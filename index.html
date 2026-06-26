@@ -2061,30 +2061,6 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2162,7 +2138,6 @@ function unlockApp(){
   // Start auto-polling after login
   setTimeout(cpStartSync,2000);
 
-
 }
 window.unlockApp=unlockApp;
 
@@ -2231,63 +2206,6 @@ function cpSaveData(){
 window.cpSaveData=cpSaveData;
 window.cpSaveData=cpSaveData;
 
-function cpLoadData(){
-  fetch('api.php?action=load&r='+Math.random())
-  .then(function(r){return r.json();})
-  .then(function(resp){
-    if(!resp.success||!resp.data)return;
-    var s=resp.data;
-    if(s.PAT_DB)          window.PAT_DB=s.PAT_DB;
-    if(s._apptData)       window._apptData=s._apptData;
-    if(s.BILLING_DB)      window.BILLING_DB=s.BILLING_DB;
-    if(s.LAB_DB){
-      // Preserve local resultFile
-      var local=window.LAB_DB||[];
-      s.LAB_DB.forEach(function(r){
-        var ex=local.find(function(x){return x.id===r.id;});
-        if(ex&&ex.resultFile){r.resultFile=ex.resultFile;r.resultType=ex.resultType;r.resultName=ex.resultName;}
-      });
-      window.LAB_DB=s.LAB_DB;
-    }
-    if(s.INV_DB)          window.INV_DB=s.INV_DB;
-    if(s._rxSaved)        window._rxSaved=s._rxSaved;
-    if(s._svcList)        window._svcList=s._svcList;
-    if(s.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=s.MY_RX_TEMPLATES;
-    if(s.CLINIC_SETTINGS) window.CLINIC_SETTINGS=s.CLINIC_SETTINGS;
-    // ── Render all pages after loading ──
-    setTimeout(function(){
-      if(typeof renderDashPatients==='function')renderDashPatients();
-      if(typeof renderApptPanes==='function')renderApptPanes();
-      if(typeof renderPharmacy==='function')renderPharmacy();
-      if(typeof renderLabQueue==='function')renderLabQueue();
-      if(typeof renderInventory==='function')renderInventory();
-      if(typeof renderFinance==='function')renderFinance();
-    },200);
-  })
-  .catch(function(){
-    // Fallback: load from localStorage
-    try{
-      var raw=localStorage.getItem('clinicpro_v1');
-      if(raw){
-        var s=JSON.parse(raw);
-        if(s.PAT_DB)          window.PAT_DB=s.PAT_DB;
-        if(s._apptData)       window._apptData=s._apptData;
-        if(s.BILLING_DB)      window.BILLING_DB=s.BILLING_DB;
-        if(s.LAB_DB)          window.LAB_DB=s.LAB_DB;
-        if(s.INV_DB)          window.INV_DB=s.INV_DB;
-        if(s._rxSaved)        window._rxSaved=s._rxSaved;
-        if(s._svcList)        window._svcList=s._svcList;
-        if(s.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=s.MY_RX_TEMPLATES;
-        if(s.CLINIC_SETTINGS) window.CLINIC_SETTINGS=s.CLINIC_SETTINGS;
-        setTimeout(function(){
-          if(typeof renderDashPatients==='function')renderDashPatients();
-          if(typeof renderApptPanes==='function')renderApptPanes();
-        },200);
-      }
-    }catch(e){}
-  });
-}
-window.cpLoadData=cpLoadData;
 window.cpLoadData=cpLoadData;
 
 function _cpRefreshAll(){
@@ -2352,8 +2270,6 @@ window.cpImportData=cpImportData;
 setInterval(cpSaveData,15000);
 window.addEventListener('beforeunload',cpSaveData);
 
-
-
 // ═══════════════════════════════════════════════════════════
 // USERS & LOGIN
 // ═══════════════════════════════════════════════════════════
@@ -2371,7 +2287,6 @@ var CP_KEYS={
   templates:'cp_templates',
   settings:'cp_settings'
 };
-
 
 // Auto-save every 60 seconds + on page unload
 window.addEventListener('beforeunload',function(){if(window.CURRENT_USER)cpSaveData();});
@@ -2398,7 +2313,6 @@ var DB=[]
 window.INV_DB=DB; // expose inventory for H1 report
 
 var _apptData = [];
-
 
 window.BILLING_DB=[];
 let _nextId=1,_editId=null, _csvRows = [], _vendorRows = [];
@@ -2453,8 +2367,6 @@ function nav(p) {
     },30);
   }
 }
-
-
 
 // ── MODAL ─────────────────────────────────────────────────────
 function openModal(id){
@@ -2590,7 +2502,6 @@ function submitAddPatient() {
   if(typeof cpSaveData==='function')cpSaveData();
 }
 
-
 // ── CSV UPLOAD ──────────────────────────────────────────────────
 function csvDrop(e) { e.preventDefault(); document.getElementById('csv-dz').classList.remove('dz-on'); const f = e.dataTransfer.files[0]; if (f) parseCSV(f); }
 function parseCSV(fileOrInput) {
@@ -2678,13 +2589,7 @@ function submitAppt(){
   toast(name+' appointment booked \u2713','success');
 }
 
-
-
 // ── PAYMENT ───────────────────────────────────────────────────
-
-
-
-
 
 // ── NEW INVOICE ───────────────────────────────────────────────
 function submitNewInvoice() {
@@ -2950,7 +2855,6 @@ function renderInventory(){
   if(typeof toast==='function')toast('Inventory updated','info');
 }
 
-
 function filterInv(q) {
   const q2 = q.toLowerCase();
   document.querySelectorAll('#inv-tbody tr').forEach(tr => {
@@ -3192,21 +3096,6 @@ function submitLab(status) {
 
 // ── VENDOR IMPORT ─────────────────────────────────────────────
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function updateVdMatch(inp) {
   const tr = inp.closest('tr');
   const name = inp.value.trim();
@@ -3215,16 +3104,6 @@ function updateVdMatch(inp) {
   const mc = tr.querySelector('.vd-match');
   if (mc) mc.innerHTML = ex ? `<span class="pill p-b">Restock +${qty}</span>` : (name ? `<span class="pill p-g">New Item</span>` : `<span class="pill p-gray">—</span>`);
 }
-
-
-
-
-
-
-
-
-
-
 
 ;
 window.vdUpdateBulk=vdUpdateBulk;
@@ -3411,7 +3290,6 @@ function vdCheckAll(cb){
   document.querySelectorAll('.vd-cb').forEach(function(c){c.checked=cb.checked;});
   vdUpdateBulk();
 }
-
 
 function openVendorConfirm(){
   var rows=[].slice.call(document.querySelectorAll('#vd-tbody tr'));
@@ -3698,7 +3576,6 @@ function manualOCREntry(){
   toast('Fill rows from the bill image shown above','info');
 }
 
-
 function fillManualFromAI(){manualOCREntry();}
 
 // ── SACH bill parser ──────────────────────────────────────────
@@ -3867,7 +3744,6 @@ document.addEventListener('keydown', function(e) {
 var _rxSaved = [];
 var _rxCounter = 1;
 
-
 function rxInit(){
   var CS=window.CLINIC_SETTINGS||{};
   var cn=document.getElementById('rx-clinic-name');
@@ -3939,8 +3815,6 @@ function rxInit(){
 window.rxInit=rxInit;
 window.rxInit=rxInit;
 
-
-
 function rxNewBlank(){
   // Clear all patient fields
   ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city',
@@ -3980,9 +3854,6 @@ function rxNewBlank(){
   toast('New prescription form ready','info');
 }
 window.rxNewBlank=rxNewBlank;
-
-
-
 
 function rxAddMedRow(data){
   var d=data||{};
@@ -4084,11 +3955,7 @@ function rxAddMedRow(data){
 window.rxAddMedRow=rxAddMedRow;
 window.rxAddMedRow=rxAddMedRow;
 
-
 // Medicine search as you type
-
-
-
 
 function rxHideDropdown(inp){
   var drop=inp?inp.nextElementSibling:null;
@@ -4096,11 +3963,6 @@ function rxHideDropdown(inp){
 }
 window.rxAddMedRow=rxAddMedRow;
 window.rxHideDropdown=rxHideDropdown;
-
-
-
-
-
 
 function rxCalcSvc(el){
   var tr=el?el.closest('tr'):null;if(!tr)return;
@@ -4172,7 +4034,6 @@ function rxCalcTotals() {
   var svcDisp=document.getElementById('rx-svc-total-display');
   if(svcDisp)svcDisp.textContent='₹'+svcT.toFixed(2);
 }
-
 
 function rxSave(){
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
@@ -4269,9 +4130,6 @@ function rxSave(){
 }
 window.rxSave=rxSave;
 
-
-
-
 function rxHistCheckAll(cb){
   document.querySelectorAll('.rx-hist-cb').forEach(function(c){c.checked=cb.checked;});
 }
@@ -4285,7 +4143,6 @@ function rxHistBulkDelete(){
   renderSavedRx(document.getElementById('rx-history-search')?document.getElementById('rx-history-search').value:'');
   toast(ids.length+' Rx deleted','success');
 }
-
 
 function rxLoad(id) {
   var rx=_rxSaved.find(function(r){return r.id===id;}); if(!rx) return;
@@ -4393,7 +4250,6 @@ function renderSvcList(){
 }
 window.renderSvcList=renderSvcList;
 
-
 window.addSvcFromList=addSvcFromList;
 window.renderSvcList=renderSvcList;
 
@@ -4407,7 +4263,6 @@ function addSvcFromList(i){
   if(typeof toast==='function')toast(name+' added to bill','success');
 }
 window.addSvcFromList=addSvcFromList;
-
 
 function addService() {
   var inp=document.getElementById('svc-new-name');
@@ -4514,14 +4369,13 @@ function rxSubmitBilling(section){
   if(typeof renderPharmacy==='function')renderPharmacy();
   if(typeof renderFinance==='function')renderFinance();
   toast('\u2713 '+newId+' \u2014 \u20b9'+total.toFixed(2)+' submitted to Pharmacy','success');
-  setTimeout(function(){nav('pharmacy');},900);
+  // nav to pharmacy removed — pharmacist sees bill via sync
 
   if(typeof cpSaveData==='function')cpSaveData();
 }
 window.rxSubmitBilling=rxSubmitBilling;
 window.rxSubmitBilling=rxSubmitBilling;
 window.rxSubmitBilling=rxSubmitBilling;
-
 
 window.rxSave=rxSave;
 window.rxLoad=rxLoad;
@@ -4712,9 +4566,6 @@ function downloadInvoicePDF(id){
 }
 window.downloadInvoicePDF=downloadInvoicePDF;
 
-
-
-
 window.downloadInvoicePDF=downloadInvoicePDF;
 function renderPharmacy(){
   var tbody=document.getElementById('ph-tbody');if(!tbody)return;
@@ -4817,7 +4668,6 @@ function renderPharmacy(){
 }
 function filterPharma(q){var lq=(q||'').toLowerCase();[].slice.call(document.querySelectorAll('#ph-tbody tr')).forEach(function(tr){tr.style.display=(!lq||(tr.dataset.search||'').includes(lq))?'':'none';});}
 
-
 function selectPayMode(btn){[].slice.call(document.querySelectorAll('.pay-mode-btn')).forEach(function(b){b.style.borderColor='var(--sl2)';b.style.background='#fff';b.style.color='var(--ink2)';});btn.style.borderColor='var(--acc)';btn.style.background='var(--m)';btn.style.color='var(--acc)';}
 function checkPayBalance(full){var r=parseFloat((document.getElementById('pay-amount')||{}).value)||0;var bal=full-r;var blk=document.getElementById('pay-bal-block');var lbl=document.getElementById('pay-bal-amt');if(blk)blk.style.display=bal>0.01?'block':'none';if(lbl)lbl.textContent='\u20b9'+bal.toFixed(2);}
 function submitPayment(invId,fullAmt){var received=parseFloat((document.getElementById('pay-amount')||{}).value)||0;if(received<=0){toast('Enter amount','error');return;}var modeBtn=[].slice.call(document.querySelectorAll('.pay-mode-btn')).find(function(b){return b.style.borderColor==='var(--acc)';});var mode=modeBtn?modeBtn.dataset.mode:'Cash';var ref=(document.getElementById('pay-ref')||{}).value||'';var balance=fullAmt-received;if(typeof BILLING_DB==='undefined')window.BILLING_DB=[];var inv=BILLING_DB.find(function(b){return b.id===invId;});if(inv){if(balance>0.01){inv.status='Partial';inv.paymode=mode+(ref?' ('+ref+')':'');inv.paidAmt=received;var nid='INV-'+String(BILLING_DB.length+1).padStart(3,'0');BILLING_DB.unshift({id:nid,patient:inv.patient,rxno:inv.rxno||'',date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),desc:'Balance from '+invId,amount:parseFloat(balance.toFixed(2)),status:'Pending',paymode:''});toast('Partial \u20b9'+received.toFixed(2)+' via '+mode+'. Balance \u20b9'+balance.toFixed(2)+' as '+nid,'info');}else{inv.status='Paid';inv.paymode=mode+(ref?' ('+ref+')':'');toast('\u2714 \u20b9'+received.toFixed(2)+' via '+mode+' - Paid!','success');}}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
@@ -4825,7 +4675,6 @@ function submitPayment(invId,fullAmt){var received=parseFloat((document.getEleme
 }
 function markPaid(el){var id=el&&el.dataset?el.dataset.id:String(el);if(typeof BILLING_DB!=='undefined'){var inv=BILLING_DB.find(function(b){return String(b.id)===id;});if(inv){inv.status='Paid';renderPharmacy();toast('Invoice '+id+' Paid','success');return;}}renderPharmacy();}
 function phCheckAll(cb){document.querySelectorAll('.ph-cb').forEach(function(c){c.checked=cb.checked;});}
-
 
 function renderApptPanes(){
   if(!window._apptData)window._apptData=[];
@@ -4870,8 +4719,6 @@ function renderApptPanes(){
   });
   var sub=document.getElementById('appt-sub');if(sub)sub.textContent=data.length+' appointments today';
 }
-
-
 
 function apptTab(btn,tab){
   var tabs=[
@@ -4949,9 +4796,6 @@ window.bookApptDirect=bookApptDirect;
 window.bookApptDirect=bookApptDirect;
 window.bookApptDirect=bookApptDirect;
 
-
-
-
 // ── openRxForPatient ─────────────────────────────────────────
 function openRxForPatient(name,pid,age,sex,mob,diag){
   window._rxCurrentPatient=(arguments[0]||'').trim().toLowerCase();
@@ -4985,10 +4829,6 @@ function _fillRxPatient(){
 
   if(typeof updateSrxBadge==='function')updateSrxBadge();
 }
-
-
-
-
 
 // ── parsePatientXLS ──────────────────────────────────────────
 
@@ -5059,11 +4899,6 @@ function parsePatientXLS(input){
   reader.readAsArrayBuffer(file);
 }
 
-
-
-
-
-
 // Helper: build one patient table row
 function buildPatientRow(name, n2, id, age, sex, mob, city, dx, st, stC) {
   return '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()"></td>' +
@@ -5081,17 +4916,11 @@ function buildPatientRow(name, n2, id, age, sex, mob, city, dx, st, stC) {
     '</div></td>';
 }
 
-
-
-
-
-
 function setRole(r){
   var m={admin:'admin@clinicpro.app',doctor:'doctor@clinicpro.app',reception:'reception@clinicpro.app'};
   var ei=document.getElementById('l-email'); if(ei)ei.value=m[r]||'';
   var pi=document.getElementById('l-pass');  if(pi)pi.value='ClinicPro@123';
 }
-
 
 function editPatient(name,pid,age,sex,dx,st){
   var el=document.getElementById('ap-name'); if(el)el.value=name||'';
@@ -5100,13 +4929,6 @@ function editPatient(name,pid,age,sex,dx,st){
   openModal('m-addPat');
   toast('Editing: '+name,'info');
 }
-
-
-
-
-
-
-
 
 function vdBulkDelete(){
   var cbs=[].slice.call(document.querySelectorAll('.vd-cb:checked'));
@@ -5121,7 +4943,6 @@ function vdUpdateBulk(){
   if(del)del.style.display=n>0?'inline-flex':'none';
 }
 function exportSettings(){toast('Settings exported','success');}
-
 
 function setFont(f){
   if(f)document.documentElement.style.setProperty('font-family',f+',sans-serif');
@@ -5145,18 +4966,6 @@ function addSymTag(t){
   if(list){var span=document.createElement('span');span.className='pill p-lav';span.style.cursor='pointer';span.textContent=t;span.onclick=function(){this.remove();};list.appendChild(span);}
 }
 function confirmAIItems(){toast('AI suggestions applied','success');}
-
-
-
-
-
-
-
-
-
-
-
-
 
 function editInvoice(invId){
   if(typeof window.BILLING_DB==='undefined'){toast('No billing data','error');return;}
@@ -5316,9 +5125,6 @@ function eiMedOpts(){
 }
 function eiSvcOpts(){return getSvcOpts();}
 
-
-
-
 function eiMedPick(sel){
   var opt=sel.options[sel.selectedIndex];if(!opt||!opt.value)return;
   var tr=sel.closest('tr');
@@ -5329,10 +5135,6 @@ function eiMedPick(sel){
   eiCalcMedRow(tr);
 }
 
-
-
-
-
 function eiSvcPick(sel){
   var opt=sel.options[sel.selectedIndex];if(!opt||!opt.value)return;
   var tr=sel.closest('tr');
@@ -5340,16 +5142,6 @@ function eiSvcPick(sel){
   if(price)price.value=opt.dataset.price||'';
   eiCalcSvcRow(tr);
 }
-
-
-
-
-
-
-
-
-
-
 
 function invAddMed(){
   var tbody=document.getElementById('inv-med-tbody');if(!tbody)return;
@@ -5403,7 +5195,6 @@ function invAddSvc(){
   tbody.appendChild(tr);
 }
 
-
 function invSvcPick(sel){
   var opt=sel.options[sel.selectedIndex];if(!opt||opt.value==='')return;
   var tr=sel.closest('tr');
@@ -5411,7 +5202,6 @@ function invSvcPick(sel){
   if(price)price.value=opt.dataset.price||'';
   invCalcSvc(price);
 }
-
 
 function invCalcSvc(inp){
   var tr=inp.closest('tr');if(!tr)return;
@@ -5498,7 +5288,6 @@ function submitInvoice(){
   toast(newId+' created \u2014 \u20b9'+total.toFixed(2),'success');
 }
 
-
 // ── Finance helpers ──────────────────────────────────────────
 function fmt(n){return '\u20b9'+(parseFloat(n)||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtRow(cash,bank,disc,pending){
@@ -5517,7 +5306,6 @@ function mkTfoot(label,cash,bank,disc,pending){
     '<td style="text-align:right;color:var(--rose)">'+fmt(pending||0)+'</td>'+
   '</tr>';
 }
-
 
 function finSetRange(range){
   var now=new Date();
@@ -5545,11 +5333,6 @@ function parseDateStr(s){
   // Handle YYYY-MM-DD
   return new Date(s);
 }
-
-
-
-
-
 
 function filterVendorLedger(q){
   var lq=(q||'').toLowerCase();
@@ -5581,7 +5364,6 @@ function printFinance(){
   if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},400);}
   else toast('Allow pop-ups to print','error');
 }
-
 
 // ── Rx Symptoms ───────────────────────────────────────────────
 if(typeof window._rxSymptoms==='undefined') window._rxSymptoms=[];
@@ -5634,7 +5416,6 @@ window.addRxSym=addRxSym;
 
 window.addRxSym=addRxSym;
 
-
 function removeRxSym(sym){
   if(!window._rxSymptoms)return;
   window._rxSymptoms=window._rxSymptoms.filter(function(s){return s!==sym;});
@@ -5657,14 +5438,10 @@ function renderRxSyms(){
   }).join(' ');
 }
 
-
-
-
 window.addRxSym=addRxSym;
 window.removeRxSym=removeRxSym;
 window.renderRxSyms=renderRxSyms;
 window.aiDxRules=aiDxRules;
-
 
 function getSvcOpts(){
   var sl=window._svcList||(typeof _svcList!=='undefined'?_svcList:[]);
@@ -5679,7 +5456,6 @@ function getSvcOpts(){
 }
 window.getSvcOpts=getSvcOpts;
 window.getSvcOpts=getSvcOpts;
-
 
 function toggleUserMenu(){
   var menu=document.getElementById('user-menu');
@@ -5708,8 +5484,6 @@ function updateUserAvatar(user){
   if(nm)nm.textContent=user.name||'';
   if(rl)rl.textContent=(user.role||'')+' Account';
 }
-
-
 
 // Hook doLogin to update avatar
 var _origDoLogin=window.doLogin;
@@ -5939,7 +5713,6 @@ window.renderIconEditor=renderIconEditor;
 window.applyNavIcon=applyNavIcon;
 window.resetNavIcons=resetNavIcons;
 
-
 function updateInvBulkBar(){
   var cbs=[].slice.call(document.querySelectorAll('#inv-tbody .inv-cb:checked'));
   var all=[].slice.call(document.querySelectorAll('#inv-tbody .inv-cb'));
@@ -5979,7 +5752,6 @@ window.updateInvBulkBar=updateInvBulkBar;
 window.invCheckAll=invCheckAll;
 window.invClearSel=invClearSel;
 window.invBulkDelete=invBulkDelete;
-
 
 function openBillReader(){
   var old=document.getElementById('m-bill-reader');if(old)old.remove();
@@ -6076,7 +5848,6 @@ function billReaderImport(){
 window.openBillReader=openBillReader;
 window.billReaderLoad=billReaderLoad;
 window.billReaderImport=billReaderImport;
-
 
 // ── Schedule H1 Report ────────────────────────────────────────
 function renderH1Report(){
@@ -6298,7 +6069,6 @@ window.renderH1Report=renderH1Report;
 window.printH1Report=printH1Report;
 window.exportH1CSV=exportH1CSV;
 
-
 function rxUpdateDate(val){
   var d=document.getElementById('rx-date');
   if(val&&d){
@@ -6310,8 +6080,6 @@ function rxUpdateDate(val){
   }
 }
 window.rxUpdateDate=rxUpdateDate;
-
-
 
 function rxCalcRow(el){
   var tr=el?el.closest('tr'):null;if(!tr)return;
@@ -6338,7 +6106,6 @@ function rxRecalcAll(){
 }
 window.rxCalcRow=rxCalcRow;
 window.rxRecalcAll=rxRecalcAll;
-
 
 function aiSuggestDx(){
   // Gather symptoms from chips + chief complaint
@@ -6377,10 +6144,6 @@ function aiSuggestDx(){
   },600);
 }
 window.aiSuggestDx=aiSuggestDx;
-
-
-
-
 
 function toggleRxHistory(){
   var panel=document.getElementById('rx-history-panel');
@@ -6489,7 +6252,6 @@ function rxMedPick(sel){
 }
 window.rxMedPick=rxMedPick;
 
-
 // Central inventory sync — call after any DB change
 function syncInvDB(){
   window.INV_DB=DB;
@@ -6515,8 +6277,6 @@ function syncInvDB(){
   }
 }
 window.syncInvDB=syncInvDB;
-
-
 
 window.renderCategoryReport=renderCategoryReport;
 
@@ -6616,9 +6376,6 @@ window.buildPatientRow=buildPatientRow;
 
 window.updateDashStats=updateDashStats;
 
-
-
-
 // Extra helpers
 function filterPatients(q){var lq=(q||'').toLowerCase();[].slice.call(document.querySelectorAll('#pat-tbody tr')).forEach(function(tr){tr.style.display=(!lq||tr.textContent.toLowerCase().includes(lq))?'':'none';});}
 function patCheckAll(cb){document.querySelectorAll('.pat-cb').forEach(function(c){c.checked=cb.checked;});updatePatBulkBar();}
@@ -6648,7 +6405,6 @@ if(typeof window.VENDOR_LEDGER==='undefined'){
 }
 
 // ── Render Purchase Report ─────────────────────────────────────
-
 
 function populateVendorDropdown(){
   var sel=document.getElementById('fin-vendor-select');if(!sel)return;
@@ -6729,7 +6485,6 @@ function loadVendorLedger(vendor){
   }
 }
 window.loadVendorLedger=loadVendorLedger;
-
 
 function openAddVendorBill(){
   var old=document.getElementById('m-vb');if(old)old.remove();
@@ -6875,7 +6630,6 @@ function delVendorBill(id){
   renderPurchaseReport();toast('Bill deleted','success');
 }
 
-
 // ── Vendor Master List ───────────────────────────────────────
 if(typeof window.VENDOR_MASTER==='undefined'){
   window.VENDOR_MASTER=[];
@@ -6883,32 +6637,7 @@ if(typeof window.VENDOR_MASTER==='undefined'){
 
 // ── Setup: Services ──────────────────────────────────────────
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ── Setup: Vendors ───────────────────────────────────────────
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function setFontSize(size){
   applyFontSize(size);
@@ -6933,13 +6662,7 @@ function applyFontWeight(weight){
   toast('Font weight: '+weight,'info');
 }
 
-
-
-
-
 // ── setPanel - shows correct panel ──────────────────────────
-
-
 
 // ── Lab Database ─────────────────────────────────────────────
 if(!window.LAB_DB)window.LAB_DB=[];
@@ -6950,7 +6673,6 @@ function saveSetupLists(){
 }
 
 // ── Lab Tab ───────────────────────────────────────────────────
-
 
 // ── Render Lab Queue ──────────────────────────────────────────
 function renderLabQueue(){
@@ -7133,10 +6855,7 @@ window._labDrawTab=_labDrawTab;
 window.renderLabQueue=renderLabQueue;
 window.renderLabQueue=renderLabQueue;
 
-
 window.renderLabQueue=renderLabQueue;
-
-
 
 function labDone(id){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});
@@ -7147,7 +6866,6 @@ function labDone(id){
     toast(t.patient+' tests completed \u2713','success');
   }
 }
-
 
 // ── Add Lab Test (manual) ─────────────────────────────────────
 function openNewLabTest(){
@@ -7243,7 +6961,6 @@ function openNewLabTest(){
   ov.appendChild(modal);ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
 }
-
 
 function toggleLabChip(btn){
   btn.classList.toggle('on');
@@ -7365,8 +7082,6 @@ function viewLabResult(id){
 
 // ── Send lab results to Rx page ───────────────────────────────
 
-
-
 function attachLabResultToRx(t){
   var card=document.getElementById('rx-lab-card');
   if(!card){toast('Lab section not found in Rx','error');return;}
@@ -7400,8 +7115,6 @@ function attachLabResultToRx(t){
   toast('Lab report attached to Rx \u2713','success');
 }
 
-
-
 function removeRxLab(){
   var card=document.getElementById('rx-lab-card');
   if(card)card.style.display='none';
@@ -7411,19 +7124,7 @@ function removeRxLab(){
   toast('Lab report removed from Rx','info');
 }
 
-
 // ── Auto-route lab invoices to lab ───────────────────────────
-
-
-
-
-
-
-
-
-
-
-
 
 // ── Rx Lab Reports ───────────────────────────────────────────
 window._rxLabReports = [];   // [{id, type, labId, name, text, url, date}]
@@ -7654,8 +7355,6 @@ function sendToRx(id){
   },500);
 }
 
-
-
 // ── Saved Rx History ─────────────────────────────────────────
 if(typeof window._rxSaved==='undefined') window._rxSaved=[];
 
@@ -7724,8 +7423,8 @@ function renderSavedRx(filter){
     rowDiv.onmouseenter=function(){rowDiv.style.background='rgba(255,255,255,.95)';};
     rowDiv.onmouseleave=function(){rowDiv.style.background='rgba(255,255,255,'+(ri%2===0?'.55':'.4')+')';};
 
-    function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
-    function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.18);flex-shrink:0';return s;}
+    
+    
 
     // Date
     rowDiv.appendChild(sp(ds,'font-size:12px;font-weight:600;color:#1a1a2e;white-space:nowrap;flex-shrink:0;width:54px'));
@@ -8010,7 +7709,6 @@ window.viewSavedRx=viewSavedRx;
 
 window.viewSavedRx=viewSavedRx;
 
-
 function rxFilterHistory(){
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
   if(!pname){toast('Enter patient name first','info');return;}
@@ -8028,7 +7726,6 @@ function rxSearchHistory(q){
 }
 
 // ── AI Dx ─────────────────────────────────────────────────────
-
 
 function aiDxRules(syms){
   var s=syms.join(' ').toLowerCase();
@@ -8100,15 +7797,9 @@ function markChanged(panel){
   // Could add unsaved indicator - for now handled on save
 }
 
-
-
-
-
-
 function applyNavStyle(style){
   toast('Nav style: '+style,'info');
 }
-
 
 // ── User Accounts ─────────────────────────────────────────────
 var ALL_MODULES=['Dashboard','Appointments','Rx','Pharmacy','Stock','Lab','Vendor','Finance'];
@@ -8129,11 +7820,6 @@ if(!window.USERS){
    modules:['Dashboard','Finance','Vendor']}
 ];
 }
-
-
-
-
-
 
 function saveNewUser(){
   var name=(document.getElementById('nu-name')||{}).value||'';
@@ -8157,15 +7843,7 @@ function saveNewUser(){
 }
 window.saveNewUser=saveNewUser;
 
-
-
-
-
-
-
-
 // ── Login with user accounts ───────────────────────────────────
-
 
 function applyModuleAccess(modules){
   var navMap={
@@ -8185,9 +7863,6 @@ function applyModuleAccess(modules){
 }
 
 // ── Export / Import ──────────────────────────────────────────
-
-
-
 
 // ── setPanel updated to render dynamic content ────────────────
 
@@ -8215,10 +7890,6 @@ window.rxSvcPick=rxSvcPick;
 window.rxSvcPick=rxSvcPick;
 window.setFontSize=setFontSize;
 window.applyFontWeight=applyFontWeight;
-
-
-
-
 
 function spTab(name){
   var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl'];
@@ -8409,14 +8080,6 @@ function updateUser(id,field,val){
   if(u){u[field]=val;showSaved('set-clinic-saved');}
 }
 
-
-
-
-
-
-
-
-
 function setTheme(color,name){
   document.documentElement.style.setProperty('--acc',color);
   var hex=color.replace('#','');
@@ -8527,7 +8190,6 @@ function applyFontSize(size){
   window._appFontSize=size;
   showSaved('set-appearance-saved');
 }
-
 
 function renderFinance(){
   var fromVal=document.getElementById('fin-from')?document.getElementById('fin-from').value:'';
@@ -8911,11 +8573,6 @@ if(!window.BILLING_DB||!window.BILLING_DB.length){
   ];
 }
 
-
-
-
-
-
 function showSvcSaved(){
   var el=document.getElementById('svc-saved-msg');
   if(el){el.style.display='inline-flex';clearTimeout(el._t);el._t=setTimeout(function(){el.style.display='none';},2000);}
@@ -9032,11 +8689,6 @@ function deleteVendor(i){
 window.renderSetupVendors=renderSetupVendors;
 window.addVendorItem=addVendorItem;
 window.deleteVendor=deleteVendor;
-
-
-
-
-
 
 function eiAddMedRow(){
   var tbody=document.getElementById('ei-med-tbody');if(!tbody)return;
@@ -9483,15 +9135,6 @@ function saveBill(){
 }
 window.saveBill=saveBill;
 
-
-
-
-
-
-
-
-
-
 // ═══ APPOINTMENT FUNCTIONS ═══════════════════════════════════
 function openApptModal(){
   var today=new Date();
@@ -9559,7 +9202,6 @@ window.openApptModal=openApptModal;
 
 // Patch openModal to set date for appt
 
-
 // ═══ PATIENT FUNCTIONS ════════════════════════════════════════
 function savePatient(){
   var name=(document.getElementById('pat-name')||{}).value||'';
@@ -9592,10 +9234,6 @@ window.savePatient=savePatient;
 
 // ═══ XLS IMPORT FUNCTIONS ════════════════════════════════════
 window._xlsRows=[];
-
-
-
-
 
 // ═══ RX TEMPLATES ════════════════════════════════════════════
 window.RX_TEMPLATES = {
@@ -9746,9 +9384,6 @@ window.RX_TEMPLATES = {
   }
 };
 
-
-
-
 function rxTplLoad(){
   var key=window._currentTpl;
   if(!key||!window.RX_TEMPLATES[key]){
@@ -9801,9 +9436,6 @@ function rxTplLoad(){
   if(typeof toast==='function')toast('\u2713 '+tpl.label+' template loaded \u2014 '+tpl.meds.length+' medicines','success');
 }
 window.rxTplLoad=rxTplLoad;
-
-
-
 
 // ═══ XLS / CSV IMPORT ════════════════════════════════════════
 window._xlsRows=[];
@@ -9993,8 +9625,6 @@ function doXLSImport(){
 }
 window.doXLSImport=doXLSImport;
 
-
-
 function openLabFromBill(invId){
   var DB=window.BILLING_DB||[];
   var inv=DB.find(function(b){return String(b.id)===String(invId);})||{};
@@ -10065,9 +9695,6 @@ function openLabFromBill(invId){
 window.openLabFromBill=openLabFromBill;
 window.openLabFromBill=openLabFromBill;
 
-
-
-
 function rxAddUnifiedSvcRow(data){
   var tbody=document.getElementById('rx-med-tbody');if(!tbody)return;
   var n=tbody.rows.length+1;
@@ -10125,8 +9752,6 @@ function rxCalcUnifiedSvc(el){
   rxCalcTotals();
 }
 window.rxCalcUnifiedSvc=rxCalcUnifiedSvc;
-
-
 
 // ═══ RX TEMPLATE MANAGER ════════════════════════════════════
 if(!window.MY_RX_TEMPLATES)window.MY_RX_TEMPLATES=[];
@@ -10434,15 +10059,6 @@ window.rxTplLoad=function(){
   if(_origRxTplLoad)_origRxTplLoad();
 };
 
-
-
-
-
-
-
-
-
-
 function labStart(id){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});
   if(!t)return;
@@ -10481,7 +10097,6 @@ function labUpload(id){
 }
 window.labUpload=labUpload;
 
-
 function labViewPDF(id){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});
   if(!t){if(typeof toast==='function')toast('Not found','error');return;}
@@ -10499,15 +10114,6 @@ function labViewPDF(id){
 }
 window.labViewPDF=labViewPDF;
 
-
-
-
-
-
-
-
-
-
 function _labFindOrder(id){
   return (window.LAB_DB||[]).find(function(x){return x.id===id;});
 }
@@ -10524,7 +10130,6 @@ function labTab(btn,tab){
 }
 window.labTab=labTab;
 window.labTab=labTab;
-
 
 function labStartTest(id){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});if(!t)return;
@@ -10627,9 +10232,6 @@ function labDelete(id){
 }
 window.labDelete=labDelete;
 
-
-
-
 function renderRxLabReports(){
   var list=document.getElementById('rx-lab-list');
   var hdr=document.getElementById('rx-lab-header');
@@ -10721,14 +10323,6 @@ window.renderRxLabReports=renderRxLabReports;
 window.renderRxLabReports=renderRxLabReports;
 window.renderRxLabReports=renderRxLabReports;
 
-
-
-
-
-
-
-
-
 function toggleSavedRxPanel(){
   var panel=document.getElementById('srx-panel');
   var btn=document.getElementById('srx-toggle-btn');
@@ -10759,24 +10353,8 @@ function updateSrxBadge(){
 }
 window.updateSrxBadge=updateSrxBadge;
 
-
 function renderAppearanceTab(){}
 window.renderAppearanceTab=renderAppearanceTab;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ═══ PATIENT AUTOCOMPLETE ════════════════════════════════════
 function patAutoInput(inp, callback){
@@ -10902,18 +10480,6 @@ function apptFillPatient(pat){
 window.apptFillPatient=apptFillPatient;
 window.apptFillPatient=apptFillPatient;
 window.apptFillPatient=apptFillPatient;
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ═══ USER MANAGEMENT ══════════════════════════════════════
 var ALL_PAGES=[
@@ -11073,7 +10639,6 @@ function cpDeleteUser(ukey){
 }
 window.cpDeleteUser=cpDeleteUser;
 
-
 // ═══ MOBILE NAV ══════════════════════════════════════════
 function toggleMobMenu(){
   var menu=document.getElementById('mob-full-menu');
@@ -11117,11 +10682,6 @@ if(typeof _origNav==='function'){
 function isMobile(){return window.innerWidth<=768;}
 window.isMobile=isMobile;
 
-
-
-
-
-
 function doLogout(){
   if(!confirm('Log out of Clinic Pro?'))return;
   if(typeof cpSaveData==='function')cpSaveData();
@@ -11140,22 +10700,8 @@ function doLogout(){
 }
 window.doLogout=doLogout;
 
-
-
-
-
-
-
-
-
 // ═══ AUTO SYNC — polls server every 3 seconds ═════════════
 var _syncTimer=null;
-
-function cpStartSync(){
-  if(_syncTimer)return;
-  _syncTimer=setInterval(cpSyncNow,3000);
-}
-window.cpStartSync=cpStartSync;
 
 function cpSyncNow(){
   if(!window.CURRENT_USER)return;
@@ -11224,8 +10770,6 @@ function cpSyncNow(){
 }
 window.cpSyncNow=cpSyncNow;
 
-
-
 function renderDashPatients(){
   var tbody=document.getElementById('pat-tbody');
   if(!tbody)return;
@@ -11258,9 +10802,6 @@ function renderDashPatients(){
   tbody.innerHTML=html;
 }
 window.renderDashPatients=renderDashPatients;
-
-
-
 
 // ═══════════════════════════════════════════════════════════
 // DB-DRIVEN DATA LAYER — reads/writes directly to MySQL
@@ -11467,7 +11008,6 @@ window.cpStartSync=cpStartSync;
 
 window.cpStartSync=cpStartSync;
 
-
 window._apptDateFilter='';window._labDateFilter='';
 function filterApptsByDate(val){window._apptDateFilter=val||'';var lbl=document.getElementById('appt-filter-label');if(lbl){if(val){var d=new Date(val+'T00:00:00');lbl.textContent='Showing: '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}else lbl.textContent='';}if(typeof renderApptPanes==='function')renderApptPanes();}
 window.filterApptsByDate=filterApptsByDate;
@@ -11522,7 +11062,6 @@ function cpSaveUserPages(uname){
 }
 window.cpSaveUserPages=cpSaveUserPages;
 
-
 // Render only the currently visible page — never navigate
 function cpRenderCurrentPage(){
   // Find actually visible page from DOM — more reliable than _currentPage
@@ -11549,7 +11088,6 @@ window.cpRenderCurrentPage=cpRenderCurrentPage;
 
 window.cpRenderCurrentPage=cpRenderCurrentPage;
 
-
 function filterApptToday(){
   var t=new Date();
   var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
@@ -11558,8 +11096,6 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
-
-
 
 </script>
 </body>
