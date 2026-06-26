@@ -2083,6 +2083,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2169,20 +2171,19 @@ function cpApplyAccess(user){
   var allowed=user.pages||allPages;
   allPages.forEach(function(p){
     var show=allowed.indexOf(p)!==-1;
-    // Fix: use nl- prefix (actual HTML IDs)
     var nl=document.getElementById('nl-'+p);  if(nl)nl.style.display=show?'':'none';
-    // Legacy nav- fallback
     var nv=document.getElementById('nav-'+p); if(nv)nv.style.display=show?'':'none';
-    // Block page div
     var pg=document.getElementById('page-'+p);
     if(pg){if(show)pg.removeAttribute('data-blocked');else pg.setAttribute('data-blocked','1');}
   });
-  // Users tab — admin only
   var ut=document.getElementById('spt-users');
   if(ut)ut.style.display=(user.role==='Admin')?'':'none';
-  // Navigate to first allowed page
-  if(typeof nav==='function') nav(allowed[0]||'dashboard');
+  // Navigate to first allowed page — only called ONCE at login
+  var firstPage=allowed[0]||'dashboard';
+  if(typeof nav==='function') nav(firstPage);
 }
+window.cpApplyAccess=cpApplyAccess;
+
 window.cpApplyAccess=cpApplyAccess;
 
 window.cpApplyAccess=cpApplyAccess;
@@ -3854,7 +3855,7 @@ var ely=document.getElementById('live-year');if(ely)ely.textContent=n.getFullYea
   try{renderApptPanes();}catch(e){}
   try{rxInit();}catch(e){}
   try{if(typeof loadVendorSample==='function')loadVendorSample();}catch(e){}
-  nav('dashboard');
+  // nav('dashboard'); removed
 });
 
 document.addEventListener('keydown', function(e) {
@@ -5027,7 +5028,7 @@ function parsePatientXLS(input){
       });
       if(!rows.length){toast('No valid rows found','error');return;}
       closeModal('m-xls');if(input)input.value='';
-      nav('dashboard');
+      // nav('dashboard'); // removed — don't force page switch
       setTimeout(function(){
         var tbody=document.getElementById('pat-tbody');
         if(!tbody){toast('Patient table not found','error');return;}
@@ -11364,11 +11365,11 @@ function cpLoadData(){
       window.INV_DB=d.INV_DB;
       try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
     }
-    if(d._rxSaved)         window._rxSaved=d._rxSaved;
-    if(d._svcList)         window._svcList=d._svcList;
-    if(d.MY_RX_TEMPLATES)  window.MY_RX_TEMPLATES=d.MY_RX_TEMPLATES;
-    if(d.CLINIC_SETTINGS)  window.CLINIC_SETTINGS=d.CLINIC_SETTINGS;
-    // Only render current visible page — never nav away from where user is
+    if(d._rxSaved)        window._rxSaved=d._rxSaved;
+    if(d._svcList)        window._svcList=d._svcList;
+    if(d.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=d.MY_RX_TEMPLATES;
+    if(d.CLINIC_SETTINGS) window.CLINIC_SETTINGS=d.CLINIC_SETTINGS;
+    // Render only current page — never navigate
     setTimeout(function(){ cpRenderCurrentPage(); },200);
     if(el){el.textContent='\u2022 Synced';el.style.color='#12AA7C';}
   })
@@ -11393,6 +11394,8 @@ function cpLoadData(){
     if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
   });
 }
+window.cpLoadData=cpLoadData;
+
 window.cpLoadData=cpLoadData;
 
 window.cpLoadData=cpLoadData;
@@ -11522,15 +11525,28 @@ window.cpSaveUserPages=cpSaveUserPages;
 
 // Render only the currently visible page — never navigate
 function cpRenderCurrentPage(){
-  var p=window._currentPage||'dashboard';
-  if(p==='dashboard'&&typeof updateDashStats==='function'){updateDashStats();if(typeof renderDashPatients==='function')renderDashPatients();}
+  // Find actually visible page from DOM — more reliable than _currentPage
+  var activePage=null;
+  document.querySelectorAll('.page').forEach(function(el){
+    if(el.classList.contains('on')){
+      activePage=el.id.replace('page-','');
+    }
+  });
+  var p=activePage||window._currentPage||'dashboard';
+  window._currentPage=p; // keep in sync
+  if(p==='dashboard'){
+    if(typeof updateDashStats==='function')updateDashStats();
+    if(typeof renderDashPatients==='function')renderDashPatients();
+  }
   if(p==='appointments'&&typeof renderApptPanes==='function') renderApptPanes();
-  if(p==='pharmacy'&&typeof renderPharmacy==='function')     renderPharmacy();
-  if(p==='lab'&&typeof renderLabQueue==='function')          renderLabQueue();
-  if(p==='inventory'&&typeof renderInventory==='function')   renderInventory();
-  if(p==='finance'&&typeof renderFinance==='function')       renderFinance();
-  if(p==='rx'&&typeof rxLoadTodayAppts==='function')         rxLoadTodayAppts();
+  if(p==='pharmacy'&&typeof renderPharmacy==='function')      renderPharmacy();
+  if(p==='lab'&&typeof renderLabQueue==='function')           renderLabQueue();
+  if(p==='inventory'&&typeof renderInventory==='function')    renderInventory();
+  if(p==='finance'&&typeof renderFinance==='function')        renderFinance();
+  if(p==='rx'&&typeof rxLoadTodayAppts==='function')          rxLoadTodayAppts();
 }
+window.cpRenderCurrentPage=cpRenderCurrentPage;
+
 window.cpRenderCurrentPage=cpRenderCurrentPage;
 
 
@@ -11542,6 +11558,8 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
+
 
 </script>
 </body>
