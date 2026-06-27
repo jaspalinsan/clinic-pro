@@ -2067,6 +2067,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2224,39 +2225,42 @@ window.unlockApp=unlockApp;
 function cpSaveData(){
   window._lastSaveTime=Date.now();
   window._lastWriteTime=Date.now();
+  // Save to localStorage as backup
   try{
-    var snap={
-      PAT_DB:          window.PAT_DB||[],
-      _apptData:       window._apptData||[],
-      BILLING_DB:      window.BILLING_DB||[],
-      LAB_DB:          window.LAB_DB||[],
-      INV_DB:          window.INV_DB||(typeof DB!=='undefined'?DB:[]),
-      _rxSaved:        window._rxSaved||[],
-      _svcList:        window._svcList||[],
-      MY_RX_TEMPLATES: window.MY_RX_TEMPLATES||[],
-      CLINIC_SETTINGS: window.CLINIC_SETTINGS||{}
-    };
-    // Save to localStorage (offline backup)
-    localStorage.setItem('clinicpro_v1',JSON.stringify(snap));
-    // Save to server (shared across all staff)
-    fetch('api.php?action=save',{
-      method:'POST',
+    localStorage.setItem('clinicpro_v1',JSON.stringify({
+      PAT_DB:window.PAT_DB||[],
+      _apptData:window._apptData||[],
+      BILLING_DB:window.BILLING_DB||[],
+      LAB_DB:(window.LAB_DB||[]).map(function(x){var r=Object.assign({},x);if(r.resultFile&&r.resultFile.length>1000)delete r.resultFile;return r;}),
+      INV_DB:window.INV_DB||[],
+      _rxSaved:window._rxSaved||[],
+      MY_RX_TEMPLATES:window.MY_RX_TEMPLATES||[]
+    }));
+  }catch(e){}
+  // Save INV_DB + rx_saved + rx_templates to data.php clinic_store
+  if(window.INV_DB&&window.INV_DB.length){
+    fetch('data.php?action=store_set',{method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(snap)
-    }).then(function(r){return r.json();})
-    .then(function(d){
-      if(d.success){
-        var el=document.getElementById('sync-status');
-        if(el){el.textContent='✓ Synced '+new Date().toLocaleTimeString();
-          el.style.color='#12AA7C';}
-      }
-    }).catch(function(){
-      var el=document.getElementById('sync-status');
-      if(el){el.textContent='⚠ Offline - local save only';el.style.color='#854F0B';}
-    });
-    return true;
-  }catch(e){console.warn('Save error:',e);return false;}
+      body:JSON.stringify({key:'inventory',value:window.INV_DB})
+    }).catch(function(){});
+  }
+  if(window._rxSaved&&window._rxSaved.length){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'rx_saved',value:window._rxSaved})
+    }).catch(function(){});
+  }
+  if(window.MY_RX_TEMPLATES&&window.MY_RX_TEMPLATES.length){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'rx_templates',value:window.MY_RX_TEMPLATES})
+    }).catch(function(){});
+  }
+  var el=document.getElementById('sync-status');
+  if(el){el.textContent='\u2713 Saved '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
+  return true;
 }
+
 window.cpSaveData=cpSaveData;
 window.cpSaveData=cpSaveData;
 
@@ -4425,6 +4429,19 @@ function rxSubmitBilling(section){
   toast('\u2713 '+newId+' \u2014 \u20b9'+total.toFixed(2)+' submitted to Pharmacy','success');
   // nav to pharmacy removed — pharmacist sees bill via sync
 
+  // Save billing to data.php proper table
+  var _bill=window.BILLING_DB[0];
+  if(_bill){
+    fetch('data.php?action=save_billing',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id:_bill.id,patient_name:_bill.patient,rx_no:_bill.rxno,
+        date:_bill.date,description:_bill.desc,amount:_bill.amount,
+        status:_bill.status,pay_mode:_bill.paymode||'',
+        data_json:JSON.stringify({age:_bill.age,mob:_bill.mob,dx:_bill.dx,meds:_bill.meds,svcs:_bill.svcs})
+      })
+    }).then(function(r){return r.json();}).catch(function(){});
+  }
   if(typeof cpSaveData==='function')cpSaveData();
 }
 window.rxSubmitBilling=rxSubmitBilling;
@@ -10950,73 +10967,91 @@ window.dbLoadAll=dbLoadAll;
 function cpLoadData(){
   var el=document.getElementById('sync-status');
   if(el){el.textContent='\u21bb Loading...';el.style.color='#185FA5';}
-  fetch('api.php?action=load&r='+Math.random())
+
+  fetch('data.php?action=get_all&r='+Math.random())
   .then(function(r){return r.json();})
   .then(function(resp){
-    if(!resp.success||!resp.data)throw new Error('no data');
-    var d=resp.data;
-    // Always restore all arrays — even empty ones
-    window.PAT_DB        = d.PAT_DB        || window.PAT_DB        || [];
-    window._apptData     = d._apptData     || window._apptData     || [];
-    window.BILLING_DB    = d.BILLING_DB    || window.BILLING_DB    || [];
-    window._rxSaved      = d._rxSaved      || window._rxSaved      || [];
-    window._svcList      = d._svcList      || window._svcList      || [];
-    window.MY_RX_TEMPLATES = d.MY_RX_TEMPLATES || window.MY_RX_TEMPLATES || [];
-    window.CLINIC_SETTINGS = d.CLINIC_SETTINGS || window.CLINIC_SETTINGS || {};
-    if(d.LAB_DB){
-      try{
-        var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
-        d.LAB_DB.forEach(function(t){
-          if(!t.resultFile&&lf[t.id]){
-            t.resultFile=lf[t.id].resultFile;
-            t.resultType=lf[t.id].resultType;
-            t.resultName=lf[t.id].resultName;
-          }
-          if(t.resultFile){
-            lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};
-          }
-        });
-        localStorage.setItem('cp_lab_files',JSON.stringify(lf));
-      }catch(ex){}
-      window.LAB_DB=d.LAB_DB;
-    } else {
-      window.LAB_DB=window.LAB_DB||[];
+    if(!resp.ok)throw new Error('get_all failed');
+
+    // Patients from proper MySQL table
+    if(resp.patients){
+      window.PAT_DB=(resp.patients||[]).map(function(p){
+        return{id:p.id,name:p.name,age:p.age,gender:p.gender,
+               mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
+      });
     }
-    if(d.INV_DB&&d.INV_DB.length){
-      window.INV_DB=d.INV_DB;
-      try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
+
+    // Appointments from proper MySQL table
+    if(resp.appointments){
+      window._apptData=(resp.appointments||[]).map(function(a){
+        return{id:a.id,name:a.patient_name,pid:a.patient_id,
+               age:a.age,gender:a.gender,mob:a.mobile,
+               date:a.date,time:a.time,token:a.token,
+               complaint:a.complaint,status:a.status};
+      });
     }
-    // Load user permissions
-    if(d.cp_users){
-      try{localStorage.setItem('cp_users_v1',JSON.stringify(d.cp_users));}catch(e){}
+
+    // Lab from proper MySQL table (includes PDF)
+    if(resp.lab){
+      try{var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');}catch(ex){var lf={};}
+      window.LAB_DB=(resp.lab||[]).map(function(l){
+        var rf=l.result_file||(lf[l.id]?lf[l.id].resultFile:null);
+        if(rf&&!lf[l.id])lf[l.id]={resultFile:rf,resultType:l.result_type,resultName:l.result_name};
+        return{id:l.id,patient:l.patient_name,patientId:l.patient_id,
+               ageSex:l.age_sex,tests:l.tests,invId:l.inv_id,
+               rxno:l.rx_no,date:l.date,status:l.status,
+               submitted:!!parseInt(l.submitted||0),
+               resultFile:rf,resultType:l.result_type,resultName:l.result_name};
+      });
+      try{localStorage.setItem('cp_lab_files',JSON.stringify(lf));}catch(ex){}
     }
-    // Render current page after load
-    setTimeout(function(){cpRenderCurrentPage();},400);
-    if(el){el.textContent='\u2022 Synced '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
+
+    // Billing from proper MySQL table
+    if(resp.billing){
+      window.BILLING_DB=(resp.billing||[]).map(function(b){
+        var ex=b.extra||{};
+        return Object.assign({
+          id:b.id,patient:b.patient_name,rxno:b.rx_no,
+          date:b.date,desc:b.description,
+          amount:parseFloat(b.amount||0),
+          status:b.status,paymode:b.pay_mode
+        },ex);
+      });
+    }
+
+    // Inventory from clinic_store
+    if(resp.inventory&&resp.inventory.length){
+      window.INV_DB=resp.inventory;
+      try{if(typeof DB!=='undefined'){DB.length=0;resp.inventory.forEach(function(x){DB.push(x);});}}catch(ex){}
+    }
+
+    // Rx saved, templates etc from clinic_store
+    if(resp.rx_saved&&resp.rx_saved.length)   window._rxSaved=resp.rx_saved;
+    if(resp.rx_templates&&resp.rx_templates.length) window.MY_RX_TEMPLATES=resp.rx_templates;
+
+    // Render current visible page
+    setTimeout(function(){cpRenderCurrentPage();},300);
+    if(el){el.textContent='\u2022 Live '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
   })
-  .catch(function(){
-    // Offline — use localStorage backup
+  .catch(function(err){
+    // Fallback to localStorage
     try{
       var snap=JSON.parse(localStorage.getItem('clinicpro_v1')||'{}');
-      if(snap.PAT_DB)        window.PAT_DB        = snap.PAT_DB;
-      if(snap._apptData)     window._apptData     = snap._apptData;
-      if(snap.BILLING_DB)    window.BILLING_DB    = snap.BILLING_DB;
-      if(snap.LAB_DB){
-        try{var lf2=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
-          snap.LAB_DB.forEach(function(t){if(!t.resultFile&&lf2[t.id]){t.resultFile=lf2[t.id].resultFile;t.resultType=lf2[t.id].resultType;t.resultName=lf2[t.id].resultName;}});
-        }catch(ex){}
-        window.LAB_DB=snap.LAB_DB;
+      if(snap.PAT_DB)     window.PAT_DB=snap.PAT_DB;
+      if(snap._apptData)  window._apptData=snap._apptData;
+      if(snap.BILLING_DB) window.BILLING_DB=snap.BILLING_DB;
+      if(snap.LAB_DB)     window.LAB_DB=snap.LAB_DB;
+      if(snap.INV_DB){    window.INV_DB=snap.INV_DB;
+        try{if(typeof DB!=='undefined'){DB.length=0;snap.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
       }
-      if(snap.INV_DB){window.INV_DB=snap.INV_DB;try{if(typeof DB!=='undefined'){DB.length=0;snap.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}}
-      if(snap._rxSaved)        window._rxSaved        = snap._rxSaved;
-      if(snap._svcList)        window._svcList        = snap._svcList;
-      if(snap.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES = snap.MY_RX_TEMPLATES;
-      if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS = snap.CLINIC_SETTINGS;
-      setTimeout(function(){cpRenderCurrentPage();},400);
+      if(snap._rxSaved)   window._rxSaved=snap._rxSaved;
+      setTimeout(function(){cpRenderCurrentPage();},300);
     }catch(ex2){}
-    if(el){el.textContent='\u26a0 Offline - local data';el.style.color='#854F0B';}
+    if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
   });
 }
+window.cpLoadData=cpLoadData;
+
 window.cpLoadData=cpLoadData;
 
 window.cpLoadData=cpLoadData;
@@ -11033,69 +11068,83 @@ function cpStartSync(){
   if(window._syncTimer)return;
   window._syncTimer=setInterval(function(){
     if(!window.CURRENT_USER)return;
-    var lastSave=Math.max(window._lastSaveTime||0,window._lastWriteTime||0);
-    if(Date.now()-lastSave<5000)return; // pause 5s after any write
-    fetch('api.php?action=load&r='+Math.random())
+    var lastWrite=Math.max(window._lastSaveTime||0,window._lastWriteTime||0);
+    if(Date.now()-lastWrite<5000)return;
+
+    fetch('data.php?action=get_all&r='+Math.random())
     .then(function(r){return r.json();})
     .then(function(resp){
-      if(!resp.success||!resp.data)return;
-      var d=resp.data; var changed=[];
+      if(!resp.ok)return;
+      var changed=[];
+
       // Patients
-      var np=JSON.stringify(d.PAT_DB||[]);
-      if(np!==JSON.stringify(window.PAT_DB||[])){
-        window.PAT_DB=d.PAT_DB||[];changed.push('Patients');
+      if(resp.patients){
+        var np=(resp.patients||[]).map(function(p){
+          return{id:p.id,name:p.name,age:p.age,gender:p.gender,mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
+        });
+        if(JSON.stringify(np)!==JSON.stringify(window.PAT_DB||[])){
+          window.PAT_DB=np; changed.push('Patients');
+        }
       }
+
       // Appointments
-      var na=JSON.stringify((d._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
-      var oa=JSON.stringify((window._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
-      if(na!==oa){
-        window._apptData=d._apptData||[];changed.push('Appointments');
-        if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();
+      if(resp.appointments){
+        var na=(resp.appointments||[]).map(function(a){
+          return{id:a.id,name:a.patient_name,pid:a.patient_id,age:a.age,gender:a.gender,mob:a.mobile,date:a.date,time:a.time,token:a.token,complaint:a.complaint,status:a.status};
+        });
+        var naS=JSON.stringify(na.map(function(x){return{id:x.id,status:x.status};}));
+        var oaS=JSON.stringify((window._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
+        if(naS!==oaS){
+          window._apptData=na; changed.push('Appointments');
+          if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();
+        }
       }
-      // Billing — most critical for pharmacist
-      var nb=JSON.stringify(d.BILLING_DB||[]);
-      if(nb!==JSON.stringify(window.BILLING_DB||[])){
-        window.BILLING_DB=d.BILLING_DB||[];changed.push('Billing');
+
+      // Billing — critical for pharmacist
+      if(resp.billing){
+        var nb=(resp.billing||[]).map(function(b){
+          var ex=b.extra||{};
+          return Object.assign({id:b.id,patient:b.patient_name,rxno:b.rx_no,date:b.date,desc:b.description,amount:parseFloat(b.amount||0),status:b.status,paymode:b.pay_mode},ex);
+        });
+        if(JSON.stringify(nb.map(function(x){return{id:x.id,status:x.status,amount:x.amount};}))!==
+           JSON.stringify((window.BILLING_DB||[]).map(function(x){return{id:x.id,status:x.status,amount:x.amount};})))
+        {window.BILLING_DB=nb; changed.push('Billing');}
       }
+
       // Lab
-      if(d.LAB_DB){
-        try{
-          var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
-          var newPDF=false;
-          d.LAB_DB.forEach(function(t){
-            if(t.resultFile&&(!lf[t.id]||!lf[t.id].resultFile)){
-              lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};
-              newPDF=true;
-            }
-            if(!t.resultFile&&lf[t.id])t.resultFile=lf[t.id].resultFile;
-          });
-          if(newPDF)localStorage.setItem('cp_lab_files',JSON.stringify(lf));
-        }catch(ex){}
-        var nl=JSON.stringify((d.LAB_DB||[]).map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
-        var ol=JSON.stringify((window.LAB_DB||[]).map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
-        if(nl!==ol){window.LAB_DB=d.LAB_DB;changed.push('Lab');}
+      if(resp.lab){
+        try{var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');}catch(ex){var lf={};}
+        var nl=(resp.lab||[]).map(function(l){
+          var rf=l.result_file||(lf[l.id]?lf[l.id].resultFile:null);
+          if(rf&&!lf[l.id]){lf[l.id]={resultFile:rf,resultType:l.result_type,resultName:l.result_name};}
+          return{id:l.id,patient:l.patient_name,ageSex:l.age_sex,tests:l.tests,invId:l.inv_id,date:l.date,status:l.status,submitted:!!parseInt(l.submitted||0),resultFile:rf,resultType:l.result_type,resultName:l.result_name};
+        });
+        var nlS=JSON.stringify(nl.map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
+        var olS=JSON.stringify((window.LAB_DB||[]).map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
+        if(nlS!==olS||(nl.some(function(t){return t.resultFile;})&&!(window.LAB_DB||[]).some(function(t){return t.resultFile;}))){
+          window.LAB_DB=nl; changed.push('Lab');
+          try{localStorage.setItem('cp_lab_files',JSON.stringify(lf));}catch(ex){}
+        }
       }
+
       // Inventory
-      if(d.INV_DB&&d.INV_DB.length){
-        var ni=JSON.stringify(d.INV_DB);
-        if(ni!==JSON.stringify(window.INV_DB||[])){
-          window.INV_DB=d.INV_DB;
-          try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
+      if(resp.inventory&&resp.inventory.length){
+        if(JSON.stringify(resp.inventory)!==JSON.stringify(window.INV_DB||[])){
+          window.INV_DB=resp.inventory;
+          try{if(typeof DB!=='undefined'){DB.length=0;resp.inventory.forEach(function(x){DB.push(x);});}}catch(ex){}
           changed.push('Stock');
         }
       }
-      // Render current page if anything changed
-      if(changed.length) cpRenderCurrentPage();
-      // Update sync status
+
+      if(changed.length)cpRenderCurrentPage();
+
       var el=document.getElementById('sync-status');
       if(el){
         var ts=new Date().toLocaleTimeString();
         if(changed.length){
           el.textContent='\u21bb '+changed.join(', ')+' updated';el.style.color='#185FA5';
           setTimeout(function(){if(el){el.textContent='\u2022 Live '+ts;el.style.color='#12AA7C';}},3000);
-        }else{
-          el.textContent='\u2022 Live '+ts;el.style.color='#12AA7C';
-        }
+        }else{el.textContent='\u2022 Live '+ts;el.style.color='#12AA7C';}
       }
     }).catch(function(){
       var el=document.getElementById('sync-status');
@@ -11103,6 +11152,8 @@ function cpStartSync(){
     });
   },5000);
 }
+window.cpStartSync=cpStartSync;
+
 window.cpStartSync=cpStartSync;
 
 window.cpStartSync=cpStartSync;
@@ -11197,6 +11248,7 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
 
 
 
