@@ -2064,6 +2064,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2149,7 +2150,7 @@ function doUnlock(u,p,err){
   var users=cpGetUsers();
   var user=users[u];
   if(!user||p!==user.pass){
-    if(err){err.textContent='Wrong username or password';err.style.display='block';}
+    if(err){err.textContent='Wrong password';err.style.display='block';}
     var inp=document.getElementById('lock-pass');
     if(inp){inp.style.borderColor='#E24B4A';inp.value='';inp.focus();
       setTimeout(function(){inp.style.borderColor='#e2e8f0';if(err)err.style.display='none';},2500);}
@@ -2158,19 +2159,28 @@ function doUnlock(u,p,err){
   window.CURRENT_USER=user;
   window.CURRENT_USER.username=u;
   if(err)err.style.display='none';
+
+  // Fade out lock screen
   var ls=document.getElementById('lock-screen');
-  if(ls){ls.style.opacity='0';ls.style.transition='opacity .35s';
-    setTimeout(function(){ls.style.display='none';},360);}
-  // Apply page access with server-fresh permissions
-  cpApplyAccess(user);
-  var nu=document.getElementById('nav-current-user');
-  if(nu)nu.textContent=user.name+' \u00b7 '+user.role;
-  // Load all data from server
-  cpLoadData();
-  if(typeof toast==='function')toast('Welcome '+user.name+' \u2713','success');
-  // Start sync polling
-  setTimeout(cpStartSync,2000);
+  if(ls){
+    ls.style.opacity='0';
+    ls.style.transition='opacity .3s';
+    setTimeout(function(){ls.style.display='none';},310);
+  }
+
+  // Wait for lock screen to fully hide, THEN apply access
+  // This ensures DOM is ready when we nav() to first page
+  setTimeout(function(){
+    cpApplyAccess(user);
+    var nu=document.getElementById('nav-current-user');
+    if(nu)nu.textContent=user.name+' \u00b7 '+user.role;
+    cpLoadData();
+    if(typeof toast==='function')toast('Welcome '+user.name,'success');
+    setTimeout(cpStartSync,2000);
+  },350);
 }
+window.doUnlock=doUnlock;
+
 window.doUnlock=doUnlock;
 
 window.unlockApp=unlockApp;
@@ -2187,10 +2197,13 @@ function cpApplyAccess(user){
   });
   var ut=document.getElementById('spt-users');
   if(ut)ut.style.display=(user.role==='Admin')?'':'none';
-  // Navigate to first allowed page — only called ONCE at login
+  // Navigate to first allowed page
   var firstPage=allowed[0]||'dashboard';
+  window._currentPage=firstPage;
   if(typeof nav==='function') nav(firstPage);
 }
+window.cpApplyAccess=cpApplyAccess;
+
 window.cpApplyAccess=cpApplyAccess;
 
 window.cpApplyAccess=cpApplyAccess;
@@ -2204,6 +2217,7 @@ window.unlockApp=unlockApp;
 // ═══ DATA SAVE / LOAD (localStorage) ══════════════════════
 function cpSaveData(){
   window._lastSaveTime=Date.now();
+  window._lastWriteTime=Date.now();
   try{
     var snap={
       PAT_DB:          window.PAT_DB||[],
@@ -2619,7 +2633,7 @@ function submitAppt(){
   closeModal('m-appt');
   ['na-name','na-mob','na-age','na-time','na-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   var sx=document.getElementById('na-sex');if(sx)sx.selectedIndex=0;
-  renderApptPanes();nav('appointments');
+  if(window._currentPage!=='appointments'){nav('appointments');}else{renderApptPanes();}
   toast(name+' appointment booked \u2713','success');
 }
 
@@ -9221,7 +9235,7 @@ function saveAppt(){
   toast('\u2713 Appointment booked for '+name,'success');
 
   // Navigate to appointments page
-  nav('appointments');
+  if(window._currentPage!=='appointments'){nav('appointments');}else{renderApptPanes();}
 
   // Clear form
   ['appt-name','appt-age','appt-mob','appt-complaint','appt-date','appt-token'].forEach(function(id){
@@ -10945,7 +10959,7 @@ function cpLoadData(){
     if(d.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=d.MY_RX_TEMPLATES;
     if(d.CLINIC_SETTINGS) window.CLINIC_SETTINGS=d.CLINIC_SETTINGS;
     // Render only current page — never navigate
-    setTimeout(function(){ cpRenderCurrentPage(); },200);
+    setTimeout(function(){ cpRenderCurrentPage(); },400);
     if(el){el.textContent='\u2022 Synced';el.style.color='#12AA7C';}
   })
   .catch(function(){
@@ -10964,7 +10978,7 @@ function cpLoadData(){
       if(snap._rxSaved)        window._rxSaved=snap._rxSaved;
       if(snap.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=snap.MY_RX_TEMPLATES;
       if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
-      setTimeout(function(){ cpRenderCurrentPage(); },200);
+      setTimeout(function(){ cpRenderCurrentPage(); },400);
     }catch(ex2){}
     if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
   });
@@ -10983,7 +10997,7 @@ function cpStartSync(){
   if(window._syncTimer)return;
   window._syncTimer=setInterval(function(){
     if(!window.CURRENT_USER)return;
-    if(Date.now()-(window._lastSaveTime||0)<3000)return;
+    if(Date.now()-(Math.max(window._lastSaveTime||0,window._lastWriteTime||0))<3000)return;
     fetch('api.php?action=load&r='+Math.random())
     .then(function(r){return r.json();})
     .then(function(resp){
@@ -11098,11 +11112,14 @@ window.cpSaveUserPages=cpSaveUserPages;
 
 // Render only the currently visible page — never navigate
 function cpRenderCurrentPage(){
-  // Read actually visible page from DOM
+  // Find visible page from DOM
   var activePage=null;
   document.querySelectorAll('.page').forEach(function(el){
-    if(el.classList.contains('on')) activePage=el.id.replace('page-','');
+    if(el.style.display!=='none'&&el.classList.contains('on')){
+      activePage=el.id.replace('page-','');
+    }
   });
+  // Fallback to tracked variable
   var p=activePage||window._currentPage||'dashboard';
   window._currentPage=p;
   if(p==='dashboard'){
@@ -11122,6 +11139,8 @@ window.cpRenderCurrentPage=cpRenderCurrentPage;
 
 window.cpRenderCurrentPage=cpRenderCurrentPage;
 
+window.cpRenderCurrentPage=cpRenderCurrentPage;
+
 function filterApptToday(){
   var t=new Date();
   var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
@@ -11130,6 +11149,7 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
 
 
 
