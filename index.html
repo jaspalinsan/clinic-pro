@@ -2070,6 +2070,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2196,24 +2197,27 @@ function doUnlock(u,p,err){
   var nu=document.getElementById('nav-current-user');
   if(nu)nu.textContent=user.name+' \u00b7 '+user.role;
 
-  // Set role badge on DR circle
+  // Set user circle — show role label + name tooltip
   var _roleMap={
-    'Admin':'Adm.',
-    'Doctor':'Dr.',
-    'Pharmacist':'Phst',
-    'Lab':'Lab',
-    'Receptionist':'Rcpt',
-    'Staff':'Stf'
+    'Admin':'Adm.','Doctor':'Dr.','Pharmacist':'Phst',
+    'Lab':'Lab','Receptionist':'Rcpt','Staff':'Stf'
+  };
+  var _colorMap={
+    'Admin':'#7C3AED','Doctor':'#185FA5','Pharmacist':'#0F6E56',
+    'Lab':'#0E7490','Receptionist':'#B45309','Staff':'#374151'
   };
   var _badge=document.getElementById('user-role-badge');
   if(_badge){
-    _badge.textContent=_roleMap[user.role]||user.role.slice(0,3);
-    // Color by role
-    var _colorMap={
-      'Admin':'#7C3AED','Doctor':'#185FA5','Pharmacist':'#0F6E56',
-      'Lab':'#0E7490','Receptionist':'#B45309','Staff':'#374151'
-    };
+    // Show role abbreviation
+    _badge.textContent=_roleMap[user.role]||user.role.slice(0,4);
     _badge.style.color=_colorMap[user.role]||'#1A3A8C';
+    _badge.title=user.name+' ('+user.role+')';
+  }
+  // Also show name label next to circle
+  var _nameLabel=document.getElementById('user-name-label');
+  if(_nameLabel){
+    _nameLabel.textContent=user.name;
+    _nameLabel.style.display='block';
   }
 
 
@@ -4392,20 +4396,25 @@ try{
 
   // Read ALL rows from unified table — detect type by data-row-type attribute
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var isSvc=tr.getAttribute('data-row-type')==='service';
+    var isSvc=tr.getAttribute('data-row-type')==='service'||
+           tr.classList.contains('svc-row')||
+           tr.querySelector('.svc-name-select')!==null;
 
     if(isSvc){
-      // Service row — read from select or typed name
+      // Service row — try multiple ways to get name
       var sel=tr.querySelector('select');
-      var sname=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'';
-      if(!sname||sname.includes('select service'))return;
+      var sname='';
+      if(sel&&sel.selectedIndex>0&&!sel.options[sel.selectedIndex].text.toLowerCase().includes('select'))
+        sname=sel.options[sel.selectedIndex].text;
+      if(!sname){var sni=tr.querySelector('input[type="text"]');if(sni)sname=sni.value.trim();}
+      if(!sname||sname.toLowerCase().includes('select service'))return;
       var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-      var price=parseFloat(g('sale'))||0;
+      var price=parseFloat(g('sale'))||parseFloat(g('price'))||0;
       var disc=parseFloat(g('disc'))||0;
       var qty=parseFloat(g('qty'))||1;
       var net=parseFloat((qty*price*(1-disc/100)).toFixed(2));
-      if(price<=0)return;
-      svcs.push({name:sname,price:price,disc:disc,net:net});
+      if(price<=0&&net<=0)return;
+      svcs.push({name:sname,price:price,disc:disc,net:net||price});
     } else {
       // Medicine row
       var nameInp=tr.querySelector('[data-rx="name"]');
@@ -11340,6 +11349,7 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
 
 
 
