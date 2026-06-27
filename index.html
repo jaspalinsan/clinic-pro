@@ -2066,6 +2066,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -4812,16 +4813,28 @@ function apptTab(btn,tab){
 window.apptTab=apptTab;
 
 function apptStart(id){
-  if(typeof _apptData==='undefined')return;
-  var a=_apptData.find(function(x){return x.id===id;});
-  if(a){a.status='process';renderApptPanes();toast(a.name+' started','success');}
+  if(!window._apptData)window._apptData=[];
+  var a=window._apptData.find(function(x){return x.id===id;});
+  if(a){
+    a.status='process';
+    if(typeof cpSaveData==='function')cpSaveData();
+    if(typeof renderApptPanes==='function')renderApptPanes();
+    if(typeof toast==='function')toast(a.name+' → In Process','success');
+  }
 }
 
+
 function apptComplete(id){
-  if(typeof _apptData==='undefined')return;
-  var a=_apptData.find(function(x){return x.id===id;});
-  if(a){a.status='done';renderApptPanes();toast(a.name+' completed','success');}
+  if(!window._apptData)window._apptData=[];
+  var a=window._apptData.find(function(x){return x.id===id;});
+  if(a){
+    a.status='done';
+    if(typeof cpSaveData==='function')cpSaveData();
+    if(typeof renderApptPanes==='function')renderApptPanes();
+    if(typeof toast==='function')toast(a.name+' → Done','success');
+  }
 }
+
 
 function apptDelete(id){
   if(typeof _apptData==='undefined')return;
@@ -9675,6 +9688,7 @@ function doXLSImport(){
   var msg='\u2713 '+added+' patients imported';
   if(skipped)msg+=' ('+skipped+' skipped — already exist)';
   toast(msg,'success');
+  if(typeof cpSaveData==='function')cpSaveData();
 }
 window.doXLSImport=doXLSImport;
 
@@ -10941,38 +10955,52 @@ function cpLoadData(){
   .then(function(resp){
     if(!resp.success||!resp.data)throw new Error('no data');
     var d=resp.data;
-    if(d.PAT_DB!==undefined)              window.PAT_DB=d.PAT_DB||[];
-    if(d._apptData!==undefined)           window._apptData=d._apptData||[];
-    if(d.BILLING_DB!==undefined)          window.BILLING_DB=d.BILLING_DB||[];
-    if(d.LAB_DB&&d.LAB_DB.length){
+    // Always restore all arrays — even empty ones
+    window.PAT_DB        = d.PAT_DB        || window.PAT_DB        || [];
+    window._apptData     = d._apptData     || window._apptData     || [];
+    window.BILLING_DB    = d.BILLING_DB    || window.BILLING_DB    || [];
+    window._rxSaved      = d._rxSaved      || window._rxSaved      || [];
+    window._svcList      = d._svcList      || window._svcList      || [];
+    window.MY_RX_TEMPLATES = d.MY_RX_TEMPLATES || window.MY_RX_TEMPLATES || [];
+    window.CLINIC_SETTINGS = d.CLINIC_SETTINGS || window.CLINIC_SETTINGS || {};
+    if(d.LAB_DB){
       try{
         var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
         d.LAB_DB.forEach(function(t){
-          if(!t.resultFile&&lf[t.id]){t.resultFile=lf[t.id].resultFile;t.resultType=lf[t.id].resultType;t.resultName=lf[t.id].resultName;}
-          if(t.resultFile)lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};
+          if(!t.resultFile&&lf[t.id]){
+            t.resultFile=lf[t.id].resultFile;
+            t.resultType=lf[t.id].resultType;
+            t.resultName=lf[t.id].resultName;
+          }
+          if(t.resultFile){
+            lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};
+          }
         });
         localStorage.setItem('cp_lab_files',JSON.stringify(lf));
       }catch(ex){}
       window.LAB_DB=d.LAB_DB;
+    } else {
+      window.LAB_DB=window.LAB_DB||[];
     }
     if(d.INV_DB&&d.INV_DB.length){
       window.INV_DB=d.INV_DB;
       try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
     }
-    if(d._rxSaved)        window._rxSaved=d._rxSaved;
-    if(d._svcList)        window._svcList=d._svcList;
-    if(d.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=d.MY_RX_TEMPLATES;
-    if(d.CLINIC_SETTINGS) window.CLINIC_SETTINGS=d.CLINIC_SETTINGS;
-    // Render only current page — never navigate
-    setTimeout(function(){ cpRenderCurrentPage(); },400);
-    if(el){el.textContent='\u2022 Synced';el.style.color='#12AA7C';}
+    // Load user permissions
+    if(d.cp_users){
+      try{localStorage.setItem('cp_users_v1',JSON.stringify(d.cp_users));}catch(e){}
+    }
+    // Render current page after load
+    setTimeout(function(){cpRenderCurrentPage();},400);
+    if(el){el.textContent='\u2022 Synced '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
   })
   .catch(function(){
+    // Offline — use localStorage backup
     try{
       var snap=JSON.parse(localStorage.getItem('clinicpro_v1')||'{}');
-      if(snap.PAT_DB)         window.PAT_DB=snap.PAT_DB;
-      if(snap._apptData)      window._apptData=snap._apptData;
-      if(snap.BILLING_DB)     window.BILLING_DB=snap.BILLING_DB;
+      if(snap.PAT_DB)        window.PAT_DB        = snap.PAT_DB;
+      if(snap._apptData)     window._apptData     = snap._apptData;
+      if(snap.BILLING_DB)    window.BILLING_DB    = snap.BILLING_DB;
       if(snap.LAB_DB){
         try{var lf2=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
           snap.LAB_DB.forEach(function(t){if(!t.resultFile&&lf2[t.id]){t.resultFile=lf2[t.id].resultFile;t.resultType=lf2[t.id].resultType;t.resultName=lf2[t.id].resultName;}});
@@ -10980,14 +11008,17 @@ function cpLoadData(){
         window.LAB_DB=snap.LAB_DB;
       }
       if(snap.INV_DB){window.INV_DB=snap.INV_DB;try{if(typeof DB!=='undefined'){DB.length=0;snap.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}}
-      if(snap._rxSaved)        window._rxSaved=snap._rxSaved;
-      if(snap.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES=snap.MY_RX_TEMPLATES;
-      if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
-      setTimeout(function(){ cpRenderCurrentPage(); },400);
+      if(snap._rxSaved)        window._rxSaved        = snap._rxSaved;
+      if(snap._svcList)        window._svcList        = snap._svcList;
+      if(snap.MY_RX_TEMPLATES) window.MY_RX_TEMPLATES = snap.MY_RX_TEMPLATES;
+      if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS = snap.CLINIC_SETTINGS;
+      setTimeout(function(){cpRenderCurrentPage();},400);
     }catch(ex2){}
-    if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
+    if(el){el.textContent='\u26a0 Offline - local data';el.style.color='#854F0B';}
   });
 }
+window.cpLoadData=cpLoadData;
+
 window.cpLoadData=cpLoadData;
 
 window.cpLoadData=cpLoadData;
@@ -11002,52 +11033,69 @@ function cpStartSync(){
   if(window._syncTimer)return;
   window._syncTimer=setInterval(function(){
     if(!window.CURRENT_USER)return;
-    if(Date.now()-(Math.max(window._lastSaveTime||0,window._lastWriteTime||0))<5000)return;
+    var lastSave=Math.max(window._lastSaveTime||0,window._lastWriteTime||0);
+    if(Date.now()-lastSave<5000)return; // pause 5s after any write
     fetch('api.php?action=load&r='+Math.random())
     .then(function(r){return r.json();})
     .then(function(resp){
       if(!resp.success||!resp.data)return;
       var d=resp.data; var changed=[];
-      if(d.PAT_DB&&JSON.stringify(d.PAT_DB)!==JSON.stringify(window.PAT_DB||[])){
-        window.PAT_DB=d.PAT_DB; changed.push('Patients');
+      // Patients
+      var np=JSON.stringify(d.PAT_DB||[]);
+      if(np!==JSON.stringify(window.PAT_DB||[])){
+        window.PAT_DB=d.PAT_DB||[];changed.push('Patients');
       }
-      if(d._apptData&&JSON.stringify(d._apptData)!==JSON.stringify(window._apptData||[])){
-        window._apptData=d._apptData; changed.push('Appts');
+      // Appointments
+      var na=JSON.stringify((d._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
+      var oa=JSON.stringify((window._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
+      if(na!==oa){
+        window._apptData=d._apptData||[];changed.push('Appointments');
         if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();
       }
-      if(d.BILLING_DB&&JSON.stringify(d.BILLING_DB)!==JSON.stringify(window.BILLING_DB||[])){
-        window.BILLING_DB=d.BILLING_DB; changed.push('Billing');
+      // Billing — most critical for pharmacist
+      var nb=JSON.stringify(d.BILLING_DB||[]);
+      if(nb!==JSON.stringify(window.BILLING_DB||[])){
+        window.BILLING_DB=d.BILLING_DB||[];changed.push('Billing');
       }
-      if(d.LAB_DB&&d.LAB_DB.length){
+      // Lab
+      if(d.LAB_DB){
         try{
           var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
-          var gotNew=false;
+          var newPDF=false;
           d.LAB_DB.forEach(function(t){
-            if(t.resultFile&&(!lf[t.id]||!lf[t.id].resultFile)){lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};gotNew=true;}
-            if(!t.resultFile&&lf[t.id]){t.resultFile=lf[t.id].resultFile;t.resultType=lf[t.id].resultType;t.resultName=lf[t.id].resultName;}
+            if(t.resultFile&&(!lf[t.id]||!lf[t.id].resultFile)){
+              lf[t.id]={resultFile:t.resultFile,resultType:t.resultType,resultName:t.resultName};
+              newPDF=true;
+            }
+            if(!t.resultFile&&lf[t.id])t.resultFile=lf[t.id].resultFile;
           });
-          if(gotNew)localStorage.setItem('cp_lab_files',JSON.stringify(lf));
+          if(newPDF)localStorage.setItem('cp_lab_files',JSON.stringify(lf));
         }catch(ex){}
-        var nLS=JSON.stringify(d.LAB_DB.map(function(x){var c=Object.assign({},x);delete c.resultFile;return c;}));
-        var oLS=JSON.stringify((window.LAB_DB||[]).map(function(x){var c=Object.assign({},x);delete c.resultFile;return c;}));
-        if(nLS!==oLS||d.LAB_DB.some(function(t){return t.resultFile&&!(window.LAB_DB||[]).find(function(o){return o.id===t.id&&o.resultFile;});})){
-          window.LAB_DB=d.LAB_DB; changed.push('Lab');
+        var nl=JSON.stringify((d.LAB_DB||[]).map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
+        var ol=JSON.stringify((window.LAB_DB||[]).map(function(x){return{id:x.id,status:x.status,submitted:x.submitted};}));
+        if(nl!==ol){window.LAB_DB=d.LAB_DB;changed.push('Lab');}
+      }
+      // Inventory
+      if(d.INV_DB&&d.INV_DB.length){
+        var ni=JSON.stringify(d.INV_DB);
+        if(ni!==JSON.stringify(window.INV_DB||[])){
+          window.INV_DB=d.INV_DB;
+          try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
+          changed.push('Stock');
         }
       }
-      if(d.INV_DB&&JSON.stringify(d.INV_DB)!==JSON.stringify(window.INV_DB||[])){
-        window.INV_DB=d.INV_DB;
-        try{if(typeof DB!=='undefined'){DB.length=0;d.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
-        changed.push('Stock');
-      }
-      // Only re-render current visible page — never navigate
+      // Render current page if anything changed
       if(changed.length) cpRenderCurrentPage();
+      // Update sync status
       var el=document.getElementById('sync-status');
       if(el){
         var ts=new Date().toLocaleTimeString();
         if(changed.length){
           el.textContent='\u21bb '+changed.join(', ')+' updated';el.style.color='#185FA5';
-          setTimeout(function(){if(el){el.textContent='\u2022 Live \u2013 '+ts;el.style.color='#12AA7C';}},3000);
-        }else{el.textContent='\u2022 Live \u2013 '+ts;el.style.color='#12AA7C';}
+          setTimeout(function(){if(el){el.textContent='\u2022 Live '+ts;el.style.color='#12AA7C';}},3000);
+        }else{
+          el.textContent='\u2022 Live '+ts;el.style.color='#12AA7C';
+        }
       }
     }).catch(function(){
       var el=document.getElementById('sync-status');
@@ -11055,6 +11103,8 @@ function cpStartSync(){
     });
   },5000);
 }
+window.cpStartSync=cpStartSync;
+
 window.cpStartSync=cpStartSync;
 
 window.cpStartSync=cpStartSync;
@@ -11147,6 +11197,7 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
 
 
 
