@@ -197,6 +197,13 @@ try{
     ]);exit;
   }
 
+  if($action==='delete_appointment'){
+    $d=json_decode(file_get_contents('php://input'),true);
+    if(!isset($d['id'])){echo json_encode(['ok'=>false]);exit();}
+    $st=$pdo->prepare("DELETE FROM appointments WHERE id=:id");
+    $st->execute([':id'=>$d['id']]);
+    echo json_encode(['ok'=>true]);exit();
+  }
   if($action==='ping'){
     echo json_encode(['ok'=>true,'msg'=>'data.php running','time'=>date('Y-m-d H:i:s')]);exit;
   }

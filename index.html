@@ -515,6 +515,12 @@ html,body{height:100%;overflow:hidden}
     <button onclick="clearApptDateFilter()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--sl2);border-radius:8px;background:var(--bg);color:var(--ink3);font-size:12px;cursor:pointer;font-weight:500"><i class="ti ti-x" style="font-size:12px"></i> All</button>
     <span id="appt-filter-label" style="font-size:12px;color:#185FA5;font-weight:600"></span>
   </div>
+  <!-- Bulk delete bar -->
+  <div id="appt-bulk-bar" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;margin-bottom:10px">
+    <span id="appt-bulk-count" style="font-size:13px;font-weight:600;color:#991B1B"></span>
+    <button onclick="apptDeleteSelected()" style="padding:6px 14px;background:#EF4444;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer"><i class="ti ti-trash"></i> Delete Selected</button>
+    <button onclick="document.querySelectorAll('.appt-cb').forEach(function(c){c.checked=false;});updateApptBulkBar();" style="padding:6px 14px;background:var(--bg);border:1px solid var(--sl2);border-radius:6px;font-size:12px;cursor:pointer">Cancel</button>
+  </div>
   <div style="display:flex;gap:10px;margin-bottom:14px">
     <button id="appt-tab-new" onclick="apptTab(this,'new')"
       style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:10px;border:none;font-size:15px;font-weight:600;background:#A32D2D;color:#fff;cursor:pointer">
@@ -2060,6 +2066,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
@@ -4764,6 +4772,9 @@ function renderApptPanes(){
     return((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
   });
   var groups={new:[],process:[],done:[]};
+  // Bulk delete bar
+  var bulkBar=document.getElementById('appt-bulk-bar');
+  if(bulkBar)bulkBar.style.display='none';
   data.forEach(function(a){if(groups[a.status])groups[a.status].push(a);});
   ['new','process','done'].forEach(function(t){
     var cnt=document.getElementById('cnt-'+t);if(cnt)cnt.textContent=groups[t].length;
@@ -4863,10 +4874,14 @@ function apptComplete(id){
 
 
 function apptDelete(id){
-  if(typeof _apptData==='undefined')return;
-  _apptData=_apptData.filter(function(x){return x.id!==id;});
-  renderApptPanes();toast('Appointment removed','info');
+  if(!window._apptData)window._apptData=[];
+  window._apptData=window._apptData.filter(function(x){return x.id!==id;});
+  if(typeof dbPost==='function')dbPost('delete_appointment',{id:id});
+  renderApptPanes();
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Appointment removed','info');
 }
+
 
 function bookApptDirect(name,pid,age,sex,mob,diag){
   if(!window._apptData)window._apptData=[];
@@ -11024,6 +11039,8 @@ function cpLoadData(){
     if(resp.billing){
       window.BILLING_DB=(resp.billing||[]).map(function(b){
         var ex=b.extra||{};
+        var bEx=b.extra||{};
+        if(!bEx.meds&&b.data_json){try{bEx=JSON.parse(b.data_json);}catch(e){}}
         return Object.assign({
           id:b.id,patient:b.patient_name,rxno:b.rx_no,
           date:b.date,desc:b.description,
@@ -11273,6 +11290,34 @@ window.filterApptToday=filterApptToday;
 
 
 
+
+
+
+function apptDeleteSelected(){
+  var checked=document.querySelectorAll('.appt-cb:checked');
+  if(!checked.length){toast('Select appointments to delete','error');return;}
+  if(!confirm('Delete '+checked.length+' appointment(s)?'))return;
+  var ids=[];
+  checked.forEach(function(cb){ids.push(cb.dataset.id);});
+  window._apptData=(window._apptData||[]).filter(function(a){return ids.indexOf(a.id)===-1;});
+  // Delete from MySQL
+  ids.forEach(function(id){
+    if(typeof dbPost==='function')dbPost('delete_appointment',{id:id});
+  });
+  renderApptPanes();
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast(ids.length+' appointment(s) deleted','success');
+}
+window.apptDeleteSelected=apptDeleteSelected;
+
+function updateApptBulkBar(){
+  var checked=document.querySelectorAll('.appt-cb:checked');
+  var bar=document.getElementById('appt-bulk-bar');
+  if(bar)bar.style.display=checked.length?'flex':'none';
+  var cnt=document.getElementById('appt-bulk-count');
+  if(cnt)cnt.textContent=checked.length+' selected';
+}
+window.updateApptBulkBar=updateApptBulkBar;
 
 
 </script>
