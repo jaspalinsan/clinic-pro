@@ -2061,6 +2061,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2089,14 +2090,24 @@ function cpGetUsers(){
   return CP_USERS_DEFAULT;
 }
 function cpSaveUsers(users){
-  localStorage.setItem('cp_users_v1',JSON.stringify(users));
-  // Also save to server
+  // Save to localStorage
+  try{localStorage.setItem('cp_users',JSON.stringify(users));}catch(e){}
+  // Save to server — permanent across all devices
   fetch('api.php?action=save_users',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({users:users})
-  }).catch(function(){});
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.success&&typeof toast==='function')
+      toast('\u2713 Permissions saved to server','success');
+  }).catch(function(){
+    if(typeof toast==='function')
+      toast('Permissions saved locally only','warning');
+  });
 }
+window.cpSaveUsers=cpSaveUsers;
+
 var CP_USERS=cpGetUsers();
 window.CP_USERS=CP_USERS;
 window.cpGetUsers=cpGetUsers;
@@ -2112,6 +2123,24 @@ function unlockApp(){
     if(err){err.textContent='Please select your role';err.style.display='block';}
     return;
   }
+  // First: fetch latest user permissions from server
+  fetch('api.php?action=load&r='+Math.random())
+  .then(function(r){return r.json();})
+  .then(function(resp){
+    // Merge server user permissions into local users
+    if(resp.success&&resp.data&&resp.data.cp_users){
+      try{localStorage.setItem('cp_users',JSON.stringify(resp.data.cp_users));}catch(e){}
+    }
+    doUnlock(u,p,err);
+  })
+  .catch(function(){
+    // No server — use local
+    doUnlock(u,p,err);
+  });
+}
+window.unlockApp=unlockApp;
+
+function doUnlock(u,p,err){
   var users=cpGetUsers();
   var user=users[u];
   if(!user||p!==user.pass){
@@ -2127,18 +2156,18 @@ function unlockApp(){
   var ls=document.getElementById('lock-screen');
   if(ls){ls.style.opacity='0';ls.style.transition='opacity .35s';
     setTimeout(function(){ls.style.display='none';},360);}
-  // Apply page access
+  // Apply page access with server-fresh permissions
   cpApplyAccess(user);
-  // Show user in nav
   var nu=document.getElementById('nav-current-user');
   if(nu)nu.textContent=user.name+' \u00b7 '+user.role;
+  // Load all data from server
   cpLoadData();
   if(typeof toast==='function')toast('Welcome '+user.name+' \u2713','success');
-
-  // Start auto-polling after login
+  // Start sync polling
   setTimeout(cpStartSync,2000);
-
 }
+window.doUnlock=doUnlock;
+
 window.unlockApp=unlockApp;
 
 function cpApplyAccess(user){
@@ -10888,9 +10917,9 @@ function cpLoadData(){
   .then(function(resp){
     if(!resp.success||!resp.data)throw new Error('no data');
     var d=resp.data;
-    if(d.PAT_DB&&d.PAT_DB.length)        window.PAT_DB=d.PAT_DB;
-    if(d._apptData&&d._apptData.length)  window._apptData=d._apptData;
-    if(d.BILLING_DB&&d.BILLING_DB.length)window.BILLING_DB=d.BILLING_DB;
+    if(d.PAT_DB!==undefined)              window.PAT_DB=d.PAT_DB||[];
+    if(d._apptData!==undefined)           window._apptData=d._apptData||[];
+    if(d.BILLING_DB!==undefined)          window.BILLING_DB=d.BILLING_DB||[];
     if(d.LAB_DB&&d.LAB_DB.length){
       try{
         var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
@@ -11064,26 +11093,26 @@ window.cpSaveUserPages=cpSaveUserPages;
 
 // Render only the currently visible page — never navigate
 function cpRenderCurrentPage(){
-  // Find actually visible page from DOM — more reliable than _currentPage
+  // Read actually visible page from DOM
   var activePage=null;
   document.querySelectorAll('.page').forEach(function(el){
-    if(el.classList.contains('on')){
-      activePage=el.id.replace('page-','');
-    }
+    if(el.classList.contains('on')) activePage=el.id.replace('page-','');
   });
   var p=activePage||window._currentPage||'dashboard';
-  window._currentPage=p; // keep in sync
+  window._currentPage=p;
   if(p==='dashboard'){
     if(typeof updateDashStats==='function')updateDashStats();
     if(typeof renderDashPatients==='function')renderDashPatients();
   }
-  if(p==='appointments'&&typeof renderApptPanes==='function') renderApptPanes();
-  if(p==='pharmacy'&&typeof renderPharmacy==='function')      renderPharmacy();
-  if(p==='lab'&&typeof renderLabQueue==='function')           renderLabQueue();
-  if(p==='inventory'&&typeof renderInventory==='function')    renderInventory();
-  if(p==='finance'&&typeof renderFinance==='function')        renderFinance();
-  if(p==='rx'&&typeof rxLoadTodayAppts==='function')          rxLoadTodayAppts();
+  if(p==='appointments'&&typeof renderApptPanes==='function')  renderApptPanes();
+  if(p==='pharmacy'&&typeof renderPharmacy==='function')       renderPharmacy();
+  if(p==='lab'&&typeof renderLabQueue==='function')            renderLabQueue();
+  if(p==='inventory'&&typeof renderInventory==='function')     renderInventory();
+  if(p==='finance'&&typeof renderFinance==='function')         renderFinance();
+  if(p==='rx'&&typeof rxLoadTodayAppts==='function')           rxLoadTodayAppts();
 }
+window.cpRenderCurrentPage=cpRenderCurrentPage;
+
 window.cpRenderCurrentPage=cpRenderCurrentPage;
 
 window.cpRenderCurrentPage=cpRenderCurrentPage;
@@ -11096,6 +11125,7 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
 
 </script>
 </body>
