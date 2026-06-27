@@ -2060,8 +2060,11 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
+function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
+window.sepEl=sepEl;
 
 
 
@@ -10380,7 +10383,7 @@ function renderRxLabReports(){
     rowDiv.onmouseleave=function(){rowDiv.style.background='rgba(255,255,255,'+(ti%2===0?'.55':'.4')+')';};
 
     // sp() is now global
-    function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.18);flex-shrink:0';return s;}
+    // sepEl() is now global
 
     rowDiv.appendChild(sp(ds,'font-size:12px;font-weight:600;color:#0C447C;white-space:nowrap;flex-shrink:0;width:54px'));
     rowDiv.appendChild(sp(t.id||'','font-size:11px;color:#0C447C;white-space:nowrap;flex-shrink:0;width:68px;opacity:.7'));
@@ -11259,6 +11262,7 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
 
 
 
