@@ -143,12 +143,13 @@ try{
     $d=json_decode(file_get_contents('php://input'),true);
     $st=$pdo->prepare("INSERT INTO billing(id,patient_name,rx_no,date,description,amount,status,pay_mode,data_json)
       VALUES(:id,:pn,:rx,:date,:desc,:amt,:status,:mode,:json)
-      ON DUPLICATE KEY UPDATE status=:s2,amount=:a2,pay_mode=:m2,data_json=:j2,updated_at=NOW()");
+      ON DUPLICATE KEY UPDATE patient_name=:pn2,description=:desc2,status=:s2,amount=:a2,pay_mode=:m2,data_json=:j2,updated_at=NOW()");
     $json=json_encode($d,JSON_UNESCAPED_UNICODE);
     $st->execute([':id'=>$d['id']??'',':pn'=>$d['patient']??'',':rx'=>$d['rxno']??'',
       ':date'=>$d['date']??'',':desc'=>$d['desc']??'',
       ':amt'=>floatval($d['amount']??0),':status'=>$d['status']??'Unpaid',
       ':mode'=>$d['paymode']??'',':json'=>$json,
+      ':pn2'=>$d['patient']??'',':desc2'=>$d['desc']??'',
       ':s2'=>$d['status']??'Unpaid',':a2'=>floatval($d['amount']??0),
       ':m2'=>$d['paymode']??'',':j2'=>$json]);
     echo json_encode(['ok'=>true]);exit;
