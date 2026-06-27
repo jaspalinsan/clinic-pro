@@ -2062,6 +2062,8 @@ html,body{height:100%;overflow:hidden}
 <script>
 
 
+
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -2090,9 +2092,9 @@ function cpGetUsers(){
   return CP_USERS_DEFAULT;
 }
 function cpSaveUsers(users){
-  // Save to localStorage
-  try{localStorage.setItem('cp_users',JSON.stringify(users));}catch(e){}
-  // Save to server — permanent across all devices
+  // Save locally with correct key
+  try{localStorage.setItem('cp_users_v1',JSON.stringify(users));}catch(e){}
+  // Save to server permanently
   fetch('api.php?action=save_users',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -2100,12 +2102,11 @@ function cpSaveUsers(users){
   }).then(function(r){return r.json();})
   .then(function(d){
     if(d.success&&typeof toast==='function')
-      toast('\u2713 Permissions saved to server','success');
-  }).catch(function(){
-    if(typeof toast==='function')
-      toast('Permissions saved locally only','warning');
-  });
+      toast('\u2713 Permissions saved — all devices updated','success');
+  }).catch(function(){});
 }
+window.cpSaveUsers=cpSaveUsers;
+
 window.cpSaveUsers=cpSaveUsers;
 
 var CP_USERS=cpGetUsers();
@@ -2123,21 +2124,25 @@ function unlockApp(){
     if(err){err.textContent='Please select your role';err.style.display='block';}
     return;
   }
-  // First: fetch latest user permissions from server
+  var err2=document.getElementById('lock-error');
+
+  // Fetch fresh user permissions from server first
   fetch('api.php?action=load&r='+Math.random())
   .then(function(r){return r.json();})
   .then(function(resp){
-    // Merge server user permissions into local users
     if(resp.success&&resp.data&&resp.data.cp_users){
-      try{localStorage.setItem('cp_users',JSON.stringify(resp.data.cp_users));}catch(e){}
+      // Server has saved permissions — use these, clear stale local
+      localStorage.removeItem('cp_users_v1');
+      localStorage.setItem('cp_users_v1', JSON.stringify(resp.data.cp_users));
     }
     doUnlock(u,p,err);
   })
   .catch(function(){
-    // No server — use local
     doUnlock(u,p,err);
   });
 }
+window.unlockApp=unlockApp;
+
 window.unlockApp=unlockApp;
 
 function doUnlock(u,p,err){
@@ -11125,6 +11130,8 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
+
 
 
 </script>
