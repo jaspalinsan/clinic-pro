@@ -2068,6 +2068,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 // ═══ APP PASSWORD ═════════════════════════════════════════
 
 // ═══ USERS ════════════════════════════════════════════════
@@ -4742,6 +4744,9 @@ function filterPharma(q){var lq=(q||'').toLowerCase();[].slice.call(document.que
 function selectPayMode(btn){[].slice.call(document.querySelectorAll('.pay-mode-btn')).forEach(function(b){b.style.borderColor='var(--sl2)';b.style.background='#fff';b.style.color='var(--ink2)';});btn.style.borderColor='var(--acc)';btn.style.background='var(--m)';btn.style.color='var(--acc)';}
 function checkPayBalance(full){var r=parseFloat((document.getElementById('pay-amount')||{}).value)||0;var bal=full-r;var blk=document.getElementById('pay-bal-block');var lbl=document.getElementById('pay-bal-amt');if(blk)blk.style.display=bal>0.01?'block':'none';if(lbl)lbl.textContent='\u20b9'+bal.toFixed(2);}
 function submitPayment(invId,fullAmt){var received=parseFloat((document.getElementById('pay-amount')||{}).value)||0;if(received<=0){toast('Enter amount','error');return;}var modeBtn=[].slice.call(document.querySelectorAll('.pay-mode-btn')).find(function(b){return b.style.borderColor==='var(--acc)';});var mode=modeBtn?modeBtn.dataset.mode:'Cash';var ref=(document.getElementById('pay-ref')||{}).value||'';var balance=fullAmt-received;if(typeof BILLING_DB==='undefined')window.BILLING_DB=[];var inv=BILLING_DB.find(function(b){return b.id===invId;});if(inv){if(balance>0.01){inv.status='Partial';inv.paymode=mode+(ref?' ('+ref+')':'');inv.paidAmt=received;var nid='INV-'+String(BILLING_DB.length+1).padStart(3,'0');BILLING_DB.unshift({id:nid,patient:inv.patient,rxno:inv.rxno||'',date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),desc:'Balance from '+invId,amount:parseFloat(balance.toFixed(2)),status:'Pending',paymode:''});toast('Partial \u20b9'+received.toFixed(2)+' via '+mode+'. Balance \u20b9'+balance.toFixed(2)+' as '+nid,'info');}else{inv.status='Paid';inv.paymode=mode+(ref?' ('+ref+')':'');toast('\u2714 \u20b9'+received.toFixed(2)+' via '+mode+' - Paid!','success');}}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
+  // Update billing status in MySQL
+  var _pb=window.BILLING_DB&&window.BILLING_DB.find(function(x){return x.id===invId;});
+  if(_pb&&typeof dbPost==='function')dbPost('save_billing',{id:_pb.id,patient_name:_pb.patient,rx_no:_pb.rxno,date:_pb.date,description:_pb.desc,amount:_pb.amount,status:_pb.status,pay_mode:_pb.paymode||''});
   if(typeof cpSaveData==='function')cpSaveData();
 }
 function markPaid(el){var id=el&&el.dataset?el.dataset.id:String(el);if(typeof BILLING_DB!=='undefined'){var inv=BILLING_DB.find(function(b){return String(b.id)===id;});if(inv){inv.status='Paid';renderPharmacy();toast('Invoice '+id+' Paid','success');return;}}renderPharmacy();}
@@ -4834,6 +4839,7 @@ function apptStart(id){
   var a=window._apptData.find(function(x){return x.id===id;});
   if(a){
     a.status='process';
+    if(typeof dbPost==='function')dbPost('update_appt_status',{id:a.id,status:'process'});
     if(typeof cpSaveData==='function')cpSaveData();
     if(typeof renderApptPanes==='function')renderApptPanes();
     if(typeof toast==='function')toast(a.name+' → In Process','success');
@@ -4846,6 +4852,7 @@ function apptComplete(id){
   var a=window._apptData.find(function(x){return x.id===id;});
   if(a){
     a.status='done';
+    if(typeof dbPost==='function')dbPost('update_appt_status',{id:a.id,status:'done'});
     if(typeof cpSaveData==='function')cpSaveData();
     if(typeof renderApptPanes==='function')renderApptPanes();
     if(typeof toast==='function')toast(a.name+' → Done','success');
@@ -9277,6 +9284,8 @@ function saveAppt(){
     var el=document.getElementById(id);if(el)el.value='';
   });
 
+  // Save appointment to MySQL
+  if(typeof dbPost==='function')dbPost('save_appointment',{id:a.id,patient_name:a.name,patient_id:a.pid||'',age:a.age||'',gender:a.gender||'',mobile:a.mob||'',date:a.date,time:a.time||'',token:a.token||'',complaint:a.complaint||'',status:'new'});
   if(typeof cpSaveData==='function')cpSaveData();
 }
 window.saveAppt=saveAppt;
@@ -10221,6 +10230,7 @@ function labStartTest(id){
   var tb=document.getElementById('lab-stab-processing');
   if(tb&&typeof labTab==='function')labTab(tb,'processing');else renderLabQueue();
   if(typeof toast==='function')toast(id+' → In Process','info');
+  if(typeof dbPost==='function')dbPost('update_lab_status',{id:id,status:'processing',submitted:0});
   if(typeof cpSaveData==='function')cpSaveData();
 }
 
@@ -10275,6 +10285,7 @@ function labMarkDone(id){
   var tb=document.getElementById('lab-stab-done');
   if(tb&&typeof labTab==='function')labTab(tb,'done');else renderLabQueue();
   if(typeof toast==='function')toast(id+' marked Done','success');
+  if(typeof dbPost==='function')dbPost('update_lab_status',{id:id,status:'done',submitted:0});
   if(typeof cpSaveData==='function')cpSaveData();
 }
 
@@ -10302,6 +10313,7 @@ function labSubmitToDoctor(id){
 
   if(typeof renderRxLabReports==='function')renderRxLabReports();
 
+  if(typeof dbPost==='function')dbPost('update_lab_status',{id:id,status:'done',submitted:1});
   if(typeof cpSaveData==='function')cpSaveData();
 }
 window.labSubmitToDoctor=labSubmitToDoctor;
@@ -11248,6 +11260,8 @@ function filterApptToday(){
   filterApptsByDate(iso);
 }
 window.filterApptToday=filterApptToday;
+
+
 
 
 
