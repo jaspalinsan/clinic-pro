@@ -366,7 +366,7 @@ html,body{height:100%;overflow:hidden}
     <div id="live-date" style="background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:2px solid #b0b0b0;border-radius:12px;padding:5px 12px;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9),inset 0 -2px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:66px;height:66px;justify-content:center"><span id="live-day" style="font-size:13px;font-weight:800;color:#1A3A8C;letter-spacing:1.5px;text-transform:uppercase;line-height:1">Mon</span><span id="live-daynum" style="font-size:13px;font-weight:900;color:#1A3A8C;line-height:1">02 Jun</span><span id="live-year" style="font-size:13px;font-weight:700;color:#CC2222;letter-spacing:1px;line-height:1">2026</span></div>
     <div style="position:relative">
       <div            <div id="user-avatar" onclick="toggleUserMenu()" title="User menu"
-        style="width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:3px solid #CC2222;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#1A3A8C;cursor:pointer">DR</div>
+        style="width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:3px solid #CC2222;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#1A3A8C;cursor:pointer" id="user-role-badge">DR</div>
       <div id="user-menu" style="display:none;position:absolute;right:0;top:40px;background:#fff;
         border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;z-index:9999;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:#F0FDF9">
@@ -2069,6 +2069,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2194,6 +2195,27 @@ function doUnlock(u,p,err){
 
   var nu=document.getElementById('nav-current-user');
   if(nu)nu.textContent=user.name+' \u00b7 '+user.role;
+
+  // Set role badge on DR circle
+  var _roleMap={
+    'Admin':'Adm.',
+    'Doctor':'Dr.',
+    'Pharmacist':'Phst',
+    'Lab':'Lab',
+    'Receptionist':'Rcpt',
+    'Staff':'Stf'
+  };
+  var _badge=document.getElementById('user-role-badge');
+  if(_badge){
+    _badge.textContent=_roleMap[user.role]||user.role.slice(0,3);
+    // Color by role
+    var _colorMap={
+      'Admin':'#7C3AED','Doctor':'#185FA5','Pharmacist':'#0F6E56',
+      'Lab':'#0E7490','Receptionist':'#B45309','Staff':'#374151'
+    };
+    _badge.style.color=_colorMap[user.role]||'#1A3A8C';
+  }
+
 
   // Load data — cpRenderCurrentPage will use _currentPage which is already set
   cpLoadData();
@@ -11318,6 +11340,7 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
 
 
 </script>
