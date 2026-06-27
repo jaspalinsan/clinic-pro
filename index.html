@@ -2071,6 +2071,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4454,7 +4455,12 @@ try{
   if(!window.BILLING_DB)window.BILLING_DB=[];
   if(!window._apptData)window._apptData=[];
   var newId='INV-'+String(Date.now()).slice(-6);
-  var desc=meds.length&&svcs.length?'Medicines + Services':meds.length?'Medicines':'Services';
+  var medNames=meds.map(function(m){return m.name;}).join(', ');
+  var svcNames=svcs.map(function(s){return s.name;}).join(', ');
+  var desc='';
+  if(medNames&&svcNames)desc=medNames+' | '+svcNames;
+  else if(medNames)desc=medNames;
+  else desc=svcNames;
 
   window.BILLING_DB.unshift({
     id:newId,patient:pname,rxno:rxno,
@@ -4721,7 +4727,16 @@ function renderPharmacy(){
     var td4=document.createElement('td');td4.style.fontSize='11.5px';td4.style.color='var(--ink3)';td4.textContent=inv.date||'';
 
     // Description
-    var td5=document.createElement('td');td5.style.fontSize='12px';td5.textContent=inv.desc||'';
+    var td5=document.createElement('td');td5.style.fontSize='12px';var dispDesc=inv.desc||'';
+    // If desc is generic, build from meds+svcs
+    if(!dispDesc||(dispDesc==='Medicines'||dispDesc==='Services'||dispDesc==='Medicines + Services')){
+      var mN=(inv.meds||[]).map(function(m){return m.name||m;}).join(', ');
+      var sN=(inv.svcs||[]).map(function(s){return s.name||s;}).join(', ');
+      if(mN&&sN)dispDesc=mN+' | '+sN;
+      else if(mN)dispDesc=mN;
+      else if(sN)dispDesc=sN;
+    }
+    td5.textContent=dispDesc;
 
     // Amount
     var td6=document.createElement('td');td6.style.fontWeight='700';td6.style.color='var(--acc)';
@@ -9771,12 +9786,11 @@ function openLabFromBill(invId){
   var inv=DB.find(function(b){return String(b.id)===String(invId);})||{};
 
   // Extract lab/service tests from invoice svcs[]
-  var labPattern=/blood|urine|ecg|x.?ray|usg|thyroid|sugar|lipid|test|lab|culture|biopsy|scan|cbc|lft|rft|stool|sputum|hb|haemo/i;
   var svcs=inv.svcs||[];
-  var labTests=svcs.filter(function(s){
-    var n=(typeof s==='object'?s.name:s)||'';
-    return labPattern.test(n);
-  });
+  // Send ALL services to lab — not just pattern-matched ones
+  var labTests=svcs.map(function(s){
+    return typeof s==='object'?s.name:s;
+  }).filter(function(n){return n&&n.trim();});
   // If no matching keyword, use all services (doctor may order any as lab)
   if(!labTests.length&&svcs.length) labTests=svcs;
 
@@ -11349,6 +11363,7 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
 
 
 
