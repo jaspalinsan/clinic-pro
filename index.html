@@ -2073,6 +2073,9 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -11017,11 +11020,16 @@ function dbLoadAll(){
         resultName:ex?ex.resultName:null};
     });
     window.BILLING_DB=(resp.billing||[]).map(function(b){
-      var ex=b.extra||{};
-      return Object.assign({id:b.id,patient:b.patient_name,
-        rxno:b.rx_no,date:b.date,desc:b.description,
-        amount:parseFloat(b.amount||0),status:b.status,
-        paymode:b.pay_mode},ex);
+      var bj={};try{bj=JSON.parse(b.data_json||'{}');}catch(e){}
+      return {id:b.id,
+        patient:b.patient_name||bj.patient||'',
+        rxno:b.rx_no||bj.rxno||'',
+        date:b.date,
+        desc:b.description||bj.desc||'',
+        amount:parseFloat(b.amount||0),
+        status:b.status,paymode:b.pay_mode||bj.paymode||'',
+        age:bj.age||'',mob:bj.mob||'',dx:bj.dx||'',
+        meds:bj.meds||[],svcs:bj.svcs||[]};
     });
     if(resp.inventory&&resp.inventory.length)window.INV_DB=resp.inventory;
     if(resp.rx_saved&&resp.rx_saved.length)window._rxSaved=resp.rx_saved;
@@ -11181,8 +11189,16 @@ function cpStartSync(){
       // Billing — critical for pharmacist
       if(resp.billing){
         var nb=(resp.billing||[]).map(function(b){
-          var ex=b.extra||{};
-          return Object.assign({id:b.id,patient:b.patient_name,rxno:b.rx_no,date:b.date,desc:b.description,amount:parseFloat(b.amount||0),status:b.status,paymode:b.pay_mode},ex);
+          var bj={};try{bj=JSON.parse(b.data_json||'{}');}catch(e){}
+          return {id:b.id,
+            patient:b.patient_name||bj.patient||'',
+            rxno:b.rx_no||bj.rxno||'',
+            date:b.date,
+            desc:b.description||bj.desc||'',
+            amount:parseFloat(b.amount||0),
+            status:b.status,paymode:b.pay_mode||bj.paymode||'',
+            age:bj.age||'',mob:bj.mob||'',dx:bj.dx||'',
+            meds:bj.meds||[],svcs:bj.svcs||[]};
         });
         if(JSON.stringify(nb.map(function(x){return{id:x.id,status:x.status,amount:x.amount};}))!==
            JSON.stringify((window.BILLING_DB||[]).map(function(x){return{id:x.id,status:x.status,amount:x.amount};})))
@@ -11365,6 +11381,9 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
+
+
 
 
 
