@@ -2076,6 +2076,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -10323,26 +10324,35 @@ function labHandleUpload(inp){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});
   if(!t||!inp.files[0])return;
   var file=inp.files[0];
-  if(file.size>5*1024*1024){if(typeof toast==='function')toast('Max 5MB','error');return;}
-  if(typeof toast==='function')toast('Uploading...','info');
+  if(file.size>5*1024*1024){toast('Max 5MB','error');return;}
+  toast('Uploading...','info');
   var reader=new FileReader();
   reader.onload=function(e){
     var b64=e.target.result;
     t.resultFile=b64; t.resultType=file.type; t.resultName=file.name;
-    // 1. localStorage — instant on same browser
+    // Save to localStorage instantly
     try{
       var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');
       lf[id]={resultFile:b64,resultType:file.type,resultName:file.name};
       localStorage.setItem('cp_lab_files',JSON.stringify(lf));
     }catch(ex){}
+    // Save PDF to MySQL via save_lab_file
+    fetch('data.php?action=save_lab_file',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:id,result_file:b64,result_type:file.type,result_name:file.name})
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok) toast('\u2713 Report saved — visible to all users','success');
+    }).catch(function(){
+      toast('\u2713 Report saved locally','success');
+    });
     inp.value='';
     renderLabQueue();
-    // 2. Server — cpSaveData now keeps resultFile, so PDF goes to MySQL
-    if(typeof cpSaveData==='function')cpSaveData();
-    if(typeof toast==='function')toast('\u2713 Report uploaded — visible on all computers','success');
   };
   reader.readAsDataURL(file);
 }
+
 
 window.labHandleUpload=labHandleUpload;
 
@@ -10381,6 +10391,13 @@ function labSubmitToDoctor(id){
   if(typeof renderRxLabReports==='function')renderRxLabReports();
 
   if(typeof dbPost==='function')dbPost('update_lab_status',{id:id,status:'done',submitted:1});
+  // Re-save PDF file reference to ensure doctor can see it
+  if(t.resultFile&&typeof fetch==='function'){
+    fetch('data.php?action=save_lab_file',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:id,result_file:t.resultFile,result_type:t.resultType||'',result_name:t.resultName||''})
+    }).catch(function(){});
+  }
   if(typeof cpSaveData==='function')cpSaveData();
 }
 window.labSubmitToDoctor=labSubmitToDoctor;
@@ -11079,14 +11096,21 @@ function cpLoadData(){
     if(resp.lab){
       try{var lf=JSON.parse(localStorage.getItem('cp_lab_files')||'{}');}catch(ex){var lf={};}
       window.LAB_DB=(resp.lab||[]).map(function(l){
+        // Get PDF from MySQL first, then localStorage fallback
         var rf=l.result_file||(lf[l.id]?lf[l.id].resultFile:null);
-        if(rf&&!lf[l.id])lf[l.id]={resultFile:rf,resultType:l.result_type,resultName:l.result_name};
+        var rt=l.result_type||(lf[l.id]?lf[l.id].resultType:'');
+        var rn=l.result_name||(lf[l.id]?lf[l.id].resultName:'');
+        // Mirror MySQL PDF to localStorage for offline
+        if(rf&&rf.length>100){
+          lf[l.id]={resultFile:rf,resultType:rt,resultName:rn};
+        }
         return{id:l.id,patient:l.patient_name,patientId:l.patient_id,
                ageSex:l.age_sex,tests:l.tests,invId:l.inv_id,
                rxno:l.rx_no,date:l.date,status:l.status,
                submitted:!!parseInt(l.submitted||0),
-               resultFile:rf,resultType:l.result_type,resultName:l.result_name};
+               resultFile:rf,resultType:rt,resultName:rn};
       });
+      try{localStorage.setItem('cp_lab_files',JSON.stringify(lf));}catch(ex){}
       try{localStorage.setItem('cp_lab_files',JSON.stringify(lf));}catch(ex){}
     }
 
@@ -11381,6 +11405,7 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
 
 
 
