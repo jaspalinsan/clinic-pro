@@ -2087,6 +2087,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4470,183 +4472,10 @@ window.removeService=removeService;
 window.rxSubmitBilling=rxSubmitBilling;
 window.markPaid=markPaid;
 
-function downloadInvoicePDF(id){
-  var D=window.BILLING_DB||[];
-  var inv=D.find(function(b){return b.id===id;});
-  if(!inv){toast('Invoice '+id+' not found','error');return;}
-
-  var CS=window.CLINIC_SETTINGS||{};
-  var cName=CS.name||'Sach Medicose';
-  var cDoctor=CS.doctor||'Dr. Cadium Healthcare';
-  var cQual=CS.qual||'MBBS, MD';
-  var cReg=CS.reg||'MCI-12345';
-  var cPhone=CS.phone||'98765-00000';
-  var cCity=CS.city||'Barnala, Punjab';
-  var cAddr=CS.address||'# SCO-001, Near Govt. School, VPO Salabatpura';
-  var cLic=CS.lic||'BTI / 140386 / 87';
-  var cFooter=CS.footer||'Thank you for visiting '+cName+'. Get well soon!';
-
-  var amt=parseFloat(inv.amount)||0;
-  var meds=inv.meds||[];
-  var svcs=inv.svcs||[];
-
-  // Summary calculations
-  var patData=D.filter(function(b){return b.patient===inv.patient;});
-  var paidOnThis=inv.status==='Paid'?amt:(inv.status==='Partial'?(parseFloat(inv.paidAmt)||0):0);
-  var remainOnThis=amt-paidOnThis;
-  var prevBal=0;
-  patData.forEach(function(b){
-    if(b.id===inv.id||b.status==='Paid'||b.status==='Credit')return;
-    prevBal+=(parseFloat(b.amount)||0)-(parseFloat(b.paidAmt)||0);
-  });
-  var balDue=prevBal+remainOnThis;
-
-  // Build item rows
-  var rows='';
-  var allItems=[];
-  meds.forEach(function(m){allItems.push({name:m.name||'',company:m.mfr||'—',batch:m.batch||'—',exp:m.exp||'—',qty:m.qty||1,rate:parseFloat(m.sale)||0,amt:(m.qty||1)*(parseFloat(m.sale)||0)});});
-  svcs.forEach(function(s){allItems.push({name:s.name||'',company:'—',batch:'—',exp:'—',qty:1,rate:parseFloat(s.net||s.price)||0,amt:parseFloat(s.net||s.price)||0});});
-
-  allItems.forEach(function(item,i){
-    rows+='<tr style="background:'+(i%2===0?'#fff':'#F9FAFB')+'">'
-      +'<td style="color:#9CA3AF;padding:6px 8px">'+(i+1)+'</td>'
-      +'<td style="font-weight:600;padding:6px 8px">'+item.name+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.company+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.batch+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.exp+'</td>'
-      +'<td style="text-align:right;padding:6px 8px">'+item.qty+'</td>'
-      +'<td style="text-align:right;padding:6px 8px">'+item.rate.toFixed(2)+'</td>'
-      +'<td style="text-align:right;font-weight:500;padding:6px 8px">'+item.amt.toFixed(2)+'</td>'
-      +'</tr>';
-  });
-
-  var statusColor=inv.status==='Paid'?'#10B981':inv.status==='Partial'?'#3B82F6':'#F59E0B';
-
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+id+'</title><style>'
-    +'*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}'
-    +'body{background:#EAECEF;padding:20px}'
-    +'.inv{max-width:720px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.12)}'
-    +'.noprint{display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px}'
-    +'.noprint button{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}'
-    +'.btn-p{background:#1A3A8C;color:#fff}.btn-c{background:#CC2222;color:#fff}'
-    +'@media print{.noprint{display:none}body{background:#fff;padding:0}.inv{box-shadow:none;border-radius:0}}'
-    +'</style></head><body>'
-
-    +'<div class="noprint">'
-    +'<button class="btn-p" onclick="window.print()">\u2399 Print</button>'
-    +'<button class="btn-c" onclick="window.close()">\u2715 Close</button>'
-    +'</div>'
-
-    +'<div class="inv">'
-
-    // ── HEADER ──
-    +'<div style="background:linear-gradient(180deg,#f8f8f8,#e8e8e8,#d4d4d4,#e8e8e8);'
-    +'border-bottom:3px solid #1A3A8C;padding:12px 18px;'
-    +'display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;gap:8px">'
-      // Left: Lic
-      +'<div>'
-        +'<div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Drug Lic No</div>'
-        +'<div style="font-size:12px;font-weight:700;color:#333">'+cLic+'</div>'
-      +'</div>'
-      // Center: Name + address
-      +'<div style="text-align:center">'
-        +'<div style="font-size:24px;font-weight:900;color:#1A3A8C;letter-spacing:-.3px">'+cName+'</div>'
-        +'<div style="font-size:10px;color:#555;margin-top:3px;line-height:1.5">'+cAddr+'<br>'+cCity+' &nbsp;|&nbsp; Ph: '+cPhone+'</div>'
-      +'</div>'
-      // Right: INVOICE label + status
-      +'<div style="text-align:right">'
-        +'<div style="font-size:20px;font-weight:900;color:#1A3A8C;letter-spacing:1px">INVOICE</div>'
-        +'<div style="font-size:10.5px;color:#555;margin-top:2px">'+id+' &nbsp;|&nbsp; '+inv.date+'</div>'
-        +'<div style="display:inline-block;background:'+statusColor+';color:#fff;font-size:9px;font-weight:700;'
-        +'padding:2px 10px;border-radius:10px;margin-top:4px;letter-spacing:.5px">'+inv.status.toUpperCase()+'</div>'
-      +'</div>'
-    +'</div>'
-
-    // ── PATIENT STRIP ──
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #E5E7EB">'
-      +'<div style="padding:8px 14px;border-right:1px solid #E5E7EB">'
-        +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:3px;letter-spacing:.5px">Patient</div>'
-        +'<div style="font-size:13px;font-weight:700">'+inv.patient+'</div>'
-        +'<div style="font-size:10.5px;color:#555;margin-top:2px">'+(inv.age||'')+' &nbsp;|&nbsp; '+(inv.mob||'')+'</div>'
-      +'</div>'
-      +'<div style="padding:8px 14px;border-right:1px solid #E5E7EB;text-align:center;display:flex;align-items:center;justify-content:center">'
-        +'<div>'
-          +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:3px;letter-spacing:.5px">Prescribed By</div>'
-          +'<div style="font-size:14px;font-weight:700;color:#1A3A8C">'+cDoctor+'</div>'
-          +'<div style="font-size:10px;color:#555;margin-top:2px">'+cQual+' &nbsp;|&nbsp; Reg: '+cReg+'</div>'
-        +'</div>'
-      +'</div>'
-      +'<div style="padding:8px 14px;text-align:right">'
-        +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:3px;letter-spacing:.5px">Rx Reference</div>'
-        +'<div style="font-size:12px;font-weight:700;color:#1A3A8C;font-family:monospace">'+(inv.rxno||'—')+'</div>'
-        +'<div style="font-size:10.5px;color:#555;margin-top:2px">Diagnosis: '+(inv.dx||'—')+'</div>'
-      +'</div>'
-    +'</div>'
-
-    // ── ITEMS TABLE ──
-    +'<div style="padding:10px 14px">'
-      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
-        +'<thead><tr style="background:#F1F5F9">'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:28px;text-align:left">#</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;text-align:left">Description</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:90px">Company</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:70px">Batch</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:55px">Exp.</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:40px;text-align:right">Qty</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:72px;text-align:right">Rate \u20b9</th>'
-          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:80px;text-align:right">Amount \u20b9</th>'
-        +'</tr></thead>'
-        +'<tbody>'+rows+'</tbody>'
-      +'</table>'
-
-      // Totals
-      +'<div style="display:flex;justify-content:flex-end;margin-top:8px">'
-        +'<div style="min-width:220px;border-top:2px solid #1A3A8C;padding-top:6px">'
-          +'<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#555"><span>Subtotal</span><span>\u20b9'+amt.toFixed(2)+'</span></div>'
-          +(prevBal>0?'<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#F59E0B"><span>Previous Balance</span><span>+ \u20b9'+prevBal.toFixed(2)+'</span></div>':'')
-          +'<div style="display:flex;justify-content:space-between;padding:5px 0 5px;border-top:2px solid #1A3A8C;margin-top:3px;font-size:15px;font-weight:900;color:#1A3A8C">'
-          +'<span>Grand Total</span><span>\u20b9'+(amt+prevBal).toFixed(2)+'</span></div>'
-          +'<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:#10B981"><span>Paid ('+(inv.paymode||'Cash')+')</span><span>- \u20b9'+paidOnThis.toFixed(2)+'</span></div>'
-          +'<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #E5E7EB;font-size:13px;font-weight:800;color:#EF4444"><span>Balance Due</span><span>\u20b9'+balDue.toFixed(2)+'</span></div>'
-        +'</div>'
-      +'</div>'
-    +'</div>'
-
-    // ── FOOTER ──
-    +'<div style="padding:8px 14px;background:#F9FAFB;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF">'
-      +'<span>'+cFooter+'</span>'
-      +'<span>Powered by Clinic Pro</span>'
-    +'</div>'
-
-    +'</div></body></html>';
-
-  // Open in iframe overlay
-  var old=document.getElementById('pdf-overlay');if(old)old.remove();
-  var ov=document.createElement('div');ov.id='pdf-overlay';
-  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column';
-  var bar=document.createElement('div');
-  bar.style.cssText='background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border-bottom:2px solid #b0b0b0;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0';
-  var title=document.createElement('span');
-  title.style.cssText='font-size:15px;font-weight:800;color:#1A3A8C';
-  title.innerHTML='<i class="ti ti-file-invoice" style="margin-right:8px"></i>Invoice '+id+' \u2014 '+inv.patient;
-  var bg=document.createElement('div');bg.style.cssText='display:flex;gap:8px';
-  var bPrint=document.createElement('button');
-  bPrint.style.cssText='padding:7px 16px;background:linear-gradient(180deg,#fff,#e0e0e0);border:2px solid #b0b0b0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:#1A3A8C';
-  bPrint.innerHTML='<i class="ti ti-printer"></i> Print';
-  bPrint.onclick=function(){document.getElementById('pdf-overlay').querySelector('iframe').contentWindow.print();};
-  var bClose=document.createElement('button');
-  bClose.style.cssText='padding:7px 16px;background:#CC2222;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:#fff';
-  bClose.innerHTML='<i class="ti ti-x"></i> Close';
-  bClose.onclick=function(){ov.remove();};
-  bg.appendChild(bPrint);bg.appendChild(bClose);bar.appendChild(title);bar.appendChild(bg);
-  var iframe=document.createElement('iframe');
-  iframe.style.cssText='flex:1;border:none;width:100%';
-  ov.appendChild(bar);ov.appendChild(iframe);
-  document.body.appendChild(ov);
-  iframe.contentDocument.open();
-  iframe.contentDocument.write(html);
-  iframe.contentDocument.close();
+function downloadInvoicePDF(invId){
+  printInvoice(invId);
 }
+
 window.downloadInvoicePDF=downloadInvoicePDF;
 
 window.downloadInvoicePDF=downloadInvoicePDF;
@@ -4794,7 +4623,13 @@ function submitPayment(invId,fullAmt){var received=parseFloat((document.getEleme
     }}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
   // Update billing status in MySQL
   var _pb=window.BILLING_DB&&window.BILLING_DB.find(function(x){return x.id===invId;});
-  if(_pb&&typeof dbPost==='function')dbPost('save_billing',{id:_pb.id,patient:_pb.patient,rxno:_pb.rxno,date:_pb.date,desc:_pb.desc,amount:_pb.amount,status:_pb.status,paymode:_pb.paymode||''});
+  if(_pb&&typeof dbPost==='function')dbPost('save_billing',{
+    id:_pb.id,patient:_pb.patient,rxno:_pb.rxno,date:_pb.date,
+    desc:_pb.desc,amount:_pb.amount,status:_pb.status,paymode:_pb.paymode||'',
+    age:_pb.age||'',mob:_pb.mob||'',dx:_pb.dx||'',
+    meds:_pb.meds||[],svcs:_pb.svcs||[],
+    paidAmt:_pb.paidAmt||0
+  });
   if(typeof cpSaveData==='function')cpSaveData();
 }
 function markPaid(el){var id=el&&el.dataset?el.dataset.id:String(el);if(typeof BILLING_DB!=='undefined'){var inv=BILLING_DB.find(function(b){return String(b.id)===id;});if(inv){inv.status='Paid';renderPharmacy();toast('Invoice '+id+' Paid','success');return;}}renderPharmacy();}
@@ -11504,6 +11339,8 @@ function printInvoice(invId){
   if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
+
 
 
 
