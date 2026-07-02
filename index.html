@@ -2086,6 +2086,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4176,6 +4177,9 @@ function rxSave(){
     var disc=parseFloat(g2('disc'))||0;
     svcs.push({name:sname,price:price,disc:disc,net:parseFloat((price*(1-disc/100)).toFixed(2))});
   });
+  var rxNumber=(document.getElementById('rx-number')||{}).textContent||'Rx';
+  var rxDateStr=(document.getElementById('rx-date')||{}).textContent||
+    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   var CS=window.CLINIC_SETTINGS||{};
   var rx={
     id:_rxCounter++,
@@ -11500,6 +11504,7 @@ function printInvoice(invId){
   if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 
 
 
