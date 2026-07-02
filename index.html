@@ -2085,6 +2085,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4367,6 +4368,12 @@ window.rxCalcTotals=rxCalcTotals;
 function rxSubmitBilling(section){
 try{
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
+  if(!pname){
+    toast('Enter patient name first','error');
+    var el=document.getElementById('rx-pat-name');
+    if(el){el.style.border='2px solid red';el.focus();setTimeout(function(){el.style.border='';},3000);}
+    return;
+  }
   var page=(document.getElementById('rx-pat-age')||{}).value||'';
   var pmob=(document.getElementById('rx-pat-mob')||{}).value||'';
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
@@ -4374,102 +4381,77 @@ try{
   var rdate=(document.getElementById('rx-date')||{}).textContent||
     new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
-  if(!pname){
-    toast('Please fill Patient Name in Rx first','error');
-    var el=document.getElementById('rx-pat-name');
-    if(el){el.style.border='2px solid red';el.focus();setTimeout(function(){el.style.border='';},3000);}
-    return;
-  }
-
-  var meds=[]; var svcs=[];
-
-  // ── Read MEDICINES from #rx-med-tbody ──────────────────────
+  var meds=[];
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    if(tr.getAttribute('data-row-type')==='service')return;
     var sel=tr.querySelector('select');
-    var nameInp=tr.querySelector('[data-rx="name"]');
-    var name=(nameInp&&nameInp.value?nameInp.value:'')
-             ||(sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'');
-    if(!name||name.includes('—')||name.toLowerCase().includes('select'))return;
-    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
-    var sale=parseFloat(g('sale'))||0;
-    var qty=parseFloat(g('qty'))||1;
-    var disc=parseFloat(g('disc'))||0;
-    var amt=parseFloat((qty*sale*(1-disc/100)).toFixed(2));
-    if(sale<=0&&amt<=0)return;
-    meds.push({name:name,dose:g('dose'),mfr:g('mfr'),batch:g('batch'),
-      exp:g('exp'),qty:qty,sale:sale,disc:disc,amt:amt});
+    var nameInp=tr.querySelector('[data-rx=name]');
+    var name=(nameInp&&nameInp.value&&nameInp.value.trim())?nameInp.value.trim():
+             (sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'');
+    if(!name||name.indexOf('—')!==-1||name.toLowerCase().indexOf('select med')!==-1)return;
+    var gm=function(k){var e=tr.querySelector('[data-rx='+k+']');return e?(e.value||''):'';}
+    var sale=parseFloat(gm('sale'))||0;
+    var qty=parseFloat(gm('qty'))||1;
+    var disc=parseFloat(gm('disc'))||0;
+    if(sale<=0)return;
+    meds.push({name:name,dose:gm('dose'),mfr:gm('mfr'),batch:gm('batch'),
+      exp:gm('exp'),qty:qty,sale:sale,disc:disc,
+      amt:parseFloat((qty*sale*(1-disc/100)).toFixed(2))});
   });
 
-  // ── Read SERVICES from #rx-svc-tbody ───────────────────────
+  var svcs=[];
   document.querySelectorAll('#rx-svc-tbody tr').forEach(function(tr){
     var sel=tr.querySelector('select');
-    var sname=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'';
-    if(!sname||sname.toLowerCase().includes('select')||sname.includes('—')){
-      var inp=tr.querySelector('input[type="text"]');
-      if(inp)sname=inp.value.trim();
+    var sname=(sel&&sel.selectedIndex>0)?sel.options[sel.selectedIndex].text:'';
+    if(!sname||sname.toLowerCase().indexOf('select')!==-1||sname.indexOf('—')!==-1){
+      var inp=tr.querySelector('input[type=text]');
+      if(inp&&inp.value.trim())sname=inp.value.trim();
     }
-    if(!sname||sname.toLowerCase().includes('select'))return;
-    var gs=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
+    if(!sname||sname.toLowerCase().indexOf('select')!==-1)return;
+    var gs=function(k){var e=tr.querySelector('[data-rx='+k+']');return e?(e.value||''):'';}
     var price=parseFloat(gs('price'))||parseFloat(gs('sale'))||0;
     var disc2=parseFloat(gs('disc'))||0;
     var qty2=parseFloat(gs('qty'))||1;
-    var net=parseFloat((qty2*price*(1-disc2/100)).toFixed(2));
-    if(price<=0&&net<=0)return;
-    svcs.push({name:sname,price:price,disc:disc2,net:net||price,qty:qty2});
+    if(price<=0)return;
+    svcs.push({name:sname,price:price,disc:disc2,qty:qty2,
+      net:parseFloat((qty2*price*(1-disc2/100)).toFixed(2))});
   });
 
-  // Calculate total
+  if(!meds.length&&!svcs.length){
+    toast('Add at least one medicine or service with a price','error');return;
+  }
+
   var medTotal=meds.reduce(function(s,m){return s+parseFloat(m.amt||0);},0);
   var svcTotal=svcs.reduce(function(s,sv){return s+parseFloat(sv.net||sv.price||0);},0);
   var total=parseFloat((medTotal+svcTotal).toFixed(2));
 
-  if(!total){toast('Add at least one item with a price','error');return;}
-
-  // Build description
   var medNames=meds.map(function(m){return m.name;}).join(', ');
   var svcNames=svcs.map(function(s){return s.name;}).join(', ');
-  var desc='';
-  if(medNames&&svcNames)desc=medNames+' | '+svcNames;
-  else if(medNames)desc=medNames;
-  else desc=svcNames;
+  var desc=medNames&&svcNames?medNames+' | '+svcNames:(medNames||svcNames);
 
-  // Generate invoice ID
   if(!window.BILLING_DB)window.BILLING_DB=[];
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
-  window.BILLING_DB.unshift({
-    id:newId,patient:pname,rxno:rxno,
-    date:rdate,desc:desc,amount:total,
-    status:'Pending',paymode:'',
-    age:page,mob:pmob,dx:pdx,
-    meds:meds,svcs:svcs
-  });
+  var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
+    status:'Pending',paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs};
+
+  window.BILLING_DB.unshift(invoice);
+
+  fetch('data.php?action=save_billing',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:newId,patient:pname,rxno:rxno,date:rdate,
+      desc:desc,amount:total,status:'Pending',paymode:'',
+      age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs})
+  }).catch(function(){});
 
   if(typeof rxSave==='function')rxSave();
   if(typeof renderPharmacy==='function')renderPharmacy();
   if(typeof renderFinance==='function')renderFinance();
-  toast('\u2713 '+newId+' \u2014 \u20b9'+total.toFixed(2)+' submitted to Pharmacy','success');
-  // nav to pharmacy removed — pharmacist sees bill via sync
-
-  // Save billing to data.php proper table
-  var _bill=window.BILLING_DB[0];
-  if(_bill){
-    fetch('data.php?action=save_billing',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        id:_bill.id,patient:_bill.patient,rxno:_bill.rxno,
-        date:_bill.date,desc:_bill.desc,amount:_bill.amount,
-        status:_bill.status,paymode:_bill.paymode||'',
-        meds:_bill.meds,svcs:_bill.svcs,
-        age:_bill.age,mob:_bill.mob,dx:_bill.dx
-      })
-    }).then(function(r){return r.json();}).catch(function(){});
-  }
   if(typeof cpSaveData==='function')cpSaveData();
+  toast('\u2713 '+newId+' \u2014 \u20b9'+total.toFixed(2)+' sent to Pharmacy','success');
 
-}catch(e){console.error('rxSubmitBilling error:',e);toast('Error: '+e.message,'error');}
+}catch(e){console.error('rxSubmitBilling:',e);toast('Error: '+e.message,'error');}
 }
+
 window.rxSubmitBilling=rxSubmitBilling;
 window.rxSubmitBilling=rxSubmitBilling;
 window.rxSubmitBilling=rxSubmitBilling;
@@ -11518,6 +11500,7 @@ function printInvoice(invId){
   if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 
 
 
