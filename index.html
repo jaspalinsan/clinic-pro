@@ -2082,6 +2082,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4143,65 +4145,35 @@ function rxSave(){
   if(!pname){toast('Enter patient name','error');return;}
 
   var meds=[],svcs=[];
+  // Read medicines from #rx-med-tbody
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    // Skip service rows
     if(tr.getAttribute('data-row-type')==='service')return;
-    // Get name: prefer data-rx="name" input, then data-tpl-name, then FIRST select
     var nameInp=tr.querySelector('[data-rx="name"]');
-    var name='';
-    if(nameInp&&nameInp.value.trim())name=nameInp.value.trim();
-    else if(tr.getAttribute('data-tpl-name'))name=tr.getAttribute('data-tpl-name');
-    else{
-      // First select is stock picker, not dose/schedule
-      var stockSel=tr.querySelector('select:first-of-type');
-      if(stockSel&&stockSel.selectedIndex>0){
-        var opt=stockSel.options[stockSel.selectedIndex];
-        var dn=opt.getAttribute('data-name');
-        name=dn?decodeURIComponent(dn):(opt.text||'');
-        name=name.replace(' (template)','');
-      }
-    }
-    if(!name||name.includes('—')||name.toLowerCase().includes('pick medicine'))return;
-    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-    var doseEl=tr.querySelector('[data-rx="dose"]');
-    var doseLbl=doseEl?(doseEl.options&&doseEl.options[doseEl.selectedIndex]?doseEl.options[doseEl.selectedIndex].text:doseEl.value)||g('dose'):g('dose');
-    meds.push({name:name,dose:doseLbl,schedule:g('schedule'),mfr:g('mfr'),
-      batch:g('batch'),exp:g('exp'),qty:g('qty'),sale:g('sale'),
-      amt:tr.querySelector('.rx-amt')?tr.querySelector('.rx-amt').textContent:'\u2014'});
+    var sel=tr.querySelector('select');
+    var name=(nameInp&&nameInp.value?nameInp.value:'')
+             ||(sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'');
+    if(!name||name.includes('—'))return;
+    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
+    var sale=parseFloat(g('sale'))||0;
+    var qty=parseFloat(g('qty'))||1;
+    meds.push({name:name,dose:g('dose'),mfr:g('mfr'),batch:g('batch'),
+      exp:g('exp'),qty:qty,sale:sale,disc:parseFloat(g('disc'))||0,
+      amt:parseFloat((qty*sale).toFixed(2))});
   });
+  // Read services from #rx-svc-tbody
   document.querySelectorAll('#rx-svc-tbody tr').forEach(function(tr){
     var sel=tr.querySelector('select');
-    var name=sel?sel.options[sel.selectedIndex].text:'';
-    if(!name||name.includes('\u2014'))return;
-    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-    svcs.push({name:name,price:g('price'),disc:g('disc'),
-      net:tr.querySelector('.rx-net')?tr.querySelector('.rx-net').textContent:'\u2014'});
+    var sname=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'';
+    if(!sname||sname.toLowerCase().includes('select')){
+      var inp=tr.querySelector('input[type="text"]');
+      if(inp)sname=inp.value.trim();
+    }
+    if(!sname||sname.toLowerCase().includes('select'))return;
+    var g2=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
+    var price=parseFloat(g2('price'))||0;
+    var disc=parseFloat(g2('disc'))||0;
+    svcs.push({name:sname,price:price,disc:disc,net:parseFloat((price*(1-disc/100)).toFixed(2))});
   });
-  if(!meds.length&&!svcs.length){toast('Add at least one medicine or service','error');return;}
-
-  // CD-RX numbering: patient gets a fixed patient number, visits are /01, /02...
-  if(!window._rxPatMap)window._rxPatMap={};
-  if(!window._rxPatCounter)window._rxPatCounter=0;
-  var pkey=pname.toLowerCase().trim();
-  if(!window._rxPatMap[pkey]){
-    window._rxPatCounter++;
-    window._rxPatMap[pkey]=window._rxPatCounter;
-    window._rxVisitMap=window._rxVisitMap||{};
-    window._rxVisitMap[pkey]=0;
-  }
-  window._rxVisitMap=window._rxVisitMap||{};
-  window._rxVisitMap[pkey]=(window._rxVisitMap[pkey]||0)+1;
-  var patNo=String(window._rxPatMap[pkey]).padStart(4,'0');
-  var visitNo=String(window._rxVisitMap[pkey]).padStart(2,'0');
-  var rxNumber='CD-RX-'+patNo+'/'+visitNo;
-
-  // Date
-  var rxDateInp=document.getElementById('rx-date-inp');
-  var rxDateVal=rxDateInp&&rxDateInp.value?rxDateInp.value:'';
-  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var rxDateStr=rxDateVal?(function(){var p=rxDateVal.split('-');return p[2]+' '+mo[parseInt(p[1])-1]+' '+p[0];}()):
-    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-
   var CS=window.CLINIC_SETTINGS||{};
   var rx={
     id:_rxCounter++,
@@ -4410,66 +4382,42 @@ try{
 
   var meds=[]; var svcs=[];
 
-  // Read ALL rows from unified table — detect type by data-row-type attribute
+  // ── Read MEDICINES from #rx-med-tbody ──────────────────────
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var isSvc=tr.getAttribute('data-row-type')==='service'||
-           tr.classList.contains('svc-row')||
-           tr.querySelector('.svc-name-select')!==null;
-
-    if(isSvc){
-      // Service row — try multiple ways to get name
-      var sel=tr.querySelector('select');
-      var sname='';
-      if(sel&&sel.selectedIndex>0&&!sel.options[sel.selectedIndex].text.toLowerCase().includes('select'))
-        sname=sel.options[sel.selectedIndex].text;
-      if(!sname){var sni=tr.querySelector('input[type="text"]');if(sni)sname=sni.value.trim();}
-      if(!sname||sname.toLowerCase().includes('select service'))return;
-      var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-      var price=parseFloat(g('sale'))||parseFloat(g('price'))||0;
-      var disc=parseFloat(g('disc'))||0;
-      var qty=parseFloat(g('qty'))||1;
-      var net=parseFloat((qty*price*(1-disc/100)).toFixed(2));
-      if(price<=0&&net<=0)return;
-      svcs.push({name:sname,price:price,disc:disc,net:net||price});
-    } else {
-      // Medicine row
-      var nameInp=tr.querySelector('[data-rx="name"]');
-      var sel2=tr.querySelector('select');
-      var mname='';
-      if(nameInp&&nameInp.value.trim())mname=nameInp.value.trim();
-      else if(tr.getAttribute('data-tpl-name'))mname=tr.getAttribute('data-tpl-name');
-      else if(sel2&&sel2.selectedIndex>0){
-        var selTxt=sel2.options[sel2.selectedIndex].text;
-        mname=selTxt.replace(' (template)','');
-      }
-      if(!mname||mname.includes('\u2014')||mname.toLowerCase().includes('pick medicine'))return;
-      var g2=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-      var qty2=parseFloat(g2('qty'))||1;
-      var sale=parseFloat(g2('sale'))||0;
-      var discPct=parseFloat(g2('disc'))||0;
-      var amt=parseFloat((qty2*sale*(1-discPct/100)).toFixed(2));
-      if(sale<=0&&amt<=0)return;
-      var doseEl=tr.querySelector('[data-rx="dose"]');
-      var doseLbl=doseEl?(doseEl.options&&doseEl.options[doseEl.selectedIndex]?doseEl.options[doseEl.selectedIndex].text:doseEl.value):g2('dose');
-      meds.push({name:mname,dose:doseLbl,schedule:g2('schedule'),mfr:g2('mfr'),
-                 batch:g2('batch'),exp:g2('exp'),qty:qty2,sale:sale,disc:discPct,amt:amt});
-    }
+    if(tr.getAttribute('data-row-type')==='service')return;
+    var sel=tr.querySelector('select');
+    var nameInp=tr.querySelector('[data-rx="name"]');
+    var name=(nameInp&&nameInp.value?nameInp.value:'')
+             ||(sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'');
+    if(!name||name.includes('—')||name.toLowerCase().includes('select'))return;
+    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
+    var sale=parseFloat(g('sale'))||0;
+    var qty=parseFloat(g('qty'))||1;
+    var disc=parseFloat(g('disc'))||0;
+    var amt=parseFloat((qty*sale*(1-disc/100)).toFixed(2));
+    if(sale<=0&&amt<=0)return;
+    meds.push({name:name,dose:g('dose'),mfr:g('mfr'),batch:g('batch'),
+      exp:g('exp'),qty:qty,sale:sale,disc:disc,amt:amt});
   });
 
-  var medTotal=meds.reduce(function(s,m){return s+(m.amt||0);},0);
-  var svcTotal=svcs.reduce(function(s,v){return s+(v.net||0);},0);
-  var total=parseFloat((medTotal+svcTotal).toFixed(2));
+  // ── Read SERVICES from #rx-svc-tbody ───────────────────────
+  document.querySelectorAll('#rx-svc-tbody tr').forEach(function(tr){
+    var sel=tr.querySelector('select');
+    var sname=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'';
+    if(!sname||sname.toLowerCase().includes('select')||sname.includes('—')){
+      var inp=tr.querySelector('input[type="text"]');
+      if(inp)sname=inp.value.trim();
+    }
+    if(!sname||sname.toLowerCase().includes('select'))return;
+    var gs=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value||'':'';};
+    var price=parseFloat(gs('price'))||parseFloat(gs('sale'))||0;
+    var disc2=parseFloat(gs('disc'))||0;
+    var qty2=parseFloat(gs('qty'))||1;
+    var net=parseFloat((qty2*price*(1-disc2/100)).toFixed(2));
+    if(price<=0&&net<=0)return;
+    svcs.push({name:sname,price:price,disc:disc2,net:net||price,qty:qty2});
+  });
 
-  if(!meds.length&&!svcs.length){
-    toast('Add at least one medicine or service with a price','error');return;
-  }
-  if(total<=0){
-    toast('Total is \u20b90 — please enter prices','error');return;
-  }
-
-  if(!window.BILLING_DB)window.BILLING_DB=[];
-  if(!window._apptData)window._apptData=[];
-  var newId='INV-'+String(Date.now()).slice(-6);
   var medNames=meds.map(function(m){return m.name;}).join(', ');
   var svcNames=svcs.map(function(s){return s.name;}).join(', ');
   var desc='';
@@ -11557,6 +11505,8 @@ function printInvoice(invId){
   if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
+
 
 
 </script>
