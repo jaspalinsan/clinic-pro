@@ -2077,6 +2077,9 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4278,8 +4281,13 @@ function rxPrint() {
   var svcRows='',ss=1;
   document.querySelectorAll('#rx-svc-tbody tr').forEach(function(tr){
     var sel=tr.querySelector('select');
-    var name=sel?sel.options[sel.selectedIndex].text:'';
-    if(!name||name.includes('\u2014')) return;
+    var name=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text:'';
+    // fallback: typed input
+    if(!name||name.toLowerCase().includes('select')||name.includes('—')){
+      var inp=tr.querySelector('input[type="text"]');
+      if(inp)name=inp.value.trim();
+    }
+    if(!name||name.toLowerCase().includes('select')) return;
     var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
     svcRows+='<tr><td>'+ss+'</td><td>'+name+'</td><td style="text-align:right">\u20b9'+g('price')+'</td>'+
       '<td style="text-align:right">\u20b9'+g('disc')+'</td>'+
@@ -9793,16 +9801,18 @@ function openLabFromBill(invId){
 
   // Extract lab/service tests from invoice svcs[]
   var svcs=inv.svcs||[];
-  // Send ALL services to lab — not just pattern-matched ones
-  var labTests=svcs.map(function(s){
-    return typeof s==='object'?s.name:s;
-  }).filter(function(n){return n&&n.trim();});
-  // If no matching keyword, use all services (doctor may order any as lab)
-  if(!labTests.length&&svcs.length) labTests=svcs;
+  var labTests=svcs.map(function(s){return typeof s==='object'?s.name:s;}).filter(function(n){return n&&n.trim();});
+  // Fallback to desc field if svcs empty
+  if(!labTests.length&&inv.desc){
+    var dp2=inv.desc.split('|');
+    var sp2=(dp2.length>1?dp2[1]:dp2[0]).trim();
+    labTests=sp2.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  }
+  if(!labTests.length&&inv.desc)labTests=[inv.desc.trim()];
 
-  // Check already ordered
+  // Check already ordered — handle both invId and inv_id
   if(!window.LAB_DB)window.LAB_DB=[];
-  if(window.LAB_DB.some(function(x){return x.invId===String(invId);})){
+  if(window.LAB_DB.some(function(x){return String(x.invId||x.inv_id||'')===String(invId);})){
     toast('Lab order already created for this invoice','info');
     nav('lab');return;
   }
@@ -9824,7 +9834,13 @@ function openLabFromBill(invId){
       status:'pending',
       resultFile:null,resultText:'',doneDate:''
     });
-    if(typeof dbSaveLab==='function'){var _ll=window.LAB_DB[window.LAB_DB.length-1];if(_ll)dbSaveLab(_ll);}
+    var _ll=window.LAB_DB[window.LAB_DB.length-1];
+    if(_ll&&typeof dbSaveLab==='function')dbSaveLab(_ll);
+    if(_ll&&typeof dbPost==='function')dbPost('save_lab',{
+      id:_ll.id,patient_name:_ll.patient,patient_id:_ll.pid||'',
+      age_sex:_ll.ageSex||'',tests:_ll.tests,inv_id:_ll.invId||'',
+      rx_no:_ll.rxno||'',date:_ll.date,status:'pending',submitted:0
+    });
     if(typeof cpSaveData==='function')cpSaveData();
     nav('lab');
     setTimeout(function(){
@@ -11405,6 +11421,9 @@ function updateApptBulkBar(){
   if(cnt)cnt.textContent=checked.length+' selected';
 }
 window.updateApptBulkBar=updateApptBulkBar;
+
+
+
 
 
 
