@@ -2084,6 +2084,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4418,12 +4419,24 @@ try{
     svcs.push({name:sname,price:price,disc:disc2,net:net||price,qty:qty2});
   });
 
+  // Calculate total
+  var medTotal=meds.reduce(function(s,m){return s+parseFloat(m.amt||0);},0);
+  var svcTotal=svcs.reduce(function(s,sv){return s+parseFloat(sv.net||sv.price||0);},0);
+  var total=parseFloat((medTotal+svcTotal).toFixed(2));
+
+  if(!total){toast('Add at least one item with a price','error');return;}
+
+  // Build description
   var medNames=meds.map(function(m){return m.name;}).join(', ');
   var svcNames=svcs.map(function(s){return s.name;}).join(', ');
   var desc='';
   if(medNames&&svcNames)desc=medNames+' | '+svcNames;
   else if(medNames)desc=medNames;
   else desc=svcNames;
+
+  // Generate invoice ID
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+  var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
   window.BILLING_DB.unshift({
     id:newId,patient:pname,rxno:rxno,
@@ -11505,6 +11518,7 @@ function printInvoice(invId){
   if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 
 
 
