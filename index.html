@@ -2094,6 +2094,10 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
+
+
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
@@ -8047,6 +8051,12 @@ function saveClinicSettings(){
   toast('Clinic info saved \u2713','success');
 
   if(typeof cpSaveData==='function')cpSaveData();
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'clinic_settings',value:window.CLINIC_SETTINGS})
+  }).then(function(r){return r.json();})
+  .then(function(d){if(d.ok)toast('Settings saved for all users','success');})
+  .catch(function(){});
 }
 function renderSetupUsers(){
   var tbody=document.getElementById('setup-users-tbody');if(!tbody)return;
@@ -11213,6 +11223,7 @@ function cpStartSync(){
         }
       }
 
+      if(d.clinic_settings&&JSON.stringify(d.clinic_settings)!==JSON.stringify(window.CLINIC_SETTINGS||{})){window.CLINIC_SETTINGS=d.clinic_settings;changed.push('Settings');}
       if(changed.length)cpRenderCurrentPage();
 
       var el=document.getElementById('sync-status');
@@ -11380,24 +11391,15 @@ window.updateApptBulkBar=updateApptBulkBar;
 function printInvoice(invId){
   var inv=(window.BILLING_DB||[]).find(function(b){return String(b.id)===String(invId);});
   if(!inv){toast('Invoice not found','error');return;}
-
   var S=window.CLINIC_SETTINGS||{};
-  var meds=inv.meds||[];
-  var svcs=inv.svcs||[];
-
-  // fallback: parse desc if arrays empty
+  var meds=inv.meds||[]; var svcs=inv.svcs||[];
   if(!meds.length&&!svcs.length&&inv.desc){
     inv.desc.split('|').forEach(function(part,pi){
-      part.split(',').forEach(function(n){
-        n=n.trim();if(!n)return;
+      part.split(',').forEach(function(n){n=n.trim();if(!n)return;
         if(pi===0)meds.push({name:n,qty:1,sale:0,disc:0,amt:0});
-        else svcs.push({name:n,price:0,disc:0,net:0});
-      });
-    });
+        else svcs.push({name:n,price:0,disc:0,net:0});});});
   }
-
-  // Previous balance for this patient (other unpaid invoices)
-  var prevItems=[];var prevTotal=0;
+  var prevItems=[],prevTotal=0;
   (window.BILLING_DB||[]).forEach(function(b){
     if(String(b.id)===String(invId))return;
     if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
@@ -11407,150 +11409,65 @@ function printInvoice(invId){
     prevItems.push({id:b.id,date:b.date||'',owed:owed});
     prevTotal+=owed;
   });
-
-  // Amounts
-  var invoiceAmt=parseFloat(inv.amount||0);
-  var paidAmt=parseFloat(inv.paidAmt||0);
-  var invOwed=invoiceAmt-paidAmt;
-  var totalPayable=invOwed+prevTotal;
+  var invAmt=parseFloat(inv.amount||0);
+  var paid=parseFloat(inv.paidAmt||0);
+  var grand=invAmt+prevTotal;
+  var bal=grand-paid;
   var status=inv.status||'Pending';
-  var statusCol=status==='Paid'?'#059669':status==='Partial'?'#D97706':'#DC2626';
-
-  // Build HTML
-  var lines=[];
-  lines.push('<!DOCTYPE html><html><head><meta charset="UTF-8">');
-  lines.push('<title>Invoice '+invId+'</title>');
-  lines.push('<style>');
-  lines.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}');
-  lines.push('body{padding:24px;font-size:12px;color:#111;max-width:800px;margin:0 auto}');
-  lines.push('.no-print{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:999}');
-  lines.push('.btn-print{padding:9px 22px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}');
-  lines.push('.btn-close{padding:9px 16px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer}');
-  lines.push('@media print{.no-print{display:none!important}}');
-  lines.push('.clinic{font-size:20px;font-weight:900;color:#059669}');
-  lines.push('.divider{border:none;border-top:2px solid #059669;margin:10px 0}');
-  lines.push('.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin:12px 0}');
-  lines.push('.lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#6b7280}');
-  lines.push('.val{font-size:13px;font-weight:700;margin-top:2px}');
-  lines.push('table{width:100%;border-collapse:collapse;margin:8px 0}');
-  lines.push('th{background:#f0fdf4;padding:6px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;border:1px solid #d1fae5;color:#374151}');
-  lines.push('td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px}');
-  lines.push('tr:nth-child(even) td{background:#fafafa}');
-  lines.push('.sec{font-size:12px;font-weight:800;color:#059669;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.5px}');
-  lines.push('.sum-box{margin-left:auto;width:280px;margin-top:14px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}');
-  lines.push('.sum-row{display:flex;justify-content:space-between;padding:6px 12px;font-size:12px;border-bottom:1px solid #f3f4f6}');
-  lines.push('.sum-row.red{background:#fef2f2;color:#991b1b;font-weight:700}');
-  lines.push('.sum-row.green{background:#f0fdf4;color:#065f46;font-weight:700}');
-  lines.push('.sum-row.grand{background:#059669;color:#fff;font-weight:900;font-size:14px}');
-  lines.push('.prev-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;margin:12px 0}');
-  lines.push('.prev-title{font-size:10px;font-weight:900;color:#991b1b;text-transform:uppercase;margin-bottom:4px}');
-  lines.push('.prev-row{display:flex;justify-content:space-between;font-size:11px;color:#7f1d1d;padding:2px 0}');
-  lines.push('.footer{margin-top:30px;padding-top:12px;border-top:1px dashed #d1d5db;display:flex;justify-content:space-between;font-size:10px;color:#9ca3af}');
-  lines.push('</style></head><body>');
-
-  // Print/Close buttons
-  lines.push('<div class="no-print">');
-  lines.push('<button class="btn-print" onclick="window.print()">&#128424; Print</button>');
-  lines.push('<button class="btn-close" onclick="window.close()">Close</button>');
-  lines.push('</div>');
-
-  // Header
-  lines.push('<div class="clinic">'+(S.name||'Clinic Pro')+'</div>');
-  if(S.address||S.doctor||S.phone)
-    lines.push('<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(S.address||'')+
-      (S.doctor?' &bull; '+S.doctor:'')+(S.phone?' &bull; Ph: '+S.phone:'')+'</div>');
-  lines.push('<hr class="divider">');
-  lines.push('<div style="display:flex;justify-content:space-between;align-items:center">');
-  lines.push('<div><div style="font-size:16px;font-weight:900">'+invId+'</div>');
-  lines.push('<div style="font-size:11px;color:#6b7280">Date: '+(inv.date||'')+(inv.rxno?' &nbsp;|&nbsp; Rx: '+inv.rxno:'')+'</div></div>');
-  lines.push('<div style="padding:4px 14px;background:'+statusCol+';color:#fff;border-radius:20px;font-weight:700;font-size:12px">'+status+'</div>');
-  lines.push('</div>');
-
-  // Patient grid
-  lines.push('<div class="grid4">');
-  lines.push('<div><div class="lbl">Patient</div><div class="val">'+(inv.patient||'—')+'</div></div>');
-  lines.push('<div><div class="lbl">Age/Sex</div><div class="val">'+(inv.age||'—')+'</div></div>');
-  lines.push('<div><div class="lbl">Mobile</div><div class="val">'+(inv.mob||'—')+'</div></div>');
-  lines.push('<div><div class="lbl">Diagnosis</div><div class="val">'+(inv.dx||'—')+'</div></div>');
-  lines.push('</div>');
-
-  // Medicines table
+  var scol=status==='Paid'?'#059669':status==='Partial'?'#D97706':'#DC2626';
+  var sbg=status==='Paid'?'#f0fdf4':status==='Partial'?'#fffbeb':'#fef2f2';
+  var cName=S.name||'Clinic Pro';
+  var cSub=[(S.doctor||''),(S.phone?'Ph:'+S.phone:'')].filter(Boolean).join(' | ');
+  var css='*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px;color:#111;max-width:820px;margin:0 auto}.np{position:fixed;top:12px;right:12px;z-index:999;display:flex;gap:8px}.bp{padding:8px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}.bc{padding:8px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer}@media print{.np{display:none!important}}.hd{background:#f0fdf4;padding:12px 16px;border-bottom:2px solid #059669}.cn{font-size:18px;font-weight:900;color:#059669}.cs{font-size:11px;color:#047857;margin-top:2px}.mt{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #e5e7eb}.bd{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px;background:#fafafa;border-bottom:1px solid #e5e7eb}.lb{font-size:9px;font-weight:700;text-transform:uppercase;color:#9ca3af;display:block;margin-bottom:1px}.vl{font-size:12px;font-weight:700}.sh{font-size:10px;font-weight:900;color:#059669;text-transform:uppercase;padding:8px 16px 2px}table{width:100%;border-collapse:collapse}th{background:#f0fdf4;padding:5px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #d1fae5}td{padding:5px 8px;border-bottom:1px solid #f3f4f6;font-size:11px}.cb{padding:12px 16px;background:#f9fafb;border-top:1px solid #e5e7eb}.cr{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#374151}.pr{color:#DC2626;font-weight:500}.gt{font-size:14px;font-weight:900;border-top:2px solid #111;margin-top:5px;padding-top:7px}.pa{color:#059669;font-weight:500}.bd2{font-size:13px;font-weight:900;color:#DC2626;border-top:1px solid #e5e7eb;margin-top:3px;padding-top:5px}.ft{padding:14px 16px;border-top:1px dashed #d1d5db;display:flex;justify-content:space-between;font-size:10px;color:#9ca3af}';
+  var H=[];
+  H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+invId+'</title><style>'+css+'</style></head><body>');
+  H.push('<div class="np"><button class="bp" onclick="window.print()">Print Invoice</button>');
+  H.push('<button class="bc" onclick="window.close()">Close</button></div>');
+  H.push('<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">');
+  H.push('<div class="hd"><div class="cn">'+cName+'</div>'+(cSub?'<div class="cs">'+cSub+'</div>':'')+'</div>');
+  H.push('<div class="mt"><div><div style="font-size:15px;font-weight:900">'+invId+'</div>');
+  H.push('<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(inv.date||'')+(inv.rxno?' &bull; Rx:'+inv.rxno:'')+'</div></div>');
+  H.push('<span class="bd" style="background:'+sbg+';color:'+scol+';border:1px solid '+scol+'">'+status+'</span></div>');
+  H.push('<div class="pg">');
+  H.push('<div><span class="lb">Patient</span><span class="vl">'+(inv.patient||'-')+'</span></div>');
+  H.push('<div><span class="lb">Age/Sex</span><span class="vl">'+(inv.age||'-')+'</span></div>');
+  H.push('<div><span class="lb">Mobile</span><span class="vl">'+(inv.mob||'-')+'</span></div>');
+  H.push('<div><span class="lb">Diagnosis</span><span class="vl">'+(inv.dx||'-')+'</span></div>');
+  H.push('</div>');
   if(meds.length){
-    lines.push('<div class="sec">Medicines</div>');
-    lines.push('<table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Disc%</th><th style="text-align:right">Amount</th></tr></thead><tbody>');
-    var medTot=0;
-    meds.forEach(function(m,i){
-      if(!m.name)return;
-      var qty=parseFloat(m.qty||1);
-      var sale=parseFloat(m.sale||0);
-      var disc=parseFloat(m.disc||0);
-      var amt=parseFloat(m.amt||(qty*sale*(1-disc/100)));
-      medTot+=amt;
-      lines.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.dose?'<br><small style="color:#6b7280">'+m.dose+'</small>':'')+'</td>');
-      lines.push('<td>'+(m.dose||'')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td>');
-      lines.push('<td style="text-align:center">'+qty+'</td>');
-      lines.push('<td style="text-align:right">₹'+sale.toFixed(2)+'</td>');
-      lines.push('<td style="text-align:right">'+(disc||'—')+'</td>');
-      lines.push('<td style="text-align:right"><b>₹'+amt.toFixed(2)+'</b></td></tr>');
+    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
+    meds.forEach(function(m,i){if(!m.name)return;
+      var q=parseFloat(m.qty||1),s=parseFloat(m.sale||0),d=parseFloat(m.disc||0),a=parseFloat(m.amt||(q*s*(1-d/100)));
+      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b></td><td>'+(m.dose||'')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
     });
-    lines.push('</tbody></table>');
+    H.push('</tbody></table>');
   }
-
-  // Services table
   if(svcs.length){
-    lines.push('<div class="sec">Services</div>');
-    lines.push('<table><thead><tr><th>#</th><th>Service</th><th style="text-align:right">Price</th><th style="text-align:right">Disc%</th><th style="text-align:right">Net</th></tr></thead><tbody>');
-    svcs.forEach(function(s,i){
-      if(!s.name)return;
-      var price=parseFloat(s.price||0);
-      var disc2=parseFloat(s.disc||0);
-      var net=parseFloat(s.net||(price*(1-disc2/100)));
-      lines.push('<tr><td>'+(i+1)+'</td><td><b>'+s.name+'</b></td>');
-      lines.push('<td style="text-align:right">₹'+price.toFixed(2)+'</td>');
-      lines.push('<td style="text-align:right">'+(disc2||'—')+'</td>');
-      lines.push('<td style="text-align:right"><b>₹'+net.toFixed(2)+'</b></td></tr>');
+    H.push('<div class="sh">Services</div><table><thead><tr><th>#</th><th>Service</th><th>Price</th><th>Disc%</th><th>Net</th></tr></thead><tbody>');
+    svcs.forEach(function(s,i){if(!s.name)return;
+      var p2=parseFloat(s.price||0),d2=parseFloat(s.disc||0),n=parseFloat(s.net||(p2*(1-d2/100)));
+      H.push('<tr><td>'+(i+1)+'</td><td><b>'+s.name+'</b></td><td>Rs.'+p2.toFixed(2)+'</td><td>'+(d2||'-')+'</td><td><b>Rs.'+n.toFixed(2)+'</b></td></tr>');
     });
-    lines.push('</tbody></table>');
+    H.push('</tbody></table>');
   }
-
-  if(!meds.length&&!svcs.length)
-    lines.push('<div style="padding:10px 0;color:#374151"><b>Items:</b> '+(inv.desc||'—')+'</div>');
-
-  // Previous balance box
-  if(prevItems.length){
-    lines.push('<div class="prev-box">');
-    lines.push('<div class="prev-title">Previous Outstanding Balance</div>');
-    prevItems.forEach(function(pi){
-      lines.push('<div class="prev-row"><span>'+pi.id+' &nbsp;('+pi.date+')</span><span>₹'+pi.owed.toFixed(2)+'</span></div>');
-    });
-    lines.push('<div class="prev-row" style="font-weight:900;border-top:1px solid #fca5a5;margin-top:4px;padding-top:4px">');
-    lines.push('<span>Total Previous</span><span>₹'+prevTotal.toFixed(2)+'</span></div>');
-    lines.push('</div>');
-  }
-
-  // Summary box
-  lines.push('<div class="sum-box">');
-  lines.push('<div class="sum-row"><span>Invoice Amount</span><span>₹'+invoiceAmt.toFixed(2)+'</span></div>');
-  if(paidAmt>0)
-    lines.push('<div class="sum-row green"><span>Paid ('+inv.paymode+')</span><span>- ₹'+paidAmt.toFixed(2)+'</span></div>');
-  if(invOwed>0&&paidAmt>0)
-    lines.push('<div class="sum-row"><span>Invoice Balance</span><span>₹'+invOwed.toFixed(2)+'</span></div>');
-  if(prevTotal>0)
-    lines.push('<div class="sum-row red"><span>Previous Balance</span><span>+ ₹'+prevTotal.toFixed(2)+'</span></div>');
-  lines.push('<div class="sum-row grand"><span>TOTAL PAYABLE</span><span>₹'+totalPayable.toFixed(2)+'</span></div>');
-  lines.push('</div>');
-
-  // Footer
-  lines.push('<div class="footer">');
-  lines.push('<span>'+(S.name||'Clinic Pro')+(S.phone?' | '+S.phone:'')+'</span>');
-  lines.push('<span>Authorised Signature: _______________________</span>');
-  lines.push('</div></body></html>');
-
-  // Open in new tab — NO auto print
+  if(!meds.length&&!svcs.length)H.push('<div style="padding:10px 16px;color:#374151"><b>Items:</b> '+(inv.desc||'-')+'</div>');
+  H.push('<div class="cb">');
+  H.push('<div class="cr"><span>Invoice amount</span><span>Rs.'+invAmt.toFixed(2)+'</span></div>');
+  prevItems.forEach(function(pi){
+    H.push('<div class="cr pr"><span>Previous balance ('+pi.id+')</span><span>+ Rs.'+pi.owed.toFixed(2)+'</span></div>');
+  });
+  H.push('<div class="cr gt"><span>Grand total</span><span>Rs.'+grand.toFixed(2)+'</span></div>');
+  if(paid>0)H.push('<div class="cr pa"><span>Paid'+(inv.paymode?' ('+inv.paymode+')':'')+' </span><span>- Rs.'+paid.toFixed(2)+'</span></div>');
+  H.push('<div class="cr bd2"><span>Balance due</span><span>Rs.'+bal.toFixed(2)+'</span></div>');
+  H.push('</div>');
+  H.push('<div class="ft"><span>'+cName+(S.phone?' | '+S.phone:'')+'</span><span>Authorised Signature: _______________________</span></div>');
+  H.push('</div></body></html>');
   var w=window.open('','_blank');
-  if(w){w.document.write(lines.join(''));w.document.close();}
+  if(w){w.document.write(H.join(''));w.document.close();}
   else toast('Allow popups to view invoice','error');
 }
+window.printInvoice=printInvoice;
+
 window.printInvoice=printInvoice;
 
 window.printInvoice=printInvoice;
@@ -11612,6 +11529,10 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
+
+
 
 
 
