@@ -2093,6 +2093,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
@@ -11061,15 +11062,25 @@ function cpLoadData(){
     // Billing from proper MySQL table
     if(resp.billing){
       window.BILLING_DB=(resp.billing||[]).map(function(b){
-        var ex=b.extra||{};
-        var bEx=b.extra||{};
-        if(!bEx.meds&&b.data_json){try{bEx=JSON.parse(b.data_json);}catch(e){}}
-        return Object.assign({
-          id:b.id,patient:b.patient_name,rxno:b.rx_no,
-          date:b.date,desc:b.description,
+        // Parse data_json — contains meds, svcs, age, mob, dx, paidAmt
+        var bj={};
+        // Try extra first (PHP already decoded it)
+        if(b.extra&&typeof b.extra==='object')bj=b.extra;
+        // Fallback: parse data_json string
+        if(!bj.meds&&b.data_json){try{bj=JSON.parse(b.data_json);}catch(e){}}
+        return {
+          id:b.id,
+          patient:b.patient_name||bj.patient||'',
+          rxno:b.rx_no||bj.rxno||'',
+          date:b.date||bj.date||'',
+          desc:b.description||bj.desc||'',
           amount:parseFloat(b.amount||0),
-          status:b.status,paymode:b.pay_mode
-        },ex);
+          status:b.status||'Pending',
+          paymode:b.pay_mode||bj.paymode||'',
+          paidAmt:parseFloat(bj.paidAmt||0),
+          age:bj.age||'',mob:bj.mob||'',dx:bj.dx||'',
+          meds:bj.meds||[],svcs:bj.svcs||[]
+        };
       });
     }
 
@@ -11157,14 +11168,18 @@ function cpStartSync(){
       // Billing — critical for pharmacist
       if(resp.billing){
         var nb=(resp.billing||[]).map(function(b){
-          var bj={};try{bj=JSON.parse(b.data_json||'{}');}catch(e){}
+          var bj={};
+          if(b.extra&&typeof b.extra==='object')bj=b.extra;
+          if(!bj.meds&&b.data_json){try{bj=JSON.parse(b.data_json);}catch(e){}}
           return {id:b.id,
             patient:b.patient_name||bj.patient||'',
             rxno:b.rx_no||bj.rxno||'',
-            date:b.date,
+            date:b.date||'',
             desc:b.description||bj.desc||'',
             amount:parseFloat(b.amount||0),
-            status:b.status,paymode:b.pay_mode||bj.paymode||'',
+            status:b.status||'Pending',
+            paymode:b.pay_mode||bj.paymode||'',
+            paidAmt:parseFloat(bj.paidAmt||0),
             age:bj.age||'',mob:bj.mob||'',dx:bj.dx||'',
             meds:bj.meds||[],svcs:bj.svcs||[]};
         });
@@ -11597,6 +11612,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 

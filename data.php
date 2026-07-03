@@ -179,7 +179,16 @@ try{
     // Include result_file so ALL users can see PDF on any computer
     $lab=$pdo->query("SELECT id,patient_name,patient_id,age_sex,tests,inv_id,rx_no,date,status,submitted,result_file,result_type,result_name FROM lab_orders ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
     $bill=$pdo->query("SELECT * FROM billing ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
-    foreach($bill as &$b){if($b['data_json'])$b['extra']=json_decode($b['data_json'],true);}
+    foreach($bill as &$b){
+      if($b['data_json']){
+        $bj=json_decode($b['data_json'],true);
+        $b['extra']=$bj;
+        // Expose paidAmt directly for JS
+        $b['paid_amt']=$bj['paidAmt']??0;
+        $b['meds_json']=isset($bj['meds'])?$bj['meds']:[];
+        $b['svcs_json']=isset($bj['svcs'])?$bj['svcs']:[];
+      }
+    }
     $inv=$pdo->query("SELECT store_value FROM clinic_store WHERE store_key='inventory'")->fetch(PDO::FETCH_ASSOC);
     $rx=$pdo->query("SELECT store_value FROM clinic_store WHERE store_key='rx_saved'")->fetch(PDO::FETCH_ASSOC);
     $vnd=$pdo->query("SELECT store_value FROM clinic_store WHERE store_key='vendors'")->fetch(PDO::FETCH_ASSOC);
