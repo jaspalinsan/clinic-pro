@@ -472,7 +472,7 @@ html,body{height:100%;overflow:hidden}
         <option value="admin">Admin</option>
         <option value="doctor">Doctor</option>
         <option value="pharmacist">Pharmacist</option>
-        <option value="lab">Lab</option>
+        <option value="lab">Lab Technician</option>
         <option value="receptionist">Receptionist</option>
         <option value="staff">Staff</option>
       </select>
@@ -889,6 +889,18 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 <div class="page" id="page-pharmacy">
+  <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
+      <i class="ti ti-calendar" style="font-size:14px;color:#F59E0B"></i>
+      From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
+      To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
+    </label>
+    <button onclick="phFilterToday()" style="padding:7px 14px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:12px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
+    <button onclick="phFilterClear()" style="padding:7px 14px;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;font-size:12px;cursor:pointer;color:var(--ink3)"><i class="ti ti-x" style="font-size:11px"></i> All</button>
+    <span id="ph-filter-label" style="font-size:12px;color:#F59E0B;font-weight:600"></span>
+  </div>
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px">
@@ -2069,6 +2081,28 @@ html,body{height:100%;overflow:hidden}
 
 
 
+function fmtDateTime(d){
+  if(!d)d=new Date();
+  if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var hh=d.getHours(),mm=String(d.getMinutes()).padStart(2,'0');
+  var ap=hh>=12?'PM':'AM',h12=hh%12||12;
+  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear()+' \u2014 '+h12+':'+mm+' '+ap;
+}
+window.fmtDateTime=fmtDateTime;
+function fmtDate(d){
+  if(!d)d=new Date();
+  if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear();
+}
+window.fmtDate=fmtDate;
+var ROLE_PREFIX={'Admin':'Admin','Doctor':'Dr.','Pharmacist':'Phst.','Lab':'Lab Technician','Receptionist':'Receptionist','Staff':'Staff'};
+window.ROLE_PREFIX=ROLE_PREFIX;
+
+
+
+
 
 
 
@@ -2241,7 +2275,8 @@ function doUnlock(u,p,err){
 
   // Load data — cpRenderCurrentPage will use _currentPage which is already set
   cpLoadData();
-  if(typeof toast==='function')toast('Welcome '+user.name,'success');
+  var _pfx=(window.ROLE_PREFIX||{})[user.role]||user.role;
+if(typeof toast==='function')toast('Welcome, '+_pfx+' '+user.name+' ✓','success');
   setTimeout(cpStartSync,2000);
 }
 window.doUnlock=doUnlock;
@@ -4483,7 +4518,30 @@ function renderPharmacy(){
   var tbody=document.getElementById('ph-tbody');if(!tbody)return;
   tbody.innerHTML='';
   if(!window.BILLING_DB)window.BILLING_DB=[];
-  var data=window.BILLING_DB;
+  // Apply date filter
+  var phFrom=(document.getElementById('ph-date-from')||{}).value||'';
+  var phTo=(document.getElementById('ph-date-to')||{}).value||'';
+  var data=(window.BILLING_DB||[]).filter(function(b){
+    if(!phFrom&&!phTo)return true;
+    var bd=b.date||'';
+    // Try to parse date string
+    var bDate=new Date(bd);
+    if(isNaN(bDate.getTime())){
+      // Try DD Mon YYYY format
+      var parts=bd.split(' ');
+      if(parts.length>=3){
+        var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+        bDate=new Date(parseInt(parts[2]),months[parts[1]]||0,parseInt(parts[0]));
+      }
+    }
+    if(isNaN(bDate.getTime()))return true;
+    var bISO=bDate.toISOString().split('T')[0];
+    if(phFrom&&bISO<phFrom)return false;
+    if(phTo&&bISO>phTo)return false;
+    return true;
+  }).sort(function(a,b){
+    return String(b.id||'').localeCompare(String(a.id||''));
+  });
   if(!data.length){
     tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--ink3)"><i class="ti ti-receipt" style="font-size:28px;display:block;margin-bottom:8px"></i>No invoices yet</td></tr>';
     var sub=document.getElementById('ph-sub');if(sub)sub.textContent='No invoices';
@@ -7351,6 +7409,8 @@ function renderSavedRx(filter){
   var hdr=document.getElementById('srx-panel-title');
   if(!list)return;
   var all=window._rxSaved||[];
+  var rxFrom=(document.getElementById('rx-saved-from')||{}).value||'';
+  var rxTo=(document.getElementById('rx-saved-to')||{}).value||'';
 
   var curPat=window._rxCurrentPatient||
     ((document.getElementById('rx-pat-name')||{}).value||'').trim().toLowerCase();
@@ -10790,7 +10850,17 @@ window.cpSyncNow=cpSyncNow;
 function renderDashPatients(){
   var tbody=document.getElementById('pat-tbody');
   if(!tbody)return;
-  var db=window.PAT_DB||[];
+  var patFrom=(document.getElementById('pat-date-from')||{}).value||'';
+  var patTo=(document.getElementById('pat-date-to')||{}).value||'';
+  var db=(window.PAT_DB||[]).filter(function(p){
+    if(!patFrom&&!patTo)return true;
+    var pd=p.date||p.createdAt||'';if(!pd)return true;
+    var pDate=new Date(pd);if(isNaN(pDate.getTime()))return true;
+    var pISO=pDate.toISOString().split('T')[0];
+    if(patFrom&&pISO<patFrom)return false;
+    if(patTo&&pISO>patTo)return false;
+    return true;
+  });
   if(!db.length){tbody.innerHTML='';return;}
   var html='';
   db.forEach(function(p){
@@ -11325,7 +11395,7 @@ function printInvoice(invId){
     (svcRows?'<div class="stitle">\ud83d\udd2c Services / Lab</div>'+
     '<table><thead><tr><th>#</th><th>Service</th><th>Price</th><th>Disc</th><th>Net</th></tr></thead>'+
     '<tbody>'+svcRows+'</tbody></table>':'')+
-    (!medRows&&!svcRows?'<div style="padding:10px;color:#666;font-style:italic">'+(inv.desc||'No items')+'</div>':'')+
+    (!medRows&&!svcRows?'<div style="padding:10px 0;color:#444"><b>Items:</b> '+(inv.desc||'No items')+'</div>':'')+
     '<div style="max-width:280px;margin-left:auto;margin-top:10px">'+
     '<div class="total-row"><span>Subtotal</span><span>\u20b9'+parseFloat(inv.amount||0).toFixed(2)+'</span></div>'+
     (inv.paidAmt?'<div class="total-row"><span>Paid</span><span style="color:#12AA7C">\u20b9'+parseFloat(inv.paidAmt||0).toFixed(2)+'</span></div>':'')+
@@ -11345,6 +11415,34 @@ window.printInvoice=printInvoice;
 
 
 
+
+
+
+
+// Pharmacy date filter helpers
+function phFilterToday(){
+  var t=new Date();
+  var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  var df=document.getElementById('ph-date-from');
+  var dt=document.getElementById('ph-date-to');
+  if(df)df.value=iso; if(dt)dt.value=iso;
+  var lbl=document.getElementById('ph-filter-label');
+  if(lbl)lbl.textContent='Today: '+fmtDate(new Date());
+  if(typeof renderPharmacy==='function')renderPharmacy();
+}
+window.phFilterToday=phFilterToday;
+function phFilterClear(){
+  var df=document.getElementById('ph-date-from');
+  var dt=document.getElementById('ph-date-to');
+  if(df)df.value=''; if(dt)dt.value='';
+  var lbl=document.getElementById('ph-filter-label');
+  if(lbl)lbl.textContent='';
+  if(typeof renderPharmacy==='function')renderPharmacy();
+}
+window.phFilterClear=phFilterClear;
+
+// Use fmtDateTime everywhere for new dates
+var _origToLocale=Date.prototype.toLocaleDateString;
 
 
 
