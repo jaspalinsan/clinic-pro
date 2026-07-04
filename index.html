@@ -2103,6 +2103,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
@@ -4729,10 +4730,24 @@ function submitPayment(invId,fullAmt){var received=parseFloat((document.getEleme
     }else{
       inv.status='Paid';inv.paymode=mode+(ref?' ('+ref+')':'');
       inv.paidAmt=received;
-      // Mark source invoice as settled if this is a balance invoice
+      // Mark source invoice as settled + save to MySQL
       if(inv.desc&&inv.desc.indexOf('Balance from ')===0){
         var _sm=(inv.desc.match(/Balance from (INV-[0-9]+)/)||[])[1];
-        if(_sm){var _si=(window.BILLING_DB||[]).find(function(b){return b.id===_sm;});if(_si)_si.status='Paid';}
+        if(_sm){
+          var _si=(window.BILLING_DB||[]).find(function(b){return b.id===_sm;});
+          if(_si){
+            _si.status='Paid';
+            // Save source invoice Paid status to MySQL — THIS was the missing step
+            if(typeof dbPost==='function')dbPost('save_billing',{
+              id:_si.id,patient:_si.patient,rxno:_si.rxno||'',
+              date:_si.date,desc:_si.desc,amount:_si.amount,
+              status:'Paid',paymode:inv.paymode||mode,
+              age:_si.age||'',mob:_si.mob||'',dx:_si.dx||'',
+              meds:_si.meds||[],svcs:_si.svcs||[],
+              paidAmt:_si.paidAmt||0
+            });
+          }
+        }
       }
       toast('✔ Rs.'+received.toFixed(2)+' via '+mode+' — Fully Paid!','success');
     }}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
@@ -11751,6 +11766,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
