@@ -1140,7 +1140,7 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
-<div class="page" id="page-settings" style="padding:0;background:#F1F5F9">
+<div class="page" id="page-settings" style="padding:0;margin:-14px -14px 0;background:#F1F5F9">
 
 <div style="display:flex;height:calc(100vh - 72px)">
 
@@ -2085,6 +2085,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -4720,7 +4722,12 @@ function submitPayment(invId,fullAmt){var received=parseFloat((document.getEleme
     }else{
       inv.status='Paid';inv.paymode=mode+(ref?' ('+ref+')':'');
       inv.paidAmt=received;
-      toast('✔ ₹'+received.toFixed(2)+' via '+mode+' — Fully Paid!','success');
+      // Mark source invoice as settled if this is a balance invoice
+      if(inv.desc&&inv.desc.indexOf('Balance from ')===0){
+        var _sm=(inv.desc.match(/Balance from (INV-[0-9]+)/)||[])[1];
+        if(_sm){var _si=(window.BILLING_DB||[]).find(function(b){return b.id===_sm;});if(_si)_si.status='Paid';}
+      }
+      toast('✔ Rs.'+received.toFixed(2)+' via '+mode+' — Fully Paid!','success');
     }}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
   // Update billing status in MySQL
   var _pb=window.BILLING_DB&&window.BILLING_DB.find(function(x){return x.id===invId;});
@@ -11441,12 +11448,22 @@ function printInvoice(invId){
         else svcs.push({name:n,price:0,disc:0,net:0});});});
   }
 
-  // Previous balance — but EXCLUDE the source invoice to avoid double counting
-  // e.g. INV-094 is balance from INV-093 — don't count INV-093 again
+  // Build set of invoice IDs that have a balance invoice covering them
+  // If INV-093 has balance invoice INV-094 that is Paid, don't count INV-093
+  var coveredByPaidBalance={};
+  (window.BILLING_DB||[]).forEach(function(b){
+    if(b.status!=='Paid')return;
+    if(!b.desc||b.desc.indexOf('Balance from ')!==0)return;
+    var bm=b.desc.match(/Balance from (INV-\d+)/);
+    if(bm)coveredByPaidBalance[bm[1]]=true;
+  });
+
+  // Previous balance — exclude self, source, and invoices covered by paid balance invoices
   var prevItems=[],prevTotal=0;
   (window.BILLING_DB||[]).forEach(function(b){
-    if(String(b.id)===String(invId))return;  // skip self
-    if(String(b.id)===sourceInvId)return;    // skip source to avoid double count
+    if(String(b.id)===String(invId))return;       // skip self
+    if(String(b.id)===sourceInvId)return;          // skip source of this balance invoice
+    if(coveredByPaidBalance[b.id])return;          // skip if already covered by paid balance
     if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
     if(b.status==='Paid')return;
     var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
@@ -11643,6 +11660,8 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
 
 
 
