@@ -334,6 +334,10 @@ html,body{height:100%;overflow:hidden}
     font-size:12px
   }
 }
+
+/* Settings top tabs */
+.spt-btn{padding:6px 12px;font-size:12px;border-radius:7px;border:1px solid var(--sl2);background:var(--bg);color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.spt-btn i{font-size:13px}
 </style>
 </head>
 <body>
@@ -1073,8 +1077,8 @@ html,body{height:100%;overflow:hidden}
 </div>
 </div>
 </div>
-<div class="page" id="page-finance">
-  <div class="ph">
+<div class="page" id="page-finance" style="padding:0">
+  <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
       <div style="display:flex;align-items:center;gap:5px">
@@ -1140,31 +1144,24 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
-<div class="page" id="page-settings" style="padding:0;margin:-14px -14px 0;background:#F1F5F9">
+<div class="page" id="page-settings" style="padding:0;background:var(--bg)">
 
-<div style="display:flex;height:calc(100vh - 72px)">
-
-  <!-- LEFT SIDEBAR -->
-  <div style="width:200px;flex-shrink:0;background:#1e293b;height:100%;display:flex;flex-direction:column">
-    <div style="padding:16px 16px 8px;font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid #334155">SETTINGS</div>
-    <div id="sp-nav" style="flex:1;padding:10px 0">
-      <button onclick="spTab('clinic')"     id="spt-clinic"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:#3b82f6;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left"><i class="ti ti-building-hospital" style="font-size:16px;flex-shrink:0;width:18px"></i>Clinic Info</button>
-      <button onclick="spTab('users')"      id="spt-users"      style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-users" style="font-size:16px;flex-shrink:0;width:18px"></i>User Accounts</button>
-      <button onclick="spTab('services')"   id="spt-services"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-activity" style="font-size:16px;flex-shrink:0;width:18px"></i>Services / Lab</button>
-      <button onclick="spTab('vendors')"    id="spt-vendors"    style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-truck" style="font-size:16px;flex-shrink:0;width:18px"></i>Vendors</button>
-      <button onclick="spTab('appearance')" id="spt-appearance" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-palette" style="font-size:16px;flex-shrink:0;width:18px"></i>Appearance</button>
-      <button onclick="spTab('rxtpl')" id="spt-rxtpl"
-        style="display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;border-radius:9px;background:none;color:#94a3b8;font-size:12.5px;cursor:pointer;text-align:left;margin-bottom:2px">
-        <div style="width:26px;height:26px;background:#1e293b;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-template" style="font-size:14px"></i></div>
-        <div><div style="font-size:12.5px">Rx Templates</div><div style="font-size:9px;opacity:.7">Custom prescriptions</div></div>
-      </button>
-
-      <button onclick="spTab('backup')"     id="spt-backup"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-database" style="font-size:16px;flex-shrink:0;width:18px"></i>Backup / Export</button>
+<div style="display:flex;flex-direction:column;height:100%">
+  <!-- TOP TAB BAR (like vendor page) -->
+  <div class="ph" style="border-bottom:1px solid var(--sl2);flex-shrink:0;flex-wrap:wrap;gap:6px">
+    <div><div class="ptitle"><i class="ti ti-settings" style="color:#3b82f6;margin-right:6px"></i>Settings</div></div>
+    <div class="ha" style="gap:6px;flex-wrap:wrap">
+      <button id="spt-clinic"     onclick="spTab('clinic')"     class="bs spt-btn active-spt"><i class="ti ti-building-hospital"></i> Clinic</button>
+      <button id="spt-users"      onclick="spTab('users')"      class="bs spt-btn"><i class="ti ti-users"></i> Users</button>
+      <button id="spt-services"   onclick="spTab('services')"   class="bs spt-btn"><i class="ti ti-activity"></i> Services</button>
+      <button id="spt-vendors"    onclick="spTab('vendors')"    class="bs spt-btn"><i class="ti ti-truck"></i> Vendors</button>
+      <button id="spt-appearance" onclick="spTab('appearance')" class="bs spt-btn"><i class="ti ti-palette"></i> Appearance</button>
+      <button id="spt-rxtpl"      onclick="spTab('rxtpl')"      class="bs spt-btn"><i class="ti ti-template"></i> Rx Templates</button>
+      <button id="spt-backup"     onclick="spTab('backup')"     class="bs spt-btn"><i class="ti ti-database"></i> Backup</button>
     </div>
   </div>
-
-  <!-- RIGHT CONTENT -->
-  <div style="flex:1;overflow-y:auto;background:#fff">
+  <!-- CONTENT AREA -->
+  <div style="flex:1;overflow-y:auto;padding:0">
 
     <!-- CLINIC INFO -->
     <div id="spc-clinic" style="display:block;padding:28px 32px;max-width:760px">
@@ -2085,6 +2082,10 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
+
+
 
 
 
@@ -4018,6 +4019,12 @@ function rxNewBlank(){
   // Focus patient name
   setTimeout(function(){var n=document.getElementById('rx-pat-name');if(n)n.focus();},50);
   toast('New prescription form ready','info');
+  // Add default consultancy service row
+  setTimeout(function(){
+    var st=document.getElementById('rx-svc-tbody');
+    if(st&&st.rows.length===0&&typeof rxAddUnifiedSvcRow==='function')
+      rxAddUnifiedSvcRow({name:'Consultancy Fee',price:150,disc:0});
+  },80);
 }
 window.rxNewBlank=rxNewBlank;
 
@@ -8017,36 +8024,27 @@ window.applyFontWeight=applyFontWeight;
 function spTab(name){
   var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl'];
   if(name==='users'&&typeof renderUserList==='function')renderUserList();
-  var _ut=document.getElementById('spt-users');if(_ut)_ut.style.display=(window.CURRENT_USER&&window.CURRENT_USER.role==='Admin')?'':'none';
+  var _ut=document.getElementById('spt-users');
+  if(_ut)_ut.style.display=(window.CURRENT_USER&&window.CURRENT_USER.role==='Admin')?'':'none';
   tabs.forEach(function(t){
     var btn=document.getElementById('spt-'+t);
     var panel=document.getElementById('spc-'+t);
     var on=(t===name);
     if(btn){
       if(on){
-        btn.style.background='linear-gradient(135deg,#3b82f6,#2563eb)';
+        btn.style.background='#3b82f6';
         btn.style.color='#fff';
+        btn.style.borderColor='#3b82f6';
         btn.style.fontWeight='700';
-        btn.style.borderRadius='8px';
-        btn.style.boxShadow='0 2px 8px rgba(59,130,246,.35)';
-      } else {
-        btn.style.background='none';
-        btn.style.color='#94a3b8';
+      }else{
+        btn.style.background='var(--bg)';
+        btn.style.color='var(--ink2)';
+        btn.style.borderColor='var(--sl2)';
         btn.style.fontWeight='400';
-        btn.style.borderRadius='';
-        btn.style.boxShadow='none';
       }
-      // Safe icon box tinting (only if inner div exists)
-      try{
-        var iconBox=btn.querySelector('div');
-        if(iconBox)iconBox.style.background=on?'rgba(255,255,255,.2)':'#1e293b';
-        var icon=btn.querySelector('i');
-        if(icon&&!iconBox)icon.style.color=on?'#fff':'#94a3b8';
-      }catch(e){}
     }
     if(panel)panel.style.display=on?'block':'none';
   });
-  // Tab-specific init
   if(name==='services'&&typeof renderSetupServices==='function')renderSetupServices();
   if(name==='vendors'&&typeof renderSetupVendors==='function')renderSetupVendors();
   if(name==='users')renderUsersTable();
@@ -8056,6 +8054,7 @@ function spTab(name){
   }
   if(name==='appearance'&&typeof renderAppearanceTab==='function')renderAppearanceTab();
 }
+
 window.spTab=spTab;
 window.spTab=spTab;
 window.spTab=spTab;
@@ -8893,8 +8892,79 @@ function saveEditInvoice(id){
   var mo=document.getElementById('m-edit-inv');if(mo)mo.remove();
   renderPharmacy();toast('Invoice '+id+' updated \u2713','success');
 }
-function openPayModal(invId){var D=(typeof BILLING_DB!=='undefined')?BILLING_DB:[];var inv=D.find(function(b){return b.id===invId;})||{id:invId,patient:'Patient',amount:0,desc:''};var amt=parseFloat(inv.amount)||0;var old=document.getElementById('m-pay');if(old)old.remove();var ov=document.createElement('div');ov.id='m-pay';ov.className='overlay open';ov.innerHTML='<div class="modal" style="max-width:440px"><div class="mh"><h2><i class="ti ti-currency-rupee" style="color:var(--acc);margin-right:6px"></i>Collect Payment</h2><button class="mclose" onclick="document.getElementById(\'m-pay\').remove()"><i class="ti ti-x"></i></button></div><div class="mbody"><div style="background:var(--m);border-radius:10px;padding:14px;margin-bottom:16px"><div style="font-size:22px;font-weight:800;color:var(--acc)">\u20b9'+amt.toLocaleString('en-IN',{minimumFractionDigits:2})+'</div><div style="font-size:12px;color:var(--ink3)">'+inv.patient+' &bull; '+(inv.desc||invId)+'</div></div><div class="flbl" style="margin-bottom:8px">Payment Mode</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"><button class="pay-mode-btn" data-mode="Cash" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--acc);border-radius:8px;cursor:pointer;background:var(--m);font-weight:600;color:var(--acc)">\uD83D\uDCB5 Cash</button><button class="pay-mode-btn" data-mode="Card" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--sl2);border-radius:8px;cursor:pointer;background:#fff;font-weight:600">\uD83D\uDCB3 Card</button><button class="pay-mode-btn" data-mode="Online" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--sl2);border-radius:8px;cursor:pointer;background:#fff;font-weight:600">\uD83D\uDCF2 Online</button></div><div class="frow"><div><div class="flbl">Amount \u20b9</div><input class="fin" id="pay-amount" type="number" value="'+amt.toFixed(2)+'" step="0.01" oninput="checkPayBalance('+amt+')"></div><div><div class="flbl">Reference</div><input class="fin" id="pay-ref" placeholder="UPI / Cheque..."></div></div><div id="pay-bal-block" style="display:none;background:var(--p-a);border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#92400E"><b>Partial:</b> Balance <b id="pay-bal-amt"></b> carries forward.</div></div><div class="mfooter"><button class="bs" onclick="document.getElementById(\'m-pay\').remove()">Cancel</button><button class="bp" onclick="submitPayment(\''+invId+'\','+amt+')"><i class="ti ti-check"></i>Confirm</button></div></div>';
-  document.body.appendChild(ov);}
+function openPayModal(invId){
+  var D=(typeof BILLING_DB!=='undefined')?BILLING_DB:(window.BILLING_DB||[]);
+  var inv=D.find(function(b){return b.id===invId;})||{id:invId,patient:'Patient',amount:0,desc:''};
+  var amt=parseFloat(inv.amount)||0;
+  var paidSoFar=parseFloat(inv.paidAmt||0);
+  var invOwed=amt-paidSoFar;
+
+  // Calculate previous balance for same patient
+  var isBalInv=inv.desc&&inv.desc.indexOf('Balance from ')===0;
+  var srcId='';
+  if(isBalInv){var bm=(inv.desc.match(/Balance from (INV-[0-9]+)/)||[]);srcId=bm[1]||'';}
+  var covPaid={};
+  D.forEach(function(b){
+    if(b.status!=='Paid')return;
+    if(!b.desc||b.desc.indexOf('Balance from ')!==0)return;
+    var bm2=(b.desc.match(/Balance from (INV-[0-9]+)/)||[]);
+    if(bm2[1])covPaid[bm2[1]]=true;
+  });
+  var prevBal=0,prevRows='';
+  D.forEach(function(b){
+    if(b.id===invId||b.id===srcId)return;
+    if(covPaid[b.id])return;
+    if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
+    if(b.status==='Paid')return;
+    var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
+    if(owed<0.01)return;
+    prevBal+=owed;
+    prevRows+='<div style="display:flex;justify-content:space-between;font-size:11px;color:#DC2626;padding:2px 0">'+
+      '<span>Previous ('+b.id+')</span><span>+ Rs.'+owed.toFixed(2)+'</span></div>';
+  });
+  var totalPayable=invOwed+prevBal;
+
+  var old=document.getElementById('m-pay');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-pay';ov.className='overlay open';
+
+  var summaryHtml=
+    '<div style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:10px;padding:12px;margin-bottom:14px">'+
+    '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">Patient: <b style="color:#111">'+inv.patient+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:2px 0">'+
+      '<span>Invoice ('+invId+')</span><span>Rs.'+invOwed.toFixed(2)+'</span></div>'+
+    prevRows+
+    (prevBal>0.01?
+      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#111;border-top:1.5px solid #d1fae5;margin-top:6px;padding-top:6px">'+
+        '<span>Total payable</span><span>Rs.'+totalPayable.toFixed(2)+'</span></div>':
+      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#059669;border-top:1.5px solid #d1fae5;margin-top:6px;padding-top:6px">'+
+        '<span>Amount due</span><span>Rs.'+totalPayable.toFixed(2)+'</span></div>'
+    )+'</div>';
+
+  ov.innerHTML='<div class="modal" style="max-width:460px">'+
+    '<div class="mh"><h2><i class="ti ti-currency-rupee" style="color:var(--acc);margin-right:6px"></i>Collect Payment</h2>'+
+    '<button class="mclose" onclick="document.getElementById(\'m-pay\').remove()"><i class="ti ti-x"></i></button></div>'+
+    '<div class="mbody">'+
+    summaryHtml+
+    '<div class="flbl" style="margin-bottom:8px">Payment Mode</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'+
+      '<button class="pay-mode-btn" data-mode="Cash" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--acc);border-radius:8px;cursor:pointer;background:var(--m);font-weight:600;color:var(--acc)">Cash</button>'+
+      '<button class="pay-mode-btn" data-mode="Card" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--sl2);border-radius:8px;cursor:pointer;background:#fff;font-weight:600">Card</button>'+
+      '<button class="pay-mode-btn" data-mode="Online" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--sl2);border-radius:8px;cursor:pointer;background:#fff;font-weight:600">Online</button>'+
+    '</div>'+
+    '<div class="frow"><div><div class="flbl">Amount Received Rs.</div>'+
+      '<input class="fin" id="pay-amount" type="number" value="'+totalPayable.toFixed(2)+'" step="0.01" oninput="checkPayBalance('+amt+')"></div>'+
+    '<div><div class="flbl">Reference</div><input class="fin" id="pay-ref" placeholder="UPI / Cheque..."></div></div>'+
+    '<div id="pay-bal-block" style="display:none;background:var(--p-a);border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#92400E">'+
+      '<b>Partial:</b> Balance <b id="pay-bal-amt"></b> carries forward.</div>'+
+    '</div>'+
+    '<div class="mfooter">'+
+      '<button class="bs" onclick="document.getElementById(\'m-pay\').remove()">Cancel</button>'+
+      '<button class="bp" onclick="submitPayment(\''+invId+'\','+amt+')"><i class="ti ti-check"></i>Confirm</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+}
+
 function deleteInvoice(id){
   if(!confirm('Delete invoice '+id+'?'))return;
   if(typeof BILLING_DB!=='undefined')window.BILLING_DB=window.BILLING_DB.filter(function(b){return b.id!==id;});
@@ -9860,6 +9930,27 @@ function rxAddUnifiedSvcRow(data){
     '<td class="rx-amt" style="text-align:right;font-size:12px;font-weight:700;color:#3B6D11">\u2014</td>'+
     '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 4px" onclick="this.closest(\'tr\').remove();rxCalcTotals()"><i class="ti ti-trash" style="font-size:12px"></i></button></td>';
   tbody.appendChild(tr);
+  // Pre-fill name if passed (custom service not in list)
+  if(d.name){
+    var sel=tr.querySelector('select');
+    var found=false;
+    if(sel){
+      for(var oi=0;oi<sel.options.length;oi++){
+        if(sel.options[oi].text===d.name){sel.selectedIndex=oi;found=true;break;}
+      }
+      if(!found){
+        var newOpt=document.createElement('option');
+        newOpt.text=d.name;newOpt.value='custom';
+        newOpt.setAttribute('data-price',d.price||0);
+        newOpt.setAttribute('data-disc',d.disc||0);
+        sel.add(newOpt);sel.value='custom';
+      }
+    }
+    var saleInp=tr.querySelector('[data-rx="sale"]');
+    if(saleInp&&d.price){saleInp.value=d.price;}
+    var discInp=tr.querySelector('[data-rx="disc"]');
+    if(discInp&&d.disc!==undefined){discInp.value=d.disc;}
+  }
   if(d.price) rxCalcUnifiedSvc(tr.querySelector('[data-rx="sale"]'));
 }
 window.rxAddUnifiedSvcRow=rxAddUnifiedSvcRow;
@@ -11660,6 +11751,10 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
+
+
 
 
 
