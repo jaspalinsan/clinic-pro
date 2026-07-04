@@ -2099,6 +2099,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
@@ -11417,16 +11418,35 @@ function printInvoice(invId){
   var inv=(window.BILLING_DB||[]).find(function(b){return String(b.id)===String(invId);});
   if(!inv){toast('Invoice not found','error');return;}
   var S=window.CLINIC_SETTINGS||{};
+
+  // Detect if this is a balance invoice (created from partial payment)
+  var isBalanceInv=inv.desc&&inv.desc.indexOf('Balance from ')===0;
+  var sourceInvId='';
+  if(isBalanceInv){
+    var m=inv.desc.match(/Balance from (INV-\d+)/);
+    if(m)sourceInvId=m[1];
+  }
+
   var meds=inv.meds||[]; var svcs=inv.svcs||[];
-  if(!meds.length&&!svcs.length&&inv.desc){
+
+  // For balance invoices — don't show copied medicines with zero rates
+  // Instead show only the balance summary
+  if(isBalanceInv){ meds=[]; svcs=[]; }
+
+  // For regular invoices — fallback parse desc if arrays empty
+  if(!isBalanceInv&&!meds.length&&!svcs.length&&inv.desc){
     inv.desc.split('|').forEach(function(part,pi){
       part.split(',').forEach(function(n){n=n.trim();if(!n)return;
         if(pi===0)meds.push({name:n,qty:1,sale:0,disc:0,amt:0});
         else svcs.push({name:n,price:0,disc:0,net:0});});});
   }
+
+  // Previous balance — but EXCLUDE the source invoice to avoid double counting
+  // e.g. INV-094 is balance from INV-093 — don't count INV-093 again
   var prevItems=[],prevTotal=0;
   (window.BILLING_DB||[]).forEach(function(b){
-    if(String(b.id)===String(invId))return;
+    if(String(b.id)===String(invId))return;  // skip self
+    if(String(b.id)===sourceInvId)return;    // skip source to avoid double count
     if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
     if(b.status==='Paid')return;
     var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
@@ -11434,6 +11454,7 @@ function printInvoice(invId){
     prevItems.push({id:b.id,date:b.date||'',owed:owed});
     prevTotal+=owed;
   });
+
   var invAmt=parseFloat(inv.amount||0);
   var paid=parseFloat(inv.paidAmt||0);
   var grand=invAmt+prevTotal;
@@ -11443,7 +11464,33 @@ function printInvoice(invId){
   var sbg=status==='Paid'?'#f0fdf4':status==='Partial'?'#fffbeb':'#fef2f2';
   var cName=S.name||'Clinic Pro';
   var cSub=[(S.doctor||''),(S.phone?'Ph:'+S.phone:'')].filter(Boolean).join(' | ');
-  var css='*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px;color:#111;max-width:820px;margin:0 auto}.np{position:fixed;top:12px;right:12px;z-index:999;display:flex;gap:8px}.bp{padding:8px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}.bc{padding:8px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer}@media print{.np{display:none!important}}.hd{background:#f0fdf4;padding:12px 16px;border-bottom:2px solid #059669}.cn{font-size:18px;font-weight:900;color:#059669}.cs{font-size:11px;color:#047857;margin-top:2px}.mt{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #e5e7eb}.bd{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px;background:#fafafa;border-bottom:1px solid #e5e7eb}.lb{font-size:9px;font-weight:700;text-transform:uppercase;color:#9ca3af;display:block;margin-bottom:1px}.vl{font-size:12px;font-weight:700}.sh{font-size:10px;font-weight:900;color:#059669;text-transform:uppercase;padding:8px 16px 2px}table{width:100%;border-collapse:collapse}th{background:#f0fdf4;padding:5px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #d1fae5}td{padding:5px 8px;border-bottom:1px solid #f3f4f6;font-size:11px}.cb{padding:12px 16px;background:#f9fafb;border-top:1px solid #e5e7eb}.cr{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#374151}.pr{color:#DC2626;font-weight:500}.gt{font-size:14px;font-weight:900;border-top:2px solid #111;margin-top:5px;padding-top:7px}.pa{color:#059669;font-weight:500}.bd2{font-size:13px;font-weight:900;color:#DC2626;border-top:1px solid #e5e7eb;margin-top:3px;padding-top:5px}.ft{padding:14px 16px;border-top:1px dashed #d1d5db;display:flex;justify-content:space-between;font-size:10px;color:#9ca3af}';
+
+  var css='*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}'+
+    'body{padding:20px;font-size:12px;color:#111;max-width:820px;margin:0 auto}'+
+    '.np{position:fixed;top:12px;right:12px;z-index:999;display:flex;gap:8px}'+
+    '.bp{padding:8px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}'+
+    '.bc{padding:8px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer}'+
+    '@media print{.np{display:none!important}}'+
+    '.hd{background:#f0fdf4;padding:12px 16px;border-bottom:2px solid #059669}'+
+    '.cn{font-size:18px;font-weight:900;color:#059669}'+
+    '.cs{font-size:11px;color:#047857;margin-top:2px}'+
+    '.mt{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #e5e7eb}'+
+    '.bd{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}'+
+    '.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px;background:#fafafa;border-bottom:1px solid #e5e7eb}'+
+    '.lb{font-size:9px;font-weight:700;text-transform:uppercase;color:#9ca3af;display:block;margin-bottom:1px}'+
+    '.vl{font-size:12px;font-weight:700}'+
+    '.sh{font-size:10px;font-weight:900;color:#059669;text-transform:uppercase;padding:8px 16px 2px}'+
+    'table{width:100%;border-collapse:collapse}'+
+    'th{background:#f0fdf4;padding:5px 8px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #d1fae5}'+
+    'td{padding:5px 8px;border-bottom:1px solid #f3f4f6;font-size:11px}'+
+    '.cb{padding:12px 16px;background:#f9fafb;border-top:1px solid #e5e7eb}'+
+    '.cr{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#374151}'+
+    '.pr{color:#DC2626;font-weight:500}.gt{font-size:14px;font-weight:900;border-top:2px solid #111;margin-top:5px;padding-top:7px}'+
+    '.pa{color:#059669;font-weight:500}.bd2{font-size:13px;font-weight:900;color:#DC2626;border-top:1px solid #e5e7eb;margin-top:3px;padding-top:5px}'+
+    '.ft{padding:14px 16px;border-top:1px dashed #d1d5db;display:flex;justify-content:space-between;font-size:10px;color:#9ca3af}'+
+    '.bal-box{margin:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px}'+
+    '.bal-lbl{font-size:10px;font-weight:900;color:#991b1b;text-transform:uppercase;margin-bottom:6px}';
+
   var H=[];
   H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+invId+'</title><style>'+css+'</style></head><body>');
   H.push('<div class="np"><button class="bp" onclick="window.print()">Print Invoice</button>');
@@ -11459,6 +11506,18 @@ function printInvoice(invId){
   H.push('<div><span class="lb">Mobile</span><span class="vl">'+(inv.mob||'-')+'</span></div>');
   H.push('<div><span class="lb">Diagnosis</span><span class="vl">'+(inv.dx||'-')+'</span></div>');
   H.push('</div>');
+
+  // Balance invoice — show clean balance summary box
+  if(isBalanceInv){
+    H.push('<div class="bal-box">');
+    H.push('<div class="bal-lbl">Balance invoice</div>');
+    H.push('<div style="font-size:12px;color:#7f1d1d;margin-bottom:6px">Remaining balance from '+sourceInvId+'</div>');
+    H.push('<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#DC2626">');
+    H.push('<span>Amount due</span><span>Rs.'+invAmt.toFixed(2)+'</span></div>');
+    H.push('</div>');
+  }
+
+  // Medicines table (regular invoices only)
   if(meds.length){
     H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
     meds.forEach(function(m,i){if(!m.name)return;
@@ -11467,6 +11526,8 @@ function printInvoice(invId){
     });
     H.push('</tbody></table>');
   }
+
+  // Services table (regular invoices only)
   if(svcs.length){
     H.push('<div class="sh">Services</div><table><thead><tr><th>#</th><th>Service</th><th>Price</th><th>Disc%</th><th>Net</th></tr></thead><tbody>');
     svcs.forEach(function(s,i){if(!s.name)return;
@@ -11475,7 +11536,11 @@ function printInvoice(invId){
     });
     H.push('</tbody></table>');
   }
-  if(!meds.length&&!svcs.length)H.push('<div style="padding:10px 16px;color:#374151"><b>Items:</b> '+(inv.desc||'-')+'</div>');
+
+  if(!isBalanceInv&&!meds.length&&!svcs.length)
+    H.push('<div style="padding:10px 16px;color:#374151"><b>Items:</b> '+(inv.desc||'-')+'</div>');
+
+  // Calculation box
   H.push('<div class="cb">');
   H.push('<div class="cr"><span>Invoice amount</span><span>Rs.'+invAmt.toFixed(2)+'</span></div>');
   prevItems.forEach(function(pi){
@@ -11487,10 +11552,34 @@ function printInvoice(invId){
   H.push('</div>');
   H.push('<div class="ft"><span>'+cName+(S.phone?' | '+S.phone:'')+'</span><span>Authorised Signature: _______________________</span></div>');
   H.push('</div></body></html>');
-  var w=window.open('','_blank');
-  if(w){w.document.write(H.join(''));w.document.close();}
-  else toast('Allow popups to view invoice','error');
+
+  // FIX 3: Open as popup modal on same page, not new tab
+  var overlay=document.getElementById('inv-modal-overlay');
+  if(overlay)overlay.parentNode.removeChild(overlay);
+  var ov=document.createElement('div');
+  ov.id='inv-modal-overlay';
+  ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;box-sizing:border-box';
+  ov.onclick=function(e){if(e.target===ov)ov.parentNode.removeChild(ov);};
+  var modal=document.createElement('div');
+  modal.style.cssText='background:#fff;border-radius:10px;width:100%;max-width:820px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);margin:auto';
+  var iframe=document.createElement('iframe');
+  iframe.style.cssText='width:100%;height:80vh;border:none;display:block';
+  iframe.srcdoc=H.join('');
+  // Print and close buttons above iframe
+  var toolbar=document.createElement('div');
+  toolbar.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#f0fdf4;border-bottom:2px solid #059669';
+  toolbar.innerHTML='<span style="font-size:14px;font-weight:700;color:#059669">'+cName+' &bull; '+invId+'</span>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button onclick="document.getElementById(\'inv-modal-overlay\').querySelector(\'iframe\').contentWindow.print()" style="padding:7px 18px;background:#059669;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Print Invoice</button>'+
+    '<button onclick="document.getElementById(\'inv-modal-overlay\').parentNode.removeChild(document.getElementById(\'inv-modal-overlay\'))" style="padding:7px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:7px;font-size:12px;cursor:pointer">Close</button>'+
+    '</div>';
+  modal.appendChild(toolbar);
+  modal.appendChild(iframe);
+  ov.appendChild(modal);
+  document.body.appendChild(ov);
 }
+window.printInvoice=printInvoice;
+
 window.printInvoice=printInvoice;
 
 window.printInvoice=printInvoice;
@@ -11554,6 +11643,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
