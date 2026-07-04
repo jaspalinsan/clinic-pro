@@ -2085,6 +2085,26 @@ html,body{height:100%;overflow:hidden}
 
 
 
+// ── Patient Running Ledger ──────────────────────────────────
+function getPatientLedger(patient){
+  var DB=window.BILLING_DB||[];
+  var pat=patient.toLowerCase();
+  var invoices=DB.filter(function(b){
+    return (b.patient||'').toLowerCase()===pat && b.status!=='Paid';
+  }).sort(function(a,b){
+    // oldest first
+    return String(a.id).localeCompare(String(b.id));
+  });
+  var totalPending=invoices.reduce(function(s,b){
+    return s+parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
+  },0);
+  return {invoices:invoices, totalPending:parseFloat(totalPending.toFixed(2))};
+}
+window.getPatientLedger=getPatientLedger;
+
+
+
+
 
 
 
@@ -4629,32 +4649,19 @@ function renderPharmacy(){
 
     // Amount
     var td6=document.createElement('td');td6.style.fontWeight='700';
-    // Calculate grand total = this invoice + all previous unpaid for same patient
-    var prevBal2=0;
-    (window.BILLING_DB||[]).forEach(function(ob){
-      if(ob.id===inv.id)return;
-      if((ob.patient||'').toLowerCase()===(inv.patient||'').toLowerCase()&&ob.status!=='Paid'){
-        prevBal2+=parseFloat(ob.amount||0)-parseFloat(ob.paidAmt||0);
-      }
-    });
-    var grandTot=parseFloat(inv.amount||0)+prevBal2;
-    var paidSoFar=parseFloat(inv.paidAmt||0);
-    var balDue=grandTot-paidSoFar;
-    if(prevBal2>0.01){
-      td6.innerHTML='<div style="font-size:10px;color:var(--ink3)">This: ₹'+parseFloat(inv.amount||0).toFixed(2)+'</div>'+
-        '<div style="font-size:10px;color:#DC2626">+Prev: ₹'+prevBal2.toFixed(2)+'</div>'+
-        '<div style="font-size:13px;font-weight:900;color:#DC2626;border-top:1px solid #e5e7eb;margin-top:2px;padding-top:2px">G: ₹'+grandTot.toFixed(2)+'</div>'+
-        (paidSoFar>0?'<div style="font-size:10px;color:#059669">Paid: ₹'+paidSoFar.toFixed(2)+'</div>':'')+
-        '<div style="font-size:11px;font-weight:700;color:#DC2626">Bal: ₹'+balDue.toFixed(2)+'</div>';
+    var _led=typeof getPatientLedger==='function'?getPatientLedger(inv.patient):{totalPending:parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0)};
+    var _owed=parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0);
+    var _prev=parseFloat((_led.totalPending-_owed).toFixed(2));
+    if(_prev>0.01){
+      td6.innerHTML='<div style="font-size:10px;color:var(--ink3)">This: Rs.'+_owed.toFixed(2)+'</div>'+
+        '<div style="font-size:10px;color:#DC2626">+Prev: Rs.'+_prev.toFixed(2)+'</div>'+
+        '<div style="font-size:12px;font-weight:900;color:#DC2626;border-top:1px solid #eee;margin-top:2px;padding-top:2px">Total: Rs.'+_led.totalPending.toFixed(2)+'</div>';
     } else {
-      td6.style.color='var(--acc)';
-      td6.innerHTML='₹'+parseFloat(inv.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2})+
-        (paidSoFar>0?'<div style="font-size:10px;color:#059669">Paid: ₹'+paidSoFar.toFixed(2)+'</div>'+
-        '<div style="font-size:11px;font-weight:700;color:#DC2626">Bal: ₹'+balDue.toFixed(2)+'</div>':'');
+      td6.style.color=_owed>0.01?'var(--rose)':'var(--acc)';
+      td6.innerHTML='Rs.'+_owed.toFixed(2)+
+        (parseFloat(inv.paidAmt||0)>0.01?'<div style="font-size:10px;color:#059669;margin-top:1px">Paid: Rs.'+parseFloat(inv.paidAmt).toFixed(2)+'</div>':'');
     }
-
-    // Status
-    var td7=document.createElement('td');
+    td7=document.createElement('td');
     td7.innerHTML='<span class="pill '+stClass+'">'+inv.status+'</span>';
 
     // Actions — DOM buttons with closures (no quote escaping issues)
@@ -4710,58 +4717,71 @@ function filterPharma(q){var lq=(q||'').toLowerCase();[].slice.call(document.que
 
 function selectPayMode(btn){[].slice.call(document.querySelectorAll('.pay-mode-btn')).forEach(function(b){b.style.borderColor='var(--sl2)';b.style.background='#fff';b.style.color='var(--ink2)';});btn.style.borderColor='var(--acc)';btn.style.background='var(--m)';btn.style.color='var(--acc)';}
 function checkPayBalance(full){var r=parseFloat((document.getElementById('pay-amount')||{}).value)||0;var bal=full-r;var blk=document.getElementById('pay-bal-block');var lbl=document.getElementById('pay-bal-amt');if(blk)blk.style.display=bal>0.01?'block':'none';if(lbl)lbl.textContent='\u20b9'+bal.toFixed(2);}
-function submitPayment(invId,fullAmt){var received=parseFloat((document.getElementById('pay-amount')||{}).value)||0;if(received<=0){toast('Enter amount','error');return;}var modeBtn=[].slice.call(document.querySelectorAll('.pay-mode-btn')).find(function(b){return b.style.borderColor==='var(--acc)';});var mode=modeBtn?modeBtn.dataset.mode:'Cash';var ref=(document.getElementById('pay-ref')||{}).value||'';var balance=fullAmt-received;if(typeof BILLING_DB==='undefined')window.BILLING_DB=[];var inv=BILLING_DB.find(function(b){return b.id===invId;});if(inv){if(balance>0.01){
-      inv.status='Partial';inv.paymode=mode+(ref?' ('+ref+')':'');
-      inv.paidAmt=received;inv.balanceAmt=balance;
-      var nid='INV-'+String(BILLING_DB.length+1).padStart(3,'0');
-      var balInv={id:nid,patient:inv.patient,rxno:inv.rxno||'',
-        date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
-        desc:'Balance from '+invId+' ('+inv.desc+')',
-        amount:parseFloat(balance.toFixed(2)),status:'Pending',paymode:'',
-        age:inv.age||'',mob:inv.mob||'',meds:[],svcs:[]};
-      BILLING_DB.unshift(balInv);
-      // Save balance invoice to MySQL
-      if(typeof dbPost==='function')dbPost('save_billing',{id:nid,patient:balInv.patient,
-        rxno:balInv.rxno,date:balInv.date,desc:balInv.desc,amount:balInv.amount,
-        status:'Pending',paymode:'',
-        meds:inv.meds||[],svcs:inv.svcs||[],
-        age:inv.age||'',mob:inv.mob||'',dx:inv.dx||''});
-      toast('Partial ₹'+received.toFixed(2)+' via '+mode+'. Balance ₹'+balance.toFixed(2)+' as '+nid,'info');
-    }else{
-      inv.status='Paid';inv.paymode=mode+(ref?' ('+ref+')':'');
-      inv.paidAmt=received;
-      // Mark source invoice as settled + save to MySQL
-      if(inv.desc&&inv.desc.indexOf('Balance from ')===0){
-        var _sm=(inv.desc.match(/Balance from (INV-[0-9]+)/)||[])[1];
-        if(_sm){
-          var _si=(window.BILLING_DB||[]).find(function(b){return b.id===_sm;});
-          if(_si){
-            _si.status='Paid';
-            // Save source invoice Paid status to MySQL — THIS was the missing step
-            if(typeof dbPost==='function')dbPost('save_billing',{
-              id:_si.id,patient:_si.patient,rxno:_si.rxno||'',
-              date:_si.date,desc:_si.desc,amount:_si.amount,
-              status:'Paid',paymode:inv.paymode||mode,
-              age:_si.age||'',mob:_si.mob||'',dx:_si.dx||'',
-              meds:_si.meds||[],svcs:_si.svcs||[],
-              paidAmt:_si.paidAmt||0
-            });
-          }
-        }
-      }
-      toast('✔ Rs.'+received.toFixed(2)+' via '+mode+' — Fully Paid!','success');
-    }}var mo=document.getElementById('m-pay');if(mo)mo.remove();renderPharmacy();if(typeof renderFinance==='function')renderFinance();
-  // Update billing status in MySQL
-  var _pb=window.BILLING_DB&&window.BILLING_DB.find(function(x){return x.id===invId;});
-  if(_pb&&typeof dbPost==='function')dbPost('save_billing',{
-    id:_pb.id,patient:_pb.patient,rxno:_pb.rxno,date:_pb.date,
-    desc:_pb.desc,amount:_pb.amount,status:_pb.status,paymode:_pb.paymode||'',
-    age:_pb.age||'',mob:_pb.mob||'',dx:_pb.dx||'',
-    meds:_pb.meds||[],svcs:_pb.svcs||[],
-    paidAmt:_pb.paidAmt||0
+function submitPayment(invId,fullAmt){
+  var received=parseFloat((document.getElementById('pay-amount')||{}).value)||0;
+  if(received<=0){toast('Enter amount','error');return;}
+  var modeBtn=[].slice.call(document.querySelectorAll('.pay-mode-btn')).find(function(b){
+    return b.style.borderColor==='var(--acc)';
   });
+  var mode=modeBtn?modeBtn.dataset.mode:'Cash';
+  var ref=(document.getElementById('pay-ref')||{}).value||'';
+  var paymode=mode+(ref?' ('+ref+')':'');
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+
+  // Get current invoice
+  var inv=window.BILLING_DB.find(function(b){return b.id===invId;});
+  if(!inv){toast('Invoice not found','error');return;}
+
+  // Get all pending invoices for this patient (oldest first)
+  var pat=inv.patient.toLowerCase();
+  var pendingInvs=window.BILLING_DB.filter(function(b){
+    return (b.patient||'').toLowerCase()===pat && b.status!=='Paid';
+  }).sort(function(a,b){return String(a.id).localeCompare(String(b.id));});
+
+  // Calculate total pending across all invoices
+  var totalPending=pendingInvs.reduce(function(s,b){
+    return s+parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
+  },0);
+
+  var remaining=received;
+
+  // Apply payment to each pending invoice (oldest first)
+  pendingInvs.forEach(function(b){
+    if(remaining<=0)return;
+    var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
+    if(owed<=0)return;
+    var applying=Math.min(remaining,owed);
+    b.paidAmt=(parseFloat(b.paidAmt||0)+applying);
+    b.paymode=paymode;
+    remaining=parseFloat((remaining-applying).toFixed(2));
+    if(b.paidAmt>=parseFloat(b.amount||0)-0.01){
+      b.status='Paid';
+      b.paidAmt=parseFloat(b.amount||0);
+    } else {
+      b.status='Partial';
+    }
+    // Save each updated invoice to MySQL
+    if(typeof dbPost==='function')dbPost('save_billing',{
+      id:b.id,patient:b.patient,rxno:b.rxno||'',date:b.date,
+      desc:b.desc,amount:b.amount,status:b.status,paymode:b.paymode||'',
+      age:b.age||'',mob:b.mob||'',dx:b.dx||'',
+      meds:b.meds||[],svcs:b.svcs||[],paidAmt:b.paidAmt
+    });
+  });
+
+  var newPending=parseFloat((totalPending-received).toFixed(2));
+  if(newPending<=0.01){
+    toast('Fully paid! All dues cleared for '+inv.patient,'success');
+  } else {
+    toast('Rs.'+received.toFixed(2)+' collected. Pending: Rs.'+newPending.toFixed(2),'info');
+  }
+
+  var mo=document.getElementById('m-pay');if(mo)mo.remove();
+  renderPharmacy();
+  if(typeof renderFinance==='function')renderFinance();
   if(typeof cpSaveData==='function')cpSaveData();
 }
+
 function markPaid(el){var id=el&&el.dataset?el.dataset.id:String(el);if(typeof BILLING_DB!=='undefined'){var inv=BILLING_DB.find(function(b){return String(b.id)===id;});if(inv){inv.status='Paid';renderPharmacy();toast('Invoice '+id+' Paid','success');return;}}renderPharmacy();}
 function phCheckAll(cb){document.querySelectorAll('.ph-cb').forEach(function(c){c.checked=cb.checked;});}
 
@@ -8908,56 +8928,51 @@ function saveEditInvoice(id){
   renderPharmacy();toast('Invoice '+id+' updated \u2713','success');
 }
 function openPayModal(invId){
-  var D=(typeof BILLING_DB!=='undefined')?BILLING_DB:(window.BILLING_DB||[]);
-  var inv=D.find(function(b){return b.id===invId;})||{id:invId,patient:'Patient',amount:0,desc:''};
-  var amt=parseFloat(inv.amount)||0;
-  var paidSoFar=parseFloat(inv.paidAmt||0);
-  var invOwed=amt-paidSoFar;
+  var D=window.BILLING_DB||[];
+  var inv=D.find(function(b){return b.id===invId;});
+  if(!inv){toast('Invoice not found','error');return;}
 
-  // Calculate previous balance for same patient
-  var isBalInv=inv.desc&&inv.desc.indexOf('Balance from ')===0;
-  var srcId='';
-  if(isBalInv){var bm=(inv.desc.match(/Balance from (INV-[0-9]+)/)||[]);srcId=bm[1]||'';}
-  var covPaid={};
-  D.forEach(function(b){
-    if(b.status!=='Paid')return;
-    if(!b.desc||b.desc.indexOf('Balance from ')!==0)return;
-    var bm2=(b.desc.match(/Balance from (INV-[0-9]+)/)||[]);
-    if(bm2[1])covPaid[bm2[1]]=true;
-  });
-  var prevBal=0,prevRows='';
-  D.forEach(function(b){
-    if(b.id===invId||b.id===srcId)return;
-    if(covPaid[b.id])return;
-    if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
-    if(b.status==='Paid')return;
+  // Get running ledger for this patient
+  var pat=inv.patient.toLowerCase();
+  var pendingInvs=D.filter(function(b){
+    return (b.patient||'').toLowerCase()===pat && b.status!=='Paid';
+  }).sort(function(a,b){return String(a.id).localeCompare(String(b.id));});
+
+  var invAmt=parseFloat(inv.amount||0);
+  var invPaid=parseFloat(inv.paidAmt||0);
+  var invOwed=parseFloat((invAmt-invPaid).toFixed(2));
+
+  var prevRows=''; var prevTotal=0;
+  pendingInvs.forEach(function(b){
+    if(b.id===invId)return;
     var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
     if(owed<0.01)return;
-    prevBal+=owed;
+    prevTotal+=owed;
     prevRows+='<div style="display:flex;justify-content:space-between;font-size:11px;color:#DC2626;padding:2px 0">'+
-      '<span>Previous ('+b.id+')</span><span>+ Rs.'+owed.toFixed(2)+'</span></div>';
+      '<span>Pending '+b.id+' ('+b.date+')</span><span>Rs.'+owed.toFixed(2)+'</span></div>';
   });
-  var totalPayable=invOwed+prevBal;
+
+  var grandTotal=parseFloat((invOwed+prevTotal).toFixed(2));
 
   var old=document.getElementById('m-pay');if(old)old.remove();
   var ov=document.createElement('div');
-  ov.id='m-pay';ov.className='overlay open';
+  ov.id='m-pay'; ov.className='overlay open';
 
   var summaryHtml=
     '<div style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:10px;padding:12px;margin-bottom:14px">'+
-    '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">Patient: <b style="color:#111">'+inv.patient+'</b></div>'+
-    '<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:2px 0">'+
-      '<span>Invoice ('+invId+')</span><span>Rs.'+invOwed.toFixed(2)+'</span></div>'+
+    '<div style="font-size:11px;color:#6b7280;margin-bottom:8px">Patient: <b style="color:#111">'+inv.patient+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:#374151;padding:3px 0;border-bottom:1px solid #d1fae5;margin-bottom:4px">'+
+      '<span>This bill ('+invId+')</span><span>Rs.'+invOwed.toFixed(2)+'</span></div>'+
     prevRows+
-    (prevBal>0.01?
-      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#111;border-top:1.5px solid #d1fae5;margin-top:6px;padding-top:6px">'+
-        '<span>Total payable</span><span>Rs.'+totalPayable.toFixed(2)+'</span></div>':
-      '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#059669;border-top:1.5px solid #d1fae5;margin-top:6px;padding-top:6px">'+
-        '<span>Amount due</span><span>Rs.'+totalPayable.toFixed(2)+'</span></div>'
-    )+'</div>';
+    (prevTotal>0.01?
+      '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#DC2626;border-top:1px solid #d1fae5;margin-top:4px;padding-top:6px">'+
+        '<span>Previous pending</span><span>Rs.'+prevTotal.toFixed(2)+'</span></div>':'')+
+    '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:#111;border-top:2px solid #059669;margin-top:6px;padding-top:8px">'+
+      '<span>Grand Total Payable</span><span style="color:#059669">Rs.'+grandTotal.toFixed(2)+'</span></div>'+
+    '</div>';
 
   ov.innerHTML='<div class="modal" style="max-width:460px">'+
-    '<div class="mh"><h2><i class="ti ti-currency-rupee" style="color:var(--acc);margin-right:6px"></i>Collect Payment</h2>'+
+    '<div class="mh"><h2><i class="ti ti-currency-rupee" style="color:var(--acc);margin-right:6px"></i>Collect Payment &mdash; '+inv.patient+'</h2>'+
     '<button class="mclose" onclick="document.getElementById(\'m-pay\').remove()"><i class="ti ti-x"></i></button></div>'+
     '<div class="mbody">'+
     summaryHtml+
@@ -8968,17 +8983,16 @@ function openPayModal(invId){
       '<button class="pay-mode-btn" data-mode="Online" onclick="selectPayMode(this)" style="padding:10px;border:2px solid var(--sl2);border-radius:8px;cursor:pointer;background:#fff;font-weight:600">Online</button>'+
     '</div>'+
     '<div class="frow"><div><div class="flbl">Amount Received Rs.</div>'+
-      '<input class="fin" id="pay-amount" type="number" value="'+totalPayable.toFixed(2)+'" step="0.01" oninput="checkPayBalance('+amt+')"></div>'+
+      '<input class="fin" id="pay-amount" type="number" value="'+grandTotal.toFixed(2)+'" step="0.01"></div>'+
     '<div><div class="flbl">Reference</div><input class="fin" id="pay-ref" placeholder="UPI / Cheque..."></div></div>'+
-    '<div id="pay-bal-block" style="display:none;background:var(--p-a);border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#92400E">'+
-      '<b>Partial:</b> Balance <b id="pay-bal-amt"></b> carries forward.</div>'+
     '</div>'+
     '<div class="mfooter">'+
       '<button class="bs" onclick="document.getElementById(\'m-pay\').remove()">Cancel</button>'+
-      '<button class="bp" onclick="submitPayment(\''+invId+'\','+amt+')"><i class="ti ti-check"></i>Confirm</button>'+
+      '<button class="bp" onclick="submitPayment(\''+invId+'\','+invAmt+')"><i class="ti ti-check"></i>Confirm</button>'+
     '</div></div>';
   document.body.appendChild(ov);
 }
+
 
 function deleteInvoice(id){
   if(!confirm('Delete invoice '+id+'?'))return;
@@ -11565,19 +11579,20 @@ function printInvoice(invId){
   });
 
   // Previous balance — exclude self, source, and invoices covered by paid balance invoices
+    // Running ledger
+  var pat2=(inv.patient||'').toLowerCase();
   var prevItems=[],prevTotal=0;
-  (window.BILLING_DB||[]).forEach(function(b){
-    if(String(b.id)===String(invId))return;       // skip self
-    if(String(b.id)===sourceInvId)return;          // skip source of this balance invoice
-    if(coveredByPaidBalance[b.id])return;          // skip if already covered by paid balance
-    if((b.patient||'').toLowerCase()!==(inv.patient||'').toLowerCase())return;
-    if(b.status==='Paid')return;
+  (window.BILLING_DB||[]).filter(function(b){
+    return String(b.id)!==String(invId) &&
+      (b.patient||'').toLowerCase()===pat2 &&
+      b.status!=='Paid';
+  }).sort(function(a,b){return String(a.id).localeCompare(String(b.id));})
+  .forEach(function(b){
     var owed=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
     if(owed<0.01)return;
     prevItems.push({id:b.id,date:b.date||'',owed:owed});
     prevTotal+=owed;
   });
-
   var invAmt=parseFloat(inv.amount||0);
   var paid=parseFloat(inv.paidAmt||0);
   var grand=invAmt+prevTotal;
@@ -11766,6 +11781,9 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
+
 
 
 
