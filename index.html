@@ -893,6 +893,17 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 <div class="page" id="page-pharmacy">
+  <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
+      <i class="ti ti-calendar" style="font-size:14px;color:#F59E0B"></i>
+      From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
+      To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
+    </label>
+    <button onclick="phFilterToday()" style="padding:7px 14px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:12px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
+    <button onclick="phFilterClear()" style="padding:7px 14px;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;font-size:12px;cursor:pointer;color:var(--ink3)"><i class="ti ti-x" style="font-size:11px"></i> All</button>
+    <span id="ph-filter-label" style="font-size:12px;color:#F59E0B;font-weight:600"></span>
   </div>
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
@@ -1067,7 +1078,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 </div>
 <div class="page" id="page-finance" style="padding:0">
-  <div class="ph" style="margin:0;border-radius:0">
+  <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
       <div style="display:flex;align-items:center;gap:5px">
@@ -1150,7 +1161,7 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
   <!-- CONTENT AREA -->
-  <div style="flex:1;overflow-y:auto;padding:0;margin-top:0">
+  <div style="flex:1;overflow-y:auto;padding:0">
 
     <!-- CLINIC INFO -->
     <div id="spc-clinic" style="display:block;padding:28px 32px;max-width:760px">
@@ -2071,8 +2082,6 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
-
-
 
 
 
@@ -4704,8 +4713,6 @@ function renderPharmacy(){
     '<b style="color:var(--gold)">\u20b9'+pen.toLocaleString('en-IN',{minimumFractionDigits:2})+' Pending</b> &bull; '+
     data.length+' invoices';
 }
-window.renderPharmacy=renderPharmacy;
-
 function filterPharma(q){var lq=(q||'').toLowerCase();[].slice.call(document.querySelectorAll('#ph-tbody tr')).forEach(function(tr){tr.style.display=(!lq||(tr.dataset.search||'').includes(lq))?'':'none';});}
 
 function selectPayMode(btn){[].slice.call(document.querySelectorAll('.pay-mode-btn')).forEach(function(b){b.style.borderColor='var(--sl2)';b.style.background='#fff';b.style.color='var(--ink2)';});btn.style.borderColor='var(--acc)';btn.style.background='var(--m)';btn.style.color='var(--acc)';}
@@ -11774,8 +11781,6 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
-
-
 
 
 
