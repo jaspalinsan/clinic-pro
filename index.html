@@ -893,17 +893,6 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 <div class="page" id="page-pharmacy">
-  <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap">
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
-      <i class="ti ti-calendar" style="font-size:14px;color:#F59E0B"></i>
-      From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
-      To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <button onclick="phFilterToday()" style="padding:7px 14px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:12px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
-    <button onclick="phFilterClear()" style="padding:7px 14px;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;font-size:12px;cursor:pointer;color:var(--ink3)"><i class="ti ti-x" style="font-size:11px"></i> All</button>
-    <span id="ph-filter-label" style="font-size:12px;color:#F59E0B;font-weight:600"></span>
   </div>
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
@@ -2082,6 +2071,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4565,147 +4555,154 @@ window.downloadInvoicePDF=downloadInvoicePDF;
 
 window.downloadInvoicePDF=downloadInvoicePDF;
 function renderPharmacy(){
-  var tbody=document.getElementById('ph-tbody');
-  if(!tbody)return;
-  var thead=document.getElementById('ph-thead');
-
-  // Apply date filter + sort newest first
+  var tbody=document.getElementById('ph-tbody');if(!tbody)return;
+  tbody.innerHTML='';
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+  // Apply date filter
   var phFrom=(document.getElementById('ph-date-from')||{}).value||'';
   var phTo=(document.getElementById('ph-date-to')||{}).value||'';
   var data=(window.BILLING_DB||[]).filter(function(b){
     if(!phFrom&&!phTo)return true;
     var bd=b.date||'';
+    // Try to parse date string
     var bDate=new Date(bd);
     if(isNaN(bDate.getTime())){
+      // Try DD Mon YYYY format
       var parts=bd.split(' ');
-      var M={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-      if(parts.length>=3)bDate=new Date(parseInt(parts[2]),M[parts[1]]||0,parseInt(parts[0]));
+      if(parts.length>=3){
+        var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+        bDate=new Date(parseInt(parts[2]),months[parts[1]]||0,parseInt(parts[0]));
+      }
     }
     if(isNaN(bDate.getTime()))return true;
     var bISO=bDate.toISOString().split('T')[0];
     if(phFrom&&bISO<phFrom)return false;
     if(phTo&&bISO>phTo)return false;
     return true;
-  }).sort(function(a,b){return String(b.id).localeCompare(String(a.id));});
-
-  // Summary stats
-  var totalAmt=0,totalPaid=0,totalPending=0,billCount=data.length;
-  data.forEach(function(b){
-    totalAmt+=parseFloat(b.amount||0);
-    totalPaid+=parseFloat(b.paidAmt||0);
-    totalPending+=parseFloat(b.amount||0)-parseFloat(b.paidAmt||0);
+  }).sort(function(a,b){
+    return String(b.id||'').localeCompare(String(a.id||''));
   });
-  var sub=document.getElementById('ph-sub');
-  if(sub)sub.innerHTML=
-    '<span style="margin-right:12px"><b>'+billCount+'</b> bills</span>'+
-    '<span style="color:#059669;margin-right:12px">Collected: <b>Rs.'+totalPaid.toFixed(2)+'</b></span>'+
-    '<span style="color:#DC2626;margin-right:12px">Pending: <b>Rs.'+totalPending.toFixed(2)+'</b></span>'+
-    '<span>Total: <b>Rs.'+totalAmt.toFixed(2)+'</b></span>';
-
   if(!data.length){
-    tbody.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--ink3)">No invoices</td></tr>';
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--ink3)"><i class="ti ti-receipt" style="font-size:28px;display:block;margin-bottom:8px"></i>No invoices yet</td></tr>';
+    var sub=document.getElementById('ph-sub');if(sub)sub.textContent='No invoices';
     return;
   }
-
-  tbody.innerHTML='';
+  var tot=0,pen=0;
   data.forEach(function(inv){
-    var iid=inv.id;
-    var status=inv.status||'Pending';
-    var stClass=status==='Paid'?'pill-green':status==='Partial'?'pill-yellow':'pill-red';
-
-    // Running ledger for this patient
-    var led=typeof getPatientLedger==='function'?getPatientLedger(inv.patient):{totalPending:parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0)};
-    var invOwed=parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0);
-    var prevOwed=parseFloat((led.totalPending-invOwed).toFixed(2));
-    var grandTotal=led.totalPending;
-
-    // Build amount cell HTML
-    var amtHtml='';
-    if(prevOwed>0.01){
-      amtHtml='<div style="font-size:10px;color:var(--ink3)">This: Rs.'+parseFloat(inv.amount||0).toFixed(2)+'</div>'+
-        '<div style="font-size:10px;color:#DC2626">+Prev: Rs.'+prevOwed.toFixed(2)+'</div>'+
-        '<div style="font-size:13px;font-weight:700;color:#DC2626;border-top:0.5px solid #e5e7eb;margin-top:2px;padding-top:2px">Total: Rs.'+grandTotal.toFixed(2)+'</div>';
-    } else {
-      amtHtml='<div style="font-size:13px;font-weight:700;color:'+(invOwed>0.01?'#DC2626':'#059669')+'">Rs.'+parseFloat(inv.amount||0).toFixed(2)+'</div>'+
-        (parseFloat(inv.paidAmt||0)>0.01?'<div style="font-size:10px;color:#059669">Paid: Rs.'+parseFloat(inv.paidAmt).toFixed(2)+'</div>':'');
-    }
-
-    // Description
-    var meds=(inv.meds||[]).map(function(m){return m.name;}).join(', ');
-    var svcs=(inv.svcs||[]).map(function(s){return s.name;}).join(', ');
-    var descStr=meds&&svcs?meds+' | '+svcs:(meds||svcs||inv.desc||'');
-    if(descStr.length>50)descStr=descStr.slice(0,50)+'…';
-
+    var amt=parseFloat(inv.amount)||0;
+    tot+=amt; if(inv.status!=='Paid')pen+=amt;
+    var stClass=inv.status==='Paid'?'p-g':inv.status==='Partial'?'p-b':'p-a';
+    var iid=String(inv.id);
     var tr=document.createElement('tr');
-    tr.style.cssText='border-bottom:0.5px solid var(--sl2)';
+
+    // Checkbox
+    var td0=document.createElement('td');
+    var cb=document.createElement('input');cb.type='checkbox';cb.className='ph-cb';
+    cb.style.cssText='cursor:pointer;width:15px;height:15px';
+    cb.onchange=function(){phUpdateBar();};
+    td0.appendChild(cb);
+
+    // Patient
+    var td1=document.createElement('td');
+    var prevOwed=0;
+    (window.BILLING_DB||[]).forEach(function(ob){
+      if(ob.id===inv.id)return;
+      if((ob.patient||'').toLowerCase()===(inv.patient||'').toLowerCase()&&ob.status!=='Paid'){
+        prevOwed+=parseFloat(ob.amount||0)-parseFloat(ob.paidAmt||0);
+      }
+    });
+    td1.innerHTML='<b style="font-size:12.5px">'+inv.patient+'</b>'+
+      (inv.rxno?'<br><span style="font-size:10px;color:var(--lav)">'+inv.rxno+'</span>':'')+
+      (inv.dx?'<br><span style="font-size:10px;color:var(--ink3)">'+inv.dx+'</span>':'')+
+      (prevOwed>0.01?'<br><span style="font-size:10px;color:#E24B4A;font-weight:600">⚠ Prev: ₹'+prevOwed.toFixed(2)+'</span>':'');
 
     // Invoice ID
-    var td1=document.createElement('td');
-    td1.style.cssText='padding:10px 12px;font-size:12px;font-weight:600;color:var(--lav);white-space:nowrap';
-    td1.textContent=iid;
-
-    // Patient + desc + date
     var td2=document.createElement('td');
-    td2.style.cssText='padding:10px 12px';
-    td2.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--ink)">'+inv.patient+'</div>'+
-      (descStr?'<div style="font-size:10px;color:var(--ink3);margin-top:1px">'+descStr+'</div>':'')+
-      '<div style="font-size:10px;color:var(--ink3);margin-top:1px">'+(inv.date||'')+(inv.rxno?' · '+inv.rxno:'')+'</div>';
+    td2.innerHTML='<span class="pill p-gray" style="font-size:10px">'+iid+'</span>';
 
-    // Amount / ledger
-    var td3=document.createElement('td');
-    td3.style.cssText='padding:10px 12px;text-align:right';
-    td3.innerHTML=amtHtml;
+    // Rx#
+    var td3=document.createElement('td');td3.style.fontSize='10px';td3.style.color='var(--ink3)';td3.textContent=inv.rxno||'';
 
-    // Status badge
-    var td4=document.createElement('td');
-    td4.style.cssText='padding:10px 12px;text-align:center';
-    td4.innerHTML='<span class="pill '+stClass+'">'+status+'</span>';
+    // Date
+    var td4=document.createElement('td');td4.style.fontSize='11.5px';td4.style.color='var(--ink3)';td4.textContent=inv.date||'';
 
-    // Actions
-    var td5=document.createElement('td');
-    td5.style.cssText='padding:10px 12px;text-align:right;white-space:nowrap';
+    // Description
+    var td5=document.createElement('td');td5.style.fontSize='12px';var dispDesc=inv.desc||'';
+    // If desc is generic, build from meds+svcs
+    if(!dispDesc||(dispDesc==='Medicines'||dispDesc==='Services'||dispDesc==='Medicines + Services')){
+      var mN=(inv.meds||[]).map(function(m){return m.name||m;}).join(', ');
+      var sN=(inv.svcs||[]).map(function(s){return s.name||s;}).join(', ');
+      if(mN&&sN)dispDesc=mN+' | '+sN;
+      else if(mN)dispDesc=mN;
+      else if(sN)dispDesc=sN;
+    }
+    td5.textContent=dispDesc;
 
-    // New Invoice button (always visible)
-    var btnNew=document.createElement('button');
-    btnNew.className='tb';
-    btnNew.style.cssText='margin-right:4px;background:#EFF6FF;color:#185FA5;border-color:#BFDBFE;font-size:11px';
-    btnNew.innerHTML='<i class="ti ti-file-plus"></i> New Invoice';
-    btnNew.onclick=(function(pt,pg,pb,pdx){
-      return function(){
-        nav('rx');
-        setTimeout(function(){
-          var n=document.getElementById('rx-pat-name');if(n){n.value=pt;n.dispatchEvent(new Event('input'));}
-          var a=document.getElementById('rx-pat-age');if(a&&pg)a.value=pg;
-          var m=document.getElementById('rx-pat-mob');if(m&&pb)m.value=pb;
-          var d=document.getElementById('rx-pat-dx');if(d&&pdx)d.value=pdx;
-        },400);
-      };
-    })(inv.patient,inv.age||'',inv.mob||'',inv.dx||'');
+    // Amount
+    var td6=document.createElement('td');td6.style.fontWeight='700';
+    var _led=typeof getPatientLedger==='function'?getPatientLedger(inv.patient):{totalPending:parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0)};
+    var _owed=parseFloat(inv.amount||0)-parseFloat(inv.paidAmt||0);
+    var _prev=parseFloat((_led.totalPending-_owed).toFixed(2));
+    if(_prev>0.01){
+      td6.innerHTML='<div style="font-size:10px;color:var(--ink3)">This: Rs.'+_owed.toFixed(2)+'</div>'+
+        '<div style="font-size:10px;color:#DC2626">+Prev: Rs.'+_prev.toFixed(2)+'</div>'+
+        '<div style="font-size:12px;font-weight:900;color:#DC2626;border-top:1px solid #eee;margin-top:2px;padding-top:2px">Total: Rs.'+_led.totalPending.toFixed(2)+'</div>';
+    } else {
+      td6.style.color=_owed>0.01?'var(--rose)':'var(--acc)';
+      td6.innerHTML='Rs.'+_owed.toFixed(2)+
+        (parseFloat(inv.paidAmt||0)>0.01?'<div style="font-size:10px;color:#059669;margin-top:1px">Paid: Rs.'+parseFloat(inv.paidAmt).toFixed(2)+'</div>':'');
+    }
+    td7=document.createElement('td');
+    td7.innerHTML='<span class="pill '+stClass+'">'+inv.status+'</span>';
 
-    // Pay button (only if not fully paid)
-    if(status!=='Paid'){
-      var btnPay=document.createElement('button');
-      btnPay.className='tb prim';
-      btnPay.style.cssText='margin-right:4px;font-size:11px';
-      btnPay.innerHTML='<i class="ti ti-currency-rupee"></i> Pay';
-      btnPay.onclick=(function(id){return function(){openPayModal(id);};})(iid);
-      td5.appendChild(btnPay);
+    // Actions — DOM buttons with closures (no quote escaping issues)
+    var td8=document.createElement('td');
+    var div=document.createElement('div');div.style.cssText='display:flex;gap:3px;flex-wrap:wrap';
+
+    var bEdit=document.createElement('button');bEdit.className='tb';bEdit.title='Edit';bEdit.style.fontSize='11px';
+    bEdit.innerHTML='<i class="ti ti-edit"></i>';
+    bEdit.onclick=(function(id){return function(){editInvoice(id);};})(iid);
+
+    var bPDF=document.createElement('button');bPDF.className='tb';bPDF.title='PDF Invoice';bPDF.style.fontSize='11px';
+    bPDF.innerHTML='<i class="ti ti-download"></i>PDF';
+    bPDF.onclick=(function(id){return function(){downloadInvoicePDF(id);};})(iid);
+
+    var bLab=document.createElement('button');bLab.className='tb';bLab.title='Send to Lab';
+    bLab.style.cssText='font-size:11px;color:#06B6D4;border-color:#06B6D4;background:#E0F9FF;';
+    bLab.innerHTML='<i class="ti ti-flask"></i>Send to Lab';
+    bLab.onclick=(function(id){return function(){openLabFromBill(id);};})(iid);
+
+    var bAct;
+    if(inv.status!=='Paid'&&inv.status!=='Partial'){
+      bAct=document.createElement('button');bAct.className='tb prim';bAct.style.fontSize='11px';
+      bAct.innerHTML='<i class="ti ti-currency-rupee"></i>Pay';
+      bAct.onclick=(function(id){return function(){openPayModal(id);};})(iid);
+    } else {
+      bAct=document.createElement('span');
+      bAct.style.cssText='font-size:11px;color:var(--acc);font-weight:700;padding:0 4px';
+      bAct.textContent='\u2714 Paid';
     }
 
-    td5.appendChild(btnNew);
+    var bDel=document.createElement('button');bDel.className='tb danger';bDel.title='Delete';bDel.style.fontSize='11px';
+    bDel.innerHTML='<i class="ti ti-trash"></i>';
+    bDel.onclick=(function(id){return function(){deleteInvoice(id);};})(iid);
 
-    // PDF button
-    var btnPdf=document.createElement('button');
-    btnPdf.className='tb';
-    btnPdf.style.cssText='font-size:11px';
-    btnPdf.innerHTML='<i class="ti ti-file-invoice"></i>';
-    btnPdf.title='View Invoice';
-    btnPdf.onclick=(function(id){return function(){printInvoice(id);};})(iid);
-    td5.appendChild(btnPdf);
+    div.appendChild(bEdit);div.appendChild(bPDF);div.appendChild(bLab);div.appendChild(bAct);div.appendChild(bDel);
+    td8.appendChild(div);
 
-    tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);tr.appendChild(td5);
+    // Pay mode cell
+    var tdMode=document.createElement('td');tdMode.style.cssText='text-align:center;font-size:11px;color:var(--ink3)';
+    tdMode.textContent=inv.paymode||'—';
+
+    [td0,td1,td2,td3,td4,td5,td6,td7,tdMode,td8].forEach(function(td){tr.appendChild(td);});
     tbody.appendChild(tr);
   });
+
+  var sub=document.getElementById('ph-sub');
+  if(sub)sub.innerHTML=
+    '<b style="color:var(--acc)">\u20b9'+tot.toLocaleString('en-IN',{minimumFractionDigits:2})+' Total</b> &bull; '+
+    '<b style="color:var(--gold)">\u20b9'+pen.toLocaleString('en-IN',{minimumFractionDigits:2})+' Pending</b> &bull; '+
+    data.length+' invoices';
 }
 window.renderPharmacy=renderPharmacy;
 
@@ -11777,6 +11774,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
