@@ -908,15 +908,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px">
-      <div style="display:flex;align-items:center;gap:5px">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">From</span>
-        <input type="date" id="ph-date-from" class="fin" style="font-size:11px;padding:4px 8px;width:132px" onchange="filterPharmaDate()">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">To</span>
-        <input type="date" id="ph-date-to" class="fin" style="font-size:11px;padding:4px 8px;width:132px" onchange="filterPharmaDate()">
-        <button class="tb" onclick="filterPharmaDate()" style="font-size:11px"><i class="ti ti-filter"></i>Filter</button>
-        <button class="tb" onclick="clearPharmaFilter()" style="font-size:11px"><i class="ti ti-x"></i>Clear</button>
-      </div>
-      <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
+            <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
       <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
@@ -2082,6 +2074,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -11787,6 +11780,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
