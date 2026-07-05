@@ -902,7 +902,7 @@ html,body{height:100%;overflow:hidden}
       To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
     </label>
     <button onclick="phFilterToday()" style="padding:7px 14px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:12px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
-    <button onclick="phFilterClear()" style="padding:7px 14px;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;font-size:12px;cursor:pointer;color:var(--ink3)"><i class="ti ti-x" style="font-size:11px"></i> All</button>
+
     <span id="ph-filter-label" style="font-size:12px;color:#F59E0B;font-weight:600"></span>
   </div>
   <div class="ph" style="flex-wrap:wrap;gap:8px">
@@ -2085,6 +2085,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // ── Patient Running Ledger ──────────────────────────────────
 function getPatientLedger(patient){
   var DB=window.BILLING_DB||[];
@@ -2128,17 +2129,26 @@ function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
   var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mon=MF[d.getMonth()];
+  var yy=String(d.getFullYear()).slice(-2);
   var hh=d.getHours(),mm=String(d.getMinutes()).padStart(2,'0');
   var ap=hh>=12?'PM':'AM',h12=hh%12||12;
-  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear()+' \u2014 '+h12+':'+mm+' '+ap;
+  return dd+' '+mon+' '+yy+' : '+String(h12).padStart(2,'0')+':'+mm+' '+ap;
 }
+window.fmtDateTime=fmtDateTime;
+
 window.fmtDateTime=fmtDateTime;
 function fmtDate(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
-  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear();
+  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dd=String(d.getDate()).padStart(2,'0');
+  return dd+' '+MF[d.getMonth()]+' '+String(d.getFullYear()).slice(-2);
 }
+window.fmtDate=fmtDate;
+
 window.fmtDate=fmtDate;
 var ROLE_PREFIX={'Admin':'Admin','Doctor':'Dr.','Pharmacist':'Phst.','Lab':'Lab Technician','Receptionist':'Receptionist','Staff':'Staff'};
 window.ROLE_PREFIX=ROLE_PREFIX;
@@ -8686,10 +8696,6 @@ if(!window.BILLING_DB||!window.BILLING_DB.length){
      meds:[{name:'Azithromycin',qty:1,sale:400,disc:0,amt:400},{name:'Pantoprazole',qty:2,sale:100,disc:0,amt:200}],
      svcs:[{name:'Consultation Fee',price:300,disc:0,net:300},{name:'CBC Blood Test',price:300,disc:0,net:300}]},
 
-    {id:'INV-004',date:_td,patient:'Priya Sharma',   paymode:'Cash', status:'Paid',   paid:350,  amount:350,
-     meds:[],
-     svcs:[{name:'CBC Blood Test',price:200,disc:0,net:200},{name:'Blood Sugar',price:150,disc:0,net:150}]},
-
     {id:'INV-005',date:_td,patient:'Gurpreet Kaur',  paymode:'',     status:'Pending',paid:0,    amount:300,
      meds:[],
      svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
@@ -11781,6 +11787,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
