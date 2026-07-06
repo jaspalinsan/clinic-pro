@@ -893,22 +893,24 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 <div class="page" id="page-pharmacy">
-  <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap">
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
-      <i class="ti ti-calendar" style="font-size:14px;color:#F59E0B"></i>
-      From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:7px 12px;cursor:pointer">
-      To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <button onclick="phFilterToday()" style="padding:7px 14px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:12px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
-
-    <span id="ph-filter-label" style="font-size:12px;color:#F59E0B;font-weight:600"></span>
-  </div>
-  <div class="ph" style="flex-wrap:wrap;gap:8px">
+  <div class="ph" style="flex-wrap:wrap;gap:8px;align-items:center">
+    <!-- LEFT: Title -->
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
-    <div class="ha" style="flex-wrap:wrap;gap:6px">
-            <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
+    <!-- CENTRE: Date filter -->
+    <div class="ha" style="flex-wrap:wrap;gap:6px;flex:1;justify-content:center">
+      <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;color:var(--ink2)">
+        <i class="ti ti-calendar" style="font-size:13px;color:#F59E0B"></i>
+        From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:11px;color:var(--ink);outline:none;cursor:pointer;width:120px">
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;color:var(--ink2)">
+        To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:11px;color:var(--ink);outline:none;cursor:pointer;width:120px">
+      </label>
+      <button onclick="phFilterToday()" style="padding:5px 12px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:11px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
+      <span id="ph-filter-label" style="font-size:11px;color:#F59E0B;font-weight:600"></span>
+    </div>
+    <!-- RIGHT: Search + New Invoice -->
+    <div class="ha" style="gap:6px">
+      <input class="fin" placeholder="Search..." style="width:120px;font-size:11px" oninput="filterPharma(this.value)">
       <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
@@ -2079,6 +2081,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // ── Patient Running Ledger ──────────────────────────────────
 function getPatientLedger(patient){
   var DB=window.BILLING_DB||[];
@@ -2121,15 +2124,14 @@ window.getPatientLedger=getPatientLedger;
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
-  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dd=String(d.getDate()).padStart(2,'0');
-  var mon=MF[d.getMonth()];
-  var yy=String(d.getFullYear()).slice(-2);
   var hh=d.getHours(),mm=String(d.getMinutes()).padStart(2,'0');
   var ap=hh>=12?'PM':'AM',h12=hh%12||12;
-  return dd+' '+mon+' '+yy+' : '+String(h12).padStart(2,'0')+':'+mm+' '+ap;
+  return dd+' '+MF[d.getMonth()]+' '+d.getFullYear()+' : '+String(h12).padStart(2,'0')+':'+mm+' '+ap;
 }
+window.fmtDateTime=fmtDateTime;
+
 window.fmtDateTime=fmtDateTime;
 
 window.fmtDateTime=fmtDateTime;
@@ -2137,9 +2139,10 @@ function fmtDate(d){
   if(!d)d=new Date();
   if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
   var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dd=String(d.getDate()).padStart(2,'0');
-  return dd+' '+MF[d.getMonth()]+' '+String(d.getFullYear()).slice(-2);
+  return String(d.getDate()).padStart(2,'0')+' '+MF[d.getMonth()]+' '+d.getFullYear();
 }
+window.fmtDate=fmtDate;
+
 window.fmtDate=fmtDate;
 
 window.fmtDate=fmtDate;
@@ -4471,8 +4474,11 @@ try{
   var pmob=(document.getElementById('rx-pat-mob')||{}).value||'';
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
-  var rdate=(document.getElementById('rx-date')||{}).textContent||
-    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var _rd=document.getElementById('rx-date');
+  var _rdtxt=(_rd&&_rd.textContent)||'';
+  // Store as ISO date for reliable filtering
+  var _now=new Date();
+  var rdate=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'+String(_now.getDate()).padStart(2,'0');
 
   var meds=[];
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
@@ -11742,9 +11748,11 @@ function phFilterToday(){
   var dt=document.getElementById('ph-date-to');
   if(df)df.value=iso; if(dt)dt.value=iso;
   var lbl=document.getElementById('ph-filter-label');
-  if(lbl)lbl.textContent='Today: '+fmtDate(new Date());
+  if(lbl)lbl.textContent=fmtDate(t);
   if(typeof renderPharmacy==='function')renderPharmacy();
 }
+window.phFilterToday=phFilterToday;
+
 window.phFilterToday=phFilterToday;
 function phFilterClear(){
   var df=document.getElementById('ph-date-from');
@@ -11780,6 +11788,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
