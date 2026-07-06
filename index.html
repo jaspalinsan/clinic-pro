@@ -2071,6 +2071,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -4592,6 +4593,23 @@ function renderPharmacy(){
   // Apply date filter
   var phFrom=(document.getElementById('ph-date-from')||{}).value||'';
   var phTo=(document.getElementById('ph-date-to')||{}).value||'';
+  // Default to today if no filter set
+  if(!phFrom&&!phTo){
+    var _td=new Date();
+    phFrom=_td.getFullYear()+'-'+String(_td.getMonth()+1).padStart(2,'0')+'-'+String(_td.getDate()).padStart(2,'0');
+    phTo=phFrom;
+    // Update display spans if empty
+    var _fl=document.getElementById('ph-from-lbl');
+    var _tl=document.getElementById('ph-to-lbl');
+    var _disp=typeof isoToDisplay==='function'?isoToDisplay(phFrom):phFrom;
+    if(_fl&&_fl.textContent==='Select from')_fl.textContent=_disp;
+    if(_tl&&_tl.textContent==='Select to')_tl.textContent=_disp;
+    // Set input values
+    var _df=document.getElementById('ph-date-from');
+    var _dt=document.getElementById('ph-date-to');
+    if(_df&&!_df.value)_df.value=phFrom;
+    if(_dt&&!_dt.value)_dt.value=phTo;
+  }
   var data=(window.BILLING_DB||[]).filter(function(b){
     if(!phFrom&&!phTo)return true;
     var bd=b.date||'';
@@ -11814,6 +11832,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
