@@ -2078,6 +2078,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -4665,9 +4666,26 @@ function renderPharmacy(){
     var sub=document.getElementById('ph-sub');if(sub)sub.textContent='No invoices';
     return;
   }
-  var tot=0,pen=0;
+  // Summary from filtered data (today only)
+  var tot=0,pen=0,collected=0;
   data.forEach(function(inv){
-    var amt=parseFloat(inv.amount)||0;
+    var amt=parseFloat(inv.amount||0);
+    var paid=parseFloat(inv.paidAmt||0);
+    tot+=amt;
+    collected+=paid;
+    if(inv.status!=='Paid')pen+=(amt-paid);
+  });
+  var sub=document.getElementById('ph-sub');
+  var filterLabel=phFrom===phTo?
+    'Today '+isoToDisplay(phFrom):
+    (phFrom||phTo?isoToDisplay(phFrom)+' – '+isoToDisplay(phTo):'All dates');
+  if(sub)sub.innerHTML='<span style="color:var(--ink3);font-size:11px">'+filterLabel+'</span>'+
+    ' &nbsp;•&nbsp; <span style="color:#059669">Collected: <b>Rs.'+collected.toFixed(2)+'</b></span>'+
+    ' &nbsp;•&nbsp; <span style="color:#DC2626">Pending: <b>Rs.'+pen.toFixed(2)+'</b></span>'+
+    ' &nbsp;•&nbsp; Total: <b>Rs.'+tot.toFixed(2)+'</b>';
+  tot=0;pen=0;
+  data.forEach(function(inv){
+    var amt=parseFloat(inv.amount||0);
     tot+=amt; if(inv.status!=='Paid')pen+=amt;
     var stClass=inv.status==='Paid'?'p-g':inv.status==='Partial'?'p-b':'p-a';
     var iid=String(inv.id);
@@ -11861,6 +11879,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
