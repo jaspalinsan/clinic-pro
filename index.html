@@ -2075,14 +2075,19 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
   var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var parts=iso.split('-');
-  if(parts.length!==3)return iso;
-  return String(parseInt(parts[2])).padStart(2,'0')+' '+MF[parseInt(parts[1])-1]+' '+parts[0];
+  if(parts.length>=3)
+    return String(parseInt(parts[2])).padStart(2,'0')+' '+MF[parseInt(parts[1])-1]+' '+parts[0];
+  return iso;
 }
+window.isoToDisplay=isoToDisplay;
+
 window.isoToDisplay=isoToDisplay;
 
 // Update all date display spans when a date input changes
@@ -2140,7 +2145,14 @@ window.getPatientLedger=getPatientLedger;
 
 function fmtDateTime(d){
   if(!d)d=new Date();
-  if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
+  if(typeof d==='string'){
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)){
+      var p=d.split('-');
+      d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+    } else {
+      var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;
+    }
+  }
   var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dd=String(d.getDate()).padStart(2,'0');
   var hh=d.getHours(),mm=String(d.getMinutes()).padStart(2,'0');
@@ -2152,12 +2164,25 @@ window.fmtDateTime=fmtDateTime;
 window.fmtDateTime=fmtDateTime;
 
 window.fmtDateTime=fmtDateTime;
+
+window.fmtDateTime=fmtDateTime;
 function fmtDate(d){
   if(!d)d=new Date();
-  if(typeof d==='string'){var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
+  // Handle ISO string "2026-07-06"
+  if(typeof d==='string'){
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)){
+      var p=d.split('-');
+      d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+    } else {
+      var t=new Date(d);
+      if(!isNaN(t.getTime()))d=t; else return d;
+    }
+  }
   var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
   return String(d.getDate()).padStart(2,'0')+' '+MF[d.getMonth()]+' '+d.getFullYear();
 }
+window.fmtDate=fmtDate;
+
 window.fmtDate=fmtDate;
 
 window.fmtDate=fmtDate;
@@ -4676,7 +4701,7 @@ function renderPharmacy(){
     var td3=document.createElement('td');td3.style.fontSize='10px';td3.style.color='var(--ink3)';td3.textContent=inv.rxno||'';
 
     // Date
-    var td4=document.createElement('td');td4.style.fontSize='11.5px';td4.style.color='var(--ink3)';td4.textContent=inv.date||'';
+    var td4=document.createElement('td');td4.style.fontSize='11.5px';td4.style.color='var(--ink3)';td4.textContent=typeof fmtDate==='function'?fmtDate(inv.date||new Date()):inv.date||'';
 
     // Description
     var td5=document.createElement('td');td5.style.fontSize='12px';var dispDesc=inv.desc||'';
@@ -4835,7 +4860,7 @@ function renderApptPanes(){
     if(!_filt)return true;
     return a.date&&(a.date===_filt||a.date.startsWith(_filt));
   }).sort(function(a,b){
-    return((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
+    return((b.date||'')+(b.time||'')).localeCompare(((typeof fmtDate==='function'?fmtDate(a.date||''):a.date||''))+(a.time||''));
   });
   var groups={new:[],process:[],done:[]};
   // Bulk delete bar
@@ -6865,7 +6890,7 @@ function renderLabQueue(){
   // Single date filter fallback
   var labSingle=window._labDateFilter||'';
   var data=(window.LAB_DB||[]).filter(function(t){
-    var td=t.date||'';
+    var td=(typeof fmtDate==='function'?fmtDate(t.date||new Date()):t.date||'');
     // Try to parse lab date
     var tDate=new Date(td);
     if(isNaN(tDate.getTime())){
@@ -7610,8 +7635,8 @@ function renderSavedRx(filter){
   list.innerHTML='';
   data.forEach(function(rx,ri){
     // Date short
-    var parts=(rx.date||'').split(' ');
-    var ds=parts.length>=2?parts[0]+' '+parts[1]:(rx.date||'');
+    var parts=((typeof fmtDate==='function'?fmtDate(rx.date||''):rx.date||'')).split(' ');
+    var ds=parts.length>=2?parts[0]+' '+parts[1]:((typeof fmtDate==='function'?fmtDate(rx.date||''):rx.date||''));
 
     // Med string
     var medStr='';
@@ -11835,6 +11860,8 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
 
 
 
