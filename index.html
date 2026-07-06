@@ -2077,6 +2077,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -11700,7 +11701,7 @@ function printInvoice(invId){
   H.push('<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">');
   H.push('<div class="hd"><div class="cn">'+cName+'</div>'+(cSub?'<div class="cs">'+cSub+'</div>':'')+'</div>');
   H.push('<div class="mt"><div><div style="font-size:15px;font-weight:900">'+invId+'</div>');
-  H.push('<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(inv.date||'')+(inv.rxno?' &bull; Rx:'+inv.rxno:'')+'</div></div>');
+  H.push('<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(fmtDate(inv.date||''))+(inv.rxno?' &bull; Rx:'+inv.rxno:'')+'</div></div>');
   H.push('<span class="bd" style="background:'+sbg+';color:'+scol+';border:1px solid '+scol+'">'+status+'</span></div>');
   H.push('<div class="pg">');
   H.push('<div><span class="lb">Patient</span><span class="vl">'+(inv.patient||'-')+'</span></div>');
@@ -11860,6 +11861,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
