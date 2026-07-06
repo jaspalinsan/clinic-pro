@@ -897,16 +897,13 @@ html,body{height:100%;overflow:hidden}
     <!-- LEFT: Title -->
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <!-- CENTRE: Date filter -->
-    <div class="ha" style="flex-wrap:wrap;gap:6px;flex:1;justify-content:center">
-      <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;color:var(--ink2)">
-        <i class="ti ti-calendar" style="font-size:13px;color:#F59E0B"></i>
-        From <input type="date" id="ph-date-from" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:11px;color:var(--ink);outline:none;cursor:pointer;width:120px">
-      </label>
-      <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;color:var(--ink2)">
-        To <input type="date" id="ph-date-to" onchange="renderPharmacy()" style="border:none;background:transparent;font-size:11px;color:var(--ink);outline:none;cursor:pointer;width:120px">
-      </label>
+    <div class="ha" style="flex-wrap:wrap;gap:6px;flex:1;justify-content:center;align-items:center">
+      <input type="date" id="ph-date-from" onchange="updateDateDisplay('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;opacity:0;width:0;height:0">
+      <span id="ph-from-lbl" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').click()" style="padding:5px 12px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;font-size:11px;font-weight:500;color:#92400E;cursor:pointer;min-width:110px;text-align:center">Select from</span>
+      <span style="font-size:11px;color:var(--ink3)">to</span>
+      <input type="date" id="ph-date-to" onchange="updateDateDisplay('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;opacity:0;width:0;height:0">
+      <span id="ph-to-lbl" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').click()" style="padding:5px 12px;background:var(--bg);border:1.5px solid #FDE68A;border-radius:8px;font-size:11px;font-weight:500;color:#92400E;cursor:pointer;min-width:110px;text-align:center">Select to</span>
       <button onclick="phFilterToday()" style="padding:5px 12px;background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;font-size:11px;font-weight:600;color:#92400E;cursor:pointer">Today</button>
-      <span id="ph-filter-label" style="font-size:11px;color:#F59E0B;font-weight:600"></span>
     </div>
     <!-- RIGHT: Search + New Invoice -->
     <div class="ha" style="gap:6px">
@@ -1017,16 +1014,13 @@ html,body{height:100%;overflow:hidden}
   </div>
 
   <div style="display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap">
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #A5F3FC;border-radius:8px;padding:7px 12px;cursor:pointer">
-      <i class="ti ti-calendar" style="font-size:14px;color:#06B6D4"></i>
-      From <input type="date" id="lab-date-from" onchange="renderLabQueue()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <label style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid #A5F3FC;border-radius:8px;padding:7px 12px;cursor:pointer">
-      To <input type="date" id="lab-date-to" onchange="renderLabQueue()" style="border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;cursor:pointer">
-    </label>
-    <button onclick="labFilterToday()" style="padding:7px 14px;background:#ECFEFF;border:1.5px solid #A5F3FC;border-radius:8px;font-size:12px;font-weight:600;color:#0E7490;cursor:pointer">Today</button>
-    <button onclick="labFilterClear()" style="padding:7px 14px;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;font-size:12px;cursor:pointer;color:var(--ink3)"><i class="ti ti-x" style="font-size:11px"></i> All</button>
-    <span id="lab-filter-label" style="font-size:12px;color:#06B6D4;font-weight:600"></span>
+    <input type="date" id="lab-date-from" onchange="updateDateDisplay('lab-date-from','lab-from-lbl');renderLabQueue()" style="position:absolute;opacity:0;width:0;height:0">
+    <span id="lab-from-lbl" onclick="document.getElementById('lab-date-from').showPicker?document.getElementById('lab-date-from').showPicker():document.getElementById('lab-date-from').click()" style="padding:6px 12px;background:var(--bg);border:1.5px solid #A5F3FC;border-radius:8px;font-size:11px;font-weight:500;color:#0E7490;cursor:pointer;min-width:110px;text-align:center"><i class="ti ti-calendar" style="margin-right:4px"></i>Select from</span>
+    <span style="font-size:11px;color:var(--ink3)">to</span>
+    <input type="date" id="lab-date-to" onchange="updateDateDisplay('lab-date-to','lab-to-lbl');renderLabQueue()" style="position:absolute;opacity:0;width:0;height:0">
+    <span id="lab-to-lbl" onclick="document.getElementById('lab-date-to').showPicker?document.getElementById('lab-date-to').showPicker():document.getElementById('lab-date-to').click()" style="padding:6px 12px;background:var(--bg);border:1.5px solid #A5F3FC;border-radius:8px;font-size:11px;font-weight:500;color:#0E7490;cursor:pointer;min-width:110px;text-align:center">Select to</span>
+    <button onclick="labFilterToday()" style="padding:6px 12px;background:#ECFEFF;border:1.5px solid #A5F3FC;border-radius:8px;font-size:11px;font-weight:600;color:#0E7490;cursor:pointer">Today</button>
+    <span id="lab-filter-label" style="font-size:11px;color:#06B6D4;font-weight:600"></span>
   </div>
   <div class="stabs" style="margin-bottom:12px">
     <button class="stab on" id="lab-stab-pending" onclick="labTab(this,'pending')">
@@ -2076,6 +2070,25 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+// Convert ISO date string to display format "02 June 2026"
+function isoToDisplay(iso){
+  if(!iso)return '';
+  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var parts=iso.split('-');
+  if(parts.length!==3)return iso;
+  return String(parseInt(parts[2])).padStart(2,'0')+' '+MF[parseInt(parts[1])-1]+' '+parts[0];
+}
+window.isoToDisplay=isoToDisplay;
+
+// Update all date display spans when a date input changes
+function updateDateDisplay(inputId,spanId){
+  var inp=document.getElementById(inputId);
+  var span=document.getElementById(spanId);
+  if(inp&&span)span.textContent=isoToDisplay(inp.value)||'Select date';
+}
+window.updateDateDisplay=updateDateDisplay;
+
 
 
 
@@ -11747,10 +11760,14 @@ function phFilterToday(){
   var df=document.getElementById('ph-date-from');
   var dt=document.getElementById('ph-date-to');
   if(df)df.value=iso; if(dt)dt.value=iso;
-  var lbl=document.getElementById('ph-filter-label');
-  if(lbl)lbl.textContent=fmtDate(t);
+  var fl=document.getElementById('ph-from-lbl');
+  var tl=document.getElementById('ph-to-lbl');
+  var disp=isoToDisplay(iso);
+  if(fl)fl.textContent=disp; if(tl)tl.textContent=disp;
   if(typeof renderPharmacy==='function')renderPharmacy();
 }
+window.phFilterToday=phFilterToday;
+
 window.phFilterToday=phFilterToday;
 
 window.phFilterToday=phFilterToday;
@@ -11758,10 +11775,13 @@ function phFilterClear(){
   var df=document.getElementById('ph-date-from');
   var dt=document.getElementById('ph-date-to');
   if(df)df.value=''; if(dt)dt.value='';
-  var lbl=document.getElementById('ph-filter-label');
-  if(lbl)lbl.textContent='';
+  var fl=document.getElementById('ph-from-lbl');
+  var tl=document.getElementById('ph-to-lbl');
+  if(fl)fl.textContent='Select from'; if(tl)tl.textContent='Select to';
   if(typeof renderPharmacy==='function')renderPharmacy();
 }
+window.phFilterClear=phFilterClear;
+
 window.phFilterClear=phFilterClear;
 
 // Use fmtDateTime everywhere for new dates
@@ -11776,9 +11796,15 @@ function labFilterToday(){
   var df=document.getElementById('lab-date-from');
   var dt=document.getElementById('lab-date-to');
   if(df)df.value=iso; if(dt)dt.value=iso;
+  var fl=document.getElementById('lab-from-lbl');
+  var tl=document.getElementById('lab-to-lbl');
+  var disp=isoToDisplay(iso);
+  if(fl)fl.textContent=disp; if(tl)tl.textContent=disp;
   window._labDateFilter='';
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
+window.labFilterToday=labFilterToday;
+
 window.labFilterToday=labFilterToday;
 function labFilterClear(){
   var df=document.getElementById('lab-date-from');
@@ -11788,6 +11814,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
