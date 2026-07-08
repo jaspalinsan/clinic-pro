@@ -514,7 +514,7 @@ html,body{height:100%;overflow:hidden}
     <div class="ha"><button class="bp" onclick="openModal('m-appt')"><i class="ti ti-plus"></i>New Appointment</button></div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;padding:0 0 10px;flex-wrap:wrap">
-    <label style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #B5D4F4;border-radius:8px;padding:7px 12px;cursor:pointer"><i class="ti ti-calendar" style="font-size:15px;color:#185FA5"></i><input type="date" id="appt-date-filter" onchange="filterApptsByDate(this.value)" style="border:none;background:transparent;font-size:13px;color:var(--ink);outline:none;cursor:pointer"></label>
+    <label style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #B5D4F4;border-radius:8px;padding:7px 12px;cursor:pointer"><i class="ti ti-calendar" style="font-size:15px;color:#185FA5"></i></label>
     <button onclick="filterApptToday()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid #B5D4F4;border-radius:8px;background:#EFF6FF;color:#185FA5;font-size:12px;cursor:pointer;font-weight:600">Today</button>
     <button onclick="clearApptDateFilter()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--sl2);border-radius:8px;background:var(--bg);color:var(--ink3);font-size:12px;cursor:pointer;font-weight:500"><i class="ti ti-x" style="font-size:12px"></i> All</button>
     <span id="appt-filter-label" style="font-size:12px;color:#185FA5;font-weight:600"></span>
@@ -968,11 +968,13 @@ html,body{height:100%;overflow:hidden}
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:4px">
           <label class="flbl" style="margin:0;font-size:11px">From:</label>
-          <input type="date" id="h1-from" class="fin" style="font-size:11px;padding:4px 8px;width:130px">
+          <input type="date" id="h1-from" onchange="updateDateDisplay('h1-from','h1-from-lbl')" style="position:absolute;opacity:0;width:0;height:0">
+          <span id="h1-from-lbl" onclick="document.getElementById('h1-from').showPicker?document.getElementById('h1-from').showPicker():document.getElementById('h1-from').click()" style="padding:4px 10px;background:var(--bg);border:1px solid var(--sl2);border-radius:6px;font-size:11px;color:var(--acc);cursor:pointer;min-width:100px;display:inline-block;text-align:center">Select date</span>
         </div>
         <div style="display:flex;align-items:center;gap:4px">
           <label class="flbl" style="margin:0;font-size:11px">To:</label>
-          <input type="date" id="h1-to" class="fin" style="font-size:11px;padding:4px 8px;width:130px">
+          <input type="date" id="h1-to" onchange="updateDateDisplay('h1-to','h1-to-lbl')" style="position:absolute;opacity:0;width:0;height:0">
+          <span id="h1-to-lbl" onclick="document.getElementById('h1-to').showPicker?document.getElementById('h1-to').showPicker():document.getElementById('h1-to').click()" style="padding:4px 10px;background:var(--bg);border:1px solid var(--sl2);border-radius:6px;font-size:11px;color:var(--acc);cursor:pointer;min-width:100px;display:inline-block;text-align:center">Select date</span>
         </div>
         <button class="bp" onclick="renderH1Report()" style="font-size:12px"><i class="ti ti-search"></i>Generate</button>
         <button class="bs" onclick="printH1Report()" style="font-size:12px"><i class="ti ti-printer"></i>Print</button>
@@ -2069,6 +2071,9 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
+
 
 
 
@@ -11881,6 +11886,9 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
+
 
 
 
