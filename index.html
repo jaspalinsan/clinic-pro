@@ -23,9 +23,9 @@ html,body{height:100%;overflow:hidden}
 .tnav{background:#F0F2F5;border-bottom:2px solid #C0C0C0;border-top:none;display:flex;align-items:center;padding:4px 12px;gap:4px;z-index:200;height:72px}
 .body{overflow:hidden;height:100%}
 .scroll{overflow-y:auto;height:100%;background:#F1F5F9}
-.page{display:none;padding:20px;min-height:calc(100vh - 72px)}
-#page-settings{padding:0!important;}
-#page-finance{padding:0!important;}
+.page{display:none;padding:0;min-height:calc(100vh - 72px)}
+.page.on{display:block}
+.page-padded{padding:16px}
 
 
 
@@ -2073,6 +2073,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -11890,6 +11891,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
