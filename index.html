@@ -2079,6 +2079,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -2148,19 +2149,16 @@ window.getPatientLedger=getPatientLedger;
 function fmtDateTime(d){
   if(!d)d=new Date();
   if(typeof d==='string'){
-    if(/^\d{4}-\d{2}-\d{2}/.test(d)){
-      var p=d.split('-');
-      d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
-    } else {
-      var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;
-    }
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)){var p=d.split('-');d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
+    else{var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
   }
-  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dd=String(d.getDate()).padStart(2,'0');
-  var hh=d.getHours(),mm=String(d.getMinutes()).padStart(2,'0');
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var hh=d.getHours(),mm=d.getMinutes();
   var ap=hh>=12?'PM':'AM',h12=hh%12||12;
-  return dd+' '+MF[d.getMonth()]+' '+d.getFullYear()+' : '+String(h12).padStart(2,'0')+':'+mm+' '+ap;
+  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear()+' : '+h12+'.'+String(mm).padStart(2,'0')+' '+ap;
 }
+window.fmtDateTime=fmtDateTime;
+
 window.fmtDateTime=fmtDateTime;
 
 window.fmtDateTime=fmtDateTime;
@@ -2170,19 +2168,15 @@ window.fmtDateTime=fmtDateTime;
 window.fmtDateTime=fmtDateTime;
 function fmtDate(d){
   if(!d)d=new Date();
-  // Handle ISO string "2026-07-06"
   if(typeof d==='string'){
-    if(/^\d{4}-\d{2}-\d{2}/.test(d)){
-      var p=d.split('-');
-      d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
-    } else {
-      var t=new Date(d);
-      if(!isNaN(t.getTime()))d=t; else return d;
-    }
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)){var p=d.split('-');d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
+    else{var t=new Date(d);if(!isNaN(t.getTime()))d=t;else return d;}
   }
-  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  return String(d.getDate()).padStart(2,'0')+' '+MF[d.getMonth()]+' '+d.getFullYear();
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear();
 }
+window.fmtDate=fmtDate;
+
 window.fmtDate=fmtDate;
 
 window.fmtDate=fmtDate;
@@ -11878,6 +11872,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
