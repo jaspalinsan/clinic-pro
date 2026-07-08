@@ -115,8 +115,8 @@ try{
     $d=json_decode(file_get_contents('php://input'),true);
     $st=$pdo->prepare("INSERT INTO lab_orders(id,patient_name,patient_id,age_sex,tests,inv_id,rx_no,date,status,submitted)
       VALUES(:id,:pn,:pid,:as,:tests,:inv,:rx,:date,:status,:sub)
-      ON DUPLICATE KEY UPDATE status=:s2,submitted=:sub2,updated_at=NOW()");
-    $st->execute([':id'=>$d['id']??'',':pn'=>$d['patient']??'',':pid'=>$d['patientId']??'',
+      ON DUPLICATE KEY UPDATE patient_name=:pn2,status=:s2,submitted=:sub2,updated_at=NOW()");
+    $st->execute([':id'=>$d['id']??'',':pn'=>$d['patient']??'',':pn2'=>$d['patient']??'',':pid'=>$d['patientId']??'',
       ':as'=>$d['ageSex']??'',':tests'=>$d['tests']??'',':inv'=>$d['invId']??'',
       ':rx'=>$d['rxno']??'',':date'=>$d['date']??'',':status'=>$d['status']??'pending',
       ':sub'=>intval($d['submitted']??0),':s2'=>$d['status']??'pending',
