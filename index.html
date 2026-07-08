@@ -1132,9 +1132,7 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
-<div class="page" id="page-settings" style="padding:0;background:var(--bg)">
-
-<div style="display:flex;flex-direction:column;height:100%">
+<div class="page" id="page-settings" style="padding:0;background:var(--bg)"><div style="display:flex;flex-direction:column;height:100%">
   <!-- TOP TAB BAR (like vendor page) -->
   <div class="ph" style="border-bottom:1px solid var(--sl2);flex-shrink:0;flex-wrap:wrap;gap:6px">
     <div><div class="ptitle"><i class="ti ti-settings" style="color:#3b82f6;margin-right:6px"></i>Settings</div></div>
@@ -1212,7 +1210,7 @@ html,body{height:100%;overflow:hidden}
     </div>
 
     <!-- USER ACCOUNTS -->
-    <div id="spc-users" style="display:none;padding:24px">
+    <div id="spc-users" style="display:none;padding:10px 14px">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
     <div>
       <div style="font-size:18px;font-weight:600;color:var(--ink)">User Accounts</div>
@@ -1228,7 +1226,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
     <!-- SERVICES / LAB -->
-    <div id="spc-services" style="display:none;padding:26px 30px">
+    <div id="spc-services" style="display:none;padding:10px 14px">
   <div style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:3px">Services &amp; Lab Tests</div>
   <div style="font-size:12px;color:#64748b;margin-bottom:20px">Define billable services with prices and default discounts — accessible in Rx page</div>
 
@@ -1276,7 +1274,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
     <!-- VENDORS -->
-    <div id="spc-vendors" style="display:none;padding:26px 30px">
+    <div id="spc-vendors" style="display:none;padding:10px 14px">
   <div style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:3px">Vendor / Supplier List</div>
   <div style="font-size:12px;color:#64748b;margin-bottom:20px">Manage medicine suppliers and distributors</div>
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
@@ -1301,7 +1299,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
     <!-- APPEARANCE -->
-    <div id="spc-appearance" style="display:none;padding:28px 32px">
+    <div id="spc-appearance" style="display:none;padding:10px 14px">
   <div style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:4px"><i class="ti ti-palette" style="color:#3b82f6;margin-right:8px"></i>Appearance</div>
   <div style="font-size:13px;color:#64748b;margin-bottom:24px">Choose a theme — colours update instantly across the whole app</div>
 
@@ -1553,7 +1551,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
     <!-- BACKUP -->
-    <div id="spc-rxtpl" style="display:none;flex:1;overflow-y:auto;padding:26px 30px">
+    <div id="spc-rxtpl" style="display:none;flex:1;overflow-y:auto;padding:10px 14px">
   <div style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:3px">Rx Templates</div>
   <div style="font-size:12px;color:#64748b;margin-bottom:20px">Create and manage custom prescription templates. Pick medicines from your stock or type manually.</div>
 
@@ -2070,6 +2068,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -11879,6 +11878,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
