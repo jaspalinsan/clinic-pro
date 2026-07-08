@@ -1069,11 +1069,12 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
-      <div style="display:flex;align-items:center;gap:5px">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">From</span>
-        <input type="date" id="fin-from" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderFinance()">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">To</span>
-        <input type="date" id="fin-to" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderFinance()">
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="date" id="fin-from" onchange="updateDateDisplay('fin-from','fin-from-lbl');renderFinance()" style="position:absolute;opacity:0;width:0;height:0">
+        <span id="fin-from-lbl" onclick="document.getElementById('fin-from').showPicker?document.getElementById('fin-from').showPicker():document.getElementById('fin-from').click()" style="padding:5px 12px;background:var(--bg);border:1.5px solid #6ee7b7;border-radius:8px;font-size:11px;font-weight:500;color:#059669;cursor:pointer;min-width:110px;text-align:center">Select from</span>
+        <span style="font-size:11px;color:var(--ink3)">to</span>
+        <input type="date" id="fin-to" onchange="updateDateDisplay('fin-to','fin-to-lbl');renderFinance()" style="position:absolute;opacity:0;width:0;height:0">
+        <span id="fin-to-lbl" onclick="document.getElementById('fin-to').showPicker?document.getElementById('fin-to').showPicker():document.getElementById('fin-to').click()" style="padding:5px 12px;background:var(--bg);border:1.5px solid #6ee7b7;border-radius:8px;font-size:11px;font-weight:500;color:#059669;cursor:pointer;min-width:110px;text-align:center">Select to</span>
       </div>
       <button class="tb" onclick="renderFinance()" style="font-size:11px"><i class="ti ti-refresh"></i>Refresh</button>
     </div>
@@ -2080,15 +2081,23 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
-  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var parts=iso.split('-');
-  if(parts.length>=3)
-    return String(parseInt(parts[2])).padStart(2,'0')+' '+MF[parseInt(parts[1])-1]+' '+parts[0];
+  if(parts.length>=3){
+    var day=String(parseInt(parts[2])).padStart(2,'0');
+    var mon=M[parseInt(parts[1])-1]||'';
+    var yr=parts[0];
+    return day+' '+mon+' '+yr;
+  }
   return iso;
 }
+window.isoToDisplay=isoToDisplay;
+
 window.isoToDisplay=isoToDisplay;
 
 window.isoToDisplay=isoToDisplay;
@@ -11872,6 +11881,8 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
+
 
 
 
