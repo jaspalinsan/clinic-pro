@@ -2094,6 +2094,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3761,38 +3762,50 @@ async function doOCR(dataURL){
   var wrap = document.getElementById('ocr-items');
   var useB = document.getElementById('ocr-use');
   var manB = document.getElementById('ocr-manual');
-
   function upd(txt,pct){if(msg)msg.textContent=txt;if(bar)bar.style.width=(pct||0)+'%';}
 
-  try {
-    upd('📡 Sending to OCR service…',10);
-    var arr=dataURL.split(',');
-    var mime=arr[0].match(/:(.*?);/)[1];
-    var bstr=atob(arr[1]);
-    var u8=new Uint8Array(bstr.length);
-    for(var i=0;i<bstr.length;i++)u8[i]=bstr.charCodeAt(i);
-    var blob=new Blob([u8],{type:mime});
-    var form=new FormData();
-    form.append('file',blob,'bill.jpg');
-    form.append('apikey','helloworld');
-    form.append('language','eng');
-    form.append('isOverlayRequired','false');
-    form.append('detectOrientation','true');
-    form.append('scale','true');
-    form.append('isTable','true');
-    upd('📡 Uploading image…',25);
-    var res=await fetch('https://api.ocr.space/parse/image',{method:'POST',body:form});
-    if(!res.ok)throw new Error('OCR service '+res.status);
-    var data=await res.json();
-    upd('🔍 Parsing rows…',75);
-    if(!data.ParsedResults||!data.ParsedResults.length)throw new Error('No text found');
-    var rawText=data.ParsedResults.map(function(r){return r.ParsedText||'';}).join('\n');
-    if(!rawText.trim())throw new Error('Empty result');
+  upd('Sending image to AI…',15);
 
-    var items=parseBillOCR(rawText);
-    if(!items.length){
-      showPasteBox(rawText,'OCR complete — no rows detected. Edit text below and click Extract:');
+  // Extract base64 data and mime type
+  var arr=dataURL.split(',');
+  var mime=arr[0].match(/:(.*?);/)[1];
+  var base64=arr[1];
+
+  // Use Claude API to extract bill data from image
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      messages:[{
+        role:'user',
+        content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:base64}},
+          {type:'text',text:'This is a vendor/supplier bill or invoice image. Extract all medicine/product items from it. Return ONLY a JSON array, no markdown, no explanation. Each item: {"name":"","qty":0,"rate":0,"amount":0,"batch":"","exp":"","mfr":""}. If a field is not visible use empty string or 0. Return [] if no items found.'}
+        ]
+      }]
+    })
+  })
+  .then(function(r){
+    upd('Reading response…',60);
+    return r.json();
+  })
+  .then(function(data){
+    upd('Parsing items…',80);
+    var text='';
+    if(data.content&&data.content.length){
+      text=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
+    }
+    // Clean and parse JSON
+    var clean=text.replace(/```json|```/g,'').trim();
+    var items=[];
+    try{items=JSON.parse(clean);}catch(e){items=[];}
+
+    if(!items||!items.length){
+      showPasteBox(text,'AI could not detect items. Paste bill text below and click Extract:');
       if(manB)manB.style.display='flex';
+      if(spin)spin.style.display='none';
       return;
     }
 
@@ -3803,22 +3816,23 @@ async function doOCR(dataURL){
       box.style.background='var(--m)';
       box.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
         '<i class="ti ti-check" style="font-size:22px;color:var(--m4)"></i>'+
-        '<div><div style="font-size:13px;font-weight:600;color:var(--m4)">✓ '+items.length+' items extracted</div>'+
-        '<div style="font-size:11.5px;color:var(--m4)">Review below — edit any row — then click Use These Items</div></div>'+
+        '<div><div style="font-size:13px;font-weight:600;color:var(--m4)">'+items.length+' items extracted</div>'+
+        '<div style="font-size:11px;color:var(--m4)">Review and edit below — then click Use These Items</div></div>'+
       '</div>';
     }
     if(bar)bar.style.width='100%';
     if(wrap)wrap.style.display='block';
     if(useB)useB.style.display='flex';
     if(manB)manB.style.display='flex';
-
-  } catch(err){
-    console.error('OCR:',err);
+  })
+  .catch(function(err){
+    console.error('AI OCR error:',err);
     if(spin)spin.style.display='none';
-    showPasteBox('','Could not read bill automatically ('+( err.message||'network error')+').\nPaste bill text below or click Fill Manually:');
+    showPasteBox('','Could not read bill ('+( err.message||'network error')+'). Paste bill text below or click Fill Manually:');
     if(manB)manB.style.display='flex';
-  }
+  });
 }
+
 
 function showPasteBox(txt,statusMsg){
   var box=document.getElementById('ocr-status-box');
@@ -11964,6 +11978,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
