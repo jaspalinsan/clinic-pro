@@ -4239,11 +4239,20 @@ function rxAddMedRow(data){
     '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;background:#E6F1FB;color:#185FA5;border:0.5px solid #B5D4F4"><i class="ti ti-pill" style="font-size:11px"></i>Med</span></td>'+
     '<td><select class="fin" style="width:100%;font-size:11px" onchange="rxMedPick(this)">'+opts+'</select></td>'+
     '<td><select class="fin" data-rx="dose" style="font-size:11px;width:100%" onchange="rxCalcRow(this)">'+
-      '<option value="1">One Time (\u00d71)</option>'+
-      '<option value="2">Two Times (\u00d72)</option>'+
-      '<option value="3">Three Times (\u00d73)</option>'+
-      '<option value="0.5">E.O.D (\u00d70.5)</option>'+
-      '<option value="4">Four Times (\u00d74)</option>'+
+      '<option value="">-- Frequency --</option>'+
+      '<option value="1">Once a day (OD)</option>'+
+      '<option value="2">Twice a day (BD)</option>'+
+      '<option value="3">Three times a day (TDS)</option>'+
+      '<option value="4">Four times a day (QID)</option>'+
+      '<option value="3">8 Hourly</option>'+
+      '<option value="1">At Night (HS)</option>'+
+      '<option value="0.14">Alternate Day (EOD)</option>'+
+      '<option value="0.14">Once a Week</option>'+
+      '<option value="0.28">Twice a Week</option>'+
+      '<option value="1">Before Food (AC)</option>'+
+      '<option value="1">After Food (PC)</option>'+
+      '<option value="1">SOS (As Needed)</option>'+
+      '<option value="1">Stat (Immediately)</option>'+
     '</select></td>'+
     '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:52px;font-size:11px">'+
       '<option value="OTC">OTC</option><option value="H">H</option>'+
