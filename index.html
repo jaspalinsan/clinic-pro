@@ -4661,7 +4661,8 @@ try{
     var qty=parseFloat(gm('qty'))||1;
     var disc=parseFloat(gm('disc'))||0;
     if(sale<=0)return;
-    meds.push({name:name,dose:gm('dose'),mfr:gm('mfr'),batch:gm('batch'),
+    var doseEl=tr.querySelector('[data-rx=dose]');var doseText=doseEl&&doseEl.selectedIndex>0?doseEl.options[doseEl.selectedIndex].text:'';
+    meds.push({name:name,dose:doseText,mfr:gm('mfr'),batch:gm('batch'),
       exp:gm('exp'),qty:qty,sale:sale,disc:disc,
       amt:parseFloat((qty*sale*(1-disc/100)).toFixed(2))});
   });
