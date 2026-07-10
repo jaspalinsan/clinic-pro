@@ -2095,6 +2095,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3405,89 +3406,107 @@ function parseVendorImage(input){
   var file=input.files?input.files[0]:null; if(!file)return;
   var ext=file.name.split('.').pop().toLowerCase();
   var nm=document.getElementById('vd-img-name');
-  var pv=document.getElementById('vd-img-preview');
   if(nm)nm.textContent=file.name;
 
-  // Excel/CSV — read as text/binary and show data in table
-  if(ext==='xlsx'||ext==='xls'||ext==='csv'){
-    if(ext==='csv'){
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        var text=ev.target.result;
-        var rows=text.split('\n').filter(Boolean);
-        var html='<table style="width:100%;border-collapse:collapse;font-size:11px">';
-        rows.forEach(function(row,i){
-          var cells=row.split(',');
-          html+='<tr>'+(i===0?
-            cells.map(function(c){return '<th style="background:#f0f4ff;border:1px solid #dde;padding:4px 8px;font-weight:600">'+c.trim()+'</th>';}).join(''):
-            cells.map(function(c){return '<td style="border:1px solid #eee;padding:4px 8px">'+c.trim()+'</td>';}).join('')
-          )+'</tr>';
+  // ── CSV ─────────────────────────────────────────────────
+  if(ext==='csv'){
+    var r1=new FileReader();
+    r1.onload=function(ev){
+      var text=ev.target.result;
+      var rows=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+      var headers=rows[0].split(',').map(function(h){return h.trim().toLowerCase();});
+      var items=[];
+      for(var i=1;i<rows.length;i++){
+        var cells=rows[i].split(',');
+        var obj={};
+        headers.forEach(function(h,j){obj[h]=(cells[j]||'').trim();});
+        var name=obj['product name']||obj['medicine']||obj['name']||obj['item']||obj['description']||'';
+        if(!name)continue;
+        items.push({
+          name:name.toUpperCase(),
+          qty:obj['qty']||obj['quantity']||obj['pcs']||'',
+          rate:obj['rate']||obj['price']||obj['net rate']||obj['n.rate']||'',
+          sale:obj['mrp']||obj['sale']||obj['sale rate']||'',
+          batch:obj['batch']||obj['batch no']||'',
+          expiry:obj['exp']||obj['expiry']||obj['exp date']||'',
+          company:obj['mfr']||obj['manufacturer']||obj['company']||'',
+          desc:''
         });
-        html+='</table>';
-        var pv2=document.getElementById('vd-img-preview');
-        if(pv2){pv2.style.display='block';pv2.innerHTML='<div style="overflow:auto;max-height:300px">'+html+'</div>';}
-        toast('CSV loaded: '+rows.length+' rows','success');
-      };
-      reader.readAsText(file);
-    } else {
-      // XLSX — use SheetJS if available, else show file name
-      if(typeof XLSX!=='undefined'){
-        var reader2=new FileReader();
-        reader2.onload=function(ev){
-          try{
-            var wb=XLSX.read(ev.target.result,{type:'binary'});
-            var ws=wb.Sheets[wb.SheetNames[0]];
-            var html2=XLSX.utils.sheet_to_html(ws,{editable:false});
-            var pv3=document.getElementById('vd-img-preview');
-            if(pv3){pv3.style.display='block';pv3.innerHTML='<div style="overflow:auto;max-height:300px;font-size:11px">'+html2+'</div>';}
-            toast('Excel loaded: '+wb.SheetNames[0],'success');
-          }catch(e){toast('Could not read Excel file','error');}
-        };
-        reader2.readAsBinaryString(file);
-      } else {
-        // SheetJS not loaded — show file name only
-        if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:10px;background:#f0f4ff;border-radius:6px;font-size:12px"><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:6px"></i><b>'+file.name+'</b><br><span style="color:#6b7280;font-size:11px">Excel file attached</span></div>';}
-        toast('Excel file attached: '+file.name,'info');
       }
-    }
-    // Store file reference
-    window._vendorBillFile={name:file.name,type:file.type,ext:ext};
-    if(input.value!==undefined)input.value='';
-    return;
-  }
-
-  // PDF — show PDF viewer
-  if(ext==='pdf'){
-    var reader3=new FileReader();
-    reader3.onload=function(ev){
-      var dataURL=ev.target.result;
-      var pv4=document.getElementById('vd-img-preview');
-      if(pv4){
-        pv4.style.display='block';
-        pv4.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';
-      }
-      window._vendorBillFile={name:file.name,type:'application/pdf',data:dataURL};
-      toast('PDF loaded: '+file.name,'success');
+      showVendorExtracted(items,file.name,'CSV');
     };
-    reader3.readAsDataURL(file);
+    r1.readAsText(file);
     if(input.value!==undefined)input.value='';
     return;
   }
 
-  // Image (JPG/PNG) — show preview + OCR
-  var reader4=new FileReader();
-  reader4.onload=function(ev){
+  // ── XLSX/XLS ─────────────────────────────────────────────
+  if(ext==='xlsx'||ext==='xls'){
+    if(typeof XLSX==='undefined'){
+      toast('Loading Excel reader…','info');
+      var script=document.createElement('script');
+      script.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      script.onload=function(){parseVendorImage(input);};
+      document.head.appendChild(script);
+      return;
+    }
+    var r2=new FileReader();
+    r2.onload=function(ev){
+      try{
+        var wb=XLSX.read(ev.target.result,{type:'binary'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var data=XLSX.utils.sheet_to_json(ws,{defval:''});
+        var items=data.map(function(row){
+          // Try to find columns by common names
+          var keys=Object.keys(row).map(function(k){return k.toLowerCase();});
+          function get(){
+            for(var a=0;a<arguments.length;a++){
+              for(var k in row){if(k.toLowerCase().indexOf(arguments[a])!==-1)return String(row[k]||'').trim();}
+            }return '';
+          }
+          var name=get('product','medicine','name','item','desc');
+          if(!name)return null;
+          return{
+            name:name.toUpperCase(),
+            qty:get('qty','quantity','pcs','nos'),
+            rate:get('n.rate','net rate','rate','price','cost'),
+            sale:get('mrp','sale','retail'),
+            batch:get('batch'),
+            expiry:get('exp'),
+            company:get('mfr','manufacturer','company','brand'),
+            desc:''
+          };
+        }).filter(Boolean);
+        showVendorExtracted(items,file.name,'Excel');
+      }catch(e){toast('Could not read Excel: '+e.message,'error');}
+    };
+    r2.readAsBinaryString(file);
+    if(input.value!==undefined)input.value='';
+    return;
+  }
+
+  // ── PDF ──────────────────────────────────────────────────
+  if(ext==='pdf'){
+    var r3=new FileReader();
+    r3.onload=function(ev){
+      var dataURL=ev.target.result;
+      showPDFExtractModal(dataURL,file.name);
+    };
+    r3.readAsDataURL(file);
+    if(input.value!==undefined)input.value='';
+    return;
+  }
+
+  // ── IMAGE (JPG/PNG) ──────────────────────────────────────
+  var r4=new FileReader();
+  r4.onload=function(ev){
     var dataURL=ev.target.result;
-    var im=document.getElementById('vd-img-el');
-    if(pv)pv.style.display='block';
-    if(im){im.src=dataURL;im.style.display='block';}
-    window._vendorBillFile={name:file.name,type:file.type,data:dataURL};
-    if(typeof openOCRModal==='function')openOCRModal(dataURL,file.name);
-    else toast('Image loaded: '+file.name,'success');
+    openOCRModal(dataURL,file.name);
   };
-  reader4.readAsDataURL(file);
+  r4.readAsDataURL(file);
   if(input.value!==undefined)input.value='';
 }
+
 
 
 function clearVdImg(){
@@ -3872,6 +3891,7 @@ function extractFromPaste(){
   var manB=document.getElementById('ocr-manual');
   if(wrap)wrap.style.display='block';
   if(useB)useB.style.display='flex';
+  var uw=document.getElementById('ocr-use-wrap');if(uw)uw.style.display='block';
   if(manB)manB.style.display='flex';
 }
 
@@ -12024,6 +12044,72 @@ window.labFilterClear=labFilterClear;
 
 
 
+
+
+function showVendorExtracted(items,fileName,source){
+  if(!items||!items.length){toast('No items found in '+fileName,'error');return;}
+  _ocrItems=items;
+  // Open OCR modal in review mode (no image)
+  var old=document.getElementById('m-ocr');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-ocr';ov.className='overlay open';
+  ov.style.cssText='align-items:flex-start;padding:16px;overflow-y:auto;z-index:2000';
+  ov.innerHTML=
+    '<div class="modal" style="max-width:820px;width:100%;margin-top:12px">'+
+    '<div class="mh" style="background:linear-gradient(135deg,#E8F5F0,#EBF5FD)">'+
+      '<div><h2 style="color:#0D8863"><i class="ti ti-table-import" style="margin-right:7px"></i>'+source+' Import</h2>'+
+      '<div style="font-size:12px;color:#2d8a68">'+fileName+' — '+items.length+' items found</div></div>'+
+      '<button class="mclose" onclick="document.getElementById(\'m-ocr\').remove()"><i class="ti ti-x"></i></button>'+
+    '</div>'+
+    '<div style="padding:14px">'+
+      '<div id="ocr-list" style="max-height:60vh;overflow-y:auto"></div>'+
+      '<div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--sl2)">'+
+        '<button class="bs" onclick="document.getElementById(\'m-ocr\').remove()">Cancel</button>'+
+        '<button class="bp" style="flex:2;justify-content:center" onclick="useOCRItems()"><i class="ti ti-check"></i>Import '+items.length+' Items to Vendor Table</button>'+
+      '</div>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  renderOCRCards(items);
+}
+window.showVendorExtracted=showVendorExtracted;
+
+function showPDFExtractModal(dataURL,fileName){
+  var old=document.getElementById('m-ocr');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-ocr';ov.className='overlay open';
+  ov.style.cssText='align-items:flex-start;padding:16px;overflow-y:auto;z-index:2000';
+  ov.innerHTML=
+    '<div class="modal" style="max-width:980px;width:100%;margin-top:12px">'+
+    '<div class="mh" style="background:linear-gradient(135deg,#E8F5F0,#EBF5FD)">'+
+      '<div><h2 style="color:#0D8863"><i class="ti ti-file-type-pdf" style="margin-right:7px"></i>PDF Bill Import</h2>'+
+      '<div style="font-size:12px;color:#2d8a68">'+fileName+'</div></div>'+
+      '<button class="mclose" onclick="document.getElementById(\'m-ocr\').remove()"><i class="ti ti-x"></i></button>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;min-height:500px">'+
+      // Left: PDF preview
+      '<div style="padding:14px;border-right:1px solid var(--sl2)">'+
+        '<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;margin-bottom:8px">PDF Preview</div>'+
+        '<iframe src="'+dataURL+'" style="width:100%;height:420px;border:1px solid var(--sl2);border-radius:8px"></iframe>'+
+      '</div>'+
+      // Right: paste area + extract
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:10px">'+
+        '<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">Extract Items</div>'+
+        '<div style="font-size:12px;color:var(--ink2);background:var(--lv2);padding:10px;border-radius:8px">'+
+          '<b>Step 1:</b> In the PDF on the left, press <b>Ctrl+A</b> then <b>Ctrl+C</b><br>'+
+          '<b>Step 2:</b> Click the box below and press <b>Ctrl+V</b><br>'+
+          '<b>Step 3:</b> Click <b>Extract Items</b>'+
+        '</div>'+
+        '<textarea id="ocr-paste-area" style="flex:1;min-height:200px;padding:9px;font-size:11px;font-family:monospace;border:1px solid var(--sl2);border-radius:7px;resize:vertical;line-height:1.6;color:var(--ink)" placeholder="Paste PDF text here (Ctrl+A → Ctrl+C in PDF, then Ctrl+V here)"></textarea>'+
+        '<button class="bp" onclick="extractFromPaste()" style="justify-content:center"><i class="ti ti-sparkles"></i>Extract Items from Text</button>'+
+        '<div id="ocr-items" style="display:none;max-height:200px;overflow-y:auto"><div id="ocr-list"></div></div>'+
+        '<div style="display:none" id="ocr-use-wrap">'+
+          '<button class="bp" id="ocr-use" style="width:100%;justify-content:center" onclick="useOCRItems()"><i class="ti ti-check"></i>Import Items to Vendor Table</button>'+
+        '</div>'+
+      '</div>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+}
+window.showPDFExtractModal=showPDFExtractModal;
 
 </script>
 </body>
