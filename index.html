@@ -754,24 +754,33 @@ html,body{height:100%;overflow:hidden}
   <div class="card" style="margin-bottom:12px">
   <div class="ch" style="flex-wrap:wrap;gap:8px">
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-      <span style="font-size:12px;color:var(--ink2);font-weight:600">Rx For</span>
-      <input type="number" id="rx-days" value="5" min="1" max="90"
-        style="width:68px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--sl2);border-radius:6px;padding:3px 6px;background:var(--bg)"
-        oninput="rxRecalcAll()" title="Treatment days">
-      <span style="font-size:12px;color:var(--ink2)">days</span>
-      <!-- Next Visit -->
-      <span style="font-size:12px;color:var(--ink2);font-weight:600;margin-left:8px">Next Visit</span>
-      <input type="number" id="rx-next-visit" value="7" min="1" max="365"
-        style="width:58px;text-align:center;font-size:13px;font-weight:700;border:1.5px solid #d1fae5;border-radius:6px;padding:3px 6px;background:#f0fdf4;color:#059669"
-        title="Next visit in days">
-      <span style="font-size:12px;color:#059669">days</span>
-      <!-- Mode of Rx -->
-      <select id="rx-mode" style="font-size:12px;font-weight:600;border:1.5px solid var(--sl2);border-radius:6px;padding:4px 8px;background:var(--bg);color:var(--ink2);margin-left:8px">
-        <option value="Offline">Offline Rx</option>
-        <option value="Online">Online Rx</option>
-        <option value="Tele">Tele-Consult</option>
-      </select>
+<!-- 3 equally spaced controls -->
+    </div>
+    <div style="flex:1;display:flex;justify-content:space-evenly;align-items:center;margin:0 8px">
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px">
+        <i class="ti ti-clock" style="color:#185FA5;font-size:13px"></i>
+        <span style="font-size:11px;font-weight:600;color:#185FA5">Rx for</span>
+        <input type="number" id="rx-days" value="5" min="1" max="90"
+          style="width:36px;text-align:center;font-size:14px;font-weight:700;border:none;background:transparent;color:#185FA5;outline:none"
+          oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
+        <span style="font-size:11px;color:#185FA5">days</span>
+      </div>
+      <i class="ti ti-arrow-right" style="color:var(--ink3);font-size:14px"></i>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px">
+        <i class="ti ti-calendar-event" style="color:#059669;font-size:13px"></i>
+        <span style="font-size:11px;font-weight:600;color:#059669">Next visit</span>
+        <span id="rx-next-date" style="font-size:12px;font-weight:700;color:#059669">--</span>
+        <input type="hidden" id="rx-next-visit" value="5">
+      </div>
+      <i class="ti ti-arrow-right" style="color:var(--ink3);font-size:14px"></i>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FAF5FF;border:1px solid #E9D5FF;border-radius:8px">
+        <i class="ti ti-device-mobile" style="color:#7C3AED;font-size:13px"></i>
+        <select id="rx-mode" style="font-size:12px;font-weight:600;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
+          <option value="Offline">Offline Rx</option>
+          <option value="Online">Online Rx</option>
+          <option value="Tele">Tele-Consult</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
@@ -2085,6 +2094,19 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function rxCalcNextDate(){
+  var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  var d=new Date();
+  d.setDate(d.getDate()+days);
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var label=String(d.getDate()).padStart(2,'0')+' '+MF[d.getMonth()]+' '+d.getFullYear();
+  var el=document.getElementById('rx-next-date');if(el)el.textContent=label;
+  var hid=document.getElementById('rx-next-visit');if(hid)hid.value=label;
+}
+window.rxCalcNextDate=rxCalcNextDate;
+
 
 
 
@@ -4220,6 +4242,7 @@ function rxNewBlank(){
   // Focus patient name
   setTimeout(function(){var n=document.getElementById('rx-pat-name');if(n)n.focus();},50);
   toast('New prescription form ready','info');
+  rxCalcNextDate();
   // Add default consultancy service row
   setTimeout(function(){
     var st=document.getElementById('rx-svc-tbody');
@@ -4658,7 +4681,7 @@ try{
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
   var _rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
-  var _rxNext=(document.getElementById('rx-next-visit')||{value:'7'}).value||'7';
+  var _rxNextEl=document.getElementById('rx-next-date');var _rxNext=(_rxNextEl&&_rxNextEl.textContent&&_rxNextEl.textContent!='--')?_rxNextEl.textContent:'';
   var _rxMode=(document.getElementById('rx-mode')||{value:'Offline'}).value||'Offline';
   var _rd=document.getElementById('rx-date');
   var _rdtxt=(_rd&&_rd.textContent)||'';
@@ -12142,6 +12165,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
