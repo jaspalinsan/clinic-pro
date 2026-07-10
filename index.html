@@ -2099,6 +2099,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3530,21 +3532,23 @@ function loadVendorSample(){
 }
 
 // ── VENDOR REVIEW TABLE ──────────────────────────────────────
-function fillVendorTable(rows, label){
+function fillVendorTable(rows,label){
   var tbody=document.getElementById('vd-tbody');
-  if(!tbody)return;
+  if(!tbody){console.error('vd-tbody not found');toast('Error: vendor table not found','error');return;}
   tbody.innerHTML='';
-  rows.forEach(function(r,i){ tbody.appendChild(makeVendorRow(i+1,r)); });
-  // Update source label if element exists
-  var src2=document.getElementById('vd-source');
-  if(src2)src2.textContent=label||'Uploaded File';
-  calcVendorTotal();
+  rows.forEach(function(r,i){tbody.appendChild(makeVendorRow(i+1,r));});
+  var src2=document.getElementById('vd-source');if(src2)src2.textContent=label||'Uploaded File';
   var ib=document.getElementById('vd-import-btn');if(ib)ib.style.display='inline-flex';
-  showReviewSection();
-  // Scroll review into view
+  // vd-review-section may not exist — just show table directly
   var rv=document.getElementById('vd-review-section');
-  if(rv)rv.scrollIntoView({behavior:'smooth',block:'start'});
+  if(rv)rv.style.display='block';
+  calcVendorTotal();
+  // Scroll table into view
+  tbody.scrollIntoView({behavior:'smooth',block:'start'});
+  toast(rows.length+' items loaded into vendor table','success');
 }
+window.fillVendorTable=fillVendorTable;
+
 
 function makeVendorRow(num, data) {
   var d = data || {};
@@ -3949,11 +3953,26 @@ function renderOCRCards(items){
 }
 
 function useOCRItems(){
-  if(!_ocrItems.length)return;
+  if(!_ocrItems||!_ocrItems.length){toast('No items to import','error');return;}
+  var items=_ocrItems.slice();
+  // Close modal
   var m=document.getElementById('m-ocr');if(m)m.remove();
-  fillVendorTable(_ocrItems,'OCR — '+_ocrItems.length+' items');
-  toast('✓ '+_ocrItems.length+' items loaded — review then click Import','success');
+  // Navigate to vendor page first, then fill table
+  if(typeof nav==='function')nav('vendor');
+  setTimeout(function(){
+    var tbody=document.getElementById('vd-tbody');
+    if(!tbody){
+      // Try vendor page
+      if(typeof nav==='function')nav('vendor');
+      setTimeout(function(){fillVendorTable(items,'AI Extracted — '+items.length+' items');},300);
+      return;
+    }
+    fillVendorTable(items,'AI Extracted — '+items.length+' items');
+  },300);
+  toast(items.length+' items imported to vendor table','success');
 }
+window.useOCRItems=useOCRItems;
+
 
 function manualOCREntry(){
   var m=document.getElementById('m-ocr');if(m)m.remove();
@@ -12139,6 +12158,8 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
 
 
 
