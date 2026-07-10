@@ -2101,6 +2101,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3790,7 +3791,7 @@ async function doOCR(dataURL){
   var mime=arr[0].match(/:(.*?);/)[1];
   var base64=arr[1];
 
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('claude_proxy.php',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
@@ -12158,6 +12159,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
