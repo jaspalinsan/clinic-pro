@@ -2098,6 +2098,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3775,14 +3776,9 @@ function openOCRModal(dataURL,fileName){
 var _ocrItems=[];
 
 async function doOCR(dataURL){
-  var msg  = document.getElementById('ocr-msg');
-  var bar  = document.getElementById('ocr-bar');
-  var spin = document.getElementById('ocr-spin');
-  var box  = document.getElementById('ocr-status-box');
-  var wrap = document.getElementById('ocr-items');
-  var useB = document.getElementById('ocr-use');
-  var manB = document.getElementById('ocr-manual');
-  function upd(txt,pct){if(msg)msg.textContent=txt;if(bar)bar.style.width=(pct||0)+'%';}
+  // NOTE: Get DOM elements LAZILY inside callbacks — modal may not exist yet when doOCR is called
+  function el(id){return document.getElementById(id);}
+  function upd(txt,pct){var m=el('ocr-msg'),b=el('ocr-bar');if(m)m.textContent=txt;if(b)b.style.width=(pct||0)+'%';}
 
   upd('Reading bill with AI…',20);
 
@@ -3800,67 +3796,84 @@ async function doOCR(dataURL){
         role:'user',
         content:[
           {type:'image',source:{type:'base64',media_type:mime,data:base64}},
-          {type:'text',text:'This is a pharmacy/medical vendor bill or invoice. Extract every medicine/product line item. Return ONLY a valid JSON array with no markdown, no explanation, no code block. Each object must have these exact keys: name (string, uppercase), qty (number), rate (number, purchase/net rate), sale (number, MRP/sale rate), batch (string), expiry (string like MM/YY), company (string, manufacturer). Use 0 for missing numbers, empty string for missing text. Example: [{"name":"PARACETAMOL 500MG TAB","qty":10,"rate":12.50,"sale":18.00,"batch":"BT2401","expiry":"06/26","company":"CIPLA"}]. Return [] if no items.'}
+          {type:'text',text:'This is a pharmacy/medical vendor bill or invoice. Extract every medicine/product line item. Return ONLY a valid JSON array with no markdown, no explanation, no code block. Each object must have these exact keys: name (string, UPPERCASE), qty (number), rate (number, net/purchase rate), sale (number, MRP), batch (string), expiry (string MM/YY), company (string, manufacturer short name). Use 0 for missing numbers, empty string for missing text. Return [] if no items found.'}
         ]
       }]
     })
   })
-  .then(function(res){ upd('Processing…',60); return res.json(); })
+  .then(function(res){upd('Processing…',60);return res.json();})
   .then(function(data){
     var text='';
     if(data.content&&data.content.length)
       text=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
-    upd('Parsing items…',80);
+    upd('Parsing…',80);
     var clean=text.replace(/```json|```/g,'').trim();
     var items=[];
     try{items=JSON.parse(clean);}catch(e){items=[];}
+
     if(!items||!items.length){
-      showPasteBox(text,'AI read the bill but found no items. Edit text below and click Extract:');
-      if(manB)manB.style.display='flex';
-      if(spin)spin.style.display='none';
+      var spin=el('ocr-spin');if(spin)spin.style.display='none';
+      showPasteBox(text,'AI could not detect items. Paste text below and click Extract:');
+      var manB=el('ocr-manual');if(manB)manB.style.display='flex';
       return;
     }
-    // Normalise fields
+
     items=items.map(function(it){
       return{
         name:String(it.name||'').toUpperCase(),
-        qty:it.qty||0,
-        rate:it.rate||0,
+        qty:it.qty||0, rate:it.rate||0,
         sale:it.sale||it.mrp||0,
-        batch:it.batch||'',
-        expiry:it.expiry||it.exp||'',
-        company:it.company||it.mfr||'',
-        desc:''
+        batch:it.batch||'', expiry:it.expiry||it.exp||'',
+        company:it.company||it.mfr||'', desc:''
       };
     }).filter(function(it){return it.name.length>1;});
+
     _ocrItems=items;
-    // Update status box first
-    if(spin)spin.style.display='none';
+
+    // Get elements NOW (modal is in DOM at this point)
+    var spin2=el('ocr-spin');   if(spin2)spin2.style.display='none';
+    var bar=el('ocr-bar');      if(bar)bar.style.width='100%';
+    var box=el('ocr-status-box');
     if(box){
       box.style.background='var(--m)';
-      box.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
-        '<i class="ti ti-check" style="font-size:22px;color:var(--m4)"></i>'+
-        '<div><div style="font-size:13px;font-weight:600;color:var(--m4)">'+items.length+' items extracted</div>'+
-        '<div style="font-size:11px;color:var(--m4)">Review below then click Use These Items</div></div>'+
-      '</div>';
+      box.innerHTML='<div style="display:flex;align-items:center;gap:8px">'+
+        '<i class="ti ti-circle-check" style="font-size:20px;color:var(--m4)"></i>'+
+        '<div style="font-size:13px;font-weight:600;color:var(--m4)">'+items.length+' items found — review below</div>'+
+        '</div>';
     }
-    if(bar)bar.style.width='100%';
-    // Show items container BEFORE rendering cards
-    if(wrap){wrap.style.display='block';wrap.style.maxHeight='320px';wrap.style.overflowY='auto';}
-    if(useB)useB.style.display='flex';
-    if(manB)manB.style.display='flex';
-    // Render cards after DOM update
-    setTimeout(function(){
-      renderOCRCards(items);
-    },50);
+    var wrap=el('ocr-items');
+    if(wrap){wrap.style.display='block';wrap.style.maxHeight='300px';wrap.style.overflowY='auto';}
+    var useB=el('ocr-use');  if(useB)useB.style.display='flex';
+    var manB2=el('ocr-manual');if(manB2)manB2.style.display='flex';
+
+    // Render cards — elements guaranteed to exist now
+    var list=el('ocr-list');
+    if(list){
+      list.innerHTML=items.map(function(item){
+        var q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0,amt=parseFloat((q*r).toFixed(2));
+        return '<div style="border:1px solid var(--sl2);border-radius:8px;overflow:hidden;margin-bottom:5px">'+
+          '<div style="padding:7px 11px;display:flex;align-items:center;gap:7px;background:var(--sl)">'+
+            '<div style="font-size:12px;font-weight:700;color:var(--ink);flex:1">'+item.name+'</div>'+
+            (amt>0?'<b style="color:var(--acc)">Rs.'+amt.toFixed(2)+'</b>':'')+
+          '</div>'+
+          '<div style="padding:4px 11px;font-size:11px;color:var(--ink3);display:flex;gap:10px;flex-wrap:wrap">'+
+            (item.company?'<span>'+item.company+'</span>':'')+
+            (item.batch?'<span>Batch: <b>'+item.batch+'</b></span>':'')+
+            (item.expiry?'<span>Exp: <b>'+item.expiry+'</b></span>':'')+
+            (item.qty?'<span>Qty: '+item.qty+'</span>':'')+
+            (item.rate?'<span>Rs.'+item.rate+'/unit</span>':'')+
+          '</div></div>';
+      }).join('');
+    }
   })
   .catch(function(err){
-    console.error('AI bill read error:',err);
-    if(spin)spin.style.display='none';
-    showPasteBox('','Could not read bill automatically. Paste bill text below and click Extract:');
-    if(manB)manB.style.display='flex';
+    console.error('AI OCR error:',err);
+    var spin3=el('ocr-spin');if(spin3)spin3.style.display='none';
+    showPasteBox('','Could not read bill ('+err.message+'). Paste text below and click Extract:');
+    var manB3=el('ocr-manual');if(manB3)manB3.style.display='flex';
   });
 }
+
 
 
 
@@ -12126,6 +12139,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
