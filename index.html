@@ -756,7 +756,7 @@ html,body{height:100%;overflow:hidden}
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
 <!-- 3 equally spaced controls -->
     </div>
-    <div style="flex:1;display:flex;justify-content:space-evenly;align-items:center;margin:0 8px">
+    <div style="flex:1;display:flex;justify-content:space-between;align-items:center;margin:0 24px;gap:0">
       <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px">
         <i class="ti ti-clock" style="color:#185FA5;font-size:13px"></i>
         <span style="font-size:11px;font-weight:600;color:#185FA5">Rx for</span>
@@ -765,14 +765,14 @@ html,body{height:100%;overflow:hidden}
           oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
         <span style="font-size:11px;color:#185FA5">days</span>
       </div>
-      <i class="ti ti-arrow-right" style="color:var(--ink3);font-size:14px"></i>
+      <div style="flex:1;height:1px;background:var(--sl2);margin:0 12px"></div>
       <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px">
         <i class="ti ti-calendar-event" style="color:#059669;font-size:13px"></i>
         <span style="font-size:11px;font-weight:600;color:#059669">Next visit</span>
         <span id="rx-next-date" style="font-size:12px;font-weight:700;color:#059669">--</span>
         <input type="hidden" id="rx-next-visit" value="5">
       </div>
-      <i class="ti ti-arrow-right" style="color:var(--ink3);font-size:14px"></i>
+      <div style="flex:1;height:1px;background:var(--sl2);margin:0 12px"></div>
       <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FAF5FF;border:1px solid #E9D5FF;border-radius:8px">
         <i class="ti ti-device-mobile" style="color:#7C3AED;font-size:13px"></i>
         <select id="rx-mode" style="font-size:12px;font-weight:600;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
