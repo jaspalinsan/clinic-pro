@@ -2097,6 +2097,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3833,7 +3834,7 @@ async function doOCR(dataURL){
       };
     }).filter(function(it){return it.name.length>1;});
     _ocrItems=items;
-    renderOCRCards(items);
+    // Update status box first
     if(spin)spin.style.display='none';
     if(box){
       box.style.background='var(--m)';
@@ -3844,9 +3845,14 @@ async function doOCR(dataURL){
       '</div>';
     }
     if(bar)bar.style.width='100%';
-    if(wrap)wrap.style.display='block';
+    // Show items container BEFORE rendering cards
+    if(wrap){wrap.style.display='block';wrap.style.maxHeight='320px';wrap.style.overflowY='auto';}
     if(useB)useB.style.display='flex';
     if(manB)manB.style.display='flex';
+    // Render cards after DOM update
+    setTimeout(function(){
+      renderOCRCards(items);
+    },50);
   })
   .catch(function(err){
     console.error('AI bill read error:',err);
@@ -3902,6 +3908,11 @@ function extractFromPaste(){
 
 function renderOCRCards(items){
   var list=document.getElementById('ocr-list');
+  if(!list){
+    // Try to find in current modal
+    var modal=document.getElementById('m-ocr');
+    if(modal)list=modal.querySelector('[id="ocr-list"]');
+  }
   if(!list)return;
   list.innerHTML=items.map(function(item){
     var q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0,amt=q*r;
@@ -12074,7 +12085,7 @@ function showVendorExtracted(items,fileName,source){
       '</div>'+
     '</div></div>';
   document.body.appendChild(ov);
-  renderOCRCards(items);
+  setTimeout(function(){renderOCRCards(items);},50);
 }
 window.showVendorExtracted=showVendorExtracted;
 
@@ -12115,6 +12126,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 </script>
