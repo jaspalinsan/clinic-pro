@@ -945,7 +945,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph">
     <div><div class="ptitle"><i class="ti ti-truck" style="color:#F97316;margin-right:6px"></i>Vendor / Purchase</div></div>
     <div class="ha">
-      <input type="file" id="vendor-img-input" accept="image/*,.pdf" style="display:none" onchange="parseVendorImage(this)">
+      <input type="file" id="vendor-img-input" accept="image/*,.pdf,.xls,.xlsx,.csv" style="display:none" onchange="parseVendorImage(this)">
       <button class="bs" onclick="openBillReader()"><i class="ti ti-camera"></i>Scan Bill</button>
       <button class="bs" onclick="document.getElementById('vendor-img-input').click()" style="margin-left:4px"><i class="ti ti-upload"></i>Upload Bill</button>
       <button class="bp" onclick="doVendorImport()"><i class="ti ti-check"></i>Confirm Import</button>
@@ -2073,6 +2073,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -3401,20 +3402,92 @@ function parseVendorCSV(input){
 
 function parseVendorImage(input){
   var file=input.files?input.files[0]:null; if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
+  var ext=file.name.split('.').pop().toLowerCase();
+  var nm=document.getElementById('vd-img-name');
+  var pv=document.getElementById('vd-img-preview');
+  if(nm)nm.textContent=file.name;
+
+  // Excel/CSV — read as text/binary and show data in table
+  if(ext==='xlsx'||ext==='xls'||ext==='csv'){
+    if(ext==='csv'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        var text=ev.target.result;
+        var rows=text.split('\n').filter(Boolean);
+        var html='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        rows.forEach(function(row,i){
+          var cells=row.split(',');
+          html+='<tr>'+(i===0?
+            cells.map(function(c){return '<th style="background:#f0f4ff;border:1px solid #dde;padding:4px 8px;font-weight:600">'+c.trim()+'</th>';}).join(''):
+            cells.map(function(c){return '<td style="border:1px solid #eee;padding:4px 8px">'+c.trim()+'</td>';}).join('')
+          )+'</tr>';
+        });
+        html+='</table>';
+        var pv2=document.getElementById('vd-img-preview');
+        if(pv2){pv2.style.display='block';pv2.innerHTML='<div style="overflow:auto;max-height:300px">'+html+'</div>';}
+        toast('CSV loaded: '+rows.length+' rows','success');
+      };
+      reader.readAsText(file);
+    } else {
+      // XLSX — use SheetJS if available, else show file name
+      if(typeof XLSX!=='undefined'){
+        var reader2=new FileReader();
+        reader2.onload=function(ev){
+          try{
+            var wb=XLSX.read(ev.target.result,{type:'binary'});
+            var ws=wb.Sheets[wb.SheetNames[0]];
+            var html2=XLSX.utils.sheet_to_html(ws,{editable:false});
+            var pv3=document.getElementById('vd-img-preview');
+            if(pv3){pv3.style.display='block';pv3.innerHTML='<div style="overflow:auto;max-height:300px;font-size:11px">'+html2+'</div>';}
+            toast('Excel loaded: '+wb.SheetNames[0],'success');
+          }catch(e){toast('Could not read Excel file','error');}
+        };
+        reader2.readAsBinaryString(file);
+      } else {
+        // SheetJS not loaded — show file name only
+        if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:10px;background:#f0f4ff;border-radius:6px;font-size:12px"><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:6px"></i><b>'+file.name+'</b><br><span style="color:#6b7280;font-size:11px">Excel file attached</span></div>';}
+        toast('Excel file attached: '+file.name,'info');
+      }
+    }
+    // Store file reference
+    window._vendorBillFile={name:file.name,type:file.type,ext:ext};
+    if(input.value!==undefined)input.value='';
+    return;
+  }
+
+  // PDF — show PDF viewer
+  if(ext==='pdf'){
+    var reader3=new FileReader();
+    reader3.onload=function(ev){
+      var dataURL=ev.target.result;
+      var pv4=document.getElementById('vd-img-preview');
+      if(pv4){
+        pv4.style.display='block';
+        pv4.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';
+      }
+      window._vendorBillFile={name:file.name,type:'application/pdf',data:dataURL};
+      toast('PDF loaded: '+file.name,'success');
+    };
+    reader3.readAsDataURL(file);
+    if(input.value!==undefined)input.value='';
+    return;
+  }
+
+  // Image (JPG/PNG) — show preview + OCR
+  var reader4=new FileReader();
+  reader4.onload=function(ev){
     var dataURL=ev.target.result;
-    var pv=document.getElementById('vd-img-preview');
-    var nm=document.getElementById('vd-img-name');
     var im=document.getElementById('vd-img-el');
-    if(nm)nm.textContent=file.name;
     if(pv)pv.style.display='block';
     if(im){im.src=dataURL;im.style.display='block';}
-    openOCRModal(dataURL,file.name);
+    window._vendorBillFile={name:file.name,type:file.type,data:dataURL};
+    if(typeof openOCRModal==='function')openOCRModal(dataURL,file.name);
+    else toast('Image loaded: '+file.name,'success');
   };
-  reader.readAsDataURL(file);
+  reader4.readAsDataURL(file);
   if(input.value!==undefined)input.value='';
 }
+
 
 function clearVdImg(){
   var pv=document.getElementById('vd-img-preview');
@@ -11891,6 +11964,7 @@ function labFilterClear(){
   if(typeof renderLabQueue==='function')renderLabQueue();
 }
 window.labFilterClear=labFilterClear;
+
 
 
 
