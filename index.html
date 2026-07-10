@@ -131,6 +131,7 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
 #page-settings{padding:0!important}
+#page-settings.on{display:block!important}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -2096,6 +2097,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 function rxCalcNextDate(){
   var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
@@ -12167,6 +12169,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
