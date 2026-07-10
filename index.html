@@ -760,6 +760,18 @@ html,body{height:100%;overflow:hidden}
         style="width:68px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--sl2);border-radius:6px;padding:3px 6px;background:var(--bg)"
         oninput="rxRecalcAll()" title="Treatment days">
       <span style="font-size:12px;color:var(--ink2)">days</span>
+      <!-- Next Visit -->
+      <span style="font-size:12px;color:var(--ink2);font-weight:600;margin-left:8px">Next Visit</span>
+      <input type="number" id="rx-next-visit" value="7" min="1" max="365"
+        style="width:58px;text-align:center;font-size:13px;font-weight:700;border:1.5px solid #d1fae5;border-radius:6px;padding:3px 6px;background:#f0fdf4;color:#059669"
+        title="Next visit in days">
+      <span style="font-size:12px;color:#059669">days</span>
+      <!-- Mode of Rx -->
+      <select id="rx-mode" style="font-size:12px;font-weight:600;border:1.5px solid var(--sl2);border-radius:6px;padding:4px 8px;background:var(--bg);color:var(--ink2);margin-left:8px">
+        <option value="Offline">Offline Rx</option>
+        <option value="Online">Online Rx</option>
+        <option value="Tele">Tele-Consult</option>
+      </select>
     </div>
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
@@ -2073,6 +2085,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -4643,6 +4657,9 @@ try{
   var pmob=(document.getElementById('rx-pat-mob')||{}).value||'';
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
+  var _rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
+  var _rxNext=(document.getElementById('rx-next-visit')||{value:'7'}).value||'7';
+  var _rxMode=(document.getElementById('rx-mode')||{value:'Offline'}).value||'Offline';
   var _rd=document.getElementById('rx-date');
   var _rdtxt=(_rd&&_rd.textContent)||'';
   // Store as ISO date for reliable filtering
@@ -4701,7 +4718,8 @@ try{
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
   var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
-    status:'Pending',paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs};
+    status:'Pending',paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs,
+    rxDays:_rxDays,nextVisit:_rxNext,rxMode:_rxMode};
 
   window.BILLING_DB.unshift(invoice);
 
@@ -11852,6 +11870,14 @@ function printInvoice(invId){
   H.push('<div><span class="lb">Mobile</span><span class="vl">'+(inv.mob||'-')+'</span></div>');
   H.push('<div><span class="lb">Diagnosis</span><span class="vl">'+(inv.dx||'-')+'</span></div>');
   H.push('</div>');
+  // Rx info bar - days, next visit, mode
+  if(inv.rxDays||inv.nextVisit||inv.rxMode){
+    H.push('<div style="display:flex;gap:20px;padding:7px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb;font-size:11px">');
+    if(inv.rxDays)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Rx For</span><b style="color:#1e40af">'+inv.rxDays+' Days</b></div>');
+    if(inv.nextVisit)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Next Visit</span><b style="color:#059669">After '+inv.nextVisit+' Days</b></div>');
+    if(inv.rxMode)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Mode</span><b style="color:#7c3aed">'+inv.rxMode+'</b></div>');
+    H.push('</div>');
+  }
 
   // Balance invoice — show clean balance summary box
   if(isBalanceInv){
@@ -12116,6 +12142,8 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
 
 
 
