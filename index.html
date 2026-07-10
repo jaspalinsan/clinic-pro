@@ -2102,6 +2102,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 // Convert ISO date string to display format "02 June 2026"
 function isoToDisplay(iso){
   if(!iso)return '';
@@ -3415,99 +3416,84 @@ function parseVendorImage(input){
   var pv=document.getElementById('vd-img-preview');
   if(nm)nm.textContent=file.name;
 
-  // CSV
-  if(ext==='csv'){
-    var r0=new FileReader();
-    r0.onload=function(ev){
-      var text=ev.target.result;
-      var rows=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-      var headers=rows[0].split(',').map(function(h){return h.trim().toLowerCase();});
-      var items=[];
-      for(var i=1;i<rows.length;i++){
-        var cells=rows[i].split(',');
-        var obj={};
-        headers.forEach(function(h,j){obj[h]=(cells[j]||'').trim();});
-        function g(){for(var a=0;a<arguments.length;a++){for(var k in obj){if(k.toLowerCase().indexOf(arguments[a])!==-1&&obj[k])return obj[k];}}return '';}
-        var name=g('product','medicine','name','item','desc');
-        if(!name)continue;
-        items.push({name:name.toUpperCase(),qty:parseFloat(g('qty','quantity','pcs'))||0,
-          rate:parseFloat(g('n.rate','net rate','rate','price','cost'))||0,
-          sale:parseFloat(g('mrp','sale','retail'))||0,
-          batch:g('batch'),expiry:g('exp'),company:g('mfr','manufacturer','company'),desc:''});
+  // Excel/CSV — read as text/binary and show data in table
+  if(ext==='xlsx'||ext==='xls'||ext==='csv'){
+    if(ext==='csv'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        var text=ev.target.result;
+        var rows=text.split('\n').filter(Boolean);
+        var html='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        rows.forEach(function(row,i){
+          var cells=row.split(',');
+          html+='<tr>'+(i===0?
+            cells.map(function(c){return '<th style="background:#f0f4ff;border:1px solid #dde;padding:4px 8px;font-weight:600">'+c.trim()+'</th>';}).join(''):
+            cells.map(function(c){return '<td style="border:1px solid #eee;padding:4px 8px">'+c.trim()+'</td>';}).join('')
+          )+'</tr>';
+        });
+        html+='</table>';
+        var pv2=document.getElementById('vd-img-preview');
+        if(pv2){pv2.style.display='block';pv2.innerHTML='<div style="overflow:auto;max-height:300px">'+html+'</div>';}
+        toast('CSV loaded: '+rows.length+' rows','success');
+      };
+      reader.readAsText(file);
+    } else {
+      // XLSX — use SheetJS if available, else show file name
+      if(typeof XLSX!=='undefined'){
+        var reader2=new FileReader();
+        reader2.onload=function(ev){
+          try{
+            var wb=XLSX.read(ev.target.result,{type:'binary'});
+            var ws=wb.Sheets[wb.SheetNames[0]];
+            var html2=XLSX.utils.sheet_to_html(ws,{editable:false});
+            var pv3=document.getElementById('vd-img-preview');
+            if(pv3){pv3.style.display='block';pv3.innerHTML='<div style="overflow:auto;max-height:300px;font-size:11px">'+html2+'</div>';}
+            toast('Excel loaded: '+wb.SheetNames[0],'success');
+          }catch(e){toast('Could not read Excel file','error');}
+        };
+        reader2.readAsBinaryString(file);
+      } else {
+        // SheetJS not loaded — show file name only
+        if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:10px;background:#f0f4ff;border-radius:6px;font-size:12px"><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:6px"></i><b>'+file.name+'</b><br><span style="color:#6b7280;font-size:11px">Excel file attached</span></div>';}
+        toast('Excel file attached: '+file.name,'info');
       }
-      if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:8px;background:#f0fdf4;border-radius:6px;font-size:12px;color:#059669"><b>'+items.length+' items found in CSV</b></div>';}
-      if(items.length){_ocrItems=items;renderOCRCards(items);
-        var wrap=document.getElementById('ocr-items');if(wrap)wrap.style.display='block';
-        var useB=document.getElementById('ocr-use');if(useB)useB.style.display='flex';}
-      else toast('No items detected in CSV','error');
-    };
-    r0.readAsText(file);
-    if(input.value!==undefined)input.value='';
-    return;
-  }
-
-  // XLSX/XLS
-  if(ext==='xlsx'||ext==='xls'){
-    if(typeof XLSX==='undefined'){
-      var s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-      s.onload=function(){parseVendorImage(input);};
-      document.head.appendChild(s); return;
     }
-    var r1=new FileReader();
-    r1.onload=function(ev){
-      try{
-        var wb=XLSX.read(ev.target.result,{type:'binary'});
-        var ws=wb.Sheets[wb.SheetNames[0]];
-        var data=XLSX.utils.sheet_to_json(ws,{defval:''});
-        var items2=data.map(function(row){
-          function g2(){for(var a=0;a<arguments.length;a++){for(var k in row){if(k.toLowerCase().indexOf(arguments[a])!==-1&&row[k]!=='')return String(row[k]).trim();}}return '';}
-          var name=g2('product','medicine','name','item','description','desc');
-          if(!name)return null;
-          return{name:name.toUpperCase(),qty:parseFloat(g2('qty','quantity','pcs'))||0,
-            rate:parseFloat(g2('n.rate','net rate','rate','price','cost'))||0,
-            sale:parseFloat(g2('mrp','sale','retail'))||0,
-            batch:g2('batch'),expiry:g2('exp'),company:g2('mfr','manufacturer','company','brand'),desc:''};
-        }).filter(Boolean);
-        var html=XLSX.utils.sheet_to_html(ws,{editable:false});
-        if(pv){pv.style.display='block';pv.innerHTML='<div style="overflow:auto;max-height:200px;font-size:11px">'+html+'</div><div style="padding:8px;background:#f0fdf4;font-size:12px;color:#059669"><b>'+items2.length+' items found in Excel</b></div>';}
-        if(items2.length){_ocrItems=items2;renderOCRCards(items2);
-          var wrap2=document.getElementById('ocr-items');if(wrap2)wrap2.style.display='block';
-          var useB2=document.getElementById('ocr-use');if(useB2)useB2.style.display='flex';}
-        else toast('No items detected in Excel','error');
-      }catch(e){toast('Excel read error: '+e.message,'error');}
-    };
-    r1.readAsBinaryString(file);
+    // Store file reference
+    window._vendorBillFile={name:file.name,type:file.type,ext:ext};
     if(input.value!==undefined)input.value='';
     return;
   }
 
-  // PDF — render first page as image via canvas, then send to Claude
+  // PDF — show PDF viewer
   if(ext==='pdf'){
-    var r2=new FileReader();
-    r2.onload=function(ev){
+    var reader3=new FileReader();
+    reader3.onload=function(ev){
       var dataURL=ev.target.result;
-      // Show PDF preview
-      if(pv){pv.style.display='block';
-        pv.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:280px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';}
-      // Open OCR modal — send PDF dataURL directly to Claude (Claude can read PDF)
-      openOCRModal(dataURL,file.name);
+      var pv4=document.getElementById('vd-img-preview');
+      if(pv4){
+        pv4.style.display='block';
+        pv4.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';
+      }
+      window._vendorBillFile={name:file.name,type:'application/pdf',data:dataURL};
+      toast('PDF loaded: '+file.name,'success');
     };
-    r2.readAsDataURL(file);
+    reader3.readAsDataURL(file);
     if(input.value!==undefined)input.value='';
     return;
   }
 
-  // JPG/PNG — direct Claude vision
-  var r3=new FileReader();
-  r3.onload=function(ev){
+  // Image (JPG/PNG) — show preview + OCR
+  var reader4=new FileReader();
+  reader4.onload=function(ev){
     var dataURL=ev.target.result;
     var im=document.getElementById('vd-img-el');
     if(pv)pv.style.display='block';
     if(im){im.src=dataURL;im.style.display='block';}
-    openOCRModal(dataURL,file.name);
+    window._vendorBillFile={name:file.name,type:file.type,data:dataURL};
+    if(typeof openOCRModal==='function')openOCRModal(dataURL,file.name);
+    else toast('Image loaded: '+file.name,'success');
   };
-  r3.readAsDataURL(file);
+  reader4.readAsDataURL(file);
   if(input.value!==undefined)input.value='';
 }
 
@@ -3533,20 +3519,20 @@ function loadVendorSample(){
 }
 
 // ── VENDOR REVIEW TABLE ──────────────────────────────────────
-function fillVendorTable(rows,label){
+function fillVendorTable(rows, label){
   var tbody=document.getElementById('vd-tbody');
-  if(!tbody){console.error('vd-tbody not found');toast('Error: vendor table not found','error');return;}
+  if(!tbody)return;
   tbody.innerHTML='';
-  rows.forEach(function(r,i){tbody.appendChild(makeVendorRow(i+1,r));});
-  var src2=document.getElementById('vd-source');if(src2)src2.textContent=label||'Uploaded File';
-  var ib=document.getElementById('vd-import-btn');if(ib)ib.style.display='inline-flex';
-  // vd-review-section may not exist — just show table directly
-  var rv=document.getElementById('vd-review-section');
-  if(rv)rv.style.display='block';
+  rows.forEach(function(r,i){ tbody.appendChild(makeVendorRow(i+1,r)); });
+  // Update source label if element exists
+  var src2=document.getElementById('vd-source');
+  if(src2)src2.textContent=label||'Uploaded File';
   calcVendorTotal();
-  // Scroll table into view
-  tbody.scrollIntoView({behavior:'smooth',block:'start'});
-  toast(rows.length+' items loaded into vendor table','success');
+  var ib=document.getElementById('vd-import-btn');if(ib)ib.style.display='inline-flex';
+  showReviewSection();
+  // Scroll review into view
+  var rv=document.getElementById('vd-review-section');
+  if(rv)rv.scrollIntoView({behavior:'smooth',block:'start'});
 }
 window.fillVendorTable=fillVendorTable;
 
@@ -3781,102 +3767,70 @@ function openOCRModal(dataURL,fileName){
 var _ocrItems=[];
 
 async function doOCR(dataURL){
-  // NOTE: Get DOM elements LAZILY inside callbacks — modal may not exist yet when doOCR is called
-  function el(id){return document.getElementById(id);}
-  function upd(txt,pct){var m=el('ocr-msg'),b=el('ocr-bar');if(m)m.textContent=txt;if(b)b.style.width=(pct||0)+'%';}
+  var msg  = document.getElementById('ocr-msg');
+  var bar  = document.getElementById('ocr-bar');
+  var spin = document.getElementById('ocr-spin');
+  var box  = document.getElementById('ocr-status-box');
+  var wrap = document.getElementById('ocr-items');
+  var useB = document.getElementById('ocr-use');
+  var manB = document.getElementById('ocr-manual');
 
-  upd('Reading bill with AI…',20);
+  function upd(txt,pct){if(msg)msg.textContent=txt;if(bar)bar.style.width=(pct||0)+'%';}
 
-  var arr=dataURL.split(',');
-  var mime=arr[0].match(/:(.*?);/)[1];
-  var base64=arr[1];
+  try {
+    upd('📡 Sending to OCR service…',10);
+    var arr=dataURL.split(',');
+    var mime=arr[0].match(/:(.*?);/)[1];
+    var bstr=atob(arr[1]);
+    var u8=new Uint8Array(bstr.length);
+    for(var i=0;i<bstr.length;i++)u8[i]=bstr.charCodeAt(i);
+    var blob=new Blob([u8],{type:mime});
+    var form=new FormData();
+    form.append('file',blob,'bill.jpg');
+    form.append('apikey','helloworld');
+    form.append('language','eng');
+    form.append('isOverlayRequired','false');
+    form.append('detectOrientation','true');
+    form.append('scale','true');
+    form.append('isTable','true');
+    upd('📡 Uploading image…',25);
+    var res=await fetch('https://api.ocr.space/parse/image',{method:'POST',body:form});
+    if(!res.ok)throw new Error('OCR service '+res.status);
+    var data=await res.json();
+    upd('🔍 Parsing rows…',75);
+    if(!data.ParsedResults||!data.ParsedResults.length)throw new Error('No text found');
+    var rawText=data.ParsedResults.map(function(r){return r.ParsedText||'';}).join('\n');
+    if(!rawText.trim())throw new Error('Empty result');
 
-  fetch('claude_proxy.php',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-6',
-      max_tokens:2000,
-      messages:[{
-        role:'user',
-        content:[
-          {type:'image',source:{type:'base64',media_type:mime,data:base64}},
-          {type:'text',text:'This is a pharmacy/medical vendor bill or invoice. Extract every medicine/product line item. Return ONLY a valid JSON array with no markdown, no explanation, no code block. Each object must have these exact keys: name (string, UPPERCASE), qty (number), rate (number, net/purchase rate), sale (number, MRP), batch (string), expiry (string MM/YY), company (string, manufacturer short name). Use 0 for missing numbers, empty string for missing text. Return [] if no items found.'}
-        ]
-      }]
-    })
-  })
-  .then(function(res){upd('Processing…',60);return res.json();})
-  .then(function(data){
-    var text='';
-    if(data.content&&data.content.length)
-      text=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
-    upd('Parsing…',80);
-    var clean=text.replace(/```json|```/g,'').trim();
-    var items=[];
-    try{items=JSON.parse(clean);}catch(e){items=[];}
-
-    if(!items||!items.length){
-      var spin=el('ocr-spin');if(spin)spin.style.display='none';
-      showPasteBox(text,'AI could not detect items. Paste text below and click Extract:');
-      var manB=el('ocr-manual');if(manB)manB.style.display='flex';
+    var items=parseBillOCR(rawText);
+    if(!items.length){
+      showPasteBox(rawText,'OCR complete — no rows detected. Edit text below and click Extract:');
+      if(manB)manB.style.display='flex';
       return;
     }
 
-    items=items.map(function(it){
-      return{
-        name:String(it.name||'').toUpperCase(),
-        qty:it.qty||0, rate:it.rate||0,
-        sale:it.sale||it.mrp||0,
-        batch:it.batch||'', expiry:it.expiry||it.exp||'',
-        company:it.company||it.mfr||'', desc:''
-      };
-    }).filter(function(it){return it.name.length>1;});
-
     _ocrItems=items;
-
-    // Get elements NOW (modal is in DOM at this point)
-    var spin2=el('ocr-spin');   if(spin2)spin2.style.display='none';
-    var bar=el('ocr-bar');      if(bar)bar.style.width='100%';
-    var box=el('ocr-status-box');
+    renderOCRCards(items);
+    if(spin)spin.style.display='none';
     if(box){
       box.style.background='var(--m)';
-      box.innerHTML='<div style="display:flex;align-items:center;gap:8px">'+
-        '<i class="ti ti-circle-check" style="font-size:20px;color:var(--m4)"></i>'+
-        '<div style="font-size:13px;font-weight:600;color:var(--m4)">'+items.length+' items found — review below</div>'+
-        '</div>';
+      box.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
+        '<i class="ti ti-check" style="font-size:22px;color:var(--m4)"></i>'+
+        '<div><div style="font-size:13px;font-weight:600;color:var(--m4)">✓ '+items.length+' items extracted</div>'+
+        '<div style="font-size:11.5px;color:var(--m4)">Review below — edit any row — then click Use These Items</div></div>'+
+      '</div>';
     }
-    var wrap=el('ocr-items');
-    if(wrap){wrap.style.display='block';wrap.style.maxHeight='300px';wrap.style.overflowY='auto';}
-    var useB=el('ocr-use');  if(useB)useB.style.display='flex';
-    var manB2=el('ocr-manual');if(manB2)manB2.style.display='flex';
+    if(bar)bar.style.width='100%';
+    if(wrap)wrap.style.display='block';
+    if(useB)useB.style.display='flex';
+    if(manB)manB.style.display='flex';
 
-    // Render cards — elements guaranteed to exist now
-    var list=el('ocr-list');
-    if(list){
-      list.innerHTML=items.map(function(item){
-        var q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0,amt=parseFloat((q*r).toFixed(2));
-        return '<div style="border:1px solid var(--sl2);border-radius:8px;overflow:hidden;margin-bottom:5px">'+
-          '<div style="padding:7px 11px;display:flex;align-items:center;gap:7px;background:var(--sl)">'+
-            '<div style="font-size:12px;font-weight:700;color:var(--ink);flex:1">'+item.name+'</div>'+
-            (amt>0?'<b style="color:var(--acc)">Rs.'+amt.toFixed(2)+'</b>':'')+
-          '</div>'+
-          '<div style="padding:4px 11px;font-size:11px;color:var(--ink3);display:flex;gap:10px;flex-wrap:wrap">'+
-            (item.company?'<span>'+item.company+'</span>':'')+
-            (item.batch?'<span>Batch: <b>'+item.batch+'</b></span>':'')+
-            (item.expiry?'<span>Exp: <b>'+item.expiry+'</b></span>':'')+
-            (item.qty?'<span>Qty: '+item.qty+'</span>':'')+
-            (item.rate?'<span>Rs.'+item.rate+'/unit</span>':'')+
-          '</div></div>';
-      }).join('');
-    }
-  })
-  .catch(function(err){
-    console.error('AI OCR error:',err);
-    var spin3=el('ocr-spin');if(spin3)spin3.style.display='none';
-    showPasteBox('','Could not read bill ('+err.message+'). Paste text below and click Extract:');
-    var manB3=el('ocr-manual');if(manB3)manB3.style.display='flex';
-  });
+  } catch(err){
+    console.error('OCR:',err);
+    if(spin)spin.style.display='none';
+    showPasteBox('','Could not read bill automatically ('+( err.message||'network error')+').\nPaste bill text below or click Fill Manually:');
+    if(manB)manB.style.display='flex';
+  }
 }
 
 
@@ -3920,17 +3874,11 @@ function extractFromPaste(){
   var manB=document.getElementById('ocr-manual');
   if(wrap)wrap.style.display='block';
   if(useB)useB.style.display='flex';
-  var uw=document.getElementById('ocr-use-wrap');if(uw)uw.style.display='block';
   if(manB)manB.style.display='flex';
 }
 
 function renderOCRCards(items){
   var list=document.getElementById('ocr-list');
-  if(!list){
-    // Try to find in current modal
-    var modal=document.getElementById('m-ocr');
-    if(modal)list=modal.querySelector('[id="ocr-list"]');
-  }
   if(!list)return;
   list.innerHTML=items.map(function(item){
     var q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0,amt=q*r;
@@ -3954,23 +3902,10 @@ function renderOCRCards(items){
 }
 
 function useOCRItems(){
-  if(!_ocrItems||!_ocrItems.length){toast('No items to import','error');return;}
-  var items=_ocrItems.slice();
-  // Close modal
+  if(!_ocrItems.length)return;
   var m=document.getElementById('m-ocr');if(m)m.remove();
-  // Navigate to vendor page first, then fill table
-  if(typeof nav==='function')nav('vendor');
-  setTimeout(function(){
-    var tbody=document.getElementById('vd-tbody');
-    if(!tbody){
-      // Try vendor page
-      if(typeof nav==='function')nav('vendor');
-      setTimeout(function(){fillVendorTable(items,'AI Extracted — '+items.length+' items');},300);
-      return;
-    }
-    fillVendorTable(items,'AI Extracted — '+items.length+' items');
-  },300);
-  toast(items.length+' items imported to vendor table','success');
+  fillVendorTable(_ocrItems,'OCR — '+_ocrItems.length+' items');
+  toast('✓ '+_ocrItems.length+' items loaded — review then click Import','success');
 }
 window.useOCRItems=useOCRItems;
 
@@ -12159,6 +12094,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
