@@ -311,9 +311,20 @@ document.getElementById('b3').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.textContent='Saving…';
   fetch('data.php?action=save_appointment',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({id:'APT-'+Date.now(),patient:name,mobile:phone,
-      age:age+(sex?'/'+sex:''),date:date,time:selSlot,
-      reason:reason,status:'Confirmed',notes:'Booked online'})
+    body:JSON.stringify({
+      id:'APT-'+Date.now(),
+      name:name,
+      mob:phone,
+      mobile:phone,
+      age:age,
+      gender:sex,
+      date:date,
+      time:selSlot,
+      complaint:reason,
+      status:'Confirmed',
+      token:'',
+      pid:''
+    })
   }).then(function(r){return r.json();})
   .then(function(){
     document.getElementById('done-details').innerHTML=
