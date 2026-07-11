@@ -25,6 +25,7 @@ html,body{height:100%;overflow:hidden}
 .scroll{overflow-y:auto;height:100%;background:#F1F5F9}
 .page{display:none;padding:0;min-height:calc(100vh - 72px)}
 .page.on{display:block}
+#page-settings.on,#page-finance.on{padding:0!important;margin-top:0!important;}
 .page-padded{padding:16px}
 
 
@@ -1099,7 +1100,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 </div>
 </div>
-<div class="page" id="page-finance" style="padding:0">
+<div class="page" id="page-finance" style="padding:0;overflow:hidden">
   <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
@@ -1167,7 +1168,7 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
-<div class="page" id="page-settings" style="padding:0;background:var(--bg)"><div style="display:flex;flex-direction:column;height:100%">
+<div class="page" id="page-settings" style="padding:0;background:var(--bg);overflow:hidden"><div style="display:flex;flex-direction:column;height:100%">
   <!-- TOP TAB BAR (like vendor page) -->
   <div class="ph" style="border-bottom:1px solid var(--sl2);flex-shrink:0;flex-wrap:wrap;gap:6px">
     <div><div class="ptitle"><i class="ti ti-settings" style="color:#3b82f6;margin-right:6px"></i>Settings</div></div>
@@ -1738,15 +1739,54 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
 
-  <!-- Block Dates -->
+  <!-- Block Days of week -->
   <div style="background:#FEF3C7;border:0.5px solid #FDE68A;border-radius:10px;padding:12px 14px;margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-ban"></i> Block dates / holidays</div>
-    <div id="apt-blocked-dates" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <input class="fin" id="apt-block-inp" type="date" style="font-size:12px;padding:5px 8px">
-      <button class="bp" onclick="aptAddBlock()" style="padding:6px 14px;font-size:12px"><i class="ti ti-plus"></i> Block</button>
+    <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-ban"></i> Block days (holidays / off days)</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px" id="apt-block-days-wrap">
+      <div class="apt-bday-wrap" data-day="Mon">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Mon</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Tue">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Tue</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Wed">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Wed</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Thu">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Thu</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Fri">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Fri</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Sat">
+        <div class="apt-bday-btn" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:white;border:0.5px solid #FDE68A;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#92400e">Sat</div>
+          <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">Open</div>
+        </div>
+      </div>
+      <div class="apt-bday-wrap" data-day="Sun">
+        <div class="apt-bday-btn blocked" onclick="aptToggleBlockDay(this.parentElement)" style="padding:8px 4px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;text-align:center;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:#DC2626">Sun</div>
+          <div style="font-size:9px;font-weight:600;color:#DC2626;margin-top:3px">Blocked</div>
+        </div>
+      </div>
     </div>
-    <div style="font-size:10px;color:#92400e;margin-top:6px">Patients cannot book on blocked dates</div>
+    <div style="font-size:10px;color:#92400e;margin-top:8px">Blocked days show as unavailable when booking appointments</div>
   </div>
 
   <hr style="border:none;border-top:0.5px solid var(--sl2);margin-bottom:16px">
@@ -2228,6 +2268,52 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function aptToggleBlockDay(wrap){
+  var btn=wrap.querySelector('.apt-bday-btn');
+  var lbls=wrap.querySelectorAll('div');
+  var lbl=lbls[lbls.length-1];
+  var blocked=btn.classList.contains('blocked');
+  if(blocked){
+    btn.classList.remove('blocked');
+    btn.style.background='white';btn.style.border='0.5px solid #FDE68A';
+    lbls[0].style.color='#92400e';
+    if(lbl){lbl.textContent='Open';lbl.style.color='#059669';}
+    APT_SETTINGS.blockedDays=(APT_SETTINGS.blockedDays||[]).filter(function(d){return d!==wrap.dataset.day;});
+  } else {
+    btn.classList.add('blocked');
+    btn.style.background='#FEF2F2';btn.style.border='1.5px solid #FECACA';
+    lbls[0].style.color='#DC2626';
+    if(lbl){lbl.textContent='Blocked';lbl.style.color='#DC2626';}
+    if(!(APT_SETTINGS.blockedDays||[]).includes(wrap.dataset.day)){
+      APT_SETTINGS.blockedDays=APT_SETTINGS.blockedDays||[];
+      APT_SETTINGS.blockedDays.push(wrap.dataset.day);
+    }
+  }
+}
+
+function renderBlockDays(){
+  var wraps=document.querySelectorAll('.apt-bday-wrap');
+  wraps.forEach(function(wrap){
+    var btn=wrap.querySelector('.apt-bday-btn');
+    var lbls=wrap.querySelectorAll('div');
+    var lbl=lbls[lbls.length-1];
+    var blocked=(APT_SETTINGS.blockedDays||[]).indexOf(wrap.dataset.day)!==-1;
+    btn.classList.toggle('blocked',blocked);
+    if(blocked){
+      btn.style.background='#FEF2F2';btn.style.border='1.5px solid #FECACA';
+      lbls[0].style.color='#DC2626';
+      if(lbl){lbl.textContent='Blocked';lbl.style.color='#DC2626';}
+    } else {
+      btn.style.background='white';btn.style.border='0.5px solid #FDE68A';
+      lbls[0].style.color='#92400e';
+      if(lbl){lbl.textContent='Open';lbl.style.color='#059669';}
+    }
+  });
+}
+window.aptToggleBlockDay=aptToggleBlockDay;
+window.renderBlockDays=renderBlockDays;
+
 
 function showApptQR(){
   var old=document.getElementById('m-appt-qr');if(old)old.remove();
@@ -12423,6 +12509,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
