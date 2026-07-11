@@ -120,7 +120,7 @@ input:focus,select:focus{border-color:#059669}
       <div id="err-2" class="err">Please select a date and time slot</div>
       <div style="display:flex;gap:8px">
         <button class="btn sec" onclick="goStep(1)" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
-        <button class="btn" onclick="goStep3()" style="flex:2"><i class="ti ti-currency-rupee"></i> Pay & Confirm</button>
+        <button class="btn" onclick="goStep3()" style="flex:2"><i class="ti ti-arrow-right"></i> Review & Confirm</button>
       </div>
     </div>
 
@@ -198,7 +198,10 @@ function lookupPatient(phone){
   .then(function(r){return r.json();})
   .then(function(d){
     var pats=(d.patients||[]);
-    var found=pats.find(function(p){return (p.mobile||p.mob||'').replace(/\D/g,'')==clean;});
+    var found=pats.find(function(p){
+      var m=(p.mobile||p.mob||p.phone||p.contact||'').toString().replace(/\D/g,'');
+      return m===clean||m.slice(-10)===clean.slice(-10);
+    });
     if(found){
       document.getElementById('b-name').value=found.name||found.patient_name||'';
       document.getElementById('b-name').className='auto-filled';
@@ -229,12 +232,16 @@ function goStep2(){
 function loadSlots(){
   var dateStr=document.getElementById('b-date').value;
   if(!dateStr)return;
-  // Load booked slots from data.php
   fetch('data.php?action=get_all')
   .then(function(r){return r.json();})
   .then(function(d){
+    // Load booked slots
     var appts=d.appointments||d.appts||[];
     bookedSlots=appts.filter(function(a){return a.date===dateStr;}).map(function(a){return a.time;});
+    // Also update APT_SETTINGS from clinic settings if available
+    if(d.clinic_settings&&d.clinic_settings.aptSettings){
+      Object.assign(APPT_SETTINGS,d.clinic_settings.aptSettings);
+    }
     renderSlots(dateStr);
   }).catch(function(){renderSlots(dateStr);});
 }
@@ -309,21 +316,33 @@ function confirmBooking(){
   var dp=date.split('-');
   var dateDisp=String(parseInt(dp[2])).padStart(2,'0')+' '+M[parseInt(dp[1])-1]+' '+dp[0];
   var apptId='APT-'+Date.now();
+  var err3=document.getElementById('err-3');
   fetch('data.php?action=save_appointment',{method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       id:apptId,patient:name,mobile:phone,
       age:age+(sex?'/'+sex:''),date:date,time:selectedSlot,
-      reason:reason||'Appointment',status:'confirmed',
+      reason:reason||'Appointment',status:'Confirmed',
       notes:'Booked online via QR'
     })
-  }).then(function(r){return r.json();}).then(function(){}).catch(function(){});
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    document.getElementById('confirm-details').innerHTML=
+      '<div class="confirm-row"><span>Patient</span><span>'+name+'</span></div>'+
+      '<div class="confirm-row"><span>Mobile</span><span>'+phone+'</span></div>'+
+      '<div class="confirm-row"><span>Date</span><span>'+dateDisp+'</span></div>'+
+      '<div class="confirm-row"><span>Time</span><span>'+selectedSlot+'</span></div>';
+    document.getElementById('confirm-sub').textContent='Your slot is confirmed at '+selectedSlot;
+    goStep(4);
+  })
+  .catch(function(){
+    if(err3){err3.style.display='block';err3.textContent='Connection error. Please try again.';}
+  });
+  return;
   document.getElementById('confirm-details').innerHTML=
     '<div class="confirm-row"><span>Patient</span><span>'+name+'</span></div>'+
     '<div class="confirm-row"><span>Mobile</span><span>'+phone+'</span></div>'+
     '<div class="confirm-row"><span>Date</span><span>'+dateDisp+'</span></div>'+
     '<div class="confirm-row"><span>Time</span><span>'+selectedSlot+'</span></div>';
-  document.getElementById('confirm-sub').textContent='Your slot is confirmed at '+selectedSlot;
-  goStep(4);
 }
 
