@@ -293,14 +293,9 @@ function goStep3(){
   if(CLINIC.upiId)document.getElementById('upi-id-lbl').textContent='UPI: '+CLINIC.upiId;
   // Load QR
   var qrImg=document.getElementById('pay-qr');
-  if(CLINIC.payQrImage){
-    qrImg.src=CLINIC.payQrImage;
-  } else if(CLINIC.upiId){
-    var upiUrl='upi://pay?pa='+CLINIC.upiId+'&pn='+encodeURIComponent(CLINIC.name)+'&am='+CLINIC.consultFee+'&cu=INR';
-    qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(upiUrl);
-  } else {
-    qrImg.style.display='none';
-  }
+  // Always show the clinic's actual UPI QR code image
+  qrImg.src='pay_qr.jpg';
+  qrImg.style.display='block';
   goStep(3);
 }
 
