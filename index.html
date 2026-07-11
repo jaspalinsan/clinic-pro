@@ -1166,6 +1166,7 @@ html,body{height:100%;overflow:hidden}
       <button id="spt-vendors"    onclick="spTab('vendors')"    class="bs spt-btn"><i class="ti ti-truck"></i> Vendors</button>
       <button id="spt-appearance" onclick="spTab('appearance')" class="bs spt-btn"><i class="ti ti-palette"></i> Appearance</button>
       <button id="spt-rxtpl"      onclick="spTab('rxtpl')"      class="bs spt-btn"><i class="ti ti-template"></i> Rx Templates</button>
+      <button id="spt-appts"      onclick="spTab('appts')"      class="bs spt-btn"><i class="ti ti-calendar-cog"></i> Appointments</button>
       <button id="spt-backup"     onclick="spTab('backup')"     class="bs spt-btn"><i class="ti ti-database"></i> Backup</button>
     </div>
   </div>
@@ -1672,6 +1673,87 @@ html,body{height:100%;overflow:hidden}
   </div>
 </div>
 
+
+<div id="spc-appts" style="display:none;padding:14px 16px;max-width:760px">
+  <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px"><i class="ti ti-calendar-cog" style="color:#3b82f6;margin-right:8px"></i>Appointment Settings</div>
+  <div style="font-size:13px;color:#64748b;margin-bottom:16px">Control slots, timing and daily limits</div>
+
+  <!-- Clinic Timing -->
+  <div style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-clock" style="color:#185FA5"></i> Clinic Timing</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+    <div><div class="flbl" style="margin-bottom:4px">Morning opens</div><input class="fin" id="apt-morn-start" type="time" value="09:00"></div>
+    <div><div class="flbl" style="margin-bottom:4px">Morning closes</div><input class="fin" id="apt-morn-end" type="time" value="13:00"></div>
+    <div><div class="flbl" style="margin-bottom:4px">Slot duration</div>
+      <select class="fin" id="apt-slot-dur">
+        <option value="10">10 min</option>
+        <option value="15" selected>15 min</option>
+        <option value="20">20 min</option>
+        <option value="30">30 min</option>
+      </select>
+    </div>
+    <div><div class="flbl" style="margin-bottom:4px">Evening opens</div><input class="fin" id="apt-eve-start" type="time" value="17:00"></div>
+    <div><div class="flbl" style="margin-bottom:4px">Evening closes</div><input class="fin" id="apt-eve-end" type="time" value="20:00"></div>
+    <div><div class="flbl" style="margin-bottom:4px">Evening session</div>
+      <select class="fin" id="apt-eve-on">
+        <option value="1" selected>Enabled</option>
+        <option value="0">Disabled</option>
+      </select>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:0.5px solid var(--sl2);margin-bottom:16px">
+
+  <!-- Daily Limits -->
+  <div style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-users" style="color:#7C3AED"></i> Daily Limit &amp; Bulk Control</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div>
+      <div class="flbl" style="margin-bottom:4px">Max appointments / day</div>
+      <div style="display:flex;align-items:center;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;overflow:hidden">
+        <button onclick="aptAdj('apt-max-day',-1)" style="padding:8px 14px;border:none;background:none;font-size:18px;cursor:pointer;color:#7C3AED">&#8722;</button>
+        <input class="fin" id="apt-max-day" type="number" value="25" min="1" max="200" style="border:none;text-align:center;font-size:16px;font-weight:900;color:#7C3AED;width:60px;flex:1">
+        <button onclick="aptAdj('apt-max-day',1)" style="padding:8px 14px;border:none;background:none;font-size:18px;cursor:pointer;color:#7C3AED">&#43;</button>
+      </div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:3px">Slots auto-block after this count</div>
+    </div>
+    <div>
+      <div class="flbl" style="margin-bottom:4px">Max per morning session</div>
+      <div style="display:flex;align-items:center;background:var(--bg);border:1.5px solid var(--sl2);border-radius:8px;overflow:hidden">
+        <button onclick="aptAdj('apt-max-morn',-1)" style="padding:8px 14px;border:none;background:none;font-size:18px;cursor:pointer;color:#185FA5">&#8722;</button>
+        <input class="fin" id="apt-max-morn" type="number" value="15" min="1" max="100" style="border:none;text-align:center;font-size:16px;font-weight:900;color:#185FA5;width:60px;flex:1">
+        <button onclick="aptAdj('apt-max-morn',1)" style="padding:8px 14px;border:none;background:none;font-size:18px;cursor:pointer;color:#185FA5">&#43;</button>
+      </div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:3px">Morning session cap</div>
+    </div>
+  </div>
+
+  <!-- Block Dates -->
+  <div style="background:#FEF3C7;border:0.5px solid #FDE68A;border-radius:10px;padding:12px 14px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-ban"></i> Block dates / holidays</div>
+    <div id="apt-blocked-dates" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input class="fin" id="apt-block-inp" type="date" style="font-size:12px;padding:5px 8px">
+      <button class="bp" onclick="aptAddBlock()" style="padding:6px 14px;font-size:12px"><i class="ti ti-plus"></i> Block</button>
+    </div>
+    <div style="font-size:10px;color:#92400e;margin-top:6px">Patients cannot book on blocked dates</div>
+  </div>
+
+  <hr style="border:none;border-top:0.5px solid var(--sl2);margin-bottom:16px">
+
+  <!-- Working Days -->
+  <div style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-calendar-week" style="color:#059669"></i> Working Days</div>
+  <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="apt-days-wrap">
+    <button onclick="aptToggleDay(this)" data-day="Mon" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Mon</button>
+    <button onclick="aptToggleDay(this)" data-day="Tue" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Tue</button>
+    <button onclick="aptToggleDay(this)" data-day="Wed" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Wed</button>
+    <button onclick="aptToggleDay(this)" data-day="Thu" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Thu</button>
+    <button onclick="aptToggleDay(this)" data-day="Fri" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Fri</button>
+    <button onclick="aptToggleDay(this)" data-day="Sat" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Sat</button>
+    <button onclick="aptToggleDay(this)" data-day="Sun" class="apt-day-btn" style="padding:8px 14px;background:var(--bg);border:0.5px solid var(--sl2);border-radius:8px;font-size:12px;color:var(--ink3);cursor:pointer">Sun</button>
+  </div>
+
+  <button class="bp" onclick="saveAptSettings()" style="width:100%;justify-content:center;padding:12px"><i class="ti ti-check"></i> Save Appointment Settings</button>
+</div>
+
 <div id="spc-backup" style="display:none;padding:10px 16px;max-width:520px">
       <div style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:4px"><i class="ti ti-database" style="color:#3b82f6;margin-right:8px"></i>Backup &amp; Export</div>
       <div style="font-size:13px;color:#64748b;margin-bottom:24px">Save and restore all clinic data</div>
@@ -1823,11 +1905,19 @@ html,body{height:100%;overflow:hidden}
       </div>
       <div>
         <div class="flbl" style="margin-bottom:4px">Date</div>
-        <input class="fin" id="appt-date" type="date" style="width:100%">
+        <input class="fin" id="appt-date" type="date" onchange="renderSlotPicker(this.value)" style="width:100%">
       </div>
-      <div>
-        <div class="flbl" style="margin-bottom:4px">Time</div>
-        <input class="fin" id="appt-time" type="time" value="10:00" style="width:100%">
+      <div style="grid-column:span 2">
+        <div class="flbl" style="margin-bottom:6px">Select Time Slot</div>
+        <input type="hidden" id="appt-time" value="">
+        <div id="apt-slot-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:180px;overflow-y:auto">
+          <div style="padding:20px;text-align:center;color:var(--ink3);font-size:12px;grid-column:span 4">Select a date first to see slots</div>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:10px;font-size:10px">
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:#F0FDF4;border:1px solid #059669;border-radius:2px;display:inline-block"></span>Free</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:#EFF6FF;border:2px solid #185FA5;border-radius:2px;display:inline-block"></span>Selected</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:2px;display:inline-block"></span>Booked</span>
+        </div>
       </div>
       <div>
         <div class="flbl" style="margin-bottom:4px">Token No</div>
@@ -2091,6 +2181,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -8329,7 +8420,7 @@ window.setFontSize=setFontSize;
 window.applyFontWeight=applyFontWeight;
 
 function spTab(name){
-  var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl'];
+  var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl','appts'];
   if(name==='users'&&typeof renderUserList==='function')renderUserList();
   var _ut=document.getElementById('spt-users');
   if(_ut)_ut.style.display=(window.CURRENT_USER&&window.CURRENT_USER.role==='Admin')?'':'none';
@@ -8360,6 +8451,7 @@ function spTab(name){
     if(typeof rtplRender==='function')rtplRender();
   }
   if(name==='appearance'&&typeof renderAppearanceTab==='function')renderAppearanceTab();
+  if(name==='appts')loadAptSettings();
 }
 
 window.spTab=spTab;
@@ -12185,6 +12277,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
