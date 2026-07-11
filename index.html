@@ -2267,14 +2267,33 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
+
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
   window._apptFromFilter=f?f.value:'';
   window._apptToFilter=t?t.value:'';
   window._apptDateFilter='';
-  renderApptPanes();
+  // Fetch fresh data from server then render
+  fetch('data.php?action=get_all&r='+Math.random())
+  .then(function(r){return r.json();})
+  .then(function(resp){
+    if(resp.appointments){
+      window._apptData=(resp.appointments||[]).map(function(a){
+        return{id:a.id,name:a.patient_name,pid:a.patient_id,
+               age:a.age,gender:a.gender,mob:a.mobile,
+               date:a.date,time:a.time,token:a.token,
+               complaint:a.complaint,status:a.status};
+      });
+    }
+    renderApptPanes();
+  })
+  .catch(function(){renderApptPanes();});
 }
+window.apptFilterRange=apptFilterRange;
+
 function apptClearRange(){
   window._apptFromFilter='';
   window._apptToFilter='';
@@ -3196,7 +3215,21 @@ function nav(p) {
   if (p === 'pharmacy')    renderPharmacy();
   // rxInit not called here — called only by New Rx button
 
-  if (p === 'appointments') renderApptPanes();
+  if(p==='appointments'){
+    fetch('data.php?action=get_all&r='+Math.random())
+    .then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp.appointments){
+        window._apptData=(resp.appointments||[]).map(function(a){
+          return{id:a.id,name:a.patient_name,pid:a.patient_id,
+                 age:a.age,gender:a.gender,mob:a.mobile,
+                 date:a.date,time:a.time,token:a.token,
+                 complaint:a.complaint,status:a.status};
+        });
+      }
+      renderApptPanes();
+    }).catch(function(){renderApptPanes();});
+  }
   if (p === 'rx') { rxInit(); setTimeout(function(){if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();},200); }
   if (p === 'settings') {
     // Load saved clinic settings into fields
@@ -12121,6 +12154,7 @@ function cpStartSync(){
         var oaS=JSON.stringify((window._apptData||[]).map(function(x){return{id:x.id,status:x.status};}));
         if(naS!==oaS){
           window._apptData=na; changed.push('Appointments');
+          if(window._currentPage==='appointments'&&typeof renderApptPanes==='function')setTimeout(renderApptPanes,100);
           if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();
         }
       }
@@ -12715,6 +12749,9 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
+
 
 
 
