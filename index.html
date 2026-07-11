@@ -24,8 +24,7 @@ html,body{height:100%;overflow:hidden}
 .body{overflow:hidden;height:100%}
 .scroll{overflow-y:auto;height:100%;background:#F1F5F9}
 .page{display:none;padding:0;min-height:calc(100vh - 72px)}
-.page.on{display:block}
-#page-settings.on,#page-finance.on{padding:0!important;margin-top:0!important;}
+.page.on{display:block}#page-settings,#page-finance{padding:0!important;}
 .page-padded{padding:16px}
 
 
@@ -128,8 +127,6 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
-#page-settings{padding:0!important}
-#page-settings.on{display:block!important}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -1100,7 +1097,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 </div>
 </div>
-<div class="page" id="page-finance" style="padding:0;overflow:hidden">
+<div class="page" id="page-finance" style="padding:0">
   <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
@@ -1168,7 +1165,7 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
-<div class="page" id="page-settings" style="padding:0;background:var(--bg);overflow:hidden"><div style="display:flex;flex-direction:column;height:100%">
+<div class="page" id="page-settings" style="padding:0;background:var(--bg)"><div style="display:flex;flex-direction:column;height:100%">
   <!-- TOP TAB BAR (like vendor page) -->
   <div class="ph" style="border-bottom:1px solid var(--sl2);flex-shrink:0;flex-wrap:wrap;gap:6px">
     <div><div class="ptitle"><i class="ti ti-settings" style="color:#3b82f6;margin-right:6px"></i>Settings</div></div>
@@ -2269,6 +2266,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 function aptToggleBlockDay(wrap){
   var btn=wrap.querySelector('.apt-bday-btn');
   var lbls=wrap.querySelectorAll('div');
@@ -2321,53 +2319,32 @@ function showApptQR(){
   ov.id='m-appt-qr';ov.className='overlay open';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   var S=window.CLINIC_SETTINGS||{};
+  var bookUrl='https://clinic.cadium.in/book.html';
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=260x260&color=1e3a8a&bgcolor=ffffff&qzone=2&data='+encodeURIComponent(bookUrl);
   ov.innerHTML=
-    '<div class="modal" style="max-width:380px;text-align:center">'+
-    '<div class="mh"><h2><i class="ti ti-qrcode" style="color:#185FA5;margin-right:8px"></i>Book Appointment</h2>'+
-    '<button class="mclose" onclick="document.getElementById(\'m-appt-qr\').remove()"><i class="ti ti-x"></i></button></div>'+
-    '<div class="mbody" style="padding:24px">'+
-    '<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px">'+(S.name||'Clinic Pro')+'</div>'+
-    '<div style="font-size:12px;color:#64748b;margin-bottom:16px">Scan to book appointment online</div>'+
-    '<div style="background:#f8faff;border:2px solid #BFDBFE;border-radius:12px;padding:16px;display:inline-block;margin-bottom:16px">'+
-    '<img id="appt-qr-img" src="" style="width:200px;height:200px;border-radius:8px" onerror="this.style.display=\'none\'">'+
+    '<div class="modal" style="max-width:400px;text-align:center">'+
+    '<div class="mh" style="background:linear-gradient(135deg,#1e3a8a,#059669);justify-content:space-between">'+
+      '<div style="color:#fff"><h2 style="color:#fff;font-size:16px"><i class="ti ti-qrcode" style="margin-right:8px"></i>Appointment QR Code</h2>'+
+      '<div style="font-size:11px;opacity:.85">Cadium Ltd — Scan to Book</div></div>'+
+      '<button class="mclose" onclick="document.getElementById(\'m-appt-qr\').remove()" style="color:#fff"><i class="ti ti-x"></i></button>'+
     '</div>'+
-    '<div style="font-size:12px;color:#185FA5;font-weight:600;margin-bottom:6px">clinic.cadium.in/book.html</div>'+
-    '<div style="font-size:11px;color:#64748b">Patient scans → fills details → picks slot → confirmed</div>'+
+    '<div class="mbody" style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px">'+
+      '<div style="background:#f0fdf4;border:2.5px solid #059669;border-radius:16px;padding:16px;display:inline-block">'+
+        '<img src="'+qrUrl+'" style="width:220px;height:220px;display:block;border-radius:8px" onerror="this.src=\'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(bookUrl)+'\'">'+
+      '</div>'+
+      '<div style="font-size:16px;font-weight:900;color:#1e3a8a">Cadium Ltd.</div>'+
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+( S.name||'Clinic Pro')+' • Online Appointments</div>'+
+      '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:8px 14px;font-size:11px;color:#185FA5;font-weight:600">'+bookUrl+'</div>'+
+      '<div style="font-size:11px;color:#64748b;text-align:center;line-height:1.6">Patient scans → fills details → picks slot → appointment confirmed instantly in Clinic Pro</div>'+
+      '<button onclick="window.print()" style="padding:8px 20px;background:#1e3a8a;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer"><i class="ti ti-printer"></i> Print QR</button>'+
     '</div></div>';
   document.body.appendChild(ov);
-  // Generate QR using free API
-  var url='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent('https://clinic.cadium.in/book.html');
-  document.getElementById('appt-qr-img').src=url;
 }
 
-function showPayQR(){
-  var old=document.getElementById('m-pay-qr');if(old)old.remove();
-  var ov=document.createElement('div');
-  ov.id='m-pay-qr';ov.className='overlay open';
-  ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var S=window.CLINIC_SETTINGS||{};
-  var upiId=S.upiId||'';
-  var fee=S.consultFee||'150';
-  var upiUrl=upiId?'upi://pay?pa='+upiId+'&pn='+encodeURIComponent(S.name||'Clinic')+'&am='+fee+'&cu=INR':'';
-  ov.innerHTML=
-    '<div class="modal" style="max-width:380px;text-align:center">'+
-    '<div class="mh"><h2><i class="ti ti-currency-rupee" style="color:#059669;margin-right:8px"></i>Payment QR</h2>'+
-    '<button class="mclose" onclick="document.getElementById(\'m-pay-qr\').remove()"><i class="ti ti-x"></i></button></div>'+
-    '<div class="mbody" style="padding:24px">'+
-    '<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px">'+(S.name||'Clinic Pro')+'</div>'+
-    '<div style="font-size:13px;font-weight:700;color:#059669;margin-bottom:16px">Consultation Fee: Rs.'+fee+'</div>'+
-    '<div style="background:#F0FDF4;border:2px solid #BBF7D0;border-radius:12px;padding:16px;display:inline-block;margin-bottom:16px">'+
-    (S.payQrImage?
-      '<img src="'+S.payQrImage+'" style="width:200px;height:200px;object-fit:cover;border-radius:8px">':
-      (upiUrl?'<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(upiUrl)+'" style="width:200px;height:200px;border-radius:8px">':
-      '<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;flex-direction:column;gap:8px"><i class="ti ti-qrcode" style="font-size:48px;color:#BBF7D0"></i>Set UPI ID in Settings</div>')
-    )+
-    '</div>'+
-    (upiId?'<div style="font-size:12px;color:#059669;font-weight:600;margin-bottom:4px">'+upiId+'</div>':'<div style="font-size:11px;color:#94a3b8">Go to Settings → Clinic → add UPI ID</div>')+
-    '<div style="font-size:11px;color:#64748b;margin-top:6px">Patient pays → shows transaction ID → appointment confirmed</div>'+
-    '</div></div>';
-  document.body.appendChild(ov);
-}
+
+
+function showPayQR(){showApptQR();}
+
 
 window.showApptQR=showApptQR;
 window.showPayQR=showPayQR;
@@ -12509,6 +12486,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
