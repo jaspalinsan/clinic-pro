@@ -752,14 +752,37 @@ html,body{height:100%;overflow:hidden}
   </div>
 
   <div class="card" style="margin-bottom:12px">
-  <div class="ch" style="flex-wrap:wrap;gap:8px">
+  <div class="ch" style="flex-wrap:wrap;gap:8px;align-items:center">
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-      <span style="font-size:12px;color:var(--ink2);font-weight:600">Rx For</span>
-      <input type="number" id="rx-days" value="5" min="1" max="90"
-        style="width:68px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--sl2);border-radius:6px;padding:3px 6px;background:var(--bg)"
-        oninput="rxRecalcAll()" title="Treatment days">
-      <span style="font-size:12px;color:var(--ink2)">days</span>
+    <!-- 3 equal buttons -->
+    <div style="flex:1;display:flex;justify-content:space-evenly;align-items:center;gap:0">
+      <!-- Rx For -->
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:9px">
+        <i class="ti ti-clock" style="color:#185FA5;font-size:15px"></i>
+        <span style="font-size:12px;font-weight:700;color:#185FA5">Rx for</span>
+        <input type="number" id="rx-days" value="5" min="1" max="90"
+          style="width:38px;text-align:center;font-size:15px;font-weight:700;border:none;background:transparent;color:#185FA5;outline:none"
+          oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
+        <span style="font-size:12px;font-weight:700;color:#185FA5">days</span>
+      </div>
+      <div style="flex:1;height:1.5px;background:var(--sl2);margin:0 14px"></div>
+      <!-- Next Visit date -->
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px">
+        <i class="ti ti-calendar-event" style="color:#059669;font-size:15px"></i>
+        <span style="font-size:12px;font-weight:700;color:#059669">Next Visit</span>
+        <span id="rx-next-date" style="font-size:13px;font-weight:700;color:#059669">--</span>
+        <input type="hidden" id="rx-next-visit" value="">
+      </div>
+      <div style="flex:1;height:1.5px;background:var(--sl2);margin:0 14px"></div>
+      <!-- Mode of Rx -->
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:9px">
+        <i class="ti ti-device-mobile" style="color:#7C3AED;font-size:15px"></i>
+        <select id="rx-mode" style="font-size:12px;font-weight:700;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
+          <option value="Offline">Offline Rx</option>
+          <option value="Online">Online Rx</option>
+          <option value="Tele">Tele-Consult</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
@@ -2073,6 +2096,17 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function rxCalcNextDate(){
+  var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  var d=new Date(); d.setDate(d.getDate()+days);
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var label=String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear();
+  var el=document.getElementById('rx-next-date'); if(el)el.textContent=label;
+  var hid=document.getElementById('rx-next-visit'); if(hid)hid.value=label;
+}
+window.rxCalcNextDate=rxCalcNextDate;
+
 
 
 
@@ -4225,6 +4259,7 @@ function rxNewBlank(){
   // Focus patient name
   setTimeout(function(){var n=document.getElementById('rx-pat-name');if(n)n.focus();},50);
   toast('New prescription form ready','info');
+  setTimeout(rxCalcNextDate,80);
   rxCalcNextDate();
   // Add default consultancy service row
   setTimeout(function(){
@@ -4665,6 +4700,9 @@ try{
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
   var _rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
   var _rxNextEl=document.getElementById('rx-next-date');var _rxNext=(_rxNextEl&&_rxNextEl.textContent&&_rxNextEl.textContent!='--')?_rxNextEl.textContent:'';
+  var _rxMode=(document.getElementById('rx-mode')||{value:'Offline'}).value||'Offline';
+  var _rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
+  var _rxNext=(document.getElementById('rx-next-date')||{textContent:''}).textContent||'';
   var _rxMode=(document.getElementById('rx-mode')||{value:'Offline'}).value||'Offline';
   var _rd=document.getElementById('rx-date');
   var _rdtxt=(_rd&&_rd.textContent)||'';
@@ -12148,6 +12186,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
