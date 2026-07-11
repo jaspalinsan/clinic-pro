@@ -15,56 +15,57 @@ body{background:#f1f5f9;min-height:100vh;display:flex;align-items:flex-start;jus
 .body{padding:20px;display:flex;flex-direction:column;gap:16px}
 .step{display:none}.step.active{display:flex;flex-direction:column;gap:14px}
 .lbl{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-input,select{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-weight:600;color:#0f172a;outline:none}
+input,select{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-weight:600;color:#0f172a;outline:none;background:#fff}
 input:focus,select:focus{border-color:#059669}
-.auto-filled{background:#f0fdf4!important;border-color:#bbf7d0!important;color:#059669!important}
+.found{background:#f0fdf4!important;border-color:#059669!important;color:#059669!important}
 .btn{width:100%;padding:13px;background:#059669;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:hover{background:#047857}
+.btn:hover{background:#047857}.btn:disabled{opacity:.6;cursor:not-allowed}
 .btn.sec{background:#EFF6FF;color:#185FA5;border:1.5px solid #BFDBFE}
 .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{padding:10px 6px;border-radius:9px;text-align:center;cursor:pointer;border:1.5px solid #059669;background:#f0fdf4}
-.slot.selected{background:#185FA5!important;border-color:#185FA5!important}
-.slot.selected .st,.slot.selected .sl{color:#fff!important}
-.slot.booked{background:#fef2f2;border-color:#fecaca;cursor:not-allowed;pointer-events:none}
+.slot{padding:10px 6px;border-radius:9px;text-align:center;cursor:pointer;border:1.5px solid #059669;background:#f0fdf4;transition:all .15s}
+.slot.sel{background:#185FA5;border-color:#185FA5}
+.slot.sel .st,.slot.sel .sl{color:#fff}
+.slot.bk{background:#fef2f2;border-color:#fecaca;cursor:not-allowed;pointer-events:none}
 .slot .st{font-size:12px;font-weight:700;color:#059669}
 .slot .sl{font-size:9px;font-weight:600;color:#059669;margin-top:2px}
-.slot.booked .st,.slot.booked .sl{color:#DC2626}
-.confirm-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px}
+.slot.bk .st,.slot.bk .sl{color:#DC2626}
+.cbox{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px}
 .crow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid #d1fae5}
 .crow:last-child{border:none}
 .crow span:first-child{color:#64748b}.crow span:last-child{font-weight:700;color:#0f172a}
-.step-ind{display:flex;justify-content:center;gap:8px;padding:12px}
+.dots{display:flex;justify-content:center;gap:8px;padding:12px}
 .dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:background .3s}
-.dot.active{background:#059669}
-.err{color:#DC2626;font-size:11px;font-weight:600;padding:6px 10px;background:#fef2f2;border-radius:6px;display:none}
+.dot.on{background:#059669}
+.err{color:#DC2626;font-size:11px;font-weight:600;padding:7px 10px;background:#fef2f2;border-radius:7px;display:none}
+.status{font-size:11px;margin-top:4px;min-height:16px}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="hdr">
-    <h1 id="clinic-name">Clinic Pro</h1>
+    <h1 id="cname">Clinic Pro</h1>
     <p>Book your appointment online</p>
   </div>
-  <div class="step-ind">
-    <div class="dot active" id="dot0"></div>
-    <div class="dot" id="dot1"></div>
-    <div class="dot" id="dot2"></div>
+  <div class="dots">
+    <div class="dot on" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
   </div>
   <div class="body">
 
-    <!-- STEP 1 -->
-    <div class="step active" id="step-1">
+    <!-- STEP 1: Phone + Name -->
+    <div class="step active" id="s1">
       <div>
         <div class="lbl">Mobile Number</div>
-        <input type="tel" id="b-phone" placeholder="98765-00000" maxlength="15">
-        <div id="phone-status" style="font-size:11px;color:#059669;margin-top:4px;min-height:16px"></div>
+        <input type="tel" id="b-phone" placeholder="Enter your mobile number" maxlength="15">
+        <div class="status" id="ph-status"></div>
       </div>
       <div>
         <div class="lbl">Patient Name</div>
         <input type="text" id="b-name" placeholder="Full name">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><div class="lbl">Age</div><input type="number" id="b-age" placeholder="25" min="0" max="120"></div>
+        <div><div class="lbl">Age</div><input type="number" id="b-age" placeholder="25"></div>
         <div><div class="lbl">Sex</div>
           <select id="b-sex">
             <option value="">Select</option>
@@ -74,220 +75,230 @@ input:focus,select:focus{border-color:#059669}
           </select>
         </div>
       </div>
-      <div id="err-1" class="err">Please fill mobile number and name</div>
-      <button class="btn" id="btn-step1">Next — Pick Date &amp; Slot <i class="ti ti-arrow-right"></i></button>
+      <div id="e1" class="err">Please enter mobile number and name</div>
+      <button class="btn" id="b1">Next — Pick Slot <i class="ti ti-arrow-right"></i></button>
     </div>
 
-    <!-- STEP 2 -->
-    <div class="step" id="step-2">
+    <!-- STEP 2: Date + Slot -->
+    <div class="step" id="s2">
       <div>
         <div class="lbl">Appointment Date</div>
         <input type="date" id="b-date">
       </div>
       <div>
-        <div class="lbl">Select Time Slot</div>
+        <div class="lbl">Available Slots</div>
         <div class="slot-grid" id="slot-grid">
           <div style="grid-column:span 3;text-align:center;color:#94a3b8;padding:16px;font-size:12px">Select a date to see slots</div>
         </div>
-        <div style="display:flex;gap:10px;font-size:10px;margin-top:8px">
-          <span><span style="display:inline-block;width:10px;height:10px;background:#f0fdf4;border:1px solid #059669;border-radius:2px;vertical-align:middle"></span> Free</span>
-          <span><span style="display:inline-block;width:10px;height:10px;background:#185FA5;border-radius:2px;vertical-align:middle"></span> Selected</span>
-          <span><span style="display:inline-block;width:10px;height:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:2px;vertical-align:middle"></span> Booked</span>
+        <div style="display:flex;gap:10px;font-size:10px;margin-top:8px;color:#64748b">
+          <span><span style="display:inline-block;width:10px;height:10px;background:#f0fdf4;border:1px solid #059669;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Free</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#185FA5;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Selected</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Booked</span>
         </div>
       </div>
       <div>
         <div class="lbl">Reason for visit</div>
         <input type="text" id="b-reason" placeholder="Fever, checkup, follow-up…">
       </div>
-      <div id="err-2" class="err">Please select a date and time slot</div>
+      <div id="e2" class="err"></div>
       <div style="display:flex;gap:8px">
-        <button class="btn sec" id="btn-back1" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
-        <button class="btn" id="btn-step2" style="flex:2">Review &amp; Confirm <i class="ti ti-arrow-right"></i></button>
+        <button class="btn sec" id="bk1" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
+        <button class="btn" id="b2" style="flex:2">Review &amp; Confirm <i class="ti ti-arrow-right"></i></button>
       </div>
     </div>
 
-    <!-- STEP 3 -->
-    <div class="step" id="step-3">
+    <!-- STEP 3: Confirm -->
+    <div class="step" id="s3">
       <div style="text-align:center;padding:6px 0">
-        <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:4px">Confirm Your Appointment</div>
-        <div style="font-size:12px;color:#64748b">Please review your booking details</div>
+        <div style="font-size:15px;font-weight:700;color:#0f172a">Confirm Your Appointment</div>
+        <div style="font-size:12px;color:#64748b;margin-top:3px">Please check your details below</div>
       </div>
-      <div class="confirm-box" id="pre-confirm"></div>
-      <div id="err-3" class="err">Could not save. Please try again.</div>
+      <div class="cbox" id="pre-details"></div>
+      <div id="e3" class="err"></div>
       <div style="display:flex;gap:8px">
-        <button class="btn sec" id="btn-back2" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
-        <button class="btn" id="btn-confirm" style="flex:2;background:#059669;font-size:15px;font-weight:900"><i class="ti ti-check"></i> Confirm Appointment</button>
+        <button class="btn sec" id="bk2" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
+        <button class="btn" id="b3" style="flex:2;font-size:15px;font-weight:900"><i class="ti ti-check"></i> Confirm Appointment</button>
       </div>
     </div>
 
-    <!-- STEP 4 -->
-    <div class="step" id="step-4">
+    <!-- STEP 4: Done -->
+    <div class="step" id="s4">
       <div style="text-align:center;padding:10px 0">
         <div style="width:64px;height:64px;background:#f0fdf4;border:2.5px solid #059669;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px">✓</div>
         <div style="font-size:20px;font-weight:900;color:#059669;margin-bottom:4px">Appointment Confirmed!</div>
-        <div style="font-size:12px;color:#64748b" id="confirm-sub">Your slot is booked</div>
+        <div style="font-size:12px;color:#64748b" id="done-sub"></div>
       </div>
-      <div class="confirm-box" id="confirm-details"></div>
+      <div class="cbox" id="done-details"></div>
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;font-size:12px;color:#92400e;text-align:center">
         Please arrive 5 minutes before your slot.<br>Show this screen to the receptionist.
       </div>
-      <button class="btn sec" id="btn-again">Book Another <i class="ti ti-plus"></i></button>
+      <button class="btn sec" id="b4">Book Another <i class="ti ti-plus"></i></button>
     </div>
 
   </div>
 </div>
-
 <script>
-var CLINIC={name:'Clinic Pro',upiId:'',consultFee:'150'};
-var APT={mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',slotDur:15,eveOn:1};
-var selectedSlot='';
+var patients=[];
 var bookedSlots=[];
-var patientData=[];
+var selSlot='';
+var APT={mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',slotDur:15,eveOn:1};
+var CLINIC={name:'Clinic Pro'};
 
-// Load clinic settings + patients
-fetch('data.php?action=get_all')
-  .then(function(r){return r.json();})
-  .then(function(d){
-    patientData=d.patients||[];
-    if(d.clinic_settings){
-      var cs=d.clinic_settings;
-      if(cs.name){CLINIC.name=cs.name;document.getElementById('clinic-name').textContent=cs.name;}
-      if(cs.aptSettings)Object.assign(APT,cs.aptSettings);
-    }
-  }).catch(function(){});
+// ── Load all data ─────────────────────────────────────────────
+Promise.all([
+  fetch('data.php?action=get_all').then(function(r){return r.json();}),
+  fetch('data.php?action=store_get&key=clinic_settings').then(function(r){return r.json();}).catch(function(){return{};})
+]).then(function(results){
+  var d=results[0], cs=results[1];
+  // Patients list
+  patients=d.patients||[];
+  // Clinic settings
+  var settings=cs.value||cs;
+  if(settings.name){CLINIC.name=settings.name;document.getElementById('cname').textContent=settings.name;}
+  if(settings.aptSettings)Object.assign(APT,settings.aptSettings);
+}).catch(function(){});
 
-// Set today as min date
+// ── Set today as default date ─────────────────────────────────
 var now=new Date();
-var iso=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+var iso=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
 document.getElementById('b-date').min=iso;
 document.getElementById('b-date').value=iso;
+function pad(n){return String(n).padStart(2,'0');}
 
+// ── Step nav ──────────────────────────────────────────────────
 function setStep(n){
-  [1,2,3,4].forEach(function(i){
-    document.getElementById('step-'+i).classList.toggle('active',i===n);
-  });
-  [0,1,2].forEach(function(i){
-    document.getElementById('dot'+i).classList.toggle('active',i<n);
-  });
+  [1,2,3,4].forEach(function(i){document.getElementById('s'+i).classList.toggle('active',i===n);});
+  [0,1,2].forEach(function(i){document.getElementById('d'+i).classList.toggle('on',i<n);});
+  window.scrollTo(0,0);
 }
 
-// Phone lookup
+// ── Phone lookup ──────────────────────────────────────────────
 document.getElementById('b-phone').addEventListener('input',function(){
-  var clean=this.value.replace(/\D/g,'');
-  var st=document.getElementById('phone-status');
-  if(clean.length<10){st.textContent='';return;}
-  var found=patientData.find(function(p){
+  var raw=this.value.replace(/\D/g,'');
+  var st=document.getElementById('ph-status');
+  if(raw.length<10){st.textContent='';return;}
+  // Search patient list
+  var found=patients.find(function(p){
     var m=(p.mobile||p.mob||p.phone||'').toString().replace(/\D/g,'');
-    return m===clean||m.slice(-10)===clean.slice(-10);
+    return m===raw||m.slice(-10)===raw.slice(-10)||raw.slice(-10)===m.slice(-10);
   });
   if(found){
-    document.getElementById('b-name').value=found.name||found.patient_name||'';
-    document.getElementById('b-name').className='auto-filled';
-    var raw=found.age||'';
+    var nameEl=document.getElementById('b-name');
+    var ageEl=document.getElementById('b-age');
+    var sexEl=document.getElementById('b-sex');
+    nameEl.value=found.name||'';
+    nameEl.className='found';
+    var ageRaw=String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
+    if(ageRaw)ageEl.value=ageRaw;
     var sex=found.sex||found.gender||'';
-    if(!sex&&raw.indexOf('M')!==-1){sex='M';raw=raw.replace('M','');}
-    if(!sex&&raw.indexOf('F')!==-1){sex='F';raw=raw.replace('F','');}
-    document.getElementById('b-age').value=raw.replace(/\D/g,'')||'';
-    if(sex)document.getElementById('b-sex').value=sex;
-    st.innerHTML='<span style="color:#059669">✓ Patient found — details filled</span>';
+    if(sex)sexEl.value=sex.charAt(0).toUpperCase();
+    st.innerHTML='<span style="color:#059669;font-weight:600">&#10003; '+( found.name||'Patient')+' — details auto-filled</span>';
   } else {
-    document.getElementById('b-name').value='';
     document.getElementById('b-name').className='';
-    st.textContent=clean.length>=10?'New patient — please fill name':'';
+    st.style.color='#94a3b8';
+    st.textContent=raw.length>=10?'New patient — please fill your name':'';
   }
 });
 
-// Step 1 → Step 2
-document.getElementById('btn-step1').addEventListener('click',function(){
+// Name input also does lookup (in case they type name first)
+document.getElementById('b-name').addEventListener('input',function(){
+  var val=this.value.trim().toLowerCase();
+  if(val.length<3)return;
+  var found=patients.find(function(p){
+    return (p.name||'').toLowerCase().startsWith(val);
+  });
+  if(found&&!document.getElementById('b-phone').value){
+    var m=found.mobile||found.mob||'';
+    if(m){document.getElementById('b-phone').value=m;}
+    var ageRaw=String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
+    if(ageRaw)document.getElementById('b-age').value=ageRaw;
+    var sex=found.sex||found.gender||'';
+    if(sex)document.getElementById('b-sex').value=sex.charAt(0).toUpperCase();
+  }
+});
+
+// ── Step 1 → 2 ───────────────────────────────────────────────
+document.getElementById('b1').addEventListener('click',function(){
   var phone=document.getElementById('b-phone').value.trim();
   var name=document.getElementById('b-name').value.trim();
-  var err=document.getElementById('err-1');
-  if(!phone||!name){err.style.display='block';return;}
-  err.style.display='none';
+  var e=document.getElementById('e1');
+  if(!phone||!name){e.style.display='block';return;}
+  e.style.display='none';
   loadSlots();
   setStep(2);
 });
-
-document.getElementById('btn-back1').addEventListener('click',function(){setStep(1);});
-
-// Load slots
+document.getElementById('bk1').addEventListener('click',function(){setStep(1);});
 document.getElementById('b-date').addEventListener('change',loadSlots);
 
+// ── Load slots ────────────────────────────────────────────────
 function loadSlots(){
   var dateStr=document.getElementById('b-date').value;
   if(!dateStr)return;
-  selectedSlot='';
+  selSlot='';
   fetch('data.php?action=get_all')
     .then(function(r){return r.json();})
     .then(function(d){
-      var appts=d.appointments||[];
-      bookedSlots=appts.filter(function(a){return a.date===dateStr;}).map(function(a){return a.time;});
-      renderSlots(dateStr);
-    }).catch(function(){renderSlots(dateStr);});
+      bookedSlots=(d.appointments||[]).filter(function(a){return a.date===dateStr;}).map(function(a){return a.time;});
+      renderSlots();
+    }).catch(function(){renderSlots();});
 }
 
-function renderSlots(dateStr){
+function renderSlots(){
   var dur=parseInt(APT.slotDur)||15;
   var slots=[];
-  function addS(start,end){
-    var s=start.split(':').map(Number);
-    var e=end.split(':').map(Number);
-    var cur=s[0]*60+s[1],fin=e[0]*60+e[1];
-    while(cur+dur<=fin){
-      var h=Math.floor(cur/60),m=cur%60;
-      var ap=h>=12?'PM':'AM',h12=h%12||12;
-      slots.push(String(h12).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap);
-      cur+=dur;
+  function addS(s,e){
+    var sv=s.split(':').map(Number),ev=e.split(':').map(Number);
+    var c=sv[0]*60+sv[1],f=ev[0]*60+ev[1];
+    while(c+dur<=f){
+      var h=Math.floor(c/60),m=c%60,ap=h>=12?'PM':'AM',h12=h%12||12;
+      slots.push(pad(h12)+':'+pad(m)+' '+ap);
+      c+=dur;
     }
   }
   addS(APT.mornStart||'09:00',APT.mornEnd||'13:00');
-  if(APT.eveOn)addS(APT.eveStart||'17:00',APT.eveEnd||'20:00');
-  var grid=document.getElementById('slot-grid');
-  if(!slots.length){grid.innerHTML='<div style="grid-column:span 3;text-align:center;color:#DC2626;padding:16px;font-size:12px">No slots available</div>';return;}
-  grid.innerHTML=slots.map(function(t){
+  if(parseInt(APT.eveOn))addS(APT.eveStart||'17:00',APT.eveEnd||'20:00');
+  var g=document.getElementById('slot-grid');
+  if(!slots.length){g.innerHTML='<div style="grid-column:span 3;text-align:center;color:#DC2626;padding:16px;font-size:12px">No slots configured</div>';return;}
+  g.innerHTML=slots.map(function(t){
     var bk=bookedSlots.indexOf(t)!==-1;
-    return '<div class="slot'+(bk?' booked':'')+(t===selectedSlot?' selected':'')+'" data-time="'+t+'">'+
-      '<div class="st">'+t+'</div><div class="sl">'+(bk?'Booked':t===selectedSlot?'Selected ✓':'Free')+'</div></div>';
+    return '<div class="slot'+(bk?' bk':'')+(t===selSlot?' sel':'')+'" data-t="'+t+'">'+
+      '<div class="st">'+t+'</div><div class="sl">'+(bk?'Booked':t===selSlot?'Selected':'Free')+'</div></div>';
   }).join('');
-  grid.querySelectorAll('.slot:not(.booked)').forEach(function(el){
+  g.querySelectorAll('.slot:not(.bk)').forEach(function(el){
     el.addEventListener('click',function(){
-      grid.querySelectorAll('.slot').forEach(function(s){
-        s.classList.remove('selected');
-        if(!s.classList.contains('booked'))s.querySelector('.sl').textContent='Free';
-      });
-      el.classList.add('selected');
-      el.querySelector('.sl').textContent='Selected ✓';
-      selectedSlot=el.dataset.time;
+      g.querySelectorAll('.slot:not(.bk)').forEach(function(s){s.classList.remove('sel');s.querySelector('.sl').textContent='Free';});
+      el.classList.add('sel');
+      el.querySelector('.sl').textContent='Selected';
+      selSlot=el.dataset.t;
     });
   });
 }
 
-// Step 2 → Step 3
-document.getElementById('btn-step2').addEventListener('click',function(){
+// ── Step 2 → 3 ───────────────────────────────────────────────
+document.getElementById('b2').addEventListener('click',function(){
   var date=document.getElementById('b-date').value;
-  var err=document.getElementById('err-2');
-  if(!date){err.style.display='block';err.textContent='Please select a date';return;}
-  if(!selectedSlot){err.style.display='block';err.textContent='Please select a time slot';return;}
-  err.style.display='none';
+  var e=document.getElementById('e2');
+  if(!date){e.style.display='block';e.textContent='Please select a date';return;}
+  if(!selSlot){e.style.display='block';e.textContent='Please select a time slot';return;}
+  e.style.display='none';
   var name=document.getElementById('b-name').value.trim();
   var phone=document.getElementById('b-phone').value.trim();
   var reason=document.getElementById('b-reason').value.trim()||'Appointment';
   var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dp=date.split('-');
-  var dateDisp=String(parseInt(dp[2])).padStart(2,'0')+' '+M[parseInt(dp[1])-1]+' '+dp[0];
-  document.getElementById('pre-confirm').innerHTML=
+  var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
+  document.getElementById('pre-details').innerHTML=
     '<div class="crow"><span>Patient</span><span>'+name+'</span></div>'+
     '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-    '<div class="crow"><span>Date</span><span>'+dateDisp+'</span></div>'+
-    '<div class="crow"><span>Time</span><span>'+selectedSlot+'</span></div>'+
+    '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
+    '<div class="crow"><span>Time</span><span style="color:#059669;font-weight:900">'+selSlot+'</span></div>'+
     '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>';
   setStep(3);
 });
+document.getElementById('bk2').addEventListener('click',function(){setStep(2);});
 
-document.getElementById('btn-back2').addEventListener('click',function(){setStep(2);});
-
-// Confirm booking
-document.getElementById('btn-confirm').addEventListener('click',function(){
+// ── Confirm booking ───────────────────────────────────────────
+document.getElementById('b3').addEventListener('click',function(){
   var name=document.getElementById('b-name').value.trim();
   var phone=document.getElementById('b-phone').value.trim();
   var age=document.getElementById('b-age').value;
@@ -296,35 +307,31 @@ document.getElementById('btn-confirm').addEventListener('click',function(){
   var reason=document.getElementById('b-reason').value.trim()||'Appointment';
   var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dp=date.split('-');
-  var dateDisp=String(parseInt(dp[2])).padStart(2,'0')+' '+M[parseInt(dp[1])-1]+' '+dp[0];
-  var btn=this; btn.disabled=true; btn.textContent='Saving…';
+  var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
+  var btn=this;btn.disabled=true;btn.textContent='Saving…';
   fetch('data.php?action=save_appointment',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      id:'APT-'+Date.now(),patient:name,mobile:phone,
-      age:age+(sex?'/'+sex:''),date:date,time:selectedSlot,
-      reason:reason,status:'Confirmed',notes:'Booked online'
-    })
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:'APT-'+Date.now(),patient:name,mobile:phone,
+      age:age+(sex?'/'+sex:''),date:date,time:selSlot,
+      reason:reason,status:'Confirmed',notes:'Booked online'})
   }).then(function(r){return r.json();})
   .then(function(){
-    document.getElementById('confirm-details').innerHTML=
+    document.getElementById('done-details').innerHTML=
       '<div class="crow"><span>Patient</span><span>'+name+'</span></div>'+
       '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-      '<div class="crow"><span>Date</span><span>'+dateDisp+'</span></div>'+
-      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:15px">'+selectedSlot+'</span></div>';
-    document.getElementById('confirm-sub').textContent='Confirmed at '+selectedSlot+' on '+dateDisp;
+      '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
+      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>';
+    document.getElementById('done-sub').textContent='Confirmed at '+selSlot+' on '+dd;
     setStep(4);
   }).catch(function(){
-    var err=document.getElementById('err-3');
-    err.style.display='block';
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-check"></i> Confirm Appointment';
+    var e=document.getElementById('e3');
+    e.style.display='block';e.textContent='Connection error. Please try again.';
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirm Appointment';
   });
 });
+document.getElementById('b4').addEventListener('click',function(){location.reload();});
 
-document.getElementById('btn-again').addEventListener('click',function(){location.reload();});
-
-// Load slots for today on init
+// Init
 loadSlots();
 </script>
 </body>
