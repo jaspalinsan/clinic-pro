@@ -1965,7 +1965,7 @@ html,body{height:100%;overflow:hidden}
     <h2><i class="ti ti-calendar-plus" style="color:var(--acc);margin-right:8px"></i>New Appointment</h2>
     <button class="mclose" onclick="closeModal('m-appt')"><i class="ti ti-x"></i></button>
   </div>
-  <div class="mbody" style="padding:18px 22px">
+  <div style="display:flex;align-items:center;gap:14px;padding:10px 18px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-bottom:1px solid #e2e8f0"><img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&color=1e3a8a&bgcolor=ffffff&data=https%3A%2F%2Fclinic.cadium.in%2Fbook.html" style="width:70px;height:70px;border-radius:8px;border:2px solid #BFDBFE;flex-shrink:0"><div><div style="font-size:12px;font-weight:700;color:#185FA5">Patient Self-Booking QR</div><div style="font-size:11px;color:#64748b;margin-top:2px">Patient scans to book their own slot online</div><div style="font-size:10px;color:#059669;font-weight:600;margin-top:3px">clinic.cadium.in/book.html</div></div></div>  <div class="mbody" style="padding:18px 22px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div style="grid-column:span 2">
         <div class="flbl" style="margin-bottom:4px">Patient Name <span style="color:#ef4444">*</span></div>
@@ -1985,7 +1985,7 @@ html,body{height:100%;overflow:hidden}
       </div>
       <div>
         <div class="flbl" style="margin-bottom:4px">Mobile</div>
-        <input class="fin" id="appt-mob" placeholder="98765-00000" style="width:100%">
+        <input class="fin" id="appt-mob" placeholder="98765-00000" style="width:100%" oninput="apptMobLookup(this.value)">
       </div>
       <div>
         <div class="flbl" style="margin-bottom:4px">Date</div>
@@ -2265,6 +2265,32 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function apptMobLookup(val){
+  var clean=val.replace(/\D/g,'');
+  if(clean.length<10)return;
+  var db=window.PAT_DB||window.PATIENTS||[];
+  if(!db.length&&window.cpData&&window.cpData.patients)db=window.cpData.patients;
+  var found=db.find(function(p){
+    var m=(p.mobile||p.mob||p.phone||'').toString().replace(/\D/g,'');
+    return m===clean||m.slice(-10)===clean.slice(-10);
+  });
+  if(found){
+    var nameEl=document.getElementById('appt-name');
+    var ageEl=document.getElementById('appt-age');
+    var genderEl=document.getElementById('appt-gender');
+    if(nameEl&&!nameEl.value)nameEl.value=found.name||found.patient_name||'';
+    if(ageEl&&!ageEl.value){
+      var raw=String(found.age||'');
+      ageEl.value=raw.replace(/[MFO\/\s]/gi,'');
+    }
+    if(genderEl&&found.sex)genderEl.value=found.sex;
+    if(genderEl&&found.gender)genderEl.value=found.gender;
+    toast((found.name||'Patient')+' found — details filled','success');
+  }
+}
+window.apptMobLookup=apptMobLookup;
+
 
 var APT_SETTINGS={
   mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',
@@ -12663,6 +12689,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
