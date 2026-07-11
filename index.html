@@ -2266,6 +2266,183 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+var APT_SETTINGS={
+  mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',
+  slotDur:15,eveOn:1,maxDay:25,maxMorn:15,
+  blockedDays:['Sun'],workDays:['Mon','Tue','Wed','Thu','Fri','Sat']
+};
+
+function saveAptSettings(){
+  function gv(id,def){var e=document.getElementById(id);return e?e.value:def;}
+  APT_SETTINGS.mornStart=gv('apt-morn-start','09:00');
+  APT_SETTINGS.mornEnd=gv('apt-morn-end','13:00');
+  APT_SETTINGS.eveStart=gv('apt-eve-start','17:00');
+  APT_SETTINGS.eveEnd=gv('apt-eve-end','20:00');
+  APT_SETTINGS.slotDur=parseInt(gv('apt-slot-dur','15'))||15;
+  APT_SETTINGS.eveOn=parseInt(gv('apt-eve-on','1'))||0;
+  APT_SETTINGS.maxDay=parseInt(gv('apt-max-day','25'))||25;
+  APT_SETTINGS.maxMorn=parseInt(gv('apt-max-morn','15'))||15;
+  // Collect blocked days
+  APT_SETTINGS.blockedDays=[];
+  document.querySelectorAll('.apt-bday-wrap').forEach(function(w){
+    if(w.querySelector('.apt-bday-btn.blocked'))APT_SETTINGS.blockedDays.push(w.dataset.day);
+  });
+  // Collect work days
+  APT_SETTINGS.workDays=[];
+  document.querySelectorAll('.apt-day-wrap').forEach(function(w){
+    if(w.querySelector('.apt-day-btn.active'))APT_SETTINGS.workDays.push(w.dataset.day);
+  });
+  if(!window.CLINIC_SETTINGS)window.CLINIC_SETTINGS={};
+  window.CLINIC_SETTINGS.aptSettings=APT_SETTINGS;
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'clinic_settings',value:window.CLINIC_SETTINGS})
+  }).then(function(r){return r.json();})
+  .then(function(d){toast('Appointment settings saved','success');})
+  .catch(function(){toast('Saved locally only','info');});
+}
+window.saveAptSettings=saveAptSettings;
+
+function loadAptSettings(){
+  var S=window.CLINIC_SETTINGS||{};
+  if(S.aptSettings)Object.assign(APT_SETTINGS,S.aptSettings);
+  function sv(id,val){var e=document.getElementById(id);if(e)e.value=val;}
+  sv('apt-morn-start',APT_SETTINGS.mornStart);
+  sv('apt-morn-end',APT_SETTINGS.mornEnd);
+  sv('apt-eve-start',APT_SETTINGS.eveStart);
+  sv('apt-eve-end',APT_SETTINGS.eveEnd);
+  sv('apt-slot-dur',APT_SETTINGS.slotDur);
+  sv('apt-eve-on',APT_SETTINGS.eveOn);
+  sv('apt-max-day',APT_SETTINGS.maxDay);
+  sv('apt-max-morn',APT_SETTINGS.maxMorn);
+  renderBlockDays();
+  renderWorkDays();
+}
+window.loadAptSettings=loadAptSettings;
+
+function aptAdj(id,delta){
+  var e=document.getElementById(id);
+  if(e)e.value=Math.max(1,parseInt(e.value||1)+delta);
+}
+window.aptAdj=aptAdj;
+
+function aptToggleDay(wrap){
+  var btn=wrap.querySelector('.apt-day-btn');
+  var lbl=wrap.querySelectorAll('div')[1];
+  var active=btn.classList.contains('active');
+  if(active){
+    btn.classList.remove('active');
+    btn.style.background='var(--bg)';btn.style.border='0.5px solid var(--sl2)';
+    btn.querySelector('div').style.color='var(--ink3)';
+    if(lbl){lbl.textContent='OFF';lbl.style.color='#DC2626';}
+  }else{
+    btn.classList.add('active');
+    btn.style.background='#EFF6FF';btn.style.border='1.5px solid #185FA5';
+    btn.querySelector('div').style.color='#185FA5';
+    if(lbl){lbl.textContent='ON';lbl.style.color='#059669';}
+  }
+}
+window.aptToggleDay=aptToggleDay;
+
+function aptToggleBlockDay(wrap){
+  var btn=wrap.querySelector('.apt-bday-btn');
+  var lbl=wrap.querySelectorAll('div')[1];
+  var blocked=btn.classList.contains('blocked');
+  if(blocked){
+    btn.classList.remove('blocked');
+    btn.style.background='white';btn.style.border='0.5px solid #FDE68A';
+    btn.querySelector('div').style.color='#92400e';
+    if(lbl){lbl.textContent='Open';lbl.style.color='#059669';}
+  }else{
+    btn.classList.add('blocked');
+    btn.style.background='#FEF2F2';btn.style.border='1.5px solid #FECACA';
+    btn.querySelector('div').style.color='#DC2626';
+    if(lbl){lbl.textContent='Blocked';lbl.style.color='#DC2626';}
+  }
+}
+window.aptToggleBlockDay=aptToggleBlockDay;
+
+function renderBlockDays(){
+  document.querySelectorAll('.apt-bday-wrap').forEach(function(wrap){
+    var btn=wrap.querySelector('.apt-bday-btn');
+    var lbl=wrap.querySelectorAll('div')[1];
+    var blocked=(APT_SETTINGS.blockedDays||[]).indexOf(wrap.dataset.day)!==-1;
+    btn.classList.toggle('blocked',blocked);
+    if(blocked){btn.style.background='#FEF2F2';btn.style.border='1.5px solid #FECACA';btn.querySelector('div').style.color='#DC2626';if(lbl){lbl.textContent='Blocked';lbl.style.color='#DC2626';}}
+    else{btn.style.background='white';btn.style.border='0.5px solid #FDE68A';btn.querySelector('div').style.color='#92400e';if(lbl){lbl.textContent='Open';lbl.style.color='#059669';}}
+  });
+}
+window.renderBlockDays=renderBlockDays;
+
+function renderWorkDays(){
+  document.querySelectorAll('.apt-day-wrap').forEach(function(wrap){
+    var btn=wrap.querySelector('.apt-day-btn');
+    var lbl=wrap.querySelectorAll('div')[1];
+    var active=(APT_SETTINGS.workDays||[]).indexOf(wrap.dataset.day)!==-1;
+    btn.classList.toggle('active',active);
+    if(active){btn.style.background='#EFF6FF';btn.style.border='1.5px solid #185FA5';btn.querySelector('div').style.color='#185FA5';if(lbl){lbl.textContent='ON';lbl.style.color='#059669';}}
+    else{btn.style.background='var(--bg)';btn.style.border='0.5px solid var(--sl2)';btn.querySelector('div').style.color='var(--ink3)';if(lbl){lbl.textContent='OFF';lbl.style.color='#DC2626';}}
+  });
+}
+window.renderWorkDays=renderWorkDays;
+
+function genSlots(dateStr){
+  var S=APT_SETTINGS;
+  var dur=parseInt(S.slotDur)||15;
+  var slots=[];
+  function addSlots(start,end){
+    var s=start.split(':').map(Number);
+    var e=end.split(':').map(Number);
+    var cur=s[0]*60+s[1],fin=e[0]*60+e[1];
+    while(cur+dur<=fin){
+      var h=Math.floor(cur/60),m=cur%60;
+      var ap=h>=12?'PM':'AM',h12=h%12||12;
+      slots.push(String(h12).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ap);
+      cur+=dur;
+    }
+  }
+  addSlots(S.mornStart||'09:00',S.mornEnd||'13:00');
+  if(S.eveOn)addSlots(S.eveStart||'17:00',S.eveEnd||'20:00');
+  var booked={};
+  (window._apptData||[]).filter(function(a){return a.date===dateStr;}).forEach(function(a){booked[a.time]=true;});
+  return slots.map(function(t){return{time:t,booked:!!booked[t]};});
+}
+window.genSlots=genSlots;
+
+function renderSlotPicker(dateStr){
+  var wrap=document.getElementById('apt-slot-grid');if(!wrap)return;
+  var slots=genSlots(dateStr);
+  var selTime=(document.getElementById('appt-time')||{}).value||'';
+  wrap.innerHTML=slots.length?slots.map(function(s){
+    var isSel=s.time===selTime;
+    var cls=s.booked?'style="padding:8px 6px;background:#FEF2F2;border:0.5px solid #FECACA;border-radius:8px;text-align:center;opacity:.6;cursor:not-allowed"':
+      (isSel?'onclick="selectApptSlot(this,\''+s.time+'\')" style="padding:8px 6px;background:#EFF6FF;border:2px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer"':
+      'onclick="selectApptSlot(this,\''+s.time+'\')" style="padding:8px 6px;background:#F0FDF4;border:1.5px solid #059669;border-radius:8px;text-align:center;cursor:pointer"');
+    return '<div '+cls+'><div style="font-size:11px;font-weight:700;color:'+(s.booked?'#DC2626':isSel?'#185FA5':'#059669')+'">'+s.time+'</div>'+
+      '<div style="font-size:9px;color:'+(s.booked?'#DC2626':isSel?'#185FA5':'#059669')+'">'+(s.booked?'Booked':isSel?'Selected ✓':'Free')+'</div></div>';
+  }).join(''):'<div style="grid-column:span 4;text-align:center;color:#94a3b8;padding:16px;font-size:12px">No slots configured</div>';
+}
+window.renderSlotPicker=renderSlotPicker;
+
+function selectApptSlot(el,time){
+  var wrap=document.getElementById('apt-slot-grid');
+  if(wrap)[].forEach.call(wrap.children,function(c){
+    if(c.style.cursor!=='not-allowed'){
+      c.style.background='#F0FDF4';c.style.border='1.5px solid #059669';
+      var divs=c.querySelectorAll('div');
+      if(divs[0])divs[0].style.color='#059669';
+      if(divs[1]){divs[1].textContent='Free';divs[1].style.color='#059669';}
+    }
+  });
+  el.style.background='#EFF6FF';el.style.border='2px solid #185FA5';
+  var divs=el.querySelectorAll('div');
+  if(divs[0])divs[0].style.color='#185FA5';
+  if(divs[1]){divs[1].textContent='Selected ✓';divs[1].style.color='#185FA5';}
+  var inp=document.getElementById('appt-time');if(inp)inp.value=time;
+}
+window.selectApptSlot=selectApptSlot;
+
+
 
 function aptToggleBlockDay(wrap){
   var btn=wrap.querySelector('.apt-bday-btn');
@@ -2316,7 +2493,7 @@ window.renderBlockDays=renderBlockDays;
 function showApptQR(){
   var old=document.getElementById('m-appt-qr');if(old)old.remove();
   var ov=document.createElement('div');
-  ov.id='m-appt-qr';ov.className='overlay open';
+  ov.id='m-appt-qr';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   var S=window.CLINIC_SETTINGS||{};
   var bookUrl='https://clinic.cadium.in/book.html';
@@ -12486,6 +12663,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
