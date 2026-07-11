@@ -133,15 +133,12 @@ input:focus,select:focus{border-color:#059669}
         <img id="pay-qr" src="" class="qr-img" alt="Payment QR">
         <div style="font-size:11px;color:#64748b;margin-top:8px">Use any UPI app to scan and pay</div>
       </div>
-      <div>
-        <div class="lbl">Enter UTR / Transaction ID (after paying)</div>
-        <input type="text" id="b-txn" placeholder="Enter UTR or last 6 digits of TXN" maxlength="20">
-        <div style="font-size:10px;color:#64748b;margin-top:3px">After paying, enter the UTR number from your payment app to confirm booking</div>
+      <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#92400e;font-weight:600">
+        After paying, tap the button below to confirm your appointment
       </div>
-      <div id="err-3" class="err">Please enter transaction ID to confirm</div>
       <div style="display:flex;gap:8px">
         <button class="btn sec" onclick="goStep(2)" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
-        <button class="btn" onclick="confirmBooking()" style="flex:2;background:#059669;font-size:15px;padding:14px"><i class="ti ti-check"></i> Confirm Appointment</button>
+        <button class="btn" onclick="confirmBooking()" style="flex:2;background:#059669;font-size:15px;padding:14px;font-weight:900"><i class="ti ti-check"></i> I Have Paid — Confirm Appointment</button>
       </div>
     </div>
 
@@ -299,10 +296,7 @@ function goStep3(){
 }
 
 function confirmBooking(){
-  var txn=document.getElementById('b-txn').value.trim();
-  var err=document.getElementById('err-3');
-  if(!txn||txn.length<4){err.style.display='block';return;}
-  err.style.display='none';
+  var txn='PAID-'+Date.now();
   var name=document.getElementById('b-name').value.trim();
   var phone=document.getElementById('b-phone').value.trim();
   var age=document.getElementById('b-age').value;
