@@ -513,7 +513,19 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-appointments">
   <div class="ph">
     <div><div class="ptitle"><i class="ti ti-calendar-event" style="color:#3B82F6;margin-right:6px"></i>Appointments</div><div class="psub" id="appt-sub">Today</div></div>
-    <div class="ha"><button class="bp" onclick="openModal('m-appt')"><i class="ti ti-plus"></i>New Appointment</button></div>
+    <div class="ha" style="gap:8px;flex-wrap:wrap">
+      <!-- Book Appointment QR button -->
+      <button onclick="showApptQR()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#185FA5">
+        <i class="ti ti-qrcode" style="font-size:18px"></i>
+        Book via QR
+      </button>
+      <!-- Payment QR button -->
+      <button onclick="showPayQR()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#059669">
+        <i class="ti ti-currency-rupee" style="font-size:18px"></i>
+        Payment QR
+      </button>
+      <button class="bp" onclick="openModal('m-appt')"><i class="ti ti-plus"></i>New Appointment</button>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;padding:0 0 10px;flex-wrap:wrap">
     <label style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #B5D4F4;border-radius:8px;padding:7px 12px;cursor:pointer"><i class="ti ti-calendar" style="font-size:15px;color:#185FA5"></i></label>
@@ -1741,14 +1753,49 @@ html,body{height:100%;overflow:hidden}
 
   <!-- Working Days -->
   <div style="font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-calendar-week" style="color:#059669"></i> Working Days</div>
-  <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="apt-days-wrap">
-    <button onclick="aptToggleDay(this)" data-day="Mon" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Mon</button>
-    <button onclick="aptToggleDay(this)" data-day="Tue" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Tue</button>
-    <button onclick="aptToggleDay(this)" data-day="Wed" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Wed</button>
-    <button onclick="aptToggleDay(this)" data-day="Thu" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Thu</button>
-    <button onclick="aptToggleDay(this)" data-day="Fri" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Fri</button>
-    <button onclick="aptToggleDay(this)" data-day="Sat" class="apt-day-btn active" style="padding:8px 14px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer">Sat</button>
-    <button onclick="aptToggleDay(this)" data-day="Sun" class="apt-day-btn" style="padding:8px 14px;background:var(--bg);border:0.5px solid var(--sl2);border-radius:8px;font-size:12px;color:var(--ink3);cursor:pointer">Sun</button>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px" id="apt-days-wrap">
+    <div class="apt-day-wrap" data-day="Mon">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Mon</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Tue">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Tue</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Wed">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Wed</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Thu">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Thu</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Fri">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Fri</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Sat">
+      <div class="apt-day-btn active" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:#EFF6FF;border:1.5px solid #185FA5;border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:700;color:#185FA5">Sat</div>
+        <div style="font-size:9px;font-weight:600;color:#059669;margin-top:3px">ON</div>
+      </div>
+    </div>
+    <div class="apt-day-wrap" data-day="Sun">
+      <div class="apt-day-btn" onclick="aptToggleDay(this.parentElement)" style="padding:8px 4px;background:var(--bg);border:0.5px solid var(--sl2);border-radius:8px;text-align:center;cursor:pointer">
+        <div style="font-size:12px;font-weight:600;color:var(--ink3)">Sun</div>
+        <div style="font-size:9px;font-weight:600;color:#DC2626;margin-top:3px">OFF</div>
+      </div>
+    </div>
   </div>
 
   <button class="bp" onclick="saveAptSettings()" style="width:100%;justify-content:center;padding:12px"><i class="ti ti-check"></i> Save Appointment Settings</button>
@@ -2181,6 +2228,104 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function showApptQR(){
+  var old=document.getElementById('m-appt-qr');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-appt-qr';ov.className='overlay open';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var S=window.CLINIC_SETTINGS||{};
+  ov.innerHTML=
+    '<div class="modal" style="max-width:380px;text-align:center">'+
+    '<div class="mh"><h2><i class="ti ti-qrcode" style="color:#185FA5;margin-right:8px"></i>Book Appointment</h2>'+
+    '<button class="mclose" onclick="document.getElementById(\'m-appt-qr\').remove()"><i class="ti ti-x"></i></button></div>'+
+    '<div class="mbody" style="padding:24px">'+
+    '<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px">'+(S.name||'Clinic Pro')+'</div>'+
+    '<div style="font-size:12px;color:#64748b;margin-bottom:16px">Scan to book appointment online</div>'+
+    '<div style="background:#f8faff;border:2px solid #BFDBFE;border-radius:12px;padding:16px;display:inline-block;margin-bottom:16px">'+
+    '<img id="appt-qr-img" src="" style="width:200px;height:200px;border-radius:8px" onerror="this.style.display=\'none\'">'+
+    '</div>'+
+    '<div style="font-size:12px;color:#185FA5;font-weight:600;margin-bottom:6px">clinic.cadium.in/book.html</div>'+
+    '<div style="font-size:11px;color:#64748b">Patient scans → fills details → picks slot → confirmed</div>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  // Generate QR using free API
+  var url='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent('https://clinic.cadium.in/book.html');
+  document.getElementById('appt-qr-img').src=url;
+}
+
+function showPayQR(){
+  var old=document.getElementById('m-pay-qr');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-pay-qr';ov.className='overlay open';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var S=window.CLINIC_SETTINGS||{};
+  var upiId=S.upiId||'';
+  var fee=S.consultFee||'150';
+  var upiUrl=upiId?'upi://pay?pa='+upiId+'&pn='+encodeURIComponent(S.name||'Clinic')+'&am='+fee+'&cu=INR':'';
+  ov.innerHTML=
+    '<div class="modal" style="max-width:380px;text-align:center">'+
+    '<div class="mh"><h2><i class="ti ti-currency-rupee" style="color:#059669;margin-right:8px"></i>Payment QR</h2>'+
+    '<button class="mclose" onclick="document.getElementById(\'m-pay-qr\').remove()"><i class="ti ti-x"></i></button></div>'+
+    '<div class="mbody" style="padding:24px">'+
+    '<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px">'+(S.name||'Clinic Pro')+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#059669;margin-bottom:16px">Consultation Fee: Rs.'+fee+'</div>'+
+    '<div style="background:#F0FDF4;border:2px solid #BBF7D0;border-radius:12px;padding:16px;display:inline-block;margin-bottom:16px">'+
+    (S.payQrImage?
+      '<img src="'+S.payQrImage+'" style="width:200px;height:200px;object-fit:cover;border-radius:8px">':
+      (upiUrl?'<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(upiUrl)+'" style="width:200px;height:200px;border-radius:8px">':
+      '<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;flex-direction:column;gap:8px"><i class="ti ti-qrcode" style="font-size:48px;color:#BBF7D0"></i>Set UPI ID in Settings</div>')
+    )+
+    '</div>'+
+    (upiId?'<div style="font-size:12px;color:#059669;font-weight:600;margin-bottom:4px">'+upiId+'</div>':'<div style="font-size:11px;color:#94a3b8">Go to Settings → Clinic → add UPI ID</div>')+
+    '<div style="font-size:11px;color:#64748b;margin-top:6px">Patient pays → shows transaction ID → appointment confirmed</div>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+}
+
+window.showApptQR=showApptQR;
+window.showPayQR=showPayQR;
+function renderWorkDays(){
+  var wraps=document.querySelectorAll('.apt-day-wrap');
+  wraps.forEach(function(wrap){
+    var btn=wrap.querySelector('.apt-day-btn');
+    var lbls=wrap.querySelectorAll('div');
+    var lbl=lbls[lbls.length-1];
+    var active=APT_SETTINGS.workDays.indexOf(wrap.dataset.day)!==-1;
+    btn.classList.toggle('active',active);
+    if(active){
+      btn.style.background='#EFF6FF';btn.style.border='1.5px solid #185FA5';
+      lbls[0].style.color='#185FA5';
+      if(lbl){lbl.textContent='ON';lbl.style.color='#059669';}
+    } else {
+      btn.style.background='var(--bg)';btn.style.border='0.5px solid var(--sl2)';
+      lbls[0].style.color='var(--ink3)';
+      if(lbl){lbl.textContent='OFF';lbl.style.color='#DC2626';}
+    }
+  });
+}
+window.renderWorkDays=renderWorkDays;
+function aptToggleDay(wrap){
+  var btn=wrap.querySelector('.apt-day-btn');
+  var lbl=wrap.querySelector('div:last-child');
+  var active=btn.classList.contains('active');
+  if(active){
+    btn.classList.remove('active');
+    btn.style.background='var(--bg)';btn.style.border='0.5px solid var(--sl2)';
+    btn.querySelector('div').style.color='var(--ink3)';
+    if(lbl){lbl.textContent='OFF';lbl.style.color='#DC2626';}
+    APT_SETTINGS.workDays=APT_SETTINGS.workDays.filter(function(d){return d!==wrap.dataset.day;});
+  } else {
+    btn.classList.add('active');
+    btn.style.background='#EFF6FF';btn.style.border='1.5px solid #185FA5';
+    btn.querySelector('div').style.color='#185FA5';
+    if(lbl){lbl.textContent='ON';lbl.style.color='#059669';}
+    if(APT_SETTINGS.workDays.indexOf(wrap.dataset.day)===-1)
+      APT_SETTINGS.workDays.push(wrap.dataset.day);
+  }
+}
+window.aptToggleDay=aptToggleDay;
+
 
 
 
@@ -8465,7 +8610,8 @@ function saveClinicSettings(){
     phone:   g('set-phone'),  email:   g('set-email'),
     address: g('set-address'),city:    g('set-city'),
     lic:     g('set-lic'),    pin:     g('set-pin'),
-    tagline: g('set-tagline'),footer:  g('set-footer')
+    tagline: g('set-tagline'),footer:  g('set-footer'),
+    upiId:   g('set-upiId'),  consultFee: g('set-consultFee')||'150'
   };
   // Update Rx header live
   var rxn=document.getElementById('rx-clinic-name');
@@ -12277,6 +12423,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
