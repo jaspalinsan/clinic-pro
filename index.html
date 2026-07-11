@@ -754,30 +754,25 @@ html,body{height:100%;overflow:hidden}
   <div class="card" style="margin-bottom:12px">
   <div class="ch" style="flex-wrap:wrap;gap:8px;align-items:center">
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <!-- 3 equal buttons -->
-    <div style="flex:1;display:flex;justify-content:space-evenly;align-items:center;gap:0">
-      <!-- Rx For -->
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:9px">
-        <i class="ti ti-clock" style="color:#185FA5;font-size:15px"></i>
-        <span style="font-size:12px;font-weight:700;color:#185FA5">Rx for</span>
+    <!-- 3 pills one line -->
+    <div style="flex:1;display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px">
+        <span style="font-size:10px;font-weight:700;color:#5b87c5;text-transform:uppercase;letter-spacing:.4px">Rx for</span>
         <input type="number" id="rx-days" value="5" min="1" max="90"
-          style="width:38px;text-align:center;font-size:15px;font-weight:700;border:none;background:transparent;color:#185FA5;outline:none"
+          style="width:34px;text-align:center;font-size:14px;font-weight:900;border:none;background:transparent;color:#185FA5;outline:none"
           oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
-        <span style="font-size:12px;font-weight:700;color:#185FA5">days</span>
+        <span style="font-size:12px;font-weight:900;color:#185FA5">days</span>
       </div>
-      <div style="flex:1;height:1.5px;background:var(--sl2);margin:0 14px"></div>
-      <!-- Next Visit date -->
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px">
-        <i class="ti ti-calendar-event" style="color:#059669;font-size:15px"></i>
-        <span style="font-size:12px;font-weight:700;color:#059669">Next Visit</span>
-        <span id="rx-next-date" style="font-size:13px;font-weight:700;color:#059669">--</span>
+      <div style="flex:1;height:1px;background:var(--sl2)"></div>
+      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px">
+        <span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Next Visit</span>
+        <span id="rx-next-date" style="font-size:14px;font-weight:900;color:#059669">--</span>
         <input type="hidden" id="rx-next-visit" value="">
       </div>
-      <div style="flex:1;height:1.5px;background:var(--sl2);margin:0 14px"></div>
-      <!-- Mode of Rx -->
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:9px">
-        <i class="ti ti-device-mobile" style="color:#7C3AED;font-size:15px"></i>
-        <select id="rx-mode" style="font-size:12px;font-weight:700;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
+      <div style="flex:1;height:1px;background:var(--sl2)"></div>
+      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px">
+        <span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Mode</span>
+        <select id="rx-mode" style="font-size:13px;font-weight:900;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
           <option value="Offline">Offline Rx</option>
           <option value="Online">Online Rx</option>
           <option value="Tele">Tele-Consult</option>
@@ -2096,6 +2091,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 function rxCalcNextDate(){
   var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
@@ -11914,12 +11911,14 @@ function printInvoice(invId){
   H.push('<div><span class="lb">Mobile</span><span class="vl">'+(inv.mob||'-')+'</span></div>');
   H.push('<div><span class="lb">Diagnosis</span><span class="vl">'+(inv.dx||'-')+'</span></div>');
   H.push('</div>');
-  // Rx info bar - days, next visit, mode
+  // Rx info bar — 3 pills one line
   if(inv.rxDays||inv.nextVisit||inv.rxMode){
-    H.push('<div style="display:flex;gap:20px;padding:7px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb;font-size:11px">');
-    if(inv.rxDays)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Rx For</span><b style="color:#1e40af">'+inv.rxDays+' Days</b></div>');
-    if(inv.nextVisit)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Next Visit</span><b style="color:#059669">After '+inv.nextVisit+' Days</b></div>');
-    if(inv.rxMode)H.push('<div><span style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:600;display:block">Mode</span><b style="color:#7c3aed">'+inv.rxMode+'</b></div>');
+    H.push('<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb">');
+    if(inv.rxDays){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#5b87c5;text-transform:uppercase;letter-spacing:.4px">Rx for</span><span style="font-size:14px;font-weight:900;color:#185FA5">'+inv.rxDays+' Days</span></div>');}
+    if(inv.rxDays&&inv.nextVisit)H.push('<div style="flex:1;height:1px;background:#e5e7eb"></div>');
+    if(inv.nextVisit){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Next Visit</span><span style="font-size:14px;font-weight:900;color:#059669">'+inv.nextVisit+'</span></div>');}
+    if(inv.nextVisit&&inv.rxMode)H.push('<div style="flex:1;height:1px;background:#e5e7eb"></div>');
+    if(inv.rxMode){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Mode</span><span style="font-size:14px;font-weight:900;color:#7C3AED">'+inv.rxMode+'</span></div>');}
     H.push('</div>');
   }
 
@@ -12186,6 +12185,8 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
 
 
 
