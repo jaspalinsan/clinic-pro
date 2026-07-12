@@ -297,9 +297,13 @@ document.getElementById('b2').addEventListener('click',function(){
   var dp=date.split('-');
   var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
   document.getElementById('pre-details').innerHTML=
-    '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+'<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+(age?'<div class="crow"><span>Age / Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+(city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+'<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+'<div class="crow"><span>Time</span><span style="color:#059669;font-size:15px;font-weight:900">'+selSlot+'</span></div>'+'<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">&#10003; Confirmed</span></div>';font-weight:900">'+selSlot+'</span></div>'+
-    '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>'+
-    (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'');
+    '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+
+    '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
+    (age?'<div class="crow"><span>Age/Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
+    (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+
+    '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
+    '<div class="crow"><span>Time</span><span style="color:#059669;font-weight:900">'+selSlot+'</span></div>'+
+    '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>';
   setStep(3);
 });
 document.getElementById('bk2').addEventListener('click',function(){setStep(2);});
@@ -355,11 +359,11 @@ document.getElementById('b3').addEventListener('click',function(){
     document.getElementById('done-details').innerHTML=
       '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+
       '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-      (age?'<div class="crow"><span>Age</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
+      (age?'<div class="crow"><span>Age/Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
       (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+
       '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>'+
-      '<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">Confirmed ✓</span></div>';
+      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:15px;font-weight:900">'+selSlot+'</span></div>'+
+      '<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">&#10003; Confirmed</span></div>';
     document.getElementById('done-sub').textContent='Confirmed at '+selSlot+' on '+dd;
     setStep(4);
   }).catch(function(){
