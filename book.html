@@ -75,6 +75,10 @@ input:focus,select:focus{border-color:#059669}
           </select>
         </div>
       </div>
+      <div>
+        <div class="lbl">City / Village</div>
+        <input type="text" id="b-city" placeholder="e.g. Moga, Ludhiana, Dina…">
+      </div>
       <div id="e1" class="err">Please enter mobile number and name</div>
       <button class="btn" id="b1">Next — Pick Slot <i class="ti ti-arrow-right"></i></button>
     </div>
@@ -192,6 +196,8 @@ document.getElementById('b-phone').addEventListener('input',function(){
     if(ageRaw)ageEl.value=ageRaw;
     var sex=found.sex||found.gender||'';
     if(sex)sexEl.value=sex.charAt(0).toUpperCase();
+    var cityEl=document.getElementById('b-city');
+    if(cityEl&&(found.city||found.address))cityEl.value=found.city||found.address||'';
     st.innerHTML='<span style="color:#059669;font-weight:600">&#10003; '+( found.name||'Patient')+' — details auto-filled</span>';
   } else {
     document.getElementById('b-name').className='';
@@ -214,6 +220,8 @@ document.getElementById('b-name').addEventListener('input',function(){
     if(ageRaw)document.getElementById('b-age').value=ageRaw;
     var sex=found.sex||found.gender||'';
     if(sex)document.getElementById('b-sex').value=sex.charAt(0).toUpperCase();
+    var cEl=document.getElementById('b-city');
+    if(cEl&&(found.city||found.address))cEl.value=found.city||found.address||'';
   }
 });
 
@@ -284,6 +292,7 @@ document.getElementById('b2').addEventListener('click',function(){
   var name=document.getElementById('b-name').value.trim();
   var phone=document.getElementById('b-phone').value.trim();
   var reason=document.getElementById('b-reason').value.trim()||'Appointment';
+  var city=document.getElementById('b-city').value.trim();
   var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dp=date.split('-');
   var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
@@ -292,7 +301,8 @@ document.getElementById('b2').addEventListener('click',function(){
     '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
     '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
     '<div class="crow"><span>Time</span><span style="color:#059669;font-weight:900">'+selSlot+'</span></div>'+
-    '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>';
+    '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>'+
+    (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'');
   setStep(3);
 });
 document.getElementById('bk2').addEventListener('click',function(){setStep(2);});
@@ -305,6 +315,7 @@ document.getElementById('b3').addEventListener('click',function(){
   var sex=document.getElementById('b-sex').value;
   var date=document.getElementById('b-date').value;
   var reason=document.getElementById('b-reason').value.trim()||'Appointment';
+  var city=document.getElementById('b-city').value.trim();
   var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dp=date.split('-');
   var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
@@ -327,11 +338,21 @@ document.getElementById('b3').addEventListener('click',function(){
     })
   }).then(function(r){return r.json();})
   .then(function(){
+    // Also save patient to patient list if new or update city
+    var patId='PAT-'+Date.now();
+    fetch('data.php?action=save_patient',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        id:patId,name:name,mobile:phone,mob:phone,
+        age:age,gender:sex,city:city,
+        blood:'',status:'active',notes:'Registered via online booking'
+      })
+    }).catch(function(){});
     document.getElementById('done-details').innerHTML=
       '<div class="crow"><span>Patient</span><span>'+name+'</span></div>'+
       '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
       '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>';
+      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>'+(city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'');
     document.getElementById('done-sub').textContent='Confirmed at '+selSlot+' on '+dd;
     setStep(4);
   }).catch(function(){
