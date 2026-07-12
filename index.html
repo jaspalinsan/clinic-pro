@@ -2279,6 +2279,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -12084,9 +12085,10 @@ function cpLoadData(){
     if(mysqlPats.length){
       window.PAT_DB=mysqlPats;
     } else if(resp.patients_backup&&resp.patients_backup.length){
-      // Fallback to backup if MySQL table empty
       window.PAT_DB=resp.patients_backup;
     }
+    // Render patient table immediately after loading
+    if(typeof renderDashPatients==='function')setTimeout(renderDashPatients,100);
 
     // Appointments from proper MySQL table
     if(resp.appointments){
@@ -12817,6 +12819,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
