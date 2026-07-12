@@ -408,6 +408,7 @@ html,body{height:100%;overflow:hidden}
       <button class="bs" onclick="openModal('m-appt')"><i class="ti ti-calendar-plus"></i>New Appointment</button>
       <button class="bp" onclick="openModal('m-addPat')"><i class="ti ti-user-plus"></i>Add Patient</button>
       <button class="bs" onclick="openModal('m-xls')"><i class="ti ti-file-spreadsheet"></i>Upload XLS</button>
+      <button class="bp" id="save-pat-list-btn" onclick="saveAllPatients()" style="background:#059669;display:none"><i class="ti ti-device-floppy"></i>Save Patient List</button>
       <button class="bp" onclick="nav('rx')"><i class="ti ti-plus"></i>New Rx</button>
     </div>
   </div>
@@ -2269,6 +2270,45 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+function saveAllPatients(){
+  var db=window.PAT_DB||[];
+  if(!db.length){toast('No patients to save','error');return;}
+  var btn=document.getElementById('save-pat-list-btn');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Saving...';}
+  var saved=0,total=db.length;
+  // Save each patient to MySQL
+  db.forEach(function(p,i){
+    setTimeout(function(){
+      fetch('data.php?action=save_patient',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          id:p.id||('PAT-'+Date.now()+i),
+          name:p.name||'',mobile:p.mobile||p.mob||'',
+          age:p.age||'',gender:p.gender||'',
+          city:p.city||'',blood:p.blood||'',
+          status:p.status||'Active',notes:p.notes||''
+        })
+      }).then(function(){
+        saved++;
+        if(saved===total){
+          // Also save backup
+          fetch('data.php?action=store_set',{method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({key:'patients_backup',value:db})
+          }).catch(function(){});
+          if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Saved!';}
+          toast(total+' patients saved permanently','success');
+          setTimeout(function(){
+            if(btn)btn.style.display='none';
+          },3000);
+        }
+      }).catch(function(){saved++;});
+    },i*50); // stagger requests 50ms apart
+  });
+}
+window.saveAllPatients=saveAllPatients;
+
+
 
 
 
@@ -3467,6 +3507,7 @@ function importCSV() {
     body:JSON.stringify({key:'patients_backup',value:backup})
   }).then(function(){
     if(typeof renderDashPatients==='function')renderDashPatients();
+  var sb=document.getElementById('save-pat-list-btn');if(sb)sb.style.display='inline-flex';
   }).catch(function(){});
   // Backup save all patients as JSON
   setTimeout(function(){
@@ -12832,6 +12873,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
