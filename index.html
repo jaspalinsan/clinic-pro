@@ -2273,6 +2273,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function saveAllPatients(){
   var btn=document.getElementById('save-pat-list-btn');
   var btn2=document.querySelector('[onclick="saveAllPatients()"]');
@@ -4454,41 +4455,34 @@ async function doOCR(dataURL){
   function el(id){return document.getElementById(id);}
   function upd(txt,pct){var m=el('ocr-msg'),b=el('ocr-bar');if(m)m.textContent=txt;if(b)b.style.width=(pct||0)+'%';}
 
-  upd('Sending to OCR service\u2026',15);
+  upd('Sending to OCR\u2026',20);
 
-  var arr=dataURL.split(',');
-  var mime=arr[0].match(/:(.*?);/)[1];
-  var bstr=atob(arr[1]);
-  var u8=new Uint8Array(bstr.length);
-  for(var i=0;i<bstr.length;i++)u8[i]=bstr.charCodeAt(i);
-  var blob=new Blob([u8],{type:mime});
+  // Use base64 API (no FormData - avoids DataCloneError)
+  var base64=dataURL.split(',')[1];
+  var mime=dataURL.split(';')[0].split(':')[1]||'image/jpeg';
 
-  var form=new FormData();
-  form.append('file',blob,'bill.jpg');
-  form.append('apikey','helloworld');
-  form.append('language','eng');
-  form.append('isOverlayRequired','false');
-  form.append('detectOrientation','true');
-  form.append('scale','true');
-  form.append('isTable','true');
-
-  upd('Uploading image\u2026',30);
-
-  fetch('https://api.ocr.space/parse/image',{method:'POST',body:form})
-  .then(function(res){
-    upd('Reading text\u2026',65);
-    return res.json();
+  fetch('https://api.ocr.space/parse/image',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'apikey=helloworld'
+      +'&base64Image='+encodeURIComponent('data:'+mime+';base64,'+base64)
+      +'&language=eng'
+      +'&isOverlayRequired=false'
+      +'&detectOrientation=true'
+      +'&scale=true'
+      +'&isTable=true'
   })
+  .then(function(res){upd('Reading text\u2026',65);return res.json();})
   .then(function(data){
-    var spin=el('ocr-spin'); if(spin)spin.style.display='none';
+    var spin=el('ocr-spin');if(spin)spin.style.display='none';
     var wrap=el('ocr-items');
     var useB=el('ocr-use');
     var manB=el('ocr-manual');
     var box=el('ocr-status-box');
-    var bar=el('ocr-bar'); if(bar)bar.style.width='100%';
+    var bar=el('ocr-bar');if(bar)bar.style.width='100%';
 
     if(!data.ParsedResults||!data.ParsedResults.length){
-      showPasteBox('','No text found in image. Paste bill text below:');
+      showPasteBox('','No text found. Paste bill text below:');
       if(manB)manB.style.display='flex';
       return;
     }
@@ -4501,7 +4495,7 @@ async function doOCR(dataURL){
     upd('Parsing rows\u2026',85);
     var items=parseBillOCR(rawText);
     if(!items.length){
-      showPasteBox(rawText,'OCR done — no rows detected. Edit text below and click Extract:');
+      showPasteBox(rawText,'OCR done but no rows detected. Edit below and click Extract:');
       if(manB)manB.style.display='flex';
       return;
     }
@@ -4512,7 +4506,7 @@ async function doOCR(dataURL){
       box.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
         '<i class="ti ti-check" style="font-size:22px;color:var(--m4)"></i>'+
         '<div><div style="font-size:13px;font-weight:600;color:var(--m4)">\u2713 '+items.length+' items extracted</div>'+
-        '<div style="font-size:11.5px;color:var(--m4)">Review below \u2014 edit any row \u2014 then click Use These Items</div></div>'+
+        '<div style="font-size:11.5px;color:var(--m4)">Review then click Use These Items</div></div>'+
       '</div>';
     }
     if(wrap)wrap.style.display='block';
@@ -4521,11 +4515,12 @@ async function doOCR(dataURL){
   })
   .catch(function(err){
     console.error('OCR:',err);
-    var spin=el('ocr-spin'); if(spin)spin.style.display='none';
-    showPasteBox('','Could not read bill ('+err.message+'). Paste bill text below:');
-    var manB=el('ocr-manual'); if(manB)manB.style.display='flex';
+    var spin=el('ocr-spin');if(spin)spin.style.display='none';
+    showPasteBox('','Could not read bill ('+err.message+'). Paste text below:');
+    var manB=el('ocr-manual');if(manB)manB.style.display='flex';
   });
 }
+
 
 
 
@@ -12859,6 +12854,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
