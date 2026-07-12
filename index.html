@@ -2278,6 +2278,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -3435,7 +3436,12 @@ function importCSV() {
     var ck2=''; for(var _k in row){if(/city|village|town/i.test(_k)){ck2=_k;break;}}
     var pcity=String(ck2?row[ck2]||'':'').trim();
     var code='CSV-'+String(Date.now()+i).slice(-8);
-    if(typeof dbSavePatient==='function')dbSavePatient({id:code,name:pname,mobile:pmob,age:page2,gender:pgen,city:pcity,blood:'',status:'Active',notes:'CSV Import'});
+    // Direct fetch - no dependency on dbSavePatient being defined
+    fetch('data.php?action=save_patient',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:code,name:pname,mobile:pmob,age:page2,gender:pgen,
+        city:pcity,blood:'',status:'Active',notes:'CSV Import'})
+    }).catch(function(){});
     if(!window.PAT_DB)window.PAT_DB=[];
     window.PAT_DB.unshift({id:code,name:pname,mob:pmob,mobile:pmob,age:page2,gender:pgen,city:pcity,status:'Active'});
     var tr=document.createElement('tr');
@@ -3452,7 +3458,14 @@ function importCSV() {
   closeModal('m-csv');
   document.getElementById('csv-preview').style.display = 'none';
   document.getElementById('csv-import-btn').disabled = true; document.getElementById('csv-import-btn').style.opacity = '.5';
-  toast(n + ' patients imported', 'success');
+  toast(n + ' patients imported to permanent list', 'success');
+  // Backup save all patients as JSON
+  setTimeout(function(){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'patients_backup',value:window.PAT_DB||[]})
+    }).catch(function(){});
+  },800);
   // Force save PAT_DB to MySQL immediately
   setTimeout(function(){
     if(window.PAT_DB&&window.PAT_DB.length){
@@ -12063,12 +12076,16 @@ function cpLoadData(){
   .then(function(resp){
     if(!resp.ok)throw new Error('get_all failed');
 
-    // Patients from proper MySQL table
-    if(resp.patients){
-      window.PAT_DB=(resp.patients||[]).map(function(p){
-        return{id:p.id,name:p.name,age:p.age,gender:p.gender,
-               mob:p.mobile,mobile:p.mobile,city:p.city,blood:p.blood,status:p.status};
-      });
+    // Patients from MySQL table
+    var mysqlPats=(resp.patients||[]).map(function(p){
+      return{id:p.id,name:p.name,age:p.age,gender:p.gender,
+             mob:p.mobile,mobile:p.mobile,city:p.city,blood:p.blood,status:p.status};
+    });
+    if(mysqlPats.length){
+      window.PAT_DB=mysqlPats;
+    } else if(resp.patients_backup&&resp.patients_backup.length){
+      // Fallback to backup if MySQL table empty
+      window.PAT_DB=resp.patients_backup;
     }
 
     // Appointments from proper MySQL table
@@ -12800,6 +12817,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
