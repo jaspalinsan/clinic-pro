@@ -24,7 +24,6 @@ html,body{height:100%;overflow:hidden}
 .body{overflow:hidden;height:100%}
 .scroll{overflow-y:auto;height:100%;background:#F1F5F9}
 .page{display:none;padding:0;min-height:calc(100vh - 72px)}
-.page.on{display:block}#page-settings,#page-finance{padding:0!important;}
 .page-padded{padding:16px}
 
 
@@ -127,6 +126,7 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
+#page-settings.on,#page-finance.on{padding:0!important}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -235,7 +235,7 @@ html,body{height:100%;overflow:hidden}
   .mob-nav{display:block}
 
   /* Page padding for bottom nav */
-  .page{padding:12px 10px 80px !important}
+  .page{padding:12px 10px 80px !important}#page-settings.on,#page-finance.on{padding:0!important}
 
   /* Shell adjustment */
   .shell{grid-template-rows:56px 1fr}
@@ -298,7 +298,7 @@ html,body{height:100%;overflow:hidden}
   #appt-tab-new i,#appt-tab-process i,#appt-tab-done i{font-size:14px !important}
 
   /* Settings sidebar + content */
-  #page-settings > div{flex-direction:column !important}
+  
   #sp-nav{flex-direction:row !important;flex-wrap:wrap;width:100% !important;
     border-right:none !important;border-bottom:1px solid var(--sl2);
     padding:8px !important}
@@ -323,7 +323,7 @@ html,body{height:100%;overflow:hidden}
 @media (max-width: 480px) {
   .tnav{height:52px}
   .shell{grid-template-rows:52px 1fr}
-  .page{padding:10px 8px 76px !important}
+  .page{padding:10px 8px 76px !important}#page-settings.on,#page-finance.on{padding:0!important}
 
   /* Extra small screens */
   .ph .ptitle{font-size:16px}
