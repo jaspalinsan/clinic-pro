@@ -977,9 +977,9 @@ html,body{height:100%;overflow:hidden}
   <div class="ph">
     <div><div class="ptitle"><i class="ti ti-truck" style="color:#F97316;margin-right:6px"></i>Vendor / Purchase</div></div>
     <div class="ha">
-      <input type="file" id="vendor-img-input" accept="image/*,.pdf,.xls,.xlsx,.csv" style="display:none" onchange="parseVendorImage(this)">
+      <input type="file" id="vendor-img-input" accept="image/*,.pdf" style="display:none" onchange="parseVendorImage(this)">
       <button class="bs" onclick="openBillReader()"><i class="ti ti-camera"></i>Scan Bill</button>
-      <button class="bs" onclick="document.getElementById('vendor-img-input').click()" style="margin-left:4px"><i class="ti ti-upload"></i>Upload Bill</button>
+      <button class="bs" onclick="document.getElementById('vendor-img-input').click()" style="margin-left:4px"><i class="ti ti-scan"></i>Scan / Upload Bill</button>
       <button class="bp" onclick="doVendorImport()"><i class="ti ti-check"></i>Confirm Import</button>
     </div>
   </div>
@@ -2269,6 +2269,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4152,215 +4153,33 @@ function parseVendorImage(input){
   var pv=document.getElementById('vd-img-preview');
   if(nm)nm.textContent=file.name;
 
-  // Excel/CSV — read as text/binary and show data in table
-  if(ext==='xlsx'||ext==='xls'||ext==='csv'){
-    if(ext==='csv'){
-      var r1=new FileReader();
-      r1.onload=function(ev){
-        var text=ev.target.result;
-        var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-        if(lines.length<2){toast('CSV has no data','error');return;}
-        var hdrs=lines[0].split(',').map(function(h){return h.replace(/["\']/g,'').trim().toLowerCase();});
-        function col(){for(var a=0;a<arguments.length;a++){for(var j=0;j<hdrs.length;j++){if(hdrs[j].indexOf(arguments[a])!==-1)return j;}}return -1;}
-        var ni=col('product','medicine','name','item','desc','particular'),
-            qi=col('qty','quantity','pcs'),
-            ri=col('n.rate','net','rate','ptr','purchase','cost'),
-            si=col('mrp','sale','retail'),
-            bi=col('batch'),ei=col('exp'),ci=col('company','mfr','brand');
-        if(ni===-1){toast('No product/name column found in CSV','error');return;}
-        var items=[];
-        for(var li=1;li<lines.length;li++){
-          var cells=lines[li].split(',').map(function(c){return c.replace(/^["\']+|["\']+$/g,'').trim();});
-          var nm=cells[ni]||'';if(!nm||nm.length<2)continue;
-          items.push({name:nm.toUpperCase(),qty:qi>=0?parseInt(cells[qi])||0:0,
-            rate:ri>=0?parseFloat(cells[ri])||0:0,sale:si>=0?parseFloat(cells[si])||0:0,
-            batch:bi>=0?cells[bi]||'':'',expiry:ei>=0?cells[ei]||'':'',company:ci>=0?cells[ci]||'':''});
-        }
-        if(items.length){fillVendorTable(items,file.name+' — '+items.length+' items');toast(items.length+' items loaded into vendor table','success');}
-        else toast('No valid items found in CSV','error');
-      };
-      r1.readAsText(file);
-    } else {
-      // XLSX — use SheetJS if available, else show file name
-      if(typeof XLSX!=='undefined'){
-        var reader2=new FileReader();
-        reader2.onload=function(ev){
-          try{
-            var wb=XLSX.read(ev.target.result,{type:'binary'});
-            var ws=wb.Sheets[wb.SheetNames[0]];
-            var html2=XLSX.utils.sheet_to_html(ws,{editable:false});
-            var pv3=document.getElementById('vd-img-preview');
-            if(pv3){pv3.style.display='block';pv3.innerHTML='<div style="overflow:auto;max-height:300px;font-size:11px">'+html2+'</div>';}
-            toast('Excel loaded: '+wb.SheetNames[0],'success');
-          }catch(e){toast('Could not read Excel file','error');}
-        };
-        reader2.readAsBinaryString(file);
-      } else {
-        // SheetJS not loaded — show file name only
-        if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:10px;background:#f0f4ff;border-radius:6px;font-size:12px"><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:6px"></i><b>'+file.name+'</b><br><span style="color:#6b7280;font-size:11px">Excel file attached</span></div>';}
-        toast('Excel file attached: '+file.name,'info');
-      }
-    }
-    // Store file reference
-    window._vendorBillFile={name:file.name,type:file.type,ext:ext};
-    if(input.value!==undefined)input.value='';
-    return;
-  }
-
-  // PDF — show PDF viewer
+  // PDF — show preview
   if(ext==='pdf'){
-    var reader3=new FileReader();
-    reader3.onload=function(ev){
+    var r1=new FileReader();
+    r1.onload=function(ev){
       var dataURL=ev.target.result;
-      var pv4=document.getElementById('vd-img-preview');
-      if(pv4){
-        pv4.style.display='block';
-        pv4.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';
-      }
-      window._vendorBillFile={name:file.name,type:'application/pdf',data:dataURL};
-      toast('PDF loaded: '+file.name,'success');
+      if(pv){pv.style.display='block';
+        pv.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';}
+      openOCRModal(dataURL,file.name);
     };
-    reader3.readAsDataURL(file);
+    r1.readAsDataURL(file);
     if(input.value!==undefined)input.value='';
     return;
   }
 
-  // Image (JPG/PNG) — show preview + OCR
-  var reader4=new FileReader();
-  reader4.onload=function(ev){
+  // Image (JPG/PNG/etc) — OCR
+  var r2=new FileReader();
+  r2.onload=function(ev){
     var dataURL=ev.target.result;
     var im=document.getElementById('vd-img-el');
     if(pv)pv.style.display='block';
     if(im){im.src=dataURL;im.style.display='block';}
-    window._vendorBillFile={name:file.name,type:file.type,data:dataURL};
-    if(typeof openOCRModal==='function')openOCRModal(dataURL,file.name);
-    else toast('Image loaded: '+file.name,'success');
+    openOCRModal(dataURL,file.name);
   };
-  reader4.readAsDataURL(file);
-  if(input.value!==undefined)input.value='';
-if(ext==='xlsx'||ext==='xls'){
-    if(typeof XLSX==='undefined'){
-      var s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-      s.onload=function(){parseVendorImage(input);}; document.head.appendChild(s); return;
-    }
-    var r2=new FileReader();
-    r2.onload=function(ev){
-      try{
-        var wb=XLSX.read(ev.target.result,{type:'binary'});
-        var ws=wb.Sheets[wb.SheetNames[0]];
-        var data=XLSX.utils.sheet_to_json(ws,{defval:''});
-        if(!data.length){toast('Excel sheet empty','error');return;}
-        function gx(row){for(var a=0;a<arguments.length;a++){for(var k in row){var kl=k.toLowerCase().replace(/[^a-z0-9]/g,'');var al=arguments[a].replace(/[^a-z0-9]/g,'');if(kl.indexOf(al)!==-1&&String(row[k]).trim())return String(row[k]).trim();}}return '';}
-        var items=data.map(function(row){
-          var nm=gx('productname','medicinename','itemname','name','product','medicine','description','particular','item');
-          if(!nm||nm.length<2)return null;
-          return{name:nm.toUpperCase(),
-            qty:parseInt(gx('qty','quantity','pcs','nos'))||0,
-            rate:parseFloat(gx('nrate','netrate','rate','ptr','price','cost','purchase'))||0,
-            sale:parseFloat(gx('mrp','sale','retail','srate'))||0,
-            batch:gx('batch','batchno')||'',expiry:gx('exp','expiry','expdate')||'',
-            company:gx('company','manufacturer','mfr','brand')||''};
-        }).filter(Boolean);
-        if(items.length){fillVendorTable(items,wb.SheetNames[0]+' — '+items.length+' items');toast(items.length+' items loaded into vendor table','success');}
-        else toast('No items found. Check column headers.','error');
-      }catch(e){toast('Excel error: '+e.message,'error');}
-    };
-    r2.readAsBinaryString(file);
-    }
-  var file=input.files?input.files[0]:null; if(!file)return;
-  var ext=file.name.split('.').pop().toLowerCase();
-  var nm=document.getElementById('vd-img-name');
-  var pv=document.getElementById('vd-img-preview');
-  if(nm)nm.textContent=file.name;
-
-  // Excel/CSV — read as text/binary and show data in table
-  if(ext==='xlsx'||ext==='xls'||ext==='csv'){
-    if(ext==='csv'){
-      var r1=new FileReader();
-      r1.onload=function(ev){
-        var text=ev.target.result;
-        var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-        if(lines.length<2){toast('CSV has no data','error');return;}
-        var hdrs=lines[0].split(',').map(function(h){return h.replace(/["\']/g,'').trim().toLowerCase();});
-        function col(){for(var a=0;a<arguments.length;a++){for(var j=0;j<hdrs.length;j++){if(hdrs[j].indexOf(arguments[a])!==-1)return j;}}return -1;}
-        var ni=col('product','medicine','name','item','desc','particular'),
-            qi=col('qty','quantity','pcs'),
-            ri=col('n.rate','net','rate','ptr','purchase','cost'),
-            si=col('mrp','sale','retail'),
-            bi=col('batch'),ei=col('exp'),ci=col('company','mfr','brand');
-        if(ni===-1){toast('No product/name column found in CSV','error');return;}
-        var items=[];
-        for(var li=1;li<lines.length;li++){
-          var cells=lines[li].split(',').map(function(c){return c.replace(/^["\']+|["\']+$/g,'').trim();});
-          var nm=cells[ni]||'';if(!nm||nm.length<2)continue;
-          items.push({name:nm.toUpperCase(),qty:qi>=0?parseInt(cells[qi])||0:0,
-            rate:ri>=0?parseFloat(cells[ri])||0:0,sale:si>=0?parseFloat(cells[si])||0:0,
-            batch:bi>=0?cells[bi]||'':'',expiry:ei>=0?cells[ei]||'':'',company:ci>=0?cells[ci]||'':''});
-        }
-        if(items.length){fillVendorTable(items,file.name+' — '+items.length+' items');toast(items.length+' items loaded into vendor table','success');}
-        else toast('No valid items found in CSV','error');
-      };
-      r1.readAsText(file);
-    } else {
-      // XLSX — use SheetJS if available, else show file name
-      if(typeof XLSX!=='undefined'){
-        var reader2=new FileReader();
-        reader2.onload=function(ev){
-          try{
-            var wb=XLSX.read(ev.target.result,{type:'binary'});
-            var ws=wb.Sheets[wb.SheetNames[0]];
-            var html2=XLSX.utils.sheet_to_html(ws,{editable:false});
-            var pv3=document.getElementById('vd-img-preview');
-            if(pv3){pv3.style.display='block';pv3.innerHTML='<div style="overflow:auto;max-height:300px;font-size:11px">'+html2+'</div>';}
-            toast('Excel loaded: '+wb.SheetNames[0],'success');
-          }catch(e){toast('Could not read Excel file','error');}
-        };
-        reader2.readAsBinaryString(file);
-      } else {
-        // SheetJS not loaded — show file name only
-        if(pv){pv.style.display='block';pv.innerHTML='<div style="padding:10px;background:#f0f4ff;border-radius:6px;font-size:12px"><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:6px"></i><b>'+file.name+'</b><br><span style="color:#6b7280;font-size:11px">Excel file attached</span></div>';}
-        toast('Excel file attached: '+file.name,'info');
-      }
-    }
-    // Store file reference
-    window._vendorBillFile={name:file.name,type:file.type,ext:ext};
-    if(input.value!==undefined)input.value='';
-    return;
-  }
-
-  // PDF — show PDF viewer
-  if(ext==='pdf'){
-    var reader3=new FileReader();
-    reader3.onload=function(ev){
-      var dataURL=ev.target.result;
-      var pv4=document.getElementById('vd-img-preview');
-      if(pv4){
-        pv4.style.display='block';
-        pv4.innerHTML='<iframe src="'+dataURL+'" style="width:100%;height:300px;border:1px solid #e5e7eb;border-radius:6px"></iframe>';
-      }
-      window._vendorBillFile={name:file.name,type:'application/pdf',data:dataURL};
-      toast('PDF loaded: '+file.name,'success');
-    };
-    reader3.readAsDataURL(file);
-    if(input.value!==undefined)input.value='';
-    return;
-  }
-
-  // Image (JPG/PNG) — show preview + OCR
-  var reader4=new FileReader();
-  reader4.onload=function(ev){
-    var dataURL=ev.target.result;
-    var im=document.getElementById('vd-img-el');
-    if(pv)pv.style.display='block';
-    if(im){im.src=dataURL;im.style.display='block';}
-    window._vendorBillFile={name:file.name,type:file.type,data:dataURL};
-    if(typeof openOCRModal==='function')openOCRModal(dataURL,file.name);
-    else toast('Image loaded: '+file.name,'success');
-  };
-  reader4.readAsDataURL(file);
+  r2.readAsDataURL(file);
   if(input.value!==undefined)input.value='';
 }
+
 
 
 
@@ -13040,6 +12859,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
