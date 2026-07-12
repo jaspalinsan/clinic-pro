@@ -408,7 +408,7 @@ html,body{height:100%;overflow:hidden}
       <button class="bs" onclick="openModal('m-appt')"><i class="ti ti-calendar-plus"></i>New Appointment</button>
       <button class="bp" onclick="openModal('m-addPat')"><i class="ti ti-user-plus"></i>Add Patient</button>
       <button class="bs" onclick="openModal('m-xls')"><i class="ti ti-file-spreadsheet"></i>Upload XLS</button>
-      <button class="bp" id="save-pat-list-btn" onclick="saveAllPatients()" style="background:#059669;display:none"><i class="ti ti-device-floppy"></i>Save Patient List</button>
+      <button class="bp" id="save-pat-list-btn" onclick="saveAllPatients()" style="background:#059669"><i class="ti ti-device-floppy"></i>Save Patient List</button>
       <button class="bp" onclick="nav('rx')"><i class="ti ti-plus"></i>New Rx</button>
     </div>
   </div>
@@ -426,7 +426,7 @@ html,body{height:100%;overflow:hidden}
   </div>
   <div class="card">
     <div class="ch">
-      <span class="ct"><i class="ti ti-users" style="color:var(--acc);margin-right:6px"></i>Patient List</span>
+      <span class="ct"><i class="ti ti-users" style="color:var(--acc);margin-right:6px"></i>Patient List</span><button onclick="saveAllPatients()" style="margin-left:8px;padding:5px 12px;background:#059669;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-device-floppy"></i>Save to Database</button>
       <div class="pat-drop-wrap" style="position:relative"><input class="fin" id="pat-search" placeholder="Search patients..." style="width:200px" autocomplete="off" oninput="filterPatients(this.value);patAutoInput(this,'')"><div id="drop-pat-search" class="pat-drop" style="display:none"></div></div>
     </div>
     <div class="tbl-wrap"><table class="tbl">
