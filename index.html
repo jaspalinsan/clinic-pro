@@ -2270,42 +2270,79 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 function saveAllPatients(){
-  var db=window.PAT_DB||[];
-  if(!db.length){toast('No patients to save','error');return;}
   var btn=document.getElementById('save-pat-list-btn');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Saving...';}
-  var saved=0,total=db.length;
-  // Save each patient to MySQL
-  db.forEach(function(p,i){
+  var btn2=document.querySelector('[onclick="saveAllPatients()"]');
+  function setLoading(){
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Saving...';}
+    if(btn2&&btn2!==btn){btn2.disabled=true;btn2.innerHTML='<i class="ti ti-loader"></i> Saving...';}
+  }
+  function setDone(n){
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Saved '+n+'!';}
+    if(btn2&&btn2!==btn){btn2.disabled=false;btn2.innerHTML='<i class="ti ti-check"></i> Saved '+n+'!';}
+    toast(n+' patients saved to database permanently','success');
     setTimeout(function(){
-      fetch('data.php?action=save_patient',{method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          id:p.id||('PAT-'+Date.now()+i),
-          name:p.name||'',mobile:p.mobile||p.mob||'',
-          age:p.age||'',gender:p.gender||'',
-          city:p.city||'',blood:p.blood||'',
-          status:p.status||'Active',notes:p.notes||''
-        })
-      }).then(function(){
+      if(btn)btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Patient List';
+      if(btn2&&btn2!==btn)btn2.innerHTML='<i class="ti ti-device-floppy"></i> Save to Database';
+    },3000);
+  }
+  function setError(){
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Patient List';}
+    if(btn2&&btn2!==btn){btn2.disabled=false;btn2.innerHTML='<i class="ti ti-device-floppy"></i> Save to Database';}
+  }
+
+  // Read ALL patients from HTML table rows (most reliable source)
+  var rows=[].slice.call(document.querySelectorAll('#pat-tbody tr'));
+  if(!rows.length){toast('No patients in table to save','error');return;}
+
+  var patients=[];
+  rows.forEach(function(tr){
+    var tds=tr.querySelectorAll('td');
+    if(tds.length<5)return;
+    // Table cols: checkbox | ID | Name | Age/Sex | City | Mobile | Actions
+    var id=(tds[1]&&tds[1].textContent.trim())||('PAT-'+Date.now()+Math.random()).slice(0,15);
+    var name=(tds[2]&&tds[2].textContent.trim())||'';
+    var agesex=(tds[3]&&tds[3].textContent.trim())||'';
+    var city=(tds[4]&&tds[4].textContent.trim())||'';
+    var mobile=(tds[5]&&tds[5].textContent.trim())||'';
+    if(!name||name==='—')return;
+    var age=agesex.replace(/[MFO\/]/g,'').trim();
+    var gen=agesex.match(/[MFO]/)?agesex.match(/[MFO]/)[0]:'';
+    patients.push({id:id,name:name,mobile:mobile,age:age,gender:gen,city:city,blood:'',status:'Active',notes:'Saved from list'});
+  });
+
+  if(!patients.length){toast('No valid patients found in table','error');return;}
+  setLoading();
+  toast('Saving '+patients.length+' patients...','info');
+
+  var saved=0,failed=0,total=patients.length;
+  patients.forEach(function(p,i){
+    setTimeout(function(){
+      fetch('data.php?action=save_patient',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(p)
+      }).then(function(r){return r.json();})
+      .then(function(){
         saved++;
-        if(saved===total){
-          // Also save backup
+        if(saved+failed===total){
+          // Also save PAT_DB backup
+          window.PAT_DB=patients;
           fetch('data.php?action=store_set',{method:'POST',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({key:'patients_backup',value:db})
+            body:JSON.stringify({key:'patients_backup',value:patients})
           }).catch(function(){});
-          if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Saved!';}
-          toast(total+' patients saved permanently','success');
-          setTimeout(function(){
-            if(btn)btn.style.display='none';
-          },3000);
+          setDone(saved);
         }
-      }).catch(function(){saved++;});
-    },i*50); // stagger requests 50ms apart
+      }).catch(function(){
+        failed++;
+        if(saved+failed===total) setDone(saved);
+      });
+    },i*30);
   });
 }
+window.saveAllPatients=saveAllPatients;
+
 window.saveAllPatients=saveAllPatients;
 
 
@@ -12873,6 +12910,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
