@@ -2276,6 +2276,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -3425,17 +3426,28 @@ function importCSV() {
   const ak = keys.find(k => /age/i.test(k)) || '';
   const gk = keys.find(k => /gender|sex/i.test(k)) || '';
   const tbody = document.getElementById('pat-tbody');
-  _csvRows.forEach((row, i) => {
-    const name = row[nk] || 'Unknown';
-    const mobile = mk ? row[mk] : '—';
-    const age = ak ? row[ak] : '—';
-    const gen = gk ? (row[gk]||'?').charAt(0) : '?';
-    const code = 'CAD-' + String(200 + i).padStart(4, '0');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><div style="font-weight:500">${name}</div></td><td style="color:var(--ink3);font-size:11.5px">${code}</td><td>${age} · ${gen}</td><td>${mobile}</td><td style="color:var(--ink3)">Imported</td><td><span class="pill p-g">New</span></td><td><div style="display:flex;gap:4px"><button class="tb" onclick="showPatient('${name}','${code}','${age}','${gen}','—','New')">View</button><button class="tb" onclick="nav('rx')">Rx</button></div></td>`;
+  _csvRows.forEach(function(row,i){
+    var pname=String(row[nk]||'Unknown').trim();
+    var pmob=String(mk?row[mk]||'':'').replace(/[^0-9]/g,'');
+    var page2=String(ak?row[ak]||'':'').trim();
+    var pgen=String(gk?row[gk]||'':'').charAt(0).toUpperCase()||'';
+    var ck2=''; for(var _k in row){if(/city|village|town/i.test(_k)){ck2=_k;break;}}
+    var pcity=String(ck2?row[ck2]||'':'').trim();
+    var code='CSV-'+String(Date.now()+i).slice(-8);
+    if(typeof dbSavePatient==='function')dbSavePatient({id:code,name:pname,mobile:pmob,age:page2,gender:pgen,city:pcity,blood:'',status:'Active',notes:'CSV Import'});
+    if(!window.PAT_DB)window.PAT_DB=[];
+    window.PAT_DB.unshift({id:code,name:pname,mob:pmob,mobile:pmob,age:page2,gender:pgen,city:pcity,status:'Active'});
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><div style="font-weight:600">'+pname+'</div></td>'
+      +'<td style="color:var(--ink3);font-size:11px">'+code+'</td>'
+      +'<td>'+page2+(pgen?' / '+pgen:'')+'</td>'
+      +'<td>'+pmob+'</td>'
+      +'<td>'+pcity+'</td>'
+      +'<td><span class="pill p-g">Active</span></td>'
+      +'<td><div style="display:flex;gap:4px"><button class="tb">View</button><button class="tb" onclick="nav(\'rx\')">Rx</button></div></td>';
     tbody.insertBefore(tr, tbody.firstChild);
   });
-  const n = _csvRows.length; _csvRows = [];
+  var n=_csvRows.length; _csvRows=[];
   closeModal('m-csv');
   document.getElementById('csv-preview').style.display = 'none';
   document.getElementById('csv-import-btn').disabled = true; document.getElementById('csv-import-btn').style.opacity = '.5';
@@ -12760,6 +12772,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
