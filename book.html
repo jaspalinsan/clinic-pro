@@ -3,48 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>Book Appointment</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#f1f5f9;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px}
-.card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:420px;overflow:hidden}
-.hdr{background:linear-gradient(135deg,#059669,#0d9488);padding:20px;text-align:center;color:#fff}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:420px}
+.hdr{background:linear-gradient(135deg,#059669,#0d9488);padding:20px;text-align:center;color:#fff;border-radius:16px 16px 0 0}
 .hdr h1{font-size:20px;font-weight:900;margin-bottom:2px}
 .hdr p{font-size:12px;opacity:.85}
-.body{padding:20px;display:flex;flex-direction:column;gap:16px}
+.body{padding:20px;display:flex;flex-direction:column;gap:14px}
 .step{display:none}.step.active{display:flex;flex-direction:column;gap:14px}
 .lbl{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-input,select{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-weight:600;color:#0f172a;outline:none;background:#fff}
+input,select{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-weight:600;color:#0f172a;outline:none;background:#fff;transition:border .2s}
 input:focus,select:focus{border-color:#059669}
 .found{background:#f0fdf4!important;border-color:#059669!important;color:#059669!important}
-.btn{width:100%;padding:13px;background:#059669;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn{width:100%;padding:13px;background:#059669;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
 .btn:hover{background:#047857}.btn:disabled{opacity:.6;cursor:not-allowed}
 .btn.sec{background:#EFF6FF;color:#185FA5;border:1.5px solid #BFDBFE}
+.btn.sec:hover{background:#dbeafe}
 .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{padding:10px 6px;border-radius:9px;text-align:center;cursor:pointer;border:1.5px solid #059669;background:#f0fdf4;transition:all .15s}
-.slot.sel{background:#185FA5;border-color:#185FA5}
-.slot.sel .st,.slot.sel .sl{color:#fff}
+.slot{padding:10px 6px;border-radius:9px;text-align:center;cursor:pointer;border:1.5px solid #059669;background:#f0fdf4;transition:all .15s;user-select:none}
+.slot:hover:not(.bk){background:#d1fae5}
+.slot.sel{background:#185FA5!important;border-color:#185FA5!important}
+.slot.sel .st,.slot.sel .sl{color:#fff!important}
 .slot.bk{background:#fef2f2;border-color:#fecaca;cursor:not-allowed;pointer-events:none}
 .slot .st{font-size:12px;font-weight:700;color:#059669}
 .slot .sl{font-size:9px;font-weight:600;color:#059669;margin-top:2px}
 .slot.bk .st,.slot.bk .sl{color:#DC2626}
-.cbox{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px}
-.crow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid #d1fae5}
+.cbox{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:0}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px;border-bottom:1px solid #d1fae5}
 .crow:last-child{border:none}
-.crow span:first-child{color:#64748b}.crow span:last-child{font-weight:700;color:#0f172a}
+.crow .ck{color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase}
+.crow .cv{font-weight:700;color:#0f172a}
 .dots{display:flex;justify-content:center;gap:8px;padding:12px}
 .dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:background .3s}
 .dot.on{background:#059669}
-.err{color:#DC2626;font-size:11px;font-weight:600;padding:7px 10px;background:#fef2f2;border-radius:7px;display:none}
-.status{font-size:11px;margin-top:4px;min-height:16px}
+.err{color:#DC2626;font-size:11px;font-weight:600;padding:8px 12px;background:#fef2f2;border-radius:7px;border:1px solid #fecaca;display:none}
+.stat{font-size:11px;min-height:18px;margin-top:4px;transition:all .2s}
+.legend{display:flex;gap:12px;font-size:10px;color:#64748b;margin-top:6px}
+.lege{display:flex;align-items:center;gap:4px}
+.lege span{width:10px;height:10px;border-radius:2px;display:inline-block}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="hdr">
     <h1 id="cname">Clinic Pro</h1>
-    <p>Book your appointment online</p>
+    <p id="cinfo">Book your appointment online</p>
   </div>
   <div class="dots">
     <div class="dot on" id="d0"></div>
@@ -53,19 +60,20 @@ input:focus,select:focus{border-color:#059669}
   </div>
   <div class="body">
 
-    <!-- STEP 1: Phone + Name -->
+    <!-- STEP 1 -->
     <div class="step active" id="s1">
+      <div style="font-size:13px;font-weight:700;color:#0f172a;text-align:center">Step 1 — Your Details</div>
       <div>
-        <div class="lbl">Mobile Number</div>
+        <div class="lbl">Mobile Number *</div>
         <input type="tel" id="b-phone" placeholder="Enter your mobile number" maxlength="15">
-        <div class="status" id="ph-status"></div>
+        <div class="stat" id="ph-stat"></div>
       </div>
       <div>
-        <div class="lbl">Patient Name</div>
+        <div class="lbl">Patient Name *</div>
         <input type="text" id="b-name" placeholder="Full name">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><div class="lbl">Age</div><input type="number" id="b-age" placeholder="25"></div>
+        <div><div class="lbl">Age</div><input type="number" id="b-age" placeholder="25" min="0" max="120"></div>
         <div><div class="lbl">Sex</div>
           <select id="b-sex">
             <option value="">Select</option>
@@ -80,24 +88,25 @@ input:focus,select:focus{border-color:#059669}
         <input type="text" id="b-city" placeholder="e.g. Moga, Ludhiana, Dina…">
       </div>
       <div id="e1" class="err">Please enter mobile number and name</div>
-      <button class="btn" id="b1">Next — Pick Slot <i class="ti ti-arrow-right"></i></button>
+      <button class="btn" id="b1">Next — Pick Date &amp; Slot <i class="ti ti-arrow-right"></i></button>
     </div>
 
-    <!-- STEP 2: Date + Slot -->
+    <!-- STEP 2 -->
     <div class="step" id="s2">
+      <div style="font-size:13px;font-weight:700;color:#0f172a;text-align:center">Step 2 — Pick Slot</div>
       <div>
         <div class="lbl">Appointment Date</div>
         <input type="date" id="b-date">
       </div>
       <div>
-        <div class="lbl">Available Slots</div>
+        <div class="lbl">Available Time Slots</div>
         <div class="slot-grid" id="slot-grid">
-          <div style="grid-column:span 3;text-align:center;color:#94a3b8;padding:16px;font-size:12px">Select a date to see slots</div>
+          <div style="grid-column:span 3;text-align:center;color:#94a3b8;padding:16px;font-size:12px">Select a date above to see slots</div>
         </div>
-        <div style="display:flex;gap:10px;font-size:10px;margin-top:8px;color:#64748b">
-          <span><span style="display:inline-block;width:10px;height:10px;background:#f0fdf4;border:1px solid #059669;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Free</span>
-          <span><span style="display:inline-block;width:10px;height:10px;background:#185FA5;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Selected</span>
-          <span><span style="display:inline-block;width:10px;height:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Booked</span>
+        <div class="legend">
+          <div class="lege"><span style="background:#f0fdf4;border:1px solid #059669"></span>Free</div>
+          <div class="lege"><span style="background:#185FA5"></span>Selected</div>
+          <div class="lege"><span style="background:#fef2f2;border:1px solid #fecaca"></span>Booked</div>
         </div>
       </div>
       <div>
@@ -111,13 +120,10 @@ input:focus,select:focus{border-color:#059669}
       </div>
     </div>
 
-    <!-- STEP 3: Confirm -->
+    <!-- STEP 3 -->
     <div class="step" id="s3">
-      <div style="text-align:center;padding:6px 0">
-        <div style="font-size:15px;font-weight:700;color:#0f172a">Confirm Your Appointment</div>
-        <div style="font-size:12px;color:#64748b;margin-top:3px">Please check your details below</div>
-      </div>
-      <div class="cbox" id="pre-details"></div>
+      <div style="font-size:13px;font-weight:700;color:#0f172a;text-align:center">Step 3 — Confirm</div>
+      <div class="cbox" id="pre-box"></div>
       <div id="e3" class="err"></div>
       <div style="display:flex;gap:8px">
         <button class="btn sec" id="bk2" style="flex:1"><i class="ti ti-arrow-left"></i> Back</button>
@@ -125,257 +131,283 @@ input:focus,select:focus{border-color:#059669}
       </div>
     </div>
 
-    <!-- STEP 4: Done -->
+    <!-- STEP 4 -->
     <div class="step" id="s4">
       <div style="text-align:center;padding:10px 0">
-        <div style="width:64px;height:64px;background:#f0fdf4;border:2.5px solid #059669;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px">✓</div>
+        <div style="width:64px;height:64px;background:#f0fdf4;border:2.5px solid #059669;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;color:#059669">&#10003;</div>
         <div style="font-size:20px;font-weight:900;color:#059669;margin-bottom:4px">Appointment Confirmed!</div>
         <div style="font-size:12px;color:#64748b" id="done-sub"></div>
       </div>
-      <div class="cbox" id="done-details"></div>
-      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;font-size:12px;color:#92400e;text-align:center">
+      <div class="cbox" id="done-box"></div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;font-size:12px;color:#92400e;text-align:center;line-height:1.7">
         Please arrive 5 minutes before your slot.<br>Show this screen to the receptionist.
       </div>
-      <button class="btn sec" id="b4">Book Another <i class="ti ti-plus"></i></button>
+      <button class="btn sec" id="b4"><i class="ti ti-plus"></i> Book Another Appointment</button>
     </div>
 
   </div>
 </div>
+
 <script>
-var patients=[];
-var bookedSlots=[];
-var selSlot='';
-var APT={mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',slotDur:15,eveOn:1};
-var CLINIC={name:'Clinic Pro'};
+// ── State ─────────────────────────────────────────────────────
+var patients = [];
+var bookedSlots = [];
+var selSlot = '';
+var APT = {mornStart:'09:00',mornEnd:'13:00',eveStart:'17:00',eveEnd:'20:00',slotDur:15,eveOn:1};
+var CLINIC = {name:'Clinic Pro'};
 
-// ── Load all data ─────────────────────────────────────────────
-Promise.all([
-  fetch('data.php?action=get_all').then(function(r){return r.json();}),
-  fetch('data.php?action=store_get&key=clinic_settings').then(function(r){return r.json();}).catch(function(){return{};})
-]).then(function(results){
-  var d=results[0], cs=results[1];
-  // Patients list
-  patients=d.patients||[];
-  // Clinic settings
-  var settings=cs.value||cs;
-  if(settings.name){CLINIC.name=settings.name;document.getElementById('cname').textContent=settings.name;}
-  if(settings.aptSettings)Object.assign(APT,settings.aptSettings);
-}).catch(function(){});
+// ── Load data from server ─────────────────────────────────────
+function loadServerData(cb){
+  Promise.all([
+    fetch('data.php?action=get_all&r='+Date.now()).then(function(r){return r.json();}),
+    fetch('data.php?action=store_get&key=clinic_settings').then(function(r){return r.json();}).catch(function(){return{};})
+  ]).then(function(res){
+    var d=res[0], cs=res[1];
+    patients = d.patients || [];
+    var s = cs.value || cs;
+    if(s.name){ CLINIC.name=s.name; }
+    if(s.doctor){ CLINIC.doctor=s.doctor; }
+    if(s.aptSettings) Object.assign(APT, s.aptSettings);
+    document.getElementById('cname').textContent = CLINIC.name || 'Clinic Pro';
+    if(CLINIC.doctor) document.getElementById('cinfo').textContent = 'Dr. '+CLINIC.doctor+' — Book Appointment';
+    if(cb) cb();
+  }).catch(function(){ if(cb) cb(); });
+}
 
-// ── Set today as default date ─────────────────────────────────
-var now=new Date();
-var iso=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-document.getElementById('b-date').min=iso;
-document.getElementById('b-date').value=iso;
-function pad(n){return String(n).padStart(2,'0');}
+// ── Helpers ───────────────────────────────────────────────────
+function pad(n){ return String(n).padStart(2,'0'); }
 
-// ── Step nav ──────────────────────────────────────────────────
 function setStep(n){
-  [1,2,3,4].forEach(function(i){document.getElementById('s'+i).classList.toggle('active',i===n);});
-  [0,1,2].forEach(function(i){document.getElementById('d'+i).classList.toggle('on',i<n);});
+  [1,2,3,4].forEach(function(i){
+    document.getElementById('s'+i).classList.toggle('active', i===n);
+  });
+  [0,1,2].forEach(function(i){
+    document.getElementById('d'+i).classList.toggle('on', i<n);
+  });
   window.scrollTo(0,0);
 }
 
-// ── Phone lookup ──────────────────────────────────────────────
-document.getElementById('b-phone').addEventListener('input',function(){
-  var raw=this.value.replace(/\D/g,'');
-  var st=document.getElementById('ph-status');
-  if(raw.length<10){st.textContent='';return;}
-  // Search patient list
-  var found=patients.find(function(p){
-    var m=(p.mobile||p.mob||p.phone||'').toString().replace(/\D/g,'');
-    return m===raw||m.slice(-10)===raw.slice(-10)||raw.slice(-10)===m.slice(-10);
-  });
-  if(found){
-    var nameEl=document.getElementById('b-name');
-    var ageEl=document.getElementById('b-age');
-    var sexEl=document.getElementById('b-sex');
-    nameEl.value=found.name||'';
-    nameEl.className='found';
-    var ageRaw=String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
-    if(ageRaw){ageEl.value=ageRaw;ageEl.className='found';}
-    var sex=found.sex||found.gender||'';
-    if(sex){sexEl.value=sex.charAt(0).toUpperCase();}
-    var cityEl=document.getElementById('b-city');
-    if(cityEl&&(found.city||found.address))cityEl.value=found.city||found.address||'';
-    st.innerHTML='<span style="color:#059669;font-weight:600">&#10003; '+( found.name||'Patient')+' — name, age, city filled automatically</span>';
-  } else {
-    document.getElementById('b-name').className='';
-    st.style.color='#94a3b8';
-    st.textContent=raw.length>=10?'New patient — please fill your name':'';
-  }
-});
-
-// Name input also does lookup (in case they type name first)
-document.getElementById('b-name').addEventListener('input',function(){
-  var val=this.value.trim().toLowerCase();
-  if(val.length<3)return;
-  var found=patients.find(function(p){
-    return (p.name||'').toLowerCase().startsWith(val);
-  });
-  if(found&&!document.getElementById('b-phone').value){
-    var m=found.mobile||found.mob||'';
-    if(m){document.getElementById('b-phone').value=m;}
-    var ageRaw=String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
-    if(ageRaw)document.getElementById('b-age').value=ageRaw;
-    var sex=found.sex||found.gender||'';
-    if(sex)document.getElementById('b-sex').value=sex.charAt(0).toUpperCase();
-    var cEl=document.getElementById('b-city');
-    if(cEl&&(found.city||found.address))cEl.value=found.city||found.address||'';
-  }
-});
-
-// ── Step 1 → 2 ───────────────────────────────────────────────
-document.getElementById('b1').addEventListener('click',function(){
-  var phone=document.getElementById('b-phone').value.trim();
-  var name=document.getElementById('b-name').value.trim();
-  var e=document.getElementById('e1');
-  if(!phone||!name){e.style.display='block';return;}
-  e.style.display='none';
-  loadSlots();
-  setStep(2);
-});
-document.getElementById('bk1').addEventListener('click',function(){setStep(1);});
-document.getElementById('b-date').addEventListener('change',loadSlots);
-
-// ── Load slots ────────────────────────────────────────────────
-function loadSlots(){
-  var dateStr=document.getElementById('b-date').value;
-  if(!dateStr)return;
-  selSlot='';
-  fetch('data.php?action=get_all')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      bookedSlots=(d.appointments||[]).filter(function(a){return a.date===dateStr;}).map(function(a){return a.time;});
-      renderSlots();
-    }).catch(function(){renderSlots();});
+function makeRow(k,v,style){
+  if(!v) return '';
+  return '<div class="crow"><span class="ck">'+k+'</span><span class="cv"'+(style?' style="'+style+'"':'')+'>'+v+'</span></div>';
 }
 
-function renderSlots(){
-  var dur=parseInt(APT.slotDur)||15;
-  var slots=[];
-  function addS(s,e){
-    var sv=s.split(':').map(Number),ev=e.split(':').map(Number);
-    var c=sv[0]*60+sv[1],f=ev[0]*60+ev[1];
+function fmtDate(iso){
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dp=iso.split('-');
+  return pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
+}
+
+// ── Phone lookup ──────────────────────────────────────────────
+function lookupPhone(raw){
+  var stat = document.getElementById('ph-stat');
+  if(raw.length < 10){ stat.textContent=''; return; }
+  var found = patients.find(function(p){
+    var m = (p.mobile||p.mob||'').toString().replace(/\D/g,'');
+    return m === raw || m.slice(-10) === raw.slice(-10);
+  });
+  if(found){
+    document.getElementById('b-name').value = found.name || '';
+    document.getElementById('b-name').className = 'found';
+    var age = String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
+    if(age){ document.getElementById('b-age').value=age; document.getElementById('b-age').className='found'; }
+    var sex = (found.sex||found.gender||'').charAt(0).toUpperCase();
+    if(sex && ['M','F','O'].indexOf(sex)!==-1) document.getElementById('b-sex').value=sex;
+    var city = found.city||found.address||'';
+    if(city){ document.getElementById('b-city').value=city; document.getElementById('b-city').className='found'; }
+    stat.innerHTML='<span style="color:#059669;font-weight:700">&#10003; Returning patient — details filled automatically</span>';
+  } else {
+    ['b-name','b-age','b-city'].forEach(function(id){ document.getElementById(id).className=''; });
+    stat.style.color='#94a3b8';
+    stat.textContent = raw.length>=10 ? 'New patient — please fill your details' : '';
+  }
+}
+
+// ── Slot generation ───────────────────────────────────────────
+function genSlotTimes(){
+  var dur = parseInt(APT.slotDur)||15;
+  var slots = [];
+  function addS(start,end){
+    var sv=start.split(':').map(Number), ev=end.split(':').map(Number);
+    var c=sv[0]*60+sv[1], f=ev[0]*60+ev[1];
     while(c+dur<=f){
-      var h=Math.floor(c/60),m=c%60,ap=h>=12?'PM':'AM',h12=h%12||12;
+      var h=Math.floor(c/60), m=c%60, ap=h>=12?'PM':'AM', h12=h%12||12;
       slots.push(pad(h12)+':'+pad(m)+' '+ap);
       c+=dur;
     }
   }
-  addS(APT.mornStart||'09:00',APT.mornEnd||'13:00');
-  if(parseInt(APT.eveOn))addS(APT.eveStart||'17:00',APT.eveEnd||'20:00');
-  var g=document.getElementById('slot-grid');
-  if(!slots.length){g.innerHTML='<div style="grid-column:span 3;text-align:center;color:#DC2626;padding:16px;font-size:12px">No slots configured</div>';return;}
-  g.innerHTML=slots.map(function(t){
-    var bk=bookedSlots.indexOf(t)!==-1;
-    return '<div class="slot'+(bk?' bk':'')+(t===selSlot?' sel':'')+'" data-t="'+t+'">'+
-      '<div class="st">'+t+'</div><div class="sl">'+(bk?'Booked':t===selSlot?'Selected':'Free')+'</div></div>';
+  addS(APT.mornStart||'09:00', APT.mornEnd||'13:00');
+  if(parseInt(APT.eveOn)) addS(APT.eveStart||'17:00', APT.eveEnd||'20:00');
+  return slots;
+}
+
+function loadSlots(){
+  var dateStr = document.getElementById('b-date').value;
+  if(!dateStr) return;
+  selSlot = '';
+  var grid = document.getElementById('slot-grid');
+  grid.innerHTML = '<div style="grid-column:span 3;text-align:center;color:#94a3b8;padding:16px;font-size:12px">Loading slots…</div>';
+  fetch('data.php?action=get_all&r='+Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var appts = d.appointments||[];
+      bookedSlots = appts.filter(function(a){ return a.date===dateStr; }).map(function(a){ return a.time; });
+      renderSlots();
+    }).catch(function(){ renderSlots(); });
+}
+
+function renderSlots(){
+  var slots = genSlotTimes();
+  var grid = document.getElementById('slot-grid');
+  if(!slots.length){
+    grid.innerHTML='<div style="grid-column:span 3;text-align:center;color:#DC2626;padding:16px;font-size:12px">No slots configured. Please contact the clinic.</div>';
+    return;
+  }
+  grid.innerHTML = slots.map(function(t){
+    var bk = bookedSlots.indexOf(t)!==-1;
+    var sel = t===selSlot;
+    return '<div class="slot'+(bk?' bk':sel?' sel':'')+'" data-t="'+t+'">'+
+      '<div class="st">'+t+'</div>'+
+      '<div class="sl">'+(bk?'Booked':sel?'Selected &#10003;':'Free')+'</div>'+
+    '</div>';
   }).join('');
-  g.querySelectorAll('.slot:not(.bk)').forEach(function(el){
-    el.addEventListener('click',function(){
-      g.querySelectorAll('.slot:not(.bk)').forEach(function(s){s.classList.remove('sel');s.querySelector('.sl').textContent='Free';});
+  grid.querySelectorAll('.slot:not(.bk)').forEach(function(el){
+    el.addEventListener('click', function(){
+      grid.querySelectorAll('.slot:not(.bk)').forEach(function(s){
+        s.classList.remove('sel');
+        s.querySelector('.sl').innerHTML='Free';
+      });
       el.classList.add('sel');
-      el.querySelector('.sl').textContent='Selected';
-      selSlot=el.dataset.t;
+      el.querySelector('.sl').innerHTML='Selected &#10003;';
+      selSlot = el.dataset.t;
     });
   });
 }
 
-// ── Step 2 → 3 ───────────────────────────────────────────────
-document.getElementById('b2').addEventListener('click',function(){
-  var date=document.getElementById('b-date').value;
-  var e=document.getElementById('e2');
-  if(!date){e.style.display='block';e.textContent='Please select a date';return;}
-  if(!selSlot){e.style.display='block';e.textContent='Please select a time slot';return;}
+// ── Step navigation ───────────────────────────────────────────
+document.getElementById('b-phone').addEventListener('input', function(){
+  lookupPhone(this.value.replace(/\D/g,''));
+});
+
+document.getElementById('b1').addEventListener('click', function(){
+  var phone = document.getElementById('b-phone').value.trim();
+  var name  = document.getElementById('b-name').value.trim();
+  var e = document.getElementById('e1');
+  if(!phone||!name){ e.style.display='block'; e.textContent='Please enter mobile number and name'; return; }
   e.style.display='none';
-  var name=document.getElementById('b-name').value.trim();
-  var phone=document.getElementById('b-phone').value.trim();
-  var reason=document.getElementById('b-reason').value.trim()||'Appointment';
-  var city=document.getElementById('b-city').value.trim();
-  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dp=date.split('-');
-  var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
-  document.getElementById('pre-details').innerHTML=
-    '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+
-    '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-    (age?'<div class="crow"><span>Age/Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
-    (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+
-    '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-    '<div class="crow"><span>Time</span><span style="color:#059669;font-weight:900">'+selSlot+'</span></div>'+
-    '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>';
+  loadSlots();
+  setStep(2);
+});
+
+document.getElementById('bk1').addEventListener('click', function(){ setStep(1); });
+
+document.getElementById('b-date').addEventListener('change', loadSlots);
+
+document.getElementById('b2').addEventListener('click', function(){
+  var date = document.getElementById('b-date').value;
+  var e = document.getElementById('e2');
+  if(!date){ e.style.display='block'; e.textContent='Please select a date'; return; }
+  if(!selSlot){ e.style.display='block'; e.textContent='Please select a time slot'; return; }
+  e.style.display='none';
+  var name   = document.getElementById('b-name').value.trim();
+  var phone  = document.getElementById('b-phone').value.trim();
+  var age    = document.getElementById('b-age').value;
+  var sex    = document.getElementById('b-sex').value;
+  var city   = document.getElementById('b-city').value.trim();
+  var reason = document.getElementById('b-reason').value.trim()||'Appointment';
+  document.getElementById('pre-box').innerHTML =
+    makeRow('Patient', name, 'font-weight:900') +
+    makeRow('Mobile', phone) +
+    makeRow('Age / Sex', age+(sex?' / '+sex:'')) +
+    makeRow('City', city) +
+    makeRow('Date', fmtDate(date)) +
+    makeRow('Time', selSlot, 'color:#059669;font-size:15px;font-weight:900') +
+    makeRow('Reason', reason);
   setStep(3);
 });
-document.getElementById('bk2').addEventListener('click',function(){setStep(2);});
 
-// ── Confirm booking ───────────────────────────────────────────
-document.getElementById('b3').addEventListener('click',function(){
-  var name=document.getElementById('b-name').value.trim();
-  var phone=document.getElementById('b-phone').value.trim();
-  var age=document.getElementById('b-age').value;
-  var sex=document.getElementById('b-sex').value;
-  var date=document.getElementById('b-date').value;
-  var reason=document.getElementById('b-reason').value.trim()||'Appointment';
-  var city=document.getElementById('b-city').value.trim();
-  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dp=date.split('-');
-  var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
-  var btn=this;btn.disabled=true;btn.textContent='Saving…';
+document.getElementById('bk2').addEventListener('click', function(){ setStep(2); });
+
+document.getElementById('b3').addEventListener('click', function(){
+  var btn    = this;
+  var name   = document.getElementById('b-name').value.trim();
+  var phone  = document.getElementById('b-phone').value.trim();
+  var age    = document.getElementById('b-age').value;
+  var sex    = document.getElementById('b-sex').value;
+  var city   = document.getElementById('b-city').value.trim();
+  var date   = document.getElementById('b-date').value;
+  var reason = document.getElementById('b-reason').value.trim()||'Appointment';
+  var e      = document.getElementById('e3');
+  btn.disabled=true; btn.textContent='Saving…';
+
+  // Save appointment
   fetch('data.php?action=save_appointment',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      id:'APT-'+Date.now(),
-      name:name,
-      mob:phone,
-      mobile:phone,
-      age:age,
-      gender:sex,
-      date:date,
-      time:selSlot,
-      complaint:reason,
-      status:'new',
-      token:'',
-      pid:''
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      id:'APT-'+Date.now(), name:name, mob:phone, mobile:phone,
+      age:age, gender:sex, date:date, time:selSlot,
+      complaint:reason, status:'new', token:'', pid:''
     })
-  }).then(function(r){return r.json();})
+  })
+  .then(function(r){ return r.json(); })
   .then(function(){
-    // Also save patient to patient list if new or update city
-    var patId='PAT-'+Date.now();
-    // Save/update patient — if mobile exists, updates their info
+    // Also save/update patient record
     fetch('data.php?action=save_patient',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        id:patId,
-        name:name,
-        mobile:phone,
-        age:age,
-        gender:sex,
-        city:city,
-        blood:'',
-        status:'Active',
-        notes:'Online booking'
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        id:'PAT-'+Date.now(), name:name, mobile:phone,
+        age:age, gender:sex, city:city,
+        blood:'', status:'Active', notes:'Registered via online booking'
       })
     }).catch(function(){});
-    document.getElementById('done-details').innerHTML=
-      '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+
-      '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-      (age?'<div class="crow"><span>Age/Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
-      (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+
-      '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:15px;font-weight:900">'+selSlot+'</span></div>'+
-      '<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">&#10003; Confirmed</span></div>';
-    document.getElementById('done-sub').textContent='Confirmed at '+selSlot+' on '+dd;
+    // Show confirmation
+    document.getElementById('done-box').innerHTML =
+      makeRow('Patient', name, 'font-weight:900') +
+      makeRow('Mobile', phone) +
+      makeRow('Age / Sex', age+(sex?' / '+sex:'')) +
+      makeRow('City', city) +
+      makeRow('Date', fmtDate(date)) +
+      makeRow('Time', selSlot, 'color:#059669;font-size:16px;font-weight:900') +
+      makeRow('Status', '&#10003; Confirmed', 'color:#059669;font-weight:700');
+    document.getElementById('done-sub').textContent = 'Confirmed at '+selSlot+' on '+fmtDate(date);
     setStep(4);
-  }).catch(function(){
-    var e=document.getElementById('e3');
-    e.style.display='block';e.textContent='Connection error. Please try again.';
-    btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Confirm Appointment';
+  })
+  .catch(function(){
+    e.style.display='block'; e.textContent='Connection error. Please try again.';
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-check"></i> Confirm Appointment';
   });
 });
-document.getElementById('b4').addEventListener('click',function(){location.reload();});
 
-// Init
-loadSlots();
+// Book Another — reset all fields and start fresh
+document.getElementById('b4').addEventListener('click', function(){
+  // Reset all fields
+  ['b-phone','b-name','b-age','b-city','b-reason'].forEach(function(id){
+    var el=document.getElementById(id); if(el){el.value=''; el.className='';}
+  });
+  document.getElementById('b-sex').value='';
+  document.getElementById('ph-stat').textContent='';
+  document.getElementById('e1').style.display='none';
+  document.getElementById('e2').style.display='none';
+  document.getElementById('e3').style.display='none';
+  selSlot='';
+  bookedSlots=[];
+  // Reset date to today
+  var now=new Date();
+  var iso=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  document.getElementById('b-date').value=iso;
+  // Go back to step 1
+  setStep(1);
+  // Reload fresh patient data
+  loadServerData(function(){ loadSlots(); });
+});
+
+// ── Init ──────────────────────────────────────────────────────
+var now = new Date();
+var iso = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+document.getElementById('b-date').min = iso;
+document.getElementById('b-date').value = iso;
+
+loadServerData(function(){ loadSlots(); });
 </script>
 </body>
 </html>

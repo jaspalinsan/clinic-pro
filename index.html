@@ -2275,6 +2275,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -11810,6 +11811,11 @@ function doLogout(){
     var err=document.getElementById('lock-error');if(err)err.style.display='none';
   }
   if(typeof toast==='function')toast('Logged out successfully','info');
+  // Clear data so next login loads fresh
+  window.PAT_DB=[];
+  window._apptData=[];
+  window.BILLING_DB=[];
+  window.CLINIC_SETTINGS={};
 }
 window.doLogout=doLogout;
 
@@ -12021,7 +12027,7 @@ function cpLoadData(){
     if(resp.patients){
       window.PAT_DB=(resp.patients||[]).map(function(p){
         return{id:p.id,name:p.name,age:p.age,gender:p.gender,
-               mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
+               mob:p.mobile,mobile:p.mobile,city:p.city,blood:p.blood,status:p.status};
       });
     }
 
@@ -12754,6 +12760,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
