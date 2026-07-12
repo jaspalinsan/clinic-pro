@@ -193,12 +193,12 @@ document.getElementById('b-phone').addEventListener('input',function(){
     nameEl.value=found.name||'';
     nameEl.className='found';
     var ageRaw=String(found.age||'').replace(/[MFO\/\s]/gi,'').replace(/\D/g,'');
-    if(ageRaw)ageEl.value=ageRaw;
+    if(ageRaw){ageEl.value=ageRaw;ageEl.className='found';}
     var sex=found.sex||found.gender||'';
-    if(sex)sexEl.value=sex.charAt(0).toUpperCase();
+    if(sex){sexEl.value=sex.charAt(0).toUpperCase();}
     var cityEl=document.getElementById('b-city');
     if(cityEl&&(found.city||found.address))cityEl.value=found.city||found.address||'';
-    st.innerHTML='<span style="color:#059669;font-weight:600">&#10003; '+( found.name||'Patient')+' — details auto-filled</span>';
+    st.innerHTML='<span style="color:#059669;font-weight:600">&#10003; '+( found.name||'Patient')+' — name, age, city filled automatically</span>';
   } else {
     document.getElementById('b-name').className='';
     st.style.color='#94a3b8';
@@ -297,10 +297,7 @@ document.getElementById('b2').addEventListener('click',function(){
   var dp=date.split('-');
   var dd=pad(parseInt(dp[2]))+' '+M[parseInt(dp[1])-1]+' '+dp[0];
   document.getElementById('pre-details').innerHTML=
-    '<div class="crow"><span>Patient</span><span>'+name+'</span></div>'+
-    '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
-    '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-    '<div class="crow"><span>Time</span><span style="color:#059669;font-weight:900">'+selSlot+'</span></div>'+
+    '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+'<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+(age?'<div class="crow"><span>Age / Sex</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+(city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+'<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+'<div class="crow"><span>Time</span><span style="color:#059669;font-size:15px;font-weight:900">'+selSlot+'</span></div>'+'<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">&#10003; Confirmed</span></div>';font-weight:900">'+selSlot+'</span></div>'+
     '<div class="crow"><span>Reason</span><span>'+reason+'</span></div>'+
     (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'');
   setStep(3);
@@ -340,19 +337,29 @@ document.getElementById('b3').addEventListener('click',function(){
   .then(function(){
     // Also save patient to patient list if new or update city
     var patId='PAT-'+Date.now();
+    // Save/update patient — if mobile exists, updates their info
     fetch('data.php?action=save_patient',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        id:patId,name:name,mobile:phone,mob:phone,
-        age:age,gender:sex,city:city,
-        blood:'',status:'active',notes:'Registered via online booking'
+        id:patId,
+        name:name,
+        mobile:phone,
+        age:age,
+        gender:sex,
+        city:city,
+        blood:'',
+        status:'Active',
+        notes:'Online booking'
       })
     }).catch(function(){});
     document.getElementById('done-details').innerHTML=
-      '<div class="crow"><span>Patient</span><span>'+name+'</span></div>'+
+      '<div class="crow"><span>Patient</span><span style="font-weight:900">'+name+'</span></div>'+
       '<div class="crow"><span>Mobile</span><span>'+phone+'</span></div>'+
+      (age?'<div class="crow"><span>Age</span><span>'+age+(sex?' / '+sex:'')+'</span></div>':'')+
+      (city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'')+
       '<div class="crow"><span>Date</span><span>'+dd+'</span></div>'+
-      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>'+(city?'<div class="crow"><span>City</span><span>'+city+'</span></div>':'');
+      '<div class="crow"><span>Time</span><span style="color:#059669;font-size:16px;font-weight:900">'+selSlot+'</span></div>'+
+      '<div class="crow"><span>Status</span><span style="color:#059669;font-weight:700">Confirmed ✓</span></div>';
     document.getElementById('done-sub').textContent='Confirmed at '+selSlot+' on '+dd;
     setStep(4);
   }).catch(function(){
