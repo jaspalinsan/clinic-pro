@@ -2277,6 +2277,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -3452,6 +3453,15 @@ function importCSV() {
   document.getElementById('csv-preview').style.display = 'none';
   document.getElementById('csv-import-btn').disabled = true; document.getElementById('csv-import-btn').style.opacity = '.5';
   toast(n + ' patients imported', 'success');
+  // Force save PAT_DB to MySQL immediately
+  setTimeout(function(){
+    if(window.PAT_DB&&window.PAT_DB.length){
+      fetch('data.php?action=store_set',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({key:'pat_db_backup',value:window.PAT_DB})
+      }).catch(function(){});
+    }
+  },500);
 }
 function filterPat(q) { const q2 = q.toLowerCase(); document.querySelectorAll('#pat-tbody tr').forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(q2) ? '' : 'none'; }); }
 
@@ -7244,6 +7254,13 @@ window.rxMedPick=rxMedPick;
 // Central inventory sync — call after any DB change
 function syncInvDB(){
   window.INV_DB=DB;
+  // Save immediately to MySQL clinic_store
+  if(DB&&DB.length){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'inventory',value:DB})
+    }).catch(function(){});
+  }
   // Also refresh Rx medicine selects if Rx page is visible
   var rxPage=document.getElementById('page-rx');
   if(rxPage&&rxPage.classList.contains('on')){
@@ -11810,25 +11827,36 @@ window.isMobile=isMobile;
 
 function doLogout(){
   if(!confirm('Log out of Clinic Pro?'))return;
+  // Save all data FIRST, then clear after delay
   if(typeof cpSaveData==='function')cpSaveData();
+  // Also force-save inventory and patients immediately
+  if(window.INV_DB&&window.INV_DB.length){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'inventory',value:window.INV_DB})
+    }).catch(function(){});
+  }
+  // Clear data after 1 second (give fetches time to complete)
+  setTimeout(function(){
+    window.PAT_DB=[];
+    window._apptData=[];
+    window.BILLING_DB=[];
+    window.INV_DB=[];
+    window.CLINIC_SETTINGS={};
+  },1000);
   window.CURRENT_USER=null;
   var um=document.getElementById('user-menu');
   if(um)um.style.display='none';
   var ls=document.getElementById('lock-screen');
   if(ls){
-    ls.style.display='flex';
-    ls.style.opacity='1';
+    ls.style.display='flex';ls.style.opacity='1';
     var p=document.getElementById('lock-pass');if(p)p.value='';
     var u=document.getElementById('lock-user');if(u)u.value='';
     var err=document.getElementById('lock-error');if(err)err.style.display='none';
   }
   if(typeof toast==='function')toast('Logged out successfully','info');
-  // Clear data so next login loads fresh
-  window.PAT_DB=[];
-  window._apptData=[];
-  window.BILLING_DB=[];
-  window.CLINIC_SETTINGS={};
 }
+
 window.doLogout=doLogout;
 
 // ═══ AUTO SYNC — polls server every 3 seconds ═════════════
@@ -12772,6 +12800,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
