@@ -175,6 +175,7 @@ try{
   // GET ALL — includes PDF file data from database
   if($action==='get_all'){
     $patients=$pdo->query("SELECT * FROM patients ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+    $pb=$pdo->prepare("SELECT store_value FROM clinic_store WHERE store_key='patients_backup'")->execute()?$pdo->query("SELECT store_value FROM clinic_store WHERE store_key='patients_backup'")->fetch(PDO::FETCH_ASSOC):null;
     $appts=$pdo->query("SELECT * FROM appointments ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
     // Include result_file so ALL users can see PDF on any computer
     $lab=$pdo->query("SELECT id,patient_name,patient_id,age_sex,tests,inv_id,rx_no,date,status,submitted,result_file,result_type,result_name FROM lab_orders ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
@@ -196,6 +197,7 @@ try{
     echo json_encode([
       'ok'=>true,
       'patients'=>$patients,
+      'patients_backup'=>$pb?json_decode($pb['store_value'],true):[],
       'appointments'=>$appts,
       'lab'=>$lab,
       'billing'=>$bill,

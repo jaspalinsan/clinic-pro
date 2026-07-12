@@ -372,9 +372,7 @@ html,body{height:100%;overflow:hidden}
   <div class="nright" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding-left:8px">
     <div id="live-date" style="background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:2px solid #b0b0b0;border-radius:12px;padding:5px 12px;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9),inset 0 -2px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:66px;height:66px;justify-content:center"><span id="live-day" style="font-size:13px;font-weight:800;color:#1A3A8C;letter-spacing:1.5px;text-transform:uppercase;line-height:1">Mon</span><span id="live-daynum" style="font-size:13px;font-weight:900;color:#1A3A8C;line-height:1">02 Jun</span><span id="live-year" style="font-size:13px;font-weight:700;color:#CC2222;letter-spacing:1px;line-height:1">2026</span></div>
     <div style="position:relative">
-      <div            <div id="user-avatar" onclick="toggleUserMenu()" title="User menu"
-        style="width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:3px solid #CC2222;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#1A3A8C;cursor:pointer" <button onclick="nav('settings')" title="Settings" style="width:42px;height:42px;border-radius:50%;border:2px solid #b0b0b0;background:linear-gradient(180deg,#fff,#e0e0e0);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)"><i class="ti ti-settings" style="font-size:20px;color:#1A3A8C"></i></button>
-      id="user-role-badge">DR</div>
+      <div            <div onclick="toggleUserMenu()" style="width:46px;height:46px;border-radius:50%;border:2px solid #b0b0b0;background:linear-gradient(180deg,#fff 0%,#e8e8e8 40%,#d0d0d0 60%,#e8e8e8 100%);box-shadow:0 3px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#1A3A8C;cursor:pointer;position:relative;flex-shrink:0" id="user-role-badge">DR</div>
       <div id="user-menu" style="display:none;position:absolute;right:0;top:40px;background:#fff;
         border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;z-index:9999;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:#F0FDF9">
@@ -2280,6 +2278,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function apptFilterRange(){
   var f=document.getElementById('appt-from-date');
   var t=document.getElementById('appt-to-date');
@@ -3459,7 +3459,15 @@ function importCSV() {
   closeModal('m-csv');
   document.getElementById('csv-preview').style.display = 'none';
   document.getElementById('csv-import-btn').disabled = true; document.getElementById('csv-import-btn').style.opacity = '.5';
-  toast(n + ' patients imported to permanent list', 'success');
+  toast(n + ' patients imported', 'success');
+  // Save backup of entire PAT_DB to clinic_store for redundancy
+  var backup=window.PAT_DB||[];
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'patients_backup',value:backup})
+  }).then(function(){
+    if(typeof renderDashPatients==='function')renderDashPatients();
+  }).catch(function(){});
   // Backup save all patients as JSON
   setTimeout(function(){
     fetch('data.php?action=store_set',{method:'POST',
@@ -5698,8 +5706,13 @@ function renderApptPanes(){
         '<div style="width:55px;font-size:11px;text-align:center;color:var(--ink3);flex-shrink:0">'+a.time+'</div>'+
         '<div style="width:34px;height:34px;border-radius:50%;background:'+C[i%C.length]+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">'+init+'</div>'+
         '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:13px;font-weight:600">'+a.name+'</div>'+
-          '<div style="font-size:11px;color:var(--ink3)">'+(a.pid||'')+(a.diag?' &middot; '+a.diag:'')+(a.age?' &middot; '+a.age+(a.sex?'/'+a.sex:''):'')+'</div>'+
+          '<div style="font-size:13px;font-weight:700">'+a.name+'</div>'+
+          '<div style="font-size:11px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">'+
+(a.age?'<span>'+a.age+(a.gender?'/'+a.gender:a.sex?'/'+a.sex:'')+'</span>':'')+
+(a.mob?'<span style="color:#185FA5;font-weight:600">'+a.mob+'</span>':'')+
+(a.complaint?'<span>'+a.complaint+'</span>':'')+
+(a.notes&&a.notes.indexOf('online')!==-1?'<span style="background:#f0fdf4;color:#059669;padding:1px 6px;border-radius:10px;font-weight:600">Online</span>':'')+
+'</div>'+
         '</div>'+
         '<div style="display:flex;gap:4px;flex-shrink:0">'+btns+'</div></div>';
     }).join('');
@@ -12819,6 +12832,8 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
 
 
 
