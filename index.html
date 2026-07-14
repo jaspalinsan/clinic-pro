@@ -986,7 +986,7 @@ html,body{height:100%;overflow:hidden}
   <div class="card">
     <div class="ch"><span class="ct">Vendor Bill Items</span></div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:50px;text-align:center">Dose</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
       <tbody id="vd-tbody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to auto-fill</td></tr></tbody>
     </table></div>
     <div style="padding:10px 16px;text-align:right"><b>Total: </b><span id="vd-total">&#8377;0.00</span></div>
@@ -4243,7 +4243,7 @@ function makeVendorRow(num, data) {
   tr.innerHTML =
     '<td><input type="checkbox" class="vd-cb" onchange="vdUpdateBulk()" style="cursor:pointer"></td>'+
     '<td><input class="edit-in" data-f="name" value="'+name+'" placeholder="Medicine name" style="width:100%;min-width:160px" oninput="updateVdMatch(this)"></td>'+
-    '<td><input class="edit-in" data-f="dose" value="'+dose+'" placeholder="TAB" style="width:48px;text-align:center;font-size:11px"></td>'+
+    '<!-- no dose --><td style="display:none"><input data-f="dose" value="'+dose+'" placeholder="TAB" style="width:48px;text-align:center;font-size:11px"></td>'+
     '<td><input class="edit-in" data-f="company" value="'+company+'" placeholder="MFR" style="width:100%;min-width:80px;font-size:11.5px"></td>'+
     '<td><input class="edit-in" data-f="batch" value="'+batch+'" placeholder="B2401" style="width:76px;font-size:11px"></td>'+
     '<td><input class="edit-in" data-f="expiry" value="'+expiry+'" placeholder="06/27" style="width:56px;font-size:11px"></td>'+
