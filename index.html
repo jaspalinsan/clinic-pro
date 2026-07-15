@@ -12610,10 +12610,10 @@ function printInvoice(invId){
 
   // Medicines table (regular invoices only)
   if(meds.length){
-    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
+    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Dose / Frequency</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
     meds.forEach(function(m,i){if(!m.name)return;
       var q=parseFloat(m.qty||1),s=parseFloat(m.sale||0),d=parseFloat(m.disc||0),a=parseFloat(m.amt||(q*s*(1-d/100)));
-      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.dose?'<br><span style="color:#185FA5;font-size:9px;font-weight:600">'+m.dose+'</span>':'')+(m.remarks?'<br><span style="color:#666;font-size:9px;font-style:italic">'+m.remarks+'</span>':'')+'</td><td>'+(m.schedule||'OTC')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
+      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.remarks?'<br><span style="color:#666;font-size:9px;font-style:italic">'+m.remarks+'</span>':'')+'</td><td style="font-weight:700">'+(m.dose||'--')+'</td><td>'+(m.schedule||'OTC')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
     });
     H.push('</tbody></table>');
   }
