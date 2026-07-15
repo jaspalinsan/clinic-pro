@@ -1650,7 +1650,7 @@ html,body{height:100%;overflow:hidden}
                 <th style="width:24px">#</th>
                 <th style="width:60px;text-align:center">Type</th>
                 <th>Name — pick from stock or type</th>
-                <th style="width:55px;text-align:center">Days</th><th>Remarks</th>
+                <th style="width:55px;text-align:center">Days</th>
                 <th style="width:72px;text-align:right">Sale &#8377;</th>
                 <th style="width:58px;text-align:center">Disc%</th>
                 <th style="width:22px"></th>
@@ -2270,6 +2270,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4919,7 +4920,9 @@ function rxAddMedRow(data){
   tr.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">'+n+'</td>'+
     '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;background:#E6F1FB;color:#185FA5;border:0.5px solid #B5D4F4"><i class="ti ti-pill" style="font-size:11px"></i>Med</span></td>'+
-    '<td><select class="fin" style="width:100%;font-size:11px" onchange="rxMedPick(this)">'+opts+'</select></td>'+
+    '<td><select class="fin" style="width:100%;font-size:11px" onchange="rxMedPick(this)">'+opts+'</select>'+
+    '<input class="edit-in" data-rx="remarks" placeholder="Remarks / Instructions" style="width:100%;font-size:10px;margin-top:3px;color:#555;border-color:#e2e8f0">'+
+  '</td>'+
     '<td><select class="fin" data-rx="dose" style="font-size:11px;width:100%" onchange="rxCalcRow(this)">'+
       '<option value="">-- Frequency --</option>'+
       '<option value="1">Once a day (OD)</option>'+
@@ -4950,7 +4953,6 @@ function rxAddMedRow(data){
       'style="width:100%;text-align:right;font-size:11px" value="'+(d.sale||'')+'" oninput="rxCalcRow(this)"></td>'+
     '<td><input class="edit-in" data-rx="disc" type="number" placeholder="0" style="width:100px;text-align:center;font-size:11px" value="'+(d.disc||'0')+'" oninput="rxCalcRow(this)"></td>'+
     '<td class="rx-amt" style="text-align:right;font-size:12px;font-weight:700;color:var(--acc)">\u2014</td>'+
-    '<td><input class="edit-in" data-rx="remarks" placeholder="Note / Instructions" style="width:100%;font-size:11px;min-width:120px"></td>'+
     '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 4px" '+
       'onclick="this.closest(\'tr\').remove();rxCalcTotals()">'+
       '<i class="ti ti-trash" style="font-size:12px"></i></button></td>';
@@ -6298,8 +6300,9 @@ function submitInvoice(){
     var qty=parseFloat((tr.querySelector('[data-inv="qty"]')||{}).value)||0;
     var sale=parseFloat((tr.querySelector('[data-inv="sale"]')||{}).value)||0;
     var dose=(tr.querySelector('[data-inv="dose"]')||{}).value||'';
-    var rem=(tr.querySelector('[data-rx="remarks"]')||{}).value||'';
-    meds.push({name:name,dose:dose,qty:qty,sale:sale,amt:qty*sale,remarks:rem,schedule:((tr.querySelector('[data-rx="schedule"]'))||{}).value||'OTC'});
+    var remEl=tr.querySelector('[data-rx="remarks"]');var rem=remEl?remEl.value.trim():'';
+    var schEl=tr.querySelector('[data-rx="schedule"]');var sch=schEl?schEl.value:'OTC';
+    meds.push({name:name,dose:dose,qty:qty,sale:sale,amt:qty*sale,remarks:rem,schedule:sch});
   });
 
   // Collect services
@@ -12608,7 +12611,7 @@ function printInvoice(invId){
     H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Remarks</th><th>Amount</th></tr></thead><tbody>');
     meds.forEach(function(m,i){if(!m.name)return;
       var q=parseFloat(m.qty||1),s=parseFloat(m.sale||0),d=parseFloat(m.disc||0),a=parseFloat(m.amt||(q*s*(1-d/100)));
-      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b></td><td>'+(m.dose||'')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
+      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.remarks?'<br><span style="color:#666;font-size:9px;font-style:italic">'+m.remarks+'</span>':'')+'</td><td>'+(m.schedule||'OTC')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
     });
     H.push('</tbody></table>');
   }
@@ -12856,6 +12859,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
