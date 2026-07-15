@@ -2145,9 +2145,12 @@ html,body{height:100%;overflow:hidden}
         <div class="flbl" style="margin-bottom:4px">Schedule</div>
         <select class="fin" id="ai-schedule" style="width:100%">
           <option value="OTC">OTC</option>
-          <option value="H">H (Schedule H)</option>
+          <option value="GH">G &amp; H</option>
+          <option value="H">H</option>
           <option value="H1">H1</option>
-          <option value="X">X</option>
+          <option value="X">X (Narcotic)</option>
+          <option value="K">K</option>
+          <option value="CC1">C &amp; C1</option>
         </select>
       </div>
       <div>
@@ -4815,7 +4818,7 @@ function rxInit(){
       '<option value="0.5">Half Tab</option>'+
     '</select></td>'+
     '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:42px;font-size:11px">'+
-      '<option value="OTC" selected>OTC</option><option value="H">H</option>'+
+      '<option value="OTC" selected>OTC</option><option value="GH">G &amp; H</option><option value="H">H</option><option value="H1">H1</option><option value="X">X</option><option value="K">K</option><option value="CC1">C &amp; C1</option>'+
     '</select></td>'+
     '<td><input class="edit-in" data-rx="mfr" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
     '<td><input class="edit-in" data-rx="batch" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
@@ -4932,8 +4935,8 @@ function rxAddMedRow(data){
       '<option value="1">Stat (Immediately)</option>'+
     '</select></td>'+
     '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:52px;font-size:11px">'+
-      '<option value="OTC">OTC</option><option value="H">H</option>'+
-      '<option value="H1">H1</option><option value="X">X</option>'+
+      '<option value="OTC">OTC</option><option value="GH">G &amp; H</option><option value="H">H</option>'+
+      '<option value="H1">H1</option><option value="X">X</option><option value="K">K</option><option value="CC1">C &amp; C1</option><option value="X">X</option>'+
     '</select></td>'+
     '<td><input class="edit-in" data-rx="mfr" placeholder="MFR" style="width:100%;font-size:11px" value="'+(d.mfr||'')+'"></td>'+
     '<td><input class="edit-in" data-rx="batch" placeholder="Batch" style="width:100%;font-size:11px" value="'+(d.batch||'')+'"></td>'+
@@ -10017,7 +10020,7 @@ function openBulkEdit(){
 
     tr.appendChild(tdName);
     tr.appendChild(makeCell(m.dose,'dose'));
-    tr.appendChild(makeCell(m.schedule,'schedule',null,['OTC','H','H1','X']));
+    tr.appendChild(makeCell(m.schedule,'schedule',null,['OTC','G & H','H','H1','X (Narcotic)','K','C & C1']));
     tr.appendChild(makeCell(m.company,'company'));
     tr.appendChild(makeCell(m.batch,'batch'));
     tr.appendChild(makeCell(m.expiry,'expiry'));
