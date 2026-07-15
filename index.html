@@ -5107,6 +5107,7 @@ function rxSave(){
     var qty=parseFloat(g('qty'))||1;
     meds.push({name:name,dose:g('dose'),mfr:g('mfr'),batch:g('batch'),
       exp:g('exp'),qty:qty,sale:sale,disc:parseFloat(g('disc'))||0,
+      remarks:g('remarks'),schedule:g('schedule')||'OTC',
       amt:parseFloat((qty*sale).toFixed(2))});
   });
   // Read services from #rx-svc-tbody
@@ -5355,6 +5356,7 @@ try{
     var doseEl=tr.querySelector('[data-rx=dose]');var doseText=doseEl&&doseEl.selectedIndex>0?doseEl.options[doseEl.selectedIndex].text:'';
     meds.push({name:name,dose:doseText,mfr:gm('mfr'),batch:gm('batch'),
       exp:gm('exp'),qty:qty,sale:sale,disc:disc,
+      remarks:gm('remarks'),schedule:gm('schedule')||'OTC',
       amt:parseFloat((qty*sale*(1-disc/100)).toFixed(2))});
   });
 
@@ -12608,7 +12610,7 @@ function printInvoice(invId){
 
   // Medicines table (regular invoices only)
   if(meds.length){
-    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Remarks</th><th>Amount</th></tr></thead><tbody>');
+    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
     meds.forEach(function(m,i){if(!m.name)return;
       var q=parseFloat(m.qty||1),s=parseFloat(m.sale||0),d=parseFloat(m.disc||0),a=parseFloat(m.amt||(q*s*(1-d/100)));
       H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.remarks?'<br><span style="color:#666;font-size:9px;font-style:italic">'+m.remarks+'</span>':'')+'</td><td>'+(m.schedule||'OTC')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
