@@ -968,7 +968,7 @@ html,body{height:100%;overflow:hidden}
     <button class="bs" onclick="invClearSel()" style="font-size:12px">Clear</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:84px">Purchase &#8377;</th><th style="width:74px">Sale &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
+    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:74px;text-align:right">Sale &#8377;</th><th style="width:90px;text-align:right">Amount &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
     <tbody id="inv-tbody"></tbody>
   </table></div></div>
 </div>
@@ -2270,6 +2270,22 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function quickAddStock(id){
+  var m=(window.INV_DB||[]).find(function(x){return String(x.id)===String(id);});
+  if(!m){toast('Item not found','error');return;}
+  var n=prompt('Add stock for: '+m.name+'\nCurrent balance: '+(parseInt(m.stock)||0)+'\n\nQty to add:');
+  if(n===null)return;
+  var qty=parseInt(n)||0;
+  if(qty<=0){toast('Invalid quantity','error');return;}
+  m.stock=(parseInt(m.stock)||0)+qty;
+  m.newIn=(parseInt(m.newIn)||0)+qty;
+  syncInvDB();
+  renderInventory();
+  toast(qty+' units added to '+m.name,'success');
+}
+window.quickAddStock=quickAddStock;
+
 
 
 function recalcVdRow(inp){
@@ -3675,199 +3691,126 @@ function renderInventory(){
   var tbody=document.getElementById('inv-tbody');
   if(!tbody)return;
   tbody.innerHTML='';
-  var items=window.INV_DB||DB||[];
+  var items=window.INV_DB||window.DB||[];
 
-  // Group items by name — collect all batches
-  var seen={}; // name -> first index
-  var grouped=[]; // [{main:item, batches:[item,...]}]
   items.forEach(function(m){
-    var key=(m.name||'').toLowerCase();
-    if(seen[key]===undefined){
-      seen[key]=grouped.length;
-      grouped.push({main:m,batches:[]});
-    } else {
-      grouped[seen[key]].batches.push(m);
-    }
-  });
+    var qty    = parseInt(m.stock)||0;
+    var sal    = parseFloat(m.sale)||0;
+    var sch    = m.schedule||'OTC';
+    var schClr = sch==='X'||sch==='X (Narcotic)'?'#DC2626':sch==='H1'?'#D97706':sch==='H'||sch==='GH'||sch==='G & H'?'#185FA5':sch==='K'?'#7C3AED':sch==='CC1'||sch==='C & C1'?'#0891B2':'#059669';
 
-  grouped.forEach(function(grp){
-    var m=grp.main;
-    var allBatches=[m].concat(grp.batches);
-    var qty=parseInt(m.stock)||0;
-    var pur=parseFloat(m.purchase)||0;
-    var sal=parseFloat(m.sale)||0;
-    var amt=qty*pur;
-    var dose=m.dose||m.cat||'—';
-    var qtyColor=qty<=0?'var(--rose)':qty<=20?'var(--gold)':'var(--acc)';
-    var stPill=qty<=0?'p-r':qty<=20?'p-a':'p-g';
-    var stLbl=qty<=0?'Out of Stock':qty<=20?'Low Stock':'In Stock';
-    var mrp=sal>0?Math.round(((sal-pur)/pur)*100)+'%':'—';
+    // Consumed from billing
+    var kw=(m.name||'').toLowerCase().split(' ')[0];
+    var consumed=0;
+    (window.BILLING_DB||[]).forEach(function(b){
+      if(!b.meds)return;
+      b.meds.forEach(function(med){if((med.name||'').toLowerCase().indexOf(kw)!==-1)consumed+=parseInt(med.qty||0);});
+    });
+
+    var pStock = m.pstock!=null?parseInt(m.pstock):qty;
+    var newIn  = parseInt(m.newIn)||0;
+    var total  = pStock+newIn;
+    var balance= total-consumed;
+    var amount = Math.max(0,balance)*sal;
+
+    var balClr = balance<=0?'#DC2626':balance<=10?'#D97706':balance<=20?'#F59E0B':'#059669';
+    var stPill = balance<=0?'p-r':balance<=20?'p-a':'p-g';
+    var stLbl  = balance<=0?'Out of Stock':balance<=20?'Low Stock':'In Stock';
 
     var tr=document.createElement('tr');
     tr.innerHTML=
-      '<td style="width:28px"><input type="checkbox" class="inv-cb" data-id="'+m.id+'" onchange="updateInvBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
+      // Checkbox
+      '<td><input type="checkbox" class="inv-cb" data-id="'+m.id+'" onchange="updateInvBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
 
       // Item Name
       '<td>'+
         '<div style="font-size:12.5px;font-weight:700;color:var(--ink)">'+m.name+'</div>'+
-        '<div style="font-size:10.5px;color:var(--ink3);margin-top:1px">'+
-          (m.type||'')+(m.company?' &bull; '+m.company:'')+
-        '</div>'+
+        (m.type?'<div style="font-size:10px;color:var(--ink3)">'+m.type+'</div>':'')+
       '</td>'+
 
-      '<td style="display:none">'+
-        (dose?'<span class="pill p-lav" style="font-size:10px;font-weight:700">'+dose+'</span>':'<span style="color:var(--ink3);font-size:11px">&mdash;</span>')+
+      // Schedule
+      '<td style="text-align:center">'+
+        '<span style="font-size:10px;font-weight:800;background:'+schClr+';color:#fff;padding:2px 7px;border-radius:5px">'+sch+'</span>'+
       '</td>'+
 
-      // Schedule — vacant (editable)
-      (function(){
-        var sch=m.schedule||'';
-        if(!sch)return '<td style="text-align:center"><span style="color:var(--ink3);font-size:11px">&mdash;</span></td>';
-        var sc_color=sch==='X'?'#EF4444':sch==='H1'?'#F97316':sch==='H'?'#F59E0B':'#10B981';
-        return '<td style="text-align:center"><span style="font-size:10px;font-weight:800;background:'+sc_color+';color:#fff;padding:2px 6px;border-radius:4px">'+sch+'</span></td>';
-      })()+
       // MFR
-      '<td style="font-size:12px;color:var(--ink2);font-weight:600">'+(m.company||'—')+'</td>'+
+      '<td style="font-size:12px;font-weight:600;color:var(--ink2)">'+(m.company||'—')+'</td>'+
 
       // Batch
-      '<td>'+
-        '<div style="font-size:11.5px;font-weight:600;color:var(--ink)">'+(m.batch||'—')+'</div>'+
-      '</td>'+
+      '<td style="font-size:11.5px;font-weight:600;color:var(--lav)">'+(m.batch||'—')+'</td>'+
 
-      // Expiry — highlight if near
-      '<td>'+
-        (function(){
-          var exp=m.expiry||'';
-          var isNear=false;
-          if(exp){
-            var parts=exp.split('/');
-            if(parts.length===2){
-              var expDate=new Date('20'+parts[1],parseInt(parts[0])-1,1);
-              var diff=(expDate-new Date())/(1000*60*60*24*30);
-              isNear=diff<3;
-            }
-          }
-          return '<span style="font-size:11.5px;font-weight:600;color:'+(isNear?'var(--rose)':'var(--ink2)')+'">'+
-            (exp||'—')+'</span>'+(isNear?'<span style="font-size:9px;color:var(--rose);display:block">Expiring!</span>':'');
-        })()+
-      '</td>'+
-
-      // P/Stock, +New, =Total, -Consumed, =Balance
+      // Expiry
       (function(){
-        // Calculate consumed from billing
-        var kw=(m.name||'').toLowerCase().split(' ')[0];
-        var consumed=0;
-        (window.BILLING_DB||[]).forEach(function(b){
-          if(!b.meds)return;
-          b.meds.forEach(function(med){
-            if((med.name||'').toLowerCase().indexOf(kw)!==-1)consumed+=parseInt(med.qty||0);
-          });
-        });
-        var pStock=m.pstock||qty; // previous stock (opening)
-        var newIn=m.newIn||0;     // new received
-        var total=pStock+newIn;
-        var balance=Math.max(0,total-consumed);
-        var balColor=balance<=0?'#EF4444':balance<=10?'#F97316':balance<=20?'#F59E0B':'#10B981';
-        return '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--ink2)">'+pStock+'</td>'+
-          '<td style="text-align:right;font-size:12px;font-weight:600;color:#10B981">+'+(newIn||0)+'</td>'+
-          '<td style="text-align:right;font-size:12px;font-weight:700;color:var(--ink)">'+total+'</td>'+
-          '<td style="text-align:right;font-size:12px;font-weight:600;color:#EF4444">−'+consumed+'</td>'+
-          '<td style="text-align:right;font-size:14px;font-weight:800;color:'+balColor+'">'+balance+'</td>';
+        var exp=m.expiry||'';
+        var near=false;
+        if(exp){var p=exp.split('/');if(p.length===2){var ed=new Date('20'+p[1],parseInt(p[0])-1,1);near=(ed-new Date())/(1000*60*60*24*30)<3;}}
+        return '<td><span style="font-size:11px;font-weight:600;color:'+(near?'#DC2626':'var(--ink2)')+'">'+
+          (exp||'—')+'</span>'+(near?'<br><span style="font-size:9px;color:#DC2626">⚠ Soon</span>':'')+'</td>';
       })()+
 
-      // Purchase ₹ (editable — same as before)
-      '<td>'+
-        '<input class="edit-in" type="number" value="'+pur.toFixed(2)+'" '+
-        'style="width:72px;text-align:right;font-weight:600" '+
-        'onchange="(function(el,id){var x=(window.INV_DB||DB).find(function(d){return d.id===id;});if(x){x.purchase=parseFloat(el.value)||0;renderInventory();}})(this,'+m.id+')">'+
+      // P/Stock
+      '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--ink2)">'+pStock+'</td>'+
+
+      // +New (editable)
+      '<td style="text-align:right">'+
+        '<input class="edit-in" type="number" value="'+newIn+'" min="0" '+
+        'style="width:44px;text-align:right;font-weight:700;color:#059669;font-size:12px" '+
+        'title="+New Stock" '+
+        'onchange="(function(el,id){var x=(window.INV_DB||[]).find(function(d){return d.id===id;});if(x){x.newIn=parseInt(el.value)||0;syncInvDB();renderInventory();}})(this,\''+m.id+'\')">'+
       '</td>'+
 
-      // Sale ₹ (editable — same as before)
+      // =Total
+      '<td style="text-align:right;font-size:12px;font-weight:700;color:var(--ink)">'+total+'</td>'+
+
+      // -Consumed
+      '<td style="text-align:right;font-size:12px;font-weight:600;color:#DC2626">&minus;'+consumed+'</td>'+
+
+      // =Balance
+      '<td style="text-align:right;font-size:14px;font-weight:900;color:'+balClr+'">'+balance+'</td>'+
+
+      // Sale ₹ (editable)
       '<td>'+
-        '<input class="edit-in" type="number" value="'+sal.toFixed(2)+'" '+
-        'style="width:65px;text-align:right;font-weight:600" '+
-        'onchange="(function(el,id){var x=(window.INV_DB||DB).find(function(d){return d.id===id;});if(x){x.sale=parseFloat(el.value)||0;renderInventory();}})(this,'+m.id+')">'+
+        '<input class="edit-in" type="number" value="'+sal.toFixed(2)+'" step="0.01" min="0" '+
+        'style="width:68px;text-align:right;font-weight:600;font-size:12px" '+
+        'title="Sale Rate" '+
+        'onchange="(function(el,id){var x=(window.INV_DB||[]).find(function(d){return d.id===id;});if(x){x.sale=parseFloat(el.value)||0;syncInvDB();renderInventory();}})(this,\''+m.id+'\')">'+
+      '</td>'+
+
+      // Amount = Balance × Sale
+      '<td style="text-align:right;font-size:13px;font-weight:800;color:var(--acc)">'+
+        (amount>0?'\u20b9'+amount.toFixed(0):'—')+
       '</td>'+
 
       // Status
-      '<td><span class="pill '+stPill+'" style="font-size:10.5px;white-space:nowrap">'+stLbl+'</span></td>'+
+      '<td style="text-align:center"><span class="pill '+stPill+'" style="font-size:10.5px;white-space:nowrap">'+stLbl+'</span></td>'+
 
       // Actions
       '<td>'+
-        '<div style="display:flex;gap:3px">'+
-          '<button class="tb" onclick="openEditItem('+m.id+')" style="font-size:11px" title="Edit">'+
-            '<i class="ti ti-edit"></i></button>'+
-          '<button class="tb danger" onclick="deleteItem('+m.id+')" style="font-size:11px" title="Delete">'+
-            '<i class="ti ti-trash"></i></button>'+
+        '<div style="display:flex;gap:3px;flex-wrap:wrap">'+
+          '<button class="tb" title="Edit" onclick="openEditItem(\''+m.id+'\')" style="font-size:11px"><i class="ti ti-edit"></i></button>'+
+          '<button class="tb" title="Add Stock" onclick="quickAddStock(\''+m.id+'\')" style="font-size:11px;color:#059669"><i class="ti ti-plus"></i></button>'+
+          '<button class="tb danger" title="Delete" onclick="deleteItem(\''+m.id+'\')" style="font-size:11px"><i class="ti ti-trash"></i></button>'+
         '</div>'+
       '</td>';
 
     tbody.appendChild(tr);
-
-    // Sub-rows for additional batches of same item
-    grp.batches.forEach(function(b){
-      var bQty=parseInt(b.stock)||0;
-      var bPur=parseFloat(b.purchase)||0;
-      var bSal=parseFloat(b.sale)||0;
-      var bKw=(b.name||'').toLowerCase().split(' ')[0];
-      var bConsumed=0;
-      (window.BILLING_DB||[]).forEach(function(bill){
-        if(!bill.meds)return;
-        bill.meds.forEach(function(med){
-          if((med.name||'').toLowerCase().indexOf(bKw)!==-1)bConsumed+=parseInt(med.qty||0);
-        });
-      });
-      var bPstock=b.pstock||bQty;
-      var bNew=b.newIn||0;
-      var bTotal=bPstock+bNew;
-      var bBal=Math.max(0,bTotal-bConsumed);
-      var bBalColor=bBal<=0?'#EF4444':bBal<=10?'#F97316':bBal<=20?'#F59E0B':'#10B981';
-      var bStPill=bBal<=0?'p-r':bBal<=10?'p-a':bBal<=20?'p-b':'p-g';
-      var bStLbl=bBal<=0?'Out Stock':bBal<=10?'Low':bBal<=20?'Low':'In Stock';
-      var btr=document.createElement('tr');
-      btr.style.background='var(--sl)';
-      btr.innerHTML=
-        '<td></td>'+
-        '<td style="padding-left:24px;font-size:11.5px;color:var(--ink2)">'+
-          '<i class="ti ti-corner-down-right" style="font-size:11px;margin-right:4px;color:var(--ink3)"></i>'+
-          b.name+' <span style="font-size:10px;color:var(--lav);font-weight:600">['+b.batch+']</span></td>'+
-        '<td style="text-align:center;font-size:11px;color:var(--ink3)">'+(b.dose||'—')+'</td>'+
-        '<td style="text-align:center;font-size:10px;color:var(--ink3)">'+(b.schedule||'—')+'</td>'+
-        '<td style="font-size:11px;color:var(--ink3)">'+(b.company||'—')+'</td>'+
-        '<td style="font-size:11.5px;font-weight:600;color:var(--lav)">'+b.batch+'</td>'+
-        '<td style="font-size:11px;color:'+(b.expiry&&new Date('20'+b.expiry.split('/')[1],parseInt(b.expiry.split('/')[0])-1,1)<new Date()?'#EF4444':'var(--ink2)')+'">'+b.expiry+'</td>'+
-        '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--ink2)">'+bPstock+'</td>'+
-        '<td style="text-align:right;font-size:12px;color:#10B981">+'+bNew+'</td>'+
-        '<td style="text-align:right;font-size:12px;font-weight:700">'+(bPstock+bNew)+'</td>'+
-        '<td style="text-align:right;font-size:12px;color:#EF4444">−'+bConsumed+'</td>'+
-        '<td style="text-align:right;font-size:13px;font-weight:800;color:'+bBalColor+'">'+bBal+'</td>'+
-        '<td><input class="edit-in" type="number" value="'+bPur.toFixed(2)+'" style="width:72px;text-align:right;font-weight:600"></td>'+
-        '<td><input class="edit-in" type="number" value="'+bSal.toFixed(2)+'" style="width:65px;text-align:right;font-weight:600"></td>'+
-        '<td><span class="pill '+bStPill+'" style="font-size:10px">'+bStLbl+'</span></td>'+
-        '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:3px" onclick="deleteItem('+b.id+')"><i class="ti ti-trash" style="font-size:12px"></i></button></td>';
-      tbody.appendChild(btr);
-    });
   });
 
-  var val=items.reduce(function(s,m){return s+(parseInt(m.stock||0)*(parseFloat(m.purchase)||0));},0);
+  // Summary stats
+  var totalVal=items.reduce(function(s,m){return s+Math.max(0,(parseInt(m.stock)||0)-(0))*(parseFloat(m.sale)||0);},0);
+  var lowCount=items.filter(function(m){var b=parseInt(m.stock||0);return b>0&&b<=20;}).length;
+  var outCount=items.filter(function(m){return parseInt(m.stock||0)<=0;}).length;
   var sub=document.getElementById('inv-sub');
-  if(sub)sub.textContent=items.length+' items \u00b7 \u20b9'+(val/1000).toFixed(1)+'k stock value';
-
-  var lowCount=items.filter(function(m){return parseInt(m.stock)>0&&parseInt(m.stock)<=20;}).length;
-  var outCount=items.filter(function(m){return parseInt(m.stock)<=0;}).length;
+  if(sub)sub.textContent=items.length+' items \u00b7 \u20b9'+(totalVal/1000).toFixed(1)+'k stock value';
   var stats=document.getElementById('inv-stats');
   if(stats)stats.innerHTML=
-    '<div class="sc sm"><div class="si"><i class="ti ti-box"></i></div><div>'+
-      '<div class="sv">'+items.length+'</div><div class="sl2t">Total Items</div></div></div>'+
-    '<div class="sc sg2"><div class="si"><i class="ti ti-alert-triangle"></i></div><div>'+
-      '<div class="sv">'+lowCount+'</div><div class="sl2t">Low Stock</div></div></div>'+
-    '<div class="sc ss"><div class="si"><i class="ti ti-ban"></i></div><div>'+
-      '<div class="sv">'+outCount+'</div><div class="sl2t">Out of Stock</div></div></div>'+
-    '<div class="sc slav"><div class="si"><i class="ti ti-currency-rupee"></i></div><div>'+
-      '<div class="sv">\u20b9'+(val/1000).toFixed(1)+'k</div><div class="sl2t">Stock Value</div></div></div>';
-
-  if(typeof toast==='function')toast('Inventory updated','info');
+    '<div class="sc sm"><div class="si"><i class="ti ti-box"></i></div><div><div class="sv">'+items.length+'</div><div class="sl2t">Total Items</div></div></div>'+
+    '<div class="sc sg2"><div class="si"><i class="ti ti-alert-triangle"></i></div><div><div class="sv">'+lowCount+'</div><div class="sl2t">Low Stock</div></div></div>'+
+    '<div class="sc ss"><div class="si"><i class="ti ti-ban"></i></div><div><div class="sv">'+outCount+'</div><div class="sl2t">Out of Stock</div></div></div>'+
+    '<div class="sc slav"><div class="si"><i class="ti ti-currency-rupee"></i></div><div><div class="sv">\u20b9'+(totalVal/1000).toFixed(1)+'k</div><div class="sl2t">Stock Value</div></div></div>';
 }
+window.renderInventory=renderInventory;
+
 
 function filterInv(q) {
   const q2 = q.toLowerCase();
@@ -12896,6 +12839,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
