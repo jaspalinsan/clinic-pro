@@ -796,17 +796,19 @@ html,body{height:100%;overflow:hidden}
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
     <thead><tr style="background:linear-gradient(90deg,#EFF6FF,#F0FDF4)">
-      <th style="width:28px;text-align:center">#</th>
-      <th style="width:30px"></th>
-      <th>Medicine <span style="font-size:9px;font-weight:400;color:#94a3b8;font-style:italic">/ Remarks below</span></th>
-      <th style="width:18%">Frequency</th>
+      <th style="width:26px;text-align:center">#</th>
+      <th style="width:34px"></th>
+      <th style="width:22%">Item Name</th>
+      <th style="width:16%">Frequency</th>
       <th style="width:46px;text-align:center">Sch</th>
+      <th style="width:7%">Batch</th>
+      <th style="width:6%;text-align:center">Exp</th>
       <th style="width:50px;text-align:center">Days</th>
-      <th style="width:56px;text-align:center">Qty</th>
-      <th style="width:75px;text-align:right">Rate &#8377;</th>
-      <th style="width:58px;text-align:center">Disc%</th>
-      <th style="width:78px;text-align:right">Amount &#8377;</th>
-      <th style="width:26px"></th>
+      <th style="width:50px;text-align:center">Qty</th>
+      <th style="width:70px;text-align:right">Rate &#8377;</th>
+      <th style="width:54px;text-align:center">Disc%</th>
+      <th style="width:76px;text-align:right">Amount &#8377;</th>
+      <th style="width:24px"></th>
     </tr></thead>
     <tbody id="rx-med-tbody"></tbody>
   </table></div>
@@ -4205,6 +4207,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function quickAddStock(id){
   var m=(window.INV_DB||[]).find(function(x){return String(x.id)===String(id);});
   if(!m){toast('Item not found','error');return;}
@@ -6719,37 +6722,42 @@ function rxInit(){
   if(!tbody)return;
   tbody.innerHTML='';
 
-  // ROW 1: Consultancy Fee — default fixed row
+    // ROW 1: Consultancy Fee — locked row
   var tr1=document.createElement('tr');
+  tr1.style.background='linear-gradient(90deg,#fffbeb,#fff)';
+  tr1.style.borderBottom='2px solid #fde68a';
   tr1.innerHTML=
-    '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">1</td>'+
-    '<td><input class="fin" data-rx="name" value="Consultancy Fee" readonly '+
-      'style="width:100%;font-size:12px;font-weight:600;color:var(--ink);'+
-      'background:var(--sk2);border-color:var(--sl2);cursor:default"></td>'+
-    '<td><select class="fin" data-rx="dose" style="font-size:11px;width:100%" onchange="rxCalcRow(this)">'+
-      '<option value="1" selected>One Time (\u00d71)</option>'+
-      '<option value="2">Two Times (\u00d72)</option>'+
-      '<option value="3">Three Times (\u00d73)</option>'+
-      '<option value="0.5">Half Tab</option>'+
-    '</select></td>'+
-    '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:42px;font-size:11px">'+
-      '<option value="OTC" selected>OTC</option><option value="GH">G &amp; H</option><option value="H">H</option><option value="H1">H1</option><option value="X">X</option><option value="K">K</option><option value="CC1">C &amp; C1</option>'+
-    '</select></td>'+
-    '<td><input class="edit-in" data-rx="mfr" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
-    '<td><input class="edit-in" data-rx="batch" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
-    '<td><input class="edit-in" data-rx="exp" placeholder="\u2014" style="width:100%;font-size:11px;text-align:center"></td>'+
-    '<td><input class="edit-in rx-qty" data-rx="qty" type="number" min="1" value="1" '+
-      'style="width:100%;text-align:center;font-size:13px;font-weight:700;color:var(--sky)" '+
-      'oninput="this.dataset.manual=1;rxCalcRow(this)"></td>'+
-    '<td><input class="edit-in" data-rx="sale" type="number" value="300" '+
-      'style="width:100%;text-align:right;font-size:11px" oninput="rxCalcRow(this)"></td>'+
-    '<td><input class="edit-in" data-rx="disc" type="number" value="0" placeholder="0" '+
-      'style="width:100%;text-align:center;font-size:11px" oninput="rxCalcRow(this)"></td>'+
-    '<td class="rx-amt" style="text-align:right;font-size:12px;font-weight:700;color:var(--acc)">\u2014</td>'+
-    '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 4px" '+
-      'onclick="this.closest(\'tr\').remove();rxCalcTotals()">'+
-      '<i class="ti ti-trash" style="font-size:12px"></i></button></td>';
+    '<td style="text-align:center;font-size:11px;font-weight:700;color:#92400E">1</td>'+
+    '<td style="text-align:center"><span style="display:inline-flex;align-items:center;padding:2px 6px;border-radius:20px;font-size:9px;font-weight:700;background:#FEF3C7;color:#92400E;border:0.5px solid #FDE68A"><i class="ti ti-stethoscope" style="font-size:10px;margin-right:2px"></i>Fee</span></td>'+
+    '<td>'+
+      '<input class="fin" data-rx="name" value="Consultancy Fee" readonly '+
+        'style="width:100%;font-size:13px;font-weight:700;color:#92400E;background:#fffbeb;border-color:#FDE68A;cursor:default">'+
+      '<div style="font-size:10px;color:#92400e;margin-top:3px;font-style:italic">General / Follow-up consultation</div>'+
+    '</td>'+
+    // Frequency — locked
+    '<td><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
+    // Sch — locked
+    '<td style="text-align:center"><span style="font-size:10px;font-weight:700;color:#64748b">—</span></td>'+
+    // Batch — locked
+    '<td><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
+    // Exp — locked
+    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
+    // Days — locked
+    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:12px;color:var(--ink3);text-align:center">—</div></td>'+
+    // Qty — locked
+    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:12px;color:var(--ink3);text-align:center">1</div></td>'+
+    // Rate ₹ — editable (default 150)
+    '<td><input class="edit-in" data-rx="sale" type="number" value="150" '+
+      'style="width:100%;text-align:right;font-size:15px;font-weight:900;color:#92400E;border-color:#FDE68A" '+
+      'oninput="rxCalcRow(this)"></td>'+
+    // Disc% — locked
+    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">0%</div></td>'+
+    // Amount
+    '<td class="rx-amt" style="text-align:right;font-size:16px;font-weight:900;color:#92400E">₹150</td>'+
+    // No delete for consultancy
+    '<td></td>';
   tbody.appendChild(tr1);
+
   rxCalcRow(tr1.querySelector('[data-rx="sale"]'));
 
   // ROW 2: One blank medicine row
@@ -6829,18 +6837,18 @@ function rxAddMedRow(data){
     }).join('');
 
   var tr=document.createElement('tr');
-    tr.innerHTML=
+      tr.innerHTML=
     // # number
     '<td style="text-align:center;font-size:11px;font-weight:700;color:var(--ink3)">'+n+'</td>'+
-    // Type badge
-    '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:2px;padding:2px 5px;border-radius:8px;font-size:9px;font-weight:700;background:#EFF6FF;color:#185FA5;border:0.5px solid #BFDBFE"><i class="ti ti-pill" style="font-size:10px"></i></span></td>'+
-    // Medicine name + remarks
+    // Badge
+    '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:2px;padding:2px 5px;border-radius:20px;font-size:9px;font-weight:700;background:#EFF6FF;color:#185FA5;border:0.5px solid #BFDBFE"><i class="ti ti-pill" style="font-size:10px"></i>Med</span></td>'+
+    // Item Name + Remarks
     '<td>'+
-      '<select class="fin" style="width:100%;font-size:12px;font-weight:600;border-color:#c7d2fe" onchange="rxMedPick(this)" onkeyup="rxMedSearch(this)">'+opts+'</select>'+
+      '<select class="fin" style="width:100%;font-size:12px;font-weight:700;border-color:#c7d2fe;color:#0f172a" onchange="rxMedPick(this)" onkeyup="rxMedSearch(this)">'+opts+'</select>'+
       '<input class="edit-in" data-rx="remarks" placeholder="Remarks / instructions..." style="width:100%;font-size:10px;margin-top:3px;color:#666;border:1px solid #e5e7eb;border-radius:5px;padding:3px 7px;background:#fafafa">'+
     '</td>'+
     // Frequency
-    '<td><select class="fin" data-rx="dose" style="font-size:11px;width:100%;font-weight:600;color:#059669" onchange="rxCalcRow(this)">'+
+    '<td><select class="fin" data-rx="dose" style="font-size:11px;width:100%;font-weight:700;color:#059669;border-color:#bbf7d0" onchange="rxCalcRow(this)">'+
       '<option value="">-- Select --</option>'+
       '<option value="1">Once a day (OD)</option>'+
       '<option value="2">Twice a day (BD)</option>'+
@@ -6848,35 +6856,39 @@ function rxAddMedRow(data){
       '<option value="4">Four times (QID)</option>'+
       '<option value="3">8 Hourly</option>'+
       '<option value="1">At Night (HS)</option>'+
-      '<option value="0.14">Alternate Day (EOD)</option>'+
+      '<option value="0.14">Alternate Day</option>'+
       '<option value="0.14">Once a Week</option>'+
       '<option value="0.28">Twice a Week</option>'+
       '<option value="1">Before Food (AC)</option>'+
       '<option value="1">After Food (PC)</option>'+
       '<option value="1">SOS</option>'+
-      '<option value="1">Stat (Immediately)</option>'+
+      '<option value="1">Stat</option>'+
     '</select></td>'+
     // Schedule
-    '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:46px;font-size:10px;padding:4px 2px;text-align:center">'+
-      '<option value="OTC">OTC</option><option value="GH">G&H</option><option value="H">H</option>'+
-      '<option value="H1">H1</option><option value="X">X</option><option value="K">K</option><option value="CC1">C&C1</option>'+
+    '<td style="text-align:center"><select class="fin" data-rx="schedule" style="width:44px;font-size:10px;padding:4px 2px;text-align:center">'+
+      '<option>OTC</option><option>G&H</option><option>H</option>'+
+      '<option>H1</option><option>X</option><option>K</option><option>C&C1</option>'+
     '</select></td>'+
+    // Batch
+    '<td><input class="edit-in" data-rx="batch" placeholder="Batch" style="width:100%;font-size:11px" value="'+(d.batch||'')+'"></td>'+
+    // Exp
+    '<td><input class="edit-in" data-rx="exp" placeholder="MM/YY" style="width:100%;font-size:11px;text-align:center" value="'+(d.exp||'')+'"></td>'+
     // Days
     '<td style="text-align:center"><input class="edit-in" data-rx="days" type="number" min="1" placeholder="5" '+
-      'style="width:46px;text-align:center;font-size:13px;font-weight:800;color:#7C3AED" '+
+      'style="width:44px;text-align:center;font-size:14px;font-weight:900;color:#7C3AED;border-color:#c4b5fd;border-radius:6px" '+
       'oninput="rxCalcRow(this)"></td>'+
     // Qty
     '<td style="text-align:center"><input class="edit-in rx-qty" data-rx="qty" type="number" min="1" value="1" '+
-      'style="width:50px;text-align:center;font-size:14px;font-weight:900;color:#185FA5" '+
+      'style="width:44px;text-align:center;font-size:14px;font-weight:900;color:#185FA5;border-color:#bfdbfe;border-radius:6px" '+
       'oninput="this.dataset.manual=1;rxCalcRow(this)"></td>'+
     // Rate
     '<td><input class="edit-in" data-rx="sale" type="number" placeholder="0" '+
-      'style="width:68px;text-align:right;font-size:12px;font-weight:700;color:var(--acc)" value="'+(d.sale||'')+'" oninput="rxCalcRow(this)"></td>'+
+      'style="width:100%;text-align:right;font-size:12px;font-weight:700;color:var(--acc)" value="'+(d.sale||'')+'" oninput="rxCalcRow(this)"></td>'+
     // Disc%
     '<td style="text-align:center"><input class="edit-in" data-rx="disc" type="number" placeholder="0" '+
-      'style="width:52px;text-align:center;font-size:11px" value="'+(d.disc||'0')+'" oninput="rxCalcRow(this)"></td>'+
+      'style="width:48px;text-align:center;font-size:11px" value="'+(d.disc||'0')+'" oninput="rxCalcRow(this)"></td>'+
     // Amount
-    '<td class="rx-amt" style="text-align:right;font-size:13px;font-weight:800;color:var(--acc)">—</td>'+
+    '<td class="rx-amt" style="text-align:right;font-size:13px;font-weight:900;color:#185FA5">—</td>'+
     // Delete
     '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 5px;font-size:16px" '+
       'onclick="this.closest(\'tr\').remove();rxCalcTotals()"><i class="ti ti-trash"></i></button></td>';
@@ -14785,6 +14797,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
