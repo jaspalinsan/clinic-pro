@@ -985,7 +985,7 @@ html,body{height:100%;overflow:hidden}
   <div class="card">
     <div class="ch"><span class="ct">Vendor Bill Items</span></div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Exp</th><th style="width:48px;text-align:center">Qty</th><th style="width:80px;text-align:right">Sale &#8377;</th><th style="width:90px">Bill No</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:28px"></th></tr></thead>
       <tbody id="vd-tbody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to auto-fill</td></tr></tbody>
     </table></div>
     <div style="padding:10px 16px;text-align:right"><b>Total: </b><span id="vd-total">&#8377;0.00</span></div>
@@ -2270,6 +2270,17 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function recalcVdRow(inp){
+  var tr=inp.closest('tr');
+  var qty=parseFloat((tr.querySelector('[data-f="qty"]')||{value:0}).value)||0;
+  var sale=parseFloat((tr.querySelector('[data-f="sale"]')||{value:0}).value)||0;
+  var amtEl=tr.querySelector('.vd-amt');
+  if(amtEl)amtEl.textContent=qty&&sale?(qty*sale).toFixed(2):'—';
+  updateVdTotals();
+}
+window.recalcVdRow=recalcVdRow;
+
 
 
 
@@ -4228,37 +4239,43 @@ window.fillVendorTable=fillVendorTable;
 function makeVendorRow(num, data) {
   var d = data || {};
   var name    = (d.name    || '').replace(/"/g,'&quot;');
-  var dose    = (d.dose    || '').replace(/"/g,'&quot;');
   var company = (d.company || '').replace(/"/g,'&quot;');
   var batch   = (d.batch   || '').replace(/"/g,'&quot;');
   var expiry  = (d.expiry  || '').replace(/"/g,'&quot;');
   var qty     = d.qty  || '';
-  var rate    = d.rate || d.purchase || '';
-  var sale    = d.sale || '';
-  if (!sale && rate) { sale = (parseFloat(rate) * 1.45).toFixed(2); }
-  var amt = (parseFloat(qty)||0) * (parseFloat(rate)||0);
-  var ex  = name ? DB.find(function(m){ return m.name.toLowerCase()===name.toLowerCase(); }) : null;
+  var sale    = d.sale || d.rate || '';
+  var billno  = (d.billno  || '').replace(/"/g,'&quot;');
+  var amt     = (parseFloat(qty)||0) * (parseFloat(sale)||0);
+
+  var ex = name ? DB.find(function(m){ return m.name.toLowerCase()===name.toLowerCase(); }) : null;
   var badge = ex
     ? '<span class="pill p-b" style="font-size:10px">Restock</span>'
-    : (name ? '<span class="pill p-g" style="font-size:10px">New</span>'
-            : '<span class="pill p-gray" style="font-size:10px">—</span>');
+    : (name ? '<span class="pill p-g" style="font-size:10px">New</span>' : '');
+
   var tr = document.createElement('tr');
   tr.innerHTML =
-    '<td><input type="checkbox" class="vd-cb" onchange="vdUpdateBulk()" style="cursor:pointer"></td>'+
-    '<td><input class="edit-in" data-f="name" value="'+name+'" placeholder="Medicine name" style="width:100%;min-width:160px" oninput="updateVdMatch(this)"></td>'+
-    '<td style="display:none"><input data-f="dose" value="'+dose+'" placeholder="TAB" style="width:48px;text-align:center;font-size:11px"></td>'+
-    '<td><input class="edit-in" data-f="company" value="'+company+'" placeholder="MFR" style="width:100%;min-width:80px;font-size:11.5px"></td>'+
-    '<td><input class="edit-in" data-f="batch" value="'+batch+'" placeholder="B2401" style="width:76px;font-size:11px"></td>'+
-    '<td><input class="edit-in" data-f="expiry" value="'+expiry+'" placeholder="06/27" style="width:56px;font-size:11px"></td>'+
-    '<td><input class="edit-in" data-f="qty" value="'+qty+'" placeholder="0" style="width:44px;text-align:center" oninput="calcVendorTotal()"></td>'+
-    '<td><input class="edit-in" data-f="rate" value="'+rate+'" placeholder="0.00" style="width:74px;text-align:right" oninput="calcVendorTotal()"></td>'+
-    '<td><input class="edit-in" data-f="sale" value="'+sale+'" placeholder="0.00" style="width:65px;text-align:right"></td>'+
-    '<td class="vd-amt" style="text-align:right;font-weight:700;font-size:12.5px;color:'+(amt>0?'var(--acc)':'var(--ink3)')+'">'+
-      (amt>0?'&#8377;'+amt.toFixed(2):'—')+'</td>'+
-    '<td class="vd-status">'+badge+'</td>'+
-    '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:3px 6px" onclick="this.closest(\'tr\').remove();calcVendorTotal()"><i class="ti ti-trash" style="font-size:13px"></i></button></td>';
+    '<td><input type="checkbox" class="vd-cb" style="cursor:pointer;width:15px;height:15px"></td>'+
+    '<td style="display:none"><input data-f="dose" value=""></td>'+
+    '<td>'+
+      '<input class="edit-in" data-f="name" value="'+name+'" placeholder="Medicine name" style="width:100%;min-width:160px;font-weight:600" oninput="updateVdMatch(this)">'+
+      '<div style="margin-top:3px">'+badge+'</div>'+
+    '</td>'+
+    '<td><input class="edit-in" data-f="company" value="'+company+'" placeholder="MFR" style="width:100%;min-width:70px"></td>'+
+    '<td><input class="edit-in" data-f="batch"   value="'+batch+'"   placeholder="Batch" style="width:100%"></td>'+
+    '<td><input class="edit-in" data-f="expiry"  value="'+expiry+'"  placeholder="MM/YY" style="width:100%;text-align:center"></td>'+
+    '<td><input class="edit-in" data-f="qty"     value="'+qty+'"     placeholder="0" type="number" min="0" style="width:100%;text-align:center;font-weight:700" oninput="recalcVdRow(this)"></td>'+
+    '<td><input class="edit-in" data-f="sale"    value="'+sale+'"    placeholder="0.00" type="number" step="0.01" style="width:100%;text-align:right" oninput="recalcVdRow(this)"></td>'+
+    '<td><input class="edit-in" data-f="billno"  value="'+billno+'"  placeholder="Bill / Invoice No" style="width:100%;min-width:80px"></td>'+
+    '<td class="vd-amt" style="text-align:right;font-weight:700;font-size:13px;color:var(--acc)">'+
+      (amt>0?amt.toFixed(2):'—')+
+    '</td>'+
+    '<td><button onclick="this.closest(\'tr\').remove();updateVdTotals()" '+
+      'style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 4px;font-size:16px" title="Delete">'+
+      '<i class="ti ti-trash"></i></button></td>';
   return tr;
 }
+window.makeVendorRow=makeVendorRow;
+
 
 function vdNameChange(inp){
   var tr=inp.closest('tr');
@@ -4372,8 +4389,8 @@ function doVendorImport(){
   var added=0,restocked=0,skipped=0;
   rows.forEach(function(tr){
     function val(f){var el=tr.querySelector('[data-f="'+f+'"]');return el?el.value.trim():'';}
-    var name=val('name'),company=val('company'),desc=val('desc');
-    var batch=val('batch'),expiry=val('expiry');
+    var name=val('name'),company=val('company');
+    var batch=val('batch'),expiry=val('expiry'),billno=val('billno');
     var qty=parseInt(val('qty'))||0;
     var purchase=parseFloat(val('rate'))||0;
     var sale=parseFloat(val('sale'))||0;
@@ -12861,6 +12878,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
