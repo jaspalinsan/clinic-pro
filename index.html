@@ -2271,6 +2271,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 function recalcVdRow(inp){
   var tr=inp.closest('tr');
   var qty=parseFloat((tr.querySelector('[data-f="qty"]')||{value:0}).value)||0;
@@ -4342,47 +4343,62 @@ function openVendorConfirm(){
   if(!filled.length){toast('Add at least one item name first','error');return;}
   var newItems=0,restock=0,totalAmt=0,tableRows='';
   filled.forEach(function(tr){
-    
-    var name=val('name'),company=val('company'),desc=val('desc');
-    var batch=val('batch'),expiry=val('expiry');
+    function val(f){var el=tr.querySelector('[data-f="'+f+'"]');return el?el.value.trim():'';}
+    var name=val('name'),company=val('company');
+    var batch=val('batch'),expiry=val('expiry'),billno=val('billno');
     var qty=parseInt(val('qty'))||0;
-    var purchase=parseFloat(val('rate'))||0;
-    var sale=parseFloat(val('sale'))||(purchase*1.45);
-    var amt=qty*purchase;
+    var sale=parseFloat(val('sale'))||0;
+    var amt=qty*sale;
     totalAmt+=amt;
     var ex=DB.find(function(m){return m.name.toLowerCase()===name.toLowerCase();});
-    if(ex)restock++;else newItems++;
-    var badge=ex
-      ?'<span class="pill p-b" style="font-size:10px">Restock</span>'
-      :'<span class="pill p-g" style="font-size:10px">New</span>';
+    if(ex)restock++; else newItems++;
     tableRows+='<tr>'+
-      '<td style="font-weight:600;font-size:12.5px">'+name+'</td>'+
-      '<td style="color:var(--ink3);font-size:11.5px">'+(desc||'—')+'</td>'+
-      '<td style="color:var(--ink3);font-size:11.5px">'+(company||'—')+'</td>'+
-      '<td style="font-size:11.5px">'+(batch||'—')+'</td>'+
-      '<td style="font-size:11.5px">'+(expiry||'—')+'</td>'+
-      '<td style="text-align:center;font-weight:600">'+qty+'</td>'+
-      '<td style="text-align:right">₹'+purchase.toFixed(2)+'</td>'+
-      '<td style="text-align:right">₹'+sale.toFixed(2)+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:var(--acc)">'+(amt>0?'₹'+amt.toFixed(2):'—')+'</td>'+
-      '<td>'+badge+'</td>'+
+      '<td style="font-weight:600">'+name+'</td>'+
+      '<td style="color:var(--ink3)">'+company+'</td>'+
+      '<td>'+batch+'</td>'+
+      '<td>'+expiry+'</td>'+
+      '<td style="text-align:center;font-weight:700">'+qty+'</td>'+
+      '<td style="text-align:right">Rs.'+sale.toFixed(2)+'</td>'+
+      '<td style="color:#185FA5">'+billno+'</td>'+
+      '<td style="text-align:right;font-weight:700">Rs.'+amt.toFixed(2)+'</td>'+
+      '<td><span class="pill '+(ex?'p-b':'p-g')+'" style="font-size:10px">'+(ex?'Restock':'New')+'</span></td>'+
     '</tr>';
   });
-  var sts=document.getElementById('vc-stats');
-  if(sts)sts.innerHTML=
-    '<div style="background:var(--m);border-radius:9px;padding:11px 14px;text-align:center">'+
-      '<div style="font-size:22px;font-weight:700;color:var(--m4)">'+filled.length+'</div>'+
-      '<div style="font-size:11px;color:var(--m4)">Total Items</div></div>'+
-    '<div style="background:var(--sk2);border-radius:9px;padding:11px 14px;text-align:center">'+
-      '<div style="font-size:22px;font-weight:700;color:var(--sk3)">'+newItems+' / '+restock+'</div>'+
-      '<div style="font-size:11px;color:var(--sk3)">New / Restock</div></div>'+
-    '<div style="background:var(--gd2);border-radius:9px;padding:11px 14px;text-align:center">'+
-      '<div style="font-size:22px;font-weight:700;color:var(--gd3)">₹'+totalAmt.toFixed(2)+'</div>'+
-      '<div style="font-size:11px;color:var(--gd3)">Total Value</div></div>';
-  var vc=document.getElementById('vc-tbody');
-  if(vc)vc.innerHTML=tableRows;
-  openModal('m-vendorConfirm');
+
+  var old=document.getElementById('m-vd-confirm');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='m-vd-confirm';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px';
+  ov.innerHTML=
+    '<div style="background:#fff;border-radius:16px;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">'+
+    '<div style="padding:16px 20px;background:linear-gradient(135deg,#185FA5,#059669);display:flex;justify-content:space-between;align-items:center">'+
+      '<div><div style="font-size:16px;font-weight:700;color:#fff">Confirm Import</div>'+
+      '<div style="font-size:12px;color:rgba(255,255,255,.8)">'+filled.length+' items · '+newItems+' new · '+restock+' restock · Total: Rs.'+totalAmt.toFixed(2)+'</div></div>'+
+      '<button onclick="document.getElementById(\'m-vd-confirm\').remove()" style="border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px">&#10005; Cancel</button>'+
+    '</div>'+
+    '<div style="overflow:auto;flex:1;padding:16px">'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr style="background:#f8fafc">'+
+      '<th style="padding:8px;text-align:left;border-bottom:2px solid #e2e8f0">Item</th>'+
+      '<th style="padding:8px;text-align:left;border-bottom:2px solid #e2e8f0">MFR</th>'+
+      '<th style="padding:8px;border-bottom:2px solid #e2e8f0">Batch</th>'+
+      '<th style="padding:8px;border-bottom:2px solid #e2e8f0">Exp</th>'+
+      '<th style="padding:8px;text-align:center;border-bottom:2px solid #e2e8f0">Qty</th>'+
+      '<th style="padding:8px;text-align:right;border-bottom:2px solid #e2e8f0">Sale Rs.</th>'+
+      '<th style="padding:8px;border-bottom:2px solid #e2e8f0">Bill No</th>'+
+      '<th style="padding:8px;text-align:right;border-bottom:2px solid #e2e8f0">Amount</th>'+
+      '<th style="padding:8px;border-bottom:2px solid #e2e8f0">Status</th>'+
+    '</tr></thead>'+
+    '<tbody>'+tableRows+'</tbody>'+
+    '</table></div>'+
+    '<div style="padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:flex-end">'+
+      '<button onclick="document.getElementById(\'m-vd-confirm\').remove()" style="padding:10px 20px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600">Cancel</button>'+
+      '<button onclick="doVendorImport();document.getElementById(\'m-vd-confirm\').remove()" style="padding:10px 24px;background:#059669;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700"><i class="ti ti-check"></i> Confirm Import to Stock</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
 }
+window.openVendorConfirm=openVendorConfirm;
+
 
 function doVendorImport(){
   var rows=[].slice.call(document.querySelectorAll('#vd-tbody tr'));
@@ -4392,38 +4408,40 @@ function doVendorImport(){
     var name=val('name'),company=val('company');
     var batch=val('batch'),expiry=val('expiry'),billno=val('billno');
     var qty=parseInt(val('qty'))||0;
-    var purchase=parseFloat(val('rate'))||0;
     var sale=parseFloat(val('sale'))||0;
+    var purchase=sale>0?parseFloat((sale/1.45).toFixed(2)):0;
     if(!name){skipped++;return;}
-    if(!sale&&purchase>0)sale=parseFloat((purchase*1.45).toFixed(2));
     var ex=DB.find(function(m){return m.name.toLowerCase()===name.toLowerCase();});
     if(ex){
       ex.stock+=qty;
-      if(purchase>0)ex.purchase=purchase;
       if(sale>0)ex.sale=sale;
+      if(purchase>0)ex.purchase=purchase;
+      if(company)ex.company=company;
       if(batch)ex.batch=batch;
       if(expiry)ex.expiry=expiry;
-      if(company&&company!=='—')ex.company=company;
-      if(desc)ex.cat=desc;
+      if(billno)ex.billno=billno;
       restocked++;
     } else {
-      DB.push({id:_nextId++,name:name,cat:desc||'General',type:'Rx Only',
-        company:company||'—',batch:batch||'—',expiry:expiry||'—',
-        stock:qty,purchase:purchase,sale:sale});
+      DB.push({
+        id:'INV-'+Date.now()+added,
+        name:name,company:company,
+        batch:batch,expiry:expiry,
+        stock:qty,purchase:purchase,sale:sale,
+        schedule:'OTC',status:'Active',
+        billno:billno
+      });
       added++;
     }
   });
-  closeModal('m-vendorConfirm');
-  clearVendorRows();
-  if(typeof clearVdImg==='function')clearVdImg();
-  var parts=[];
-  if(added)parts.push(added+' item'+(added!==1?'s':'')+' added');
-  if(restocked)parts.push(restocked+' item'+(restocked!==1?'s':'')+' restocked');
-  if(skipped)parts.push(skipped+' skipped');
   syncInvDB();
-  toast(parts.join(' · ')||'Nothing imported',added+restocked>0?'success':'error');
-  if(added+restocked>0){renderInventory();setTimeout(function(){nav('inventory');},400);}
+  renderInventory();
+  toast((added?added+' added':'')+(restocked?' '+restocked+' restocked':'')+(skipped?' '+skipped+' skipped':''),'success');
+  // Clear vendor table
+  var tbody=document.getElementById('vd-tbody');
+  if(tbody)tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to populate items</td></tr>';
 }
+window.doVendorImport=doVendorImport;
+
 
 // ── OCR MODAL ─────────────────────────────────────────────────
 function openOCRModal(dataURL,fileName){
@@ -12878,6 +12896,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
