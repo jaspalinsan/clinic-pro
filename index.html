@@ -4010,10 +4010,10 @@ html,body{height:100%;overflow:hidden}
   </div>
   <div class="mbody" style="padding:18px 22px">
     <div style="background:#f0fdf4;border:1.5px dashed #10b981;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;cursor:pointer"
-      onclick="document.getElementById('xls-file-input').click()">
+      onclick="document.getElementById('xls-file-input').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();var f=event.dataTransfer.files[0];if(f){document.getElementById('xls-file-input').files;handleXLSUpload({files:[f]})}">
       <i class="ti ti-file-spreadsheet" style="font-size:32px;color:#10b981;display:block;margin-bottom:8px"></i>
       <div style="font-size:14px;font-weight:600;color:#065f46;margin-bottom:4px">Click to select XLS / CSV file</div>
-      <div style="font-size:12px;color:#6b7280">Supports .xlsx, .xls, .csv files</div>
+      <div style="font-size:12px;color:#6b7280">Supports .xlsx, .xls, .csv files</div><div style="font-size:11px;color:#10b981;margin-top:6px;font-weight:600">Tip: CSV works instantly without any library</div>
     </div>
     <input type="file" id="xls-file-input" accept=".xlsx,.xls,.csv"
       style="display:none" onchange="handleXLSUpload(this)">
@@ -4186,6 +4186,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12768,48 +12769,92 @@ window.rxTplLoad=rxTplLoad;
 window._xlsRows=[];
 
 function handleXLSUpload(inp){
-  var file=inp.files[0];if(!file)return;
+  var file=inp.files[0]; if(!file)return;
   var fn=document.getElementById('xls-filename');
   if(fn)fn.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
 
-  if(file.name.toLowerCase().endsWith('.csv')){
+  var ext=file.name.split('.').pop().toLowerCase();
+
+  if(ext==='csv'){
+    // Pure JS CSV — no library needed
     var reader=new FileReader();
-    reader.onload=function(e){_xlsParseCsv(e.target.result);};
+    reader.onload=function(e){
+      _xlsParseCsv(e.target.result);
+    };
     reader.readAsText(file);
     return;
   }
 
-  // XLSX
-  function readXls(){
+  // XLS/XLSX — load SheetJS dynamically
+  function doRead(){
     var reader=new FileReader();
     reader.onload=function(e){
       try{
-        var wb=XLSX.read(e.target.result,{type:'binary'});
+        var data=new Uint8Array(e.target.result);
+        var wb=XLSX.read(data,{type:'array'});
         var ws=wb.Sheets[wb.SheetNames[0]];
-        var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+        if(!rows||rows.length<2){toast('File appears empty','error');return;}
         _xlsParseRows(rows);
-      }catch(er){toast('Error reading file: '+er.message,'error');}
+      }catch(er){
+        toast('Error reading XLS: '+er.message,'error');
+        console.error(er);
+      }
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   }
+
   if(typeof XLSX!=='undefined'){
-    readXls();
+    doRead();
   } else {
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    s.onload=readXls;
-    document.head.appendChild(s);
+    // Load SheetJS from multiple CDN fallbacks
+    var loaded=false;
+    function tryLoad(url,cb){
+      var s=document.createElement('script');
+      s.src=url;
+      s.onload=function(){if(!loaded){loaded=true;cb();}};
+      s.onerror=function(){};
+      document.head.appendChild(s);
+    }
+    // Try multiple CDNs
+    tryLoad('https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js',doRead);
+    tryLoad('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',doRead);
+    tryLoad('https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',doRead);
+    // Fallback toast after 5s if still not loaded
+    setTimeout(function(){
+      if(typeof XLSX==='undefined'){
+        toast('Could not load XLS reader. Please use CSV format instead.','error');
+      }
+    },5000);
   }
 }
 window.handleXLSUpload=handleXLSUpload;
 
+window.handleXLSUpload=handleXLSUpload;
+
 function _xlsParseCsv(text){
-  var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-  var rows=lines.map(function(l){
-    return l.split(',').map(function(c){return c.trim().replace(/^"|"$/g,'');});
-  });
+  // Handle both comma and semicolon delimiters
+  var lines=text.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
+  if(lines.length<2){toast('CSV empty or only 1 row','error');return;}
+  // Detect delimiter
+  var delim=lines[0].indexOf(';')>lines[0].indexOf(',')?';':',';
+  // Parse with quoted field support
+  function parseLine(line){
+    var result=[]; var cur=''; var inQ=false;
+    for(var i=0;i<line.length;i++){
+      var c=line[i];
+      if(c==='"'){inQ=!inQ;}
+      else if(c===delim&&!inQ){result.push(cur.trim());cur='';}
+      else{cur+=c;}
+    }
+    result.push(cur.trim());
+    return result;
+  }
+  var rows=lines.map(parseLine);
   _xlsParseRows(rows);
 }
+window._xlsParseCsv=_xlsParseCsv;
+
 
 function _xlsParseRows(rows){
   if(!rows||rows.length<2){toast('File is empty or has no data rows','error');return;}
@@ -15070,6 +15115,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 </script>
 </body>
