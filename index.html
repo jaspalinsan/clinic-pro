@@ -628,154 +628,152 @@ html,body{height:100%;overflow:hidden}
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
     </div>
     
-  <!-- ════ CHIEF COMPLAINTS ════ -->
-  <div style="border:0.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#E6F1FB;border-bottom:1.5px solid #BFDBFE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-stethoscope" style="font-size:15px;color:#185FA5"></i>Chief Complaints / Symptoms</div><span style="cursor:pointer;font-size:10px;font-weight:700;color:#DC2626;border:1px solid #FECACA;background:#FEF2F2;border-radius:6px;padding:3px 9px;text-decoration:none;display:inline-block" onclick="clearRxSyms()">Clear all</span></div>
-    <div style="padding:10px 16px;background:#fff">
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px" id="rx-sym-chips">
-        <button class="tb" onclick="addRxSym('Fever')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Fever</button>
-        <button class="tb" onclick="addRxSym('Cough')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Cough</button>
-        <button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Cold</button>
-        <button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Sore Throat</button>
-        <button class="tb" onclick="addRxSym('Headache')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Headache</button>
-        <button class="tb" onclick="addRxSym('Body Ache')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Body Ache</button>
-        <button class="tb" onclick="addRxSym('Vomiting')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Vomiting</button>
-        <button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Diarrhoea</button>
-        <button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Chest Pain</button>
-        <button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Breathlessness</button>
-        <button class="tb" onclick="addRxSym('Weakness')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Weakness</button>
-        <button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Abdominal Pain</button>
-        <button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Burning Urine</button>
-        <button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Skin Rash</button>
-      </div>
-      <textarea class="fin" id="rx-symptoms" rows="2" placeholder="Type or click chips above to add complaints..." style="width:100%;resize:vertical;font-size:12px"></textarea>
-    </div>
-  </div>
+  <!-- ════════ DESIGN A — CARD STRIP ════════ -->
+  <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#fff">
 
-  <!-- ════ HISTORY ════ -->
-  <div style="border:0.5px solid #FDE68A;border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#FFFBEB;border-bottom:1.5px solid #FDE68A;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#633806;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-clock-history" style="font-size:15px;color:#854F0B"></i>Patient History</div><span style="font-size:10px;font-weight:700;background:#FEF3C7;color:#633806;border:0.5px solid #FDE68A;border-radius:20px;padding:2px 8px">Past Records</span></div>
-    <div style="padding:10px 16px;background:#fff">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Past Illness</div>
-          <input class="fin" id="rx-past-illness" placeholder="HTN, DM, Asthma..." style="width:100%;border-color:#FDE68A">
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Allergies</div>
-          <input class="fin" id="rx-allergies" placeholder="Penicillin, Sulfa..." style="width:100%;border-color:#FDE68A">
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Family History</div>
-          <input class="fin" id="rx-family-history" placeholder="DM, HTN in family..." style="width:100%;border-color:#FDE68A">
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Current Medications</div>
-          <input class="fin" id="rx-current-meds" placeholder="Metformin 500mg..." style="width:100%;border-color:#FDE68A">
-        </div>
+    <!-- ROW 1: Patient -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid #f1f5f9;min-height:46px">
+      <div style="width:110px;flex-shrink:0;background:#f8faff;border-right:1.5px solid #e2e8f0;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-user-circle" style="font-size:15px;color:#185FA5"></i>Patient
       </div>
-      <textarea class="fin" id="rx-old-history" rows="2" placeholder="Additional history, surgical history, social history..." style="width:100%;resize:vertical;font-size:12px;border-color:#FDE68A"></textarea>
-    </div>
-  </div>
-
-  <!-- ════ VITALS ════ -->
-  <div style="border:0.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#E6F1FB;border-bottom:1.5px solid #BFDBFE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-activity-heartbeat" style="font-size:15px;color:#185FA5"></i>Vitals</div><span style="font-size:10px;font-weight:700;background:#EFF6FF;color:#0C447C;border:0.5px solid #BFDBFE;border-radius:20px;padding:2px 8px">Auto-saved</span></div>
-    <div style="padding:10px 16px;background:#fff">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">BP (mmHg)</div>
-          <input class="fin" id="rx-bp" placeholder="120/80" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">systolic/diastolic</div>
-        </div>
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Pulse</div>
-          <input class="fin" id="rx-pulse" type="number" placeholder="72" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">beats/min</div>
-        </div>
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Temp</div>
-          <input class="fin" id="rx-temp" type="number" placeholder="98.6" step="0.1" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">°F</div>
-        </div>
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">SpO2</div>
-          <input class="fin" id="rx-spo2" type="number" placeholder="98" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">%</div>
-        </div>
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Weight</div>
-          <input class="fin" id="rx-weight" type="number" placeholder="65" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">kg</div>
-        </div>
-        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
-          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">RR</div>
-          <input class="fin" id="rx-rr" type="number" placeholder="16" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px">breaths/min</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════ DIAGNOSIS ════ -->
-  <div style="border:0.5px solid #DDD6FE;border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#EEEDFE;border-bottom:1.5px solid #DDD6FE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#3C3489;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-microscope" style="font-size:15px;color:#534AB7"></i>Diagnosis / Impression</div><span style="cursor:pointer;font-size:10px;font-weight:700;color:#3C3489;border:1px solid #DDD6FE;background:#EEEDFE;border-radius:6px;padding:3px 9px;display:inline-block" onclick="document.getElementById('rx-diagnosis').value=''">Clear</span></div>
-    <div style="padding:10px 16px;background:#fff">
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':')+'URTI'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">URTI</button>
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Viral Fever'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Viral Fever</button>
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Gastritis'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Gastritis</button>
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'HTN'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">HTN</button>
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Diabetes'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Diabetes</button>
-        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Anaemia'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Anaemia</button>
-      </div>
-      <textarea class="fin" id="rx-diagnosis" rows="2" placeholder="Provisional / confirmed diagnosis..." style="width:100%;resize:vertical;font-size:12px;border-color:#DDD6FE"></textarea>
-    </div>
-  </div>
-
-  <!-- ════ RX TEMPLATES ════ -->
-  <div style="border:0.5px solid #C0DD97;border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#EAF3DE;border-bottom:1.5px solid #C0DD97;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#27500A;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-template" style="font-size:15px;color:#3B6D11"></i>Rx Templates</div><span style="font-size:10px;font-weight:700;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;border-radius:20px;padding:2px 8px">Quick load</span></div>
-    <div style="padding:10px 16px;background:#fff">
-      <select id="rx-tpl-select" onchange="rxTplSelect(this.value)" style="width:100%;border:1.5px solid #C0DD97;border-radius:8px;padding:8px 10px;font-size:12px;background:#F4FAE8;color:#27500A;margin-bottom:8px;cursor:pointer;outline:none">
-        <option value="">— Select a saved template —</option>
-      </select>
-      <div style="display:flex;gap:6px">
-        <button class="tb" onclick="rxTplLoad()" style="flex:1;padding:7px 10px;background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:8px;font-size:12px;font-weight:700;color:#27500A"><i class="ti ti-player-play" style="font-size:12px"></i> Load</button>
-        <button class="tb" onclick="rxTplSave()" style="flex:1;padding:7px 10px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save Current as Template</button>
-        <button class="tb" onclick="rxTplDelete()" style="padding:7px 10px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;font-size:12px;font-weight:700;color:#DC2626"><i class="ti ti-trash" style="font-size:12px"></i></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════ RX MODE / CONSULT INFO ════ -->
-  <div style="border:0.5px solid var(--sl2);border-radius:10px;overflow:hidden;margin:0 0 10px">
-    <div style="background:#f8fafc;border-bottom:1.5px solid var(--sl2);padding:9px 16px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px">
-      <i class="ti ti-stethoscope" style="font-size:15px;color:#64748b"></i>Consultation Info
-    </div>
-    <div style="padding:10px 16px;background:#fff;display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end">
-      <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Rx for Days</div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <input type="number" id="rx-days" oninput="rxCalcNextDate();rxSyncDaysToRows()" value="5" min="1" max="90" style="width:49px;text-align:center;font-size:16px;font-weight:900;color:#7C3AED;border:1.5px solid #c4b5fd;border-radius:7px;padding:6px 4px;outline:none">
-          <span style="font-size:11px;color:#64748b">days</span>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Next Visit</div>
-        <div id="rx-next-visit" style="font-size:12px;font-weight:700;color:#059669;padding:6px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;min-height:34px">—</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Mode</div>
-        <select id="rx-mode" style="width:100%;border:1.5px solid var(--sl2);border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--ink);background:#fff;outline:none">
-          <option value="OPD">OPD</option>
-          <option value="IPD">IPD</option>
-          <option value="Emergency">Emergency</option>
-          <option value="Follow-up">Follow-up</option>
+      <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <input class="fin" id="rx-pat-search" placeholder="🔍 Search name or mobile..." style="width:170px;font-weight:600" oninput="rxPatSearch(this.value)">
+        <input class="fin" id="rx-pat-age" placeholder="Age / Sex" style="width:72px">
+        <input class="fin" id="rx-pat-mob" placeholder="Mobile" style="width:115px">
+        <input class="fin" id="rx-pat-city" placeholder="City" style="width:95px">
+        <select class="fin" id="rx-mode" style="width:100px;font-size:11px">
+          <option value="OPD">OPD</option><option value="IPD">IPD</option>
+          <option value="Follow-up">Follow-up</option><option value="Emergency">Emergency</option>
           <option value="Tele">Tele-Consult</option>
         </select>
+        <div style="display:flex;align-items:center;gap:4px;margin-left:2px">
+          <input type="number" id="rx-days" oninput="rxCalcNextDate();rxSyncDaysToRows()" value="5" min="1" max="90"
+            style="width:49px;text-align:center;font-size:16px;font-weight:900;color:#7C3AED;border:1.5px solid #c4b5fd;border-radius:7px;padding:5px 3px;outline:none">
+          <span style="font-size:10px;color:#94a3b8">days</span>
+        </div>
+        <div id="rx-next-visit" style="font-size:11px;font-weight:700;color:#059669;padding:4px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;white-space:nowrap">—</div>
       </div>
     </div>
+
+    <!-- ROW 2: History -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid #f1f5f9;min-height:46px">
+      <div style="width:110px;flex-shrink:0;background:#FFFBEB;border-right:1.5px solid #FDE68A;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#854F0B;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-clock-history" style="font-size:15px;color:#854F0B"></i>History
+      </div>
+      <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <input class="fin" id="rx-past-illness" placeholder="Past illness — HTN, DM, Asthma..." style="flex:1;min-width:130px;border-color:#FDE68A">
+        <input class="fin" id="rx-allergies" placeholder="Allergies — Penicillin, Sulfa..." style="flex:1;min-width:120px;border-color:#FDE68A">
+        <input class="fin" id="rx-current-meds" placeholder="Current medications..." style="flex:1;min-width:120px;border-color:#FDE68A">
+      </div>
+    </div>
+
+    <!-- ROW 3: Complaints -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid #f1f5f9;min-height:46px">
+      <div style="width:110px;flex-shrink:0;background:#f8faff;border-right:1.5px solid #e2e8f0;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-stethoscope" style="font-size:15px;color:#185FA5"></i>Complaints
+      </div>
+      <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        <button class="tb" onclick="rxAddSym('Fever')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Fever</button>
+        <button class="tb" onclick="rxAddSym('Cough')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Cough</button>
+        <button class="tb" onclick="rxAddSym('Cold')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Cold</button>
+        <button class="tb" onclick="rxAddSym('Headache')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Headache</button>
+        <button class="tb" onclick="rxAddSym('Body Ache')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Body Ache</button>
+        <button class="tb" onclick="rxAddSym('Vomiting')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Vomiting</button>
+        <button class="tb" onclick="rxAddSym('Diarrhoea')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Diarrhoea</button>
+        <button class="tb" onclick="rxAddSym('Chest Pain')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Chest Pain</button>
+        <button class="tb" onclick="rxAddSym('Breathlessness')" style="padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5;font-size:11px">Breathlessness</button>
+        <input class="fin" id="rx-symptoms" placeholder="Type complaints..." style="flex:1;min-width:100px">
+      </div>
+    </div>
+
+    <!-- ROW 3b: Diagnosis -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid #f1f5f9;min-height:46px">
+      <div style="width:110px;flex-shrink:0;background:#EEEDFE;border-right:1.5px solid #DDD6FE;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#3C3489;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-microscope" style="font-size:15px;color:#534AB7"></i>Diagnosis
+      </div>
+      <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        <button class="tb" onclick="rxAddDiag('URTI')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">URTI</button>
+        <button class="tb" onclick="rxAddDiag('Viral Fever')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">Viral Fever</button>
+        <button class="tb" onclick="rxAddDiag('Gastritis')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">Gastritis</button>
+        <button class="tb" onclick="rxAddDiag('Anaemia')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">Anaemia</button>
+        <button class="tb" onclick="rxAddDiag('HTN')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">HTN</button>
+        <button class="tb" onclick="rxAddDiag('DM Type 2')" style="padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489;font-size:11px">DM Type 2</button>
+        <button class="tb" onclick="rxAiDiagnose()" style="padding:3px 10px;border-radius:20px;border:1px solid #bbf7d0;background:#f0fdf4;color:#059669;font-size:11px;font-weight:700">&#10022; AI Suggest</button>
+        <input class="fin" id="rx-diagnosis" placeholder="Type or click to add diagnosis..." style="flex:1;min-width:130px;border-color:#DDD6FE">
+      </div>
+    </div>
+
+    <!-- ROW 4: Vitals -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid #f1f5f9;min-height:50px">
+      <div style="width:110px;flex-shrink:0;background:#E6F1FB;border-right:1.5px solid #BFDBFE;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-activity-heartbeat" style="font-size:15px;color:#185FA5"></i>Vitals
+      </div>
+      <div style="flex:1;padding:7px 10px;display:flex;align-items:center;gap:6px;overflow-x:auto;flex-wrap:nowrap">
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:74px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">BP</div>
+          <input class="fin" id="rx-bp" placeholder="120/80" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:70px;padding:0">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">mmHg</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:64px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Pulse</div>
+          <input class="fin" id="rx-pulse" type="number" placeholder="72" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:52px;padding:0">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">bpm</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:64px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Temp</div>
+          <input class="fin" id="rx-temp" type="number" step="0.1" placeholder="98.6" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:52px;padding:0">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">°F</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:60px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">SpO2</div>
+          <input class="fin" id="rx-spo2" type="number" placeholder="98" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:46px;padding:0">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">%</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:64px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Weight</div>
+          <input class="fin" id="rx-weight" type="number" placeholder="65" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:46px;padding:0" oninput="rxCalcBMI()">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">kg</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:60px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Height</div>
+          <input class="fin" id="rx-height" type="number" placeholder="170" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:46px;padding:0" oninput="rxCalcBMI()">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">cm</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:5px 10px;min-width:60px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#854F0B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">BMI</div>
+          <div id="rx-bmi" style="font-size:15px;font-weight:900;color:#854F0B;text-align:center;min-width:46px">—</div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">auto</div>
+        </div>
+        <div style="color:#cbd5e1;font-size:16px;flex-shrink:0">·</div>
+        <div style="display:flex;flex-direction:column;align-items:center;background:#f0f7ff;border:1.5px solid #BFDBFE;border-radius:9px;padding:5px 10px;min-width:60px;text-align:center;flex-shrink:0">
+          <div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">RR</div>
+          <input class="fin" id="rx-rr" type="number" placeholder="16" style="border:none;background:none;font-size:15px;font-weight:900;color:#1A3A8C;text-align:center;width:46px;padding:0">
+          <div style="font-size:9px;color:#94a3b8;margin-top:1px">/min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 5: Template -->
+    <div style="display:flex;align-items:stretch;min-height:46px">
+      <div style="width:110px;flex-shrink:0;background:#EAF3DE;border-right:1.5px solid #C0DD97;padding:8px 10px;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#27500A;text-transform:uppercase;letter-spacing:.5px">
+        <i class="ti ti-template" style="font-size:15px;color:#3B6D11"></i>Template
+      </div>
+      <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <select id="rx-tpl-select" onchange="rxTplSelect(this.value)" style="flex:1;min-width:170px;border:1.5px solid #C0DD97;border-radius:7px;padding:6px 10px;font-size:12px;background:#F4FAE8;color:#27500A;outline:none;cursor:pointer">
+          <option value="">— Select saved template —</option>
+        </select>
+        <button class="tb" onclick="rxTplLoad()" style="padding:6px 12px;background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:7px;font-size:11px;font-weight:700;color:#27500A"><i class="ti ti-player-play" style="font-size:11px"></i> Load</button>
+        <button class="tb" onclick="rxTplSave()" style="padding:6px 12px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:7px;font-size:11px;font-weight:700;color:#185FA5"><i class="ti ti-device-floppy" style="font-size:11px"></i> Save</button>
+        <button class="tb" onclick="rxTplDelete()" style="padding:6px 10px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:7px;font-size:11px;font-weight:700;color:#DC2626"><i class="ti ti-trash" style="font-size:11px"></i></button>
+      </div>
+    </div>
+
   </div>
 
 <div class="tbl-wrap"><table class="tbl" style="table-layout:auto;width:100%;min-width:900px">
@@ -4188,6 +4186,68 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function rxAddSym(s){
+  var el=document.getElementById('rx-symptoms');
+  if(!el)return;
+  var v=el.value.trim();
+  el.value=v?(v+', '+s):s;
+}
+window.rxAddSym=rxAddSym;
+
+function rxAddDiag(s){
+  var el=document.getElementById('rx-diagnosis');
+  if(!el)return;
+  var v=el.value.trim();
+  el.value=v?(v+', '+s):s;
+}
+window.rxAddDiag=rxAddDiag;
+
+function rxCalcBMI(){
+  var w=parseFloat((document.getElementById('rx-weight')||{}).value)||0;
+  var h=parseFloat((document.getElementById('rx-height')||{}).value)||0;
+  var bmi=document.getElementById('rx-bmi');
+  if(!bmi)return;
+  if(w&&h){
+    var hm=h/100;
+    var b=(w/(hm*hm)).toFixed(1);
+    bmi.textContent=b;
+    bmi.style.color=b<18.5?'#DC2626':b<25?'#059669':b<30?'#D97706':'#DC2626';
+  } else {
+    bmi.textContent='—';
+  }
+}
+window.rxCalcBMI=rxCalcBMI;
+
+function rxAiDiagnose(){
+  var sym=document.getElementById('rx-symptoms');
+  if(!sym||!sym.value.trim()){toast('Add complaints first','info');return;}
+  toast('AI diagnosis coming soon','info');
+}
+window.rxAiDiagnose=rxAiDiagnose;
+
+function rxPatSearch(val){
+  var v=val.replace(/\D/g,'');
+  if(v.length<10&&val.length<3)return;
+  var db=window.PAT_DB||[];
+  var found=db.find(function(p){
+    var m=(p.mobile||p.mob||'').replace(/\D/g,'');
+    return m.slice(-10)===v.slice(-10)||
+           (p.name||'').toLowerCase().startsWith(val.toLowerCase());
+  });
+  if(found){
+    var age=document.getElementById('rx-pat-age');
+    var mob=document.getElementById('rx-pat-mob');
+    var city=document.getElementById('rx-pat-city');
+    if(age)age.value=(found.age||'')+(found.gender?'/'+found.gender:'');
+    if(mob)mob.value=found.mobile||found.mob||'';
+    if(city)city.value=found.city||'';
+    toast((found.name||'Patient')+' found','success');
+  }
+}
+window.rxPatSearch=rxPatSearch;
+
+
 
 function rxSyncDaysToRows(){
   var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
@@ -14526,103 +14586,188 @@ function printInvoice(invId){
     '.bal-box{margin:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px}'+
     '.bal-lbl{font-size:10px;font-weight:900;color:#991b1b;text-transform:uppercase;margin-bottom:6px}';
 
-  var H=[];
-  H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+invId+'</title><style>'+css+'</style></head><body>');
-  H.push('<div class="np"><button class="bp" onclick="window.print()">Print Invoice</button>');
-  H.push('<button class="bc" onclick="window.close()">Close</button></div>');
-  H.push('<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">');
-  H.push('<div class="hd"><div class="cn">'+cName+'</div>'+(cSub?'<div class="cs">'+cSub+'</div>':'')+'</div>');
-  H.push('<div class="mt"><div><div style="font-size:15px;font-weight:900">'+invId+'</div>');
-  H.push('<div style="font-size:11px;color:#6b7280;margin-top:2px">'+(fmtDate(inv.date||''))+(inv.rxno?' &bull; Rx:'+inv.rxno:'')+'</div></div>');
-  H.push('<span class="bd" style="background:'+sbg+';color:'+scol+';border:1px solid '+scol+'">'+status+'</span></div>');
-  H.push('<div class="pg">');
-  H.push('<div><span class="lb">Patient</span><span class="vl">'+(inv.patient||'-')+'</span></div>');
-  H.push('<div><span class="lb">Age/Sex</span><span class="vl">'+(inv.age||'-')+'</span></div>');
-  H.push('<div><span class="lb">Mobile</span><span class="vl">'+(inv.mob||'-')+'</span></div>');
-  H.push('<div><span class="lb">Diagnosis</span><span class="vl">'+(inv.dx||'-')+'</span></div>');
+    var H=[];
+  var CS=window.CLINIC_SETTINGS||{};
+  var cname=CS.name||'Clinic Pro';
+  var cdoc=CS.doctor||'';
+  var cqual=CS.qual||'';
+  var creg=CS.reg||'';
+  var caddr=(CS.address||'')+(CS.city?', '+CS.city:'');
+  var cphone=CS.phone||'';
+  var cfooter=CS.footer||'';
+
+  var inv=BILLING_DB.find(function(b){return b.id===invId;})||{};
+  var meds=(inv.meds||[]).filter(function(m){return m.name;});
+  var svcs=(inv.services||[]).filter(function(s){return s.name;});
+  var patName=inv.patient||inv.name||'';
+  var patAge=inv.age||'';
+  var patMob=inv.mobile||inv.mob||'';
+  var patCity=inv.city||'';
+  var invDate=inv.date||new Date().toLocaleDateString('en-IN');
+  var invNo=inv.id||invId;
+  var rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
+  var nextVisit=(document.getElementById('rx-next-visit')||{textContent:''}).textContent||'';
+  var mode=(document.getElementById('rx-mode')||{value:'OPD'}).value||'OPD';
+  var complaints=(document.getElementById('rx-symptoms')||{value:''}).value||inv.complaint||'';
+  var diagnosis=(document.getElementById('rx-diagnosis')||{value:''}).value||inv.diag||'';
+  var bp=(document.getElementById('rx-bp')||{value:''}).value||'';
+  var pulse=(document.getElementById('rx-pulse')||{value:''}).value||'';
+  var temp=(document.getElementById('rx-temp')||{value:''}).value||'';
+  var spo2=(document.getElementById('rx-spo2')||{value:''}).value||'';
+  var wt=(document.getElementById('rx-weight')||{value:''}).value||'';
+  var bmiVal=(document.getElementById('rx-bmi')||{textContent:''}).textContent||'';
+
+  var totalAmt=0;
+  meds.forEach(function(m){totalAmt+=(m.amt||0);});
+  svcs.forEach(function(s){totalAmt+=(s.amt||0);});
+
+  H.push('<!DOCTYPE html><html><head><meta charset="UTF-8">');
+  H.push('<title>Rx '+invNo+'</title>');
+  H.push('<style>');
+  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}');
+  H.push('body{background:#fff;color:#0f172a;font-size:12px}');
+  H.push('.page{max-width:210mm;margin:0 auto;padding:0;background:#fff}');
+  H.push('.hdr{background:#1A3A8C;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}');
+  H.push('.cn{color:#fff;font-size:18px;font-weight:700;letter-spacing:.3px}');
+  H.push('.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:3px}');
+  H.push('.rx{color:#fff;text-align:right}');
+  H.push('.rxs{font-size:28px;font-weight:900;font-style:italic;line-height:1}');
+  H.push('.rxn{font-size:11px;opacity:.8;margin-top:2px}');
+  H.push('.pat{background:#EFF6FF;padding:10px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;border-bottom:2px solid #1A3A8C}');
+  H.push('.pf .pl{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.4px}');
+  H.push('.pf .pv{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px}');
+  H.push('.info-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #e2e8f0}');
+  H.push('.ib{padding:7px 12px;border-right:1px solid #e2e8f0;font-size:11px}');
+  H.push('.ib:last-child{border-right:none}');
+  H.push('.ibl{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px}');
+  H.push('.ibv{font-size:12px;font-weight:700;color:#0f172a;margin-top:2px}');
+  H.push('.sec{padding:10px 20px;border-bottom:1px solid #e2e8f0}');
+  H.push('.sl{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:4px}');
+  H.push('.sl::before{content:"";display:inline-block;width:3px;height:12px;background:#185FA5;border-radius:2px}');
+  H.push('.stxt{font-size:12px;color:#374151;line-height:1.6}');
+  H.push('.diag{font-size:13px;font-weight:700;color:#1A3A8C;line-height:1.6}');
+  H.push('table{width:100%;border-collapse:collapse;font-size:11px}');
+  H.push('th{background:#f0f4ff;border:1px solid #d1d5db;padding:5px 8px;font-weight:700;color:#374151;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.3px}');
+  H.push('td{border:1px solid #e5e7eb;padding:5px 8px;vertical-align:top}');
+  H.push('tr:nth-child(even) td{background:#f8faff}');
+  H.push('.mn{font-weight:700;font-size:12px}');
+  H.push('.md{font-size:10px;color:#185FA5;font-weight:600;margin-top:1px}');
+  H.push('.mr{font-size:10px;color:#64748b;font-style:italic}');
+  H.push('.vita{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:10px 20px;border-bottom:1px solid #e2e8f0}');
+  H.push('.vb{background:#f0f7ff;border:1px solid #BFDBFE;border-radius:6px;padding:5px 8px;text-align:center}');
+  H.push('.vl{font-size:8px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.4px}');
+  H.push('.vv{font-size:14px;font-weight:900;color:#1A3A8C}');
+  H.push('.vu{font-size:8px;color:#94a3b8}');
+  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 20px;border-top:2px solid #1A3A8C;background:#f8faff}');
+  H.push('.next{font-size:11px;color:#185FA5;font-weight:600}');
+  H.push('.sig{text-align:right}');
+  H.push('.sig-line{border-top:1.5px solid #1A3A8C;width:120px;margin:0 0 4px auto}');
+  H.push('.sig-lbl{font-size:10px;color:#64748b}');
+  H.push('.tot-row td{background:#EFF6FF!important;font-weight:700;font-size:13px}');
+  H.push('@media print{body{margin:0}@page{size:A4;margin:8mm}}');
+  H.push('</style></head><body><div class="page">');
+
+  // Header
+  H.push('<div class="hdr">');
+  H.push('<div><div class="cn">'+cname+'</div>');
+  H.push('<div class="cs">'+( cdoc?'Dr. '+cdoc+(cqual?' · '+cqual:'')+(creg?' · Reg: '+creg:''):'')+( caddr?' · '+caddr:'')+( cphone?' · '+cphone:'')+'</div></div>');
+  H.push('<div class="rx"><div class="rxs">&#8478;</div><div class="rxn">'+invNo+' &nbsp;·&nbsp; '+invDate+'</div></div>');
   H.push('</div>');
-  // Rx info bar — 3 pills one line
-  if(inv.rxDays||inv.nextVisit||inv.rxMode){
-    H.push('<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb">');
-    if(inv.rxDays){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#5b87c5;text-transform:uppercase;letter-spacing:.4px">Rx for</span><span style="font-size:14px;font-weight:900;color:#185FA5">'+inv.rxDays+' Days</span></div>');}
-    if(inv.rxDays&&inv.nextVisit)H.push('<div style="flex:1;height:1px;background:#e5e7eb"></div>');
-    if(inv.nextVisit){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Next Visit</span><span style="font-size:14px;font-weight:900;color:#059669">'+inv.nextVisit+'</span></div>');}
-    if(inv.nextVisit&&inv.rxMode)H.push('<div style="flex:1;height:1px;background:#e5e7eb"></div>');
-    if(inv.rxMode){H.push('<div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px"><span style="font-size:9px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Mode</span><span style="font-size:14px;font-weight:900;color:#7C3AED">'+inv.rxMode+'</span></div>');}
+
+  // Patient bar
+  H.push('<div class="pat">');
+  H.push('<div class="pf"><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
+  H.push('<div class="pf"><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'—')+'</div></div>');
+  H.push('<div class="pf"><div class="pl">Mobile</div><div class="pv">'+(patMob||'—')+'</div></div>');
+  H.push('<div class="pf"><div class="pl">City</div><div class="pv">'+(patCity||'—')+'</div></div>');
+  H.push('</div>');
+
+  // Info bar
+  H.push('<div class="info-bar">');
+  H.push('<div class="ib"><div class="ibl">Chief Complaints</div><div class="ibv">'+(complaints||'—')+'</div></div>');
+  H.push('<div class="ib"><div class="ibl">Mode</div><div class="ibv">'+mode+'</div></div>');
+  H.push('<div class="ib"><div class="ibl">Rx for Days</div><div class="ibv">'+rxDays+' days</div></div>');
+  H.push('<div class="ib"><div class="ibl">Next Visit</div><div class="ibv" style="color:#059669">'+( nextVisit||'—')+'</div></div>');
+  H.push('</div>');
+
+  // Diagnosis
+  if(diagnosis){
+    H.push('<div class="sec">');
+    H.push('<div class="sl">Diagnosis / Impression</div>');
+    H.push('<div class="diag">'+diagnosis+'</div>');
     H.push('</div>');
   }
 
-  // Balance invoice — show clean balance summary box
-  if(isBalanceInv){
-    H.push('<div class="bal-box">');
-    H.push('<div class="bal-lbl">Balance invoice</div>');
-    H.push('<div style="font-size:12px;color:#7f1d1d;margin-bottom:6px">Remaining balance from '+sourceInvId+'</div>');
-    H.push('<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#DC2626">');
-    H.push('<span>Amount due</span><span>Rs.'+invAmt.toFixed(2)+'</span></div>');
+  // Vitals
+  if(bp||pulse||temp||spo2||wt){
+    H.push('<div class="vita">');
+    if(bp)H.push('<div class="vb"><div class="vl">BP</div><div class="vv">'+bp+'</div><div class="vu">mmHg</div></div>');
+    if(pulse)H.push('<div class="vb"><div class="vl">Pulse</div><div class="vv">'+pulse+'</div><div class="vu">bpm</div></div>');
+    if(temp)H.push('<div class="vb"><div class="vl">Temp</div><div class="vv">'+temp+'</div><div class="vu">°F</div></div>');
+    if(spo2)H.push('<div class="vb"><div class="vl">SpO2</div><div class="vv">'+spo2+'</div><div class="vu">%</div></div>');
+    if(wt)H.push('<div class="vb"><div class="vl">Weight</div><div class="vv">'+wt+'</div><div class="vu">kg</div></div>');
+    if(bmiVal&&bmiVal!=='—')H.push('<div class="vb" style="background:#fffbeb;border-color:#fde68a"><div class="vl" style="color:#854F0B">BMI</div><div class="vv" style="color:#854F0B">'+bmiVal+'</div><div class="vu">auto</div></div>');
     H.push('</div>');
   }
 
-  // Medicines table (regular invoices only)
+  // Medicines table
   if(meds.length){
-    H.push('<div class="sh">Medicines</div><table><thead><tr><th>#</th><th>Medicine</th><th>Dose / Frequency</th><th>Sch.</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Amount</th></tr></thead><tbody>');
-    meds.forEach(function(m,i){if(!m.name)return;
-      var q=parseFloat(m.qty||1),s=parseFloat(m.sale||0),d=parseFloat(m.disc||0),a=parseFloat(m.amt||(q*s*(1-d/100)));
-      H.push('<tr><td>'+(i+1)+'</td><td><b>'+m.name+'</b>'+(m.remarks?'<br><span style="color:#666;font-size:9px;font-style:italic">'+m.remarks+'</span>':'')+'</td><td style="font-weight:700">'+(m.dose||'--')+'</td><td>'+(m.schedule||'OTC')+'</td><td>'+(m.mfr||'')+'</td><td>'+(m.batch||'')+'</td><td>'+(m.exp||'')+'</td><td>'+q+'</td><td>Rs.'+s.toFixed(2)+'</td><td>'+(d||'-')+'</td><td><b>Rs.'+a.toFixed(2)+'</b></td></tr>');
+    H.push('<div class="sec" style="padding-bottom:0">');
+    H.push('<div class="sl">Medications</div>');
+    H.push('<table><thead><tr><th>#</th><th>Medicine / Remarks</th><th>Dose / Frequency</th><th>Sch</th><th>Days</th><th>Qty</th><th>Rate</th><th>Disc%</th><th style="text-align:right">Amount &#8377;</th></tr></thead><tbody>');
+    var medTotal=0;
+    meds.forEach(function(m,i){
+      if(!m.name)return;
+      var q=parseInt(m.qty)||0;
+      var s=parseFloat(m.sale)||0;
+      var d=parseFloat(m.disc)||0;
+      var a=parseFloat(m.amt||(q*s*(1-d/100)))||0;
+      medTotal+=a;
+      H.push('<tr>');
+      H.push('<td style="color:#64748b;font-weight:700">'+(i+1)+'</td>');
+      H.push('<td><div class="mn">'+m.name+'</div>'+(m.dose?'<div class="md">'+m.dose+'</div>':'')+(m.remarks?'<div class="mr">'+m.remarks+'</div>':'')+'</td>');
+      H.push('<td style="color:#185FA5;font-weight:600">'+(m.dose||'—')+'</td>');
+      H.push('<td style="text-align:center">'+(m.schedule||'OTC')+'</td>');
+      H.push('<td style="text-align:center;font-weight:700;color:#7C3AED">'+(m.days||'—')+'</td>');
+      H.push('<td style="text-align:center;font-weight:700;color:#185FA5">'+q+'</td>');
+      H.push('<td style="text-align:right">&#8377;'+s.toFixed(2)+'</td>');
+      H.push('<td style="text-align:center">'+(d||0)+'%</td>');
+      H.push('<td style="text-align:right;font-weight:700">&#8377;'+a.toFixed(2)+'</td>');
+      H.push('</tr>');
     });
-    H.push('</tbody></table>');
+    H.push('</tbody></table></div>');
   }
 
-  // Services table (regular invoices only)
+  // Services table
   if(svcs.length){
-    H.push('<div class="sh">Services</div><table><thead><tr><th>#</th><th>Service</th><th>Price</th><th>Disc%</th><th>Net</th></tr></thead><tbody>');
-    svcs.forEach(function(s,i){if(!s.name)return;
-      var p2=parseFloat(s.price||0),d2=parseFloat(s.disc||0),n=parseFloat(s.net||(p2*(1-d2/100)));
-      H.push('<tr><td>'+(i+1)+'</td><td><b>'+s.name+'</b></td><td>Rs.'+p2.toFixed(2)+'</td><td>'+(d2||'-')+'</td><td><b>Rs.'+n.toFixed(2)+'</b></td></tr>');
+    H.push('<div class="sec" style="padding-bottom:0;padding-top:10px">');
+    H.push('<div class="sl" style="color:#059669">Services</div>');
+    H.push('<table><thead><tr><th>#</th><th>Service</th><th style="text-align:right">Rate &#8377;</th><th>Disc%</th><th style="text-align:right">Amount &#8377;</th></tr></thead><tbody>');
+    svcs.forEach(function(s,i){
+      var a=parseFloat(s.amt||s.price||0);
+      H.push('<tr><td style="color:#64748b">'+(i+1)+'</td><td><div class="mn">'+s.name+'</div></td><td style="text-align:right">&#8377;'+(s.price||0)+'</td><td style="text-align:center">'+(s.disc||0)+'%</td><td style="text-align:right;font-weight:700;color:#059669">&#8377;'+a.toFixed(2)+'</td></tr>');
     });
-    H.push('</tbody></table>');
+    H.push('</tbody></table></div>');
   }
 
-  if(!isBalanceInv&&!meds.length&&!svcs.length)
-    H.push('<div style="padding:10px 16px;color:#374151"><b>Items:</b> '+(inv.desc||'-')+'</div>');
-
-  // Calculation box
-  H.push('<div class="cb">');
-  H.push('<div class="cr"><span>Invoice amount</span><span>Rs.'+invAmt.toFixed(2)+'</span></div>');
-  prevItems.forEach(function(pi){
-    H.push('<div class="cr pr"><span>Previous balance ('+pi.id+')</span><span>+ Rs.'+pi.owed.toFixed(2)+'</span></div>');
-  });
-  H.push('<div class="cr gt"><span>Grand total</span><span>Rs.'+grand.toFixed(2)+'</span></div>');
-  if(paid>0)H.push('<div class="cr pa"><span>Paid'+(inv.paymode?' ('+inv.paymode+')':'')+' </span><span>- Rs.'+paid.toFixed(2)+'</span></div>');
-  H.push('<div class="cr bd2"><span>Balance due</span><span>Rs.'+bal.toFixed(2)+'</span></div>');
+  // Total
+  H.push('<div style="padding:10px 20px;text-align:right;background:#EFF6FF;border-top:1px solid #BFDBFE">');
+  H.push('<span style="font-size:11px;color:#64748b">Grand Total &nbsp;</span>');
+  H.push('<span style="font-size:20px;font-weight:900;color:#1A3A8C">&#8377;'+totalAmt.toFixed(2)+'</span>');
   H.push('</div>');
-  H.push('<div class="ft"><span>'+cName+(S.phone?' | '+S.phone:'')+'</span><span>Authorised Signature: _______________________</span></div>');
+
+  // Footer
+  H.push('<div class="foot">');
+  H.push('<div class="next">');
+  if(nextVisit)H.push('&#128197; Next Visit: <b>'+nextVisit+'</b> &nbsp;·&nbsp; ');
+  H.push('Rx for '+rxDays+' days');
+  if(cfooter)H.push('<br><span style="font-size:10px;color:#64748b">'+cfooter+'</span>');
+  H.push('</div>');
+  H.push('<div class="sig"><div class="sig-line"></div><div class="sig-lbl">Dr. Signature &amp; Stamp</div></div>');
+  H.push('</div>');
   H.push('</div></body></html>');
 
-  // FIX 3: Open as popup modal on same page, not new tab
-  var overlay=document.getElementById('inv-modal-overlay');
-  if(overlay)overlay.parentNode.removeChild(overlay);
-  var ov=document.createElement('div');
-  ov.id='inv-modal-overlay';
-  ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;box-sizing:border-box';
-  ov.onclick=function(e){if(e.target===ov)ov.parentNode.removeChild(ov);};
-  var modal=document.createElement('div');
-  modal.style.cssText='background:#fff;border-radius:10px;width:100%;max-width:820px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);margin:auto';
-  var iframe=document.createElement('iframe');
-  iframe.style.cssText='width:100%;height:80vh;border:none;display:block';
-  iframe.srcdoc=H.join('');
-  // Print and close buttons above iframe
-  var toolbar=document.createElement('div');
-  toolbar.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#f0fdf4;border-bottom:2px solid #059669';
-  toolbar.innerHTML='<span style="font-size:14px;font-weight:700;color:#059669">'+cName+' &bull; '+invId+'</span>'+
-    '<div style="display:flex;gap:8px">'+
-    '<button onclick="document.getElementById(\'inv-modal-overlay\').querySelector(\'iframe\').contentWindow.print()" style="padding:7px 18px;background:#059669;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Print Invoice</button>'+
-    '<button onclick="document.getElementById(\'inv-modal-overlay\').parentNode.removeChild(document.getElementById(\'inv-modal-overlay\'))" style="padding:7px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:7px;font-size:12px;cursor:pointer">Close</button>'+
-    '</div>';
-  modal.appendChild(toolbar);
-  modal.appendChild(iframe);
-  ov.appendChild(modal);
-  document.body.appendChild(ov);
-}
+  }
 window.printInvoice=printInvoice;
 
 window.printInvoice=printInvoice;
@@ -14815,6 +14960,8 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
+
 
 
 
