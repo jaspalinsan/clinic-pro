@@ -4187,6 +4187,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 function showPdfPopup(html, title, color){
   var old=document.getElementById('m-pdf-popup');if(old)old.remove();
   var ov=document.createElement('div');
@@ -7235,33 +7236,20 @@ function rxLoad(id) {
 }
 
 function rxPrint(){
-  // Collect meds from Rx table
   var meds=[];
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
     function g(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value.trim():'';}
-    var nameSel=tr.querySelector('select.fin');
-    var name=g('name')||( nameSel?nameSel.value.trim():'');
+    var sel=tr.querySelector('select.fin');
+    var name=g('name')||(sel?sel.value.trim():'');
     if(!name||name==='Consultancy Fee')return;
-    meds.push({
-      name:name,
-      dose:g('dose'),
-      days:g('days'),
-      qty:g('qty')||'1',
-      remarks:g('remarks'),
-      schedule:g('schedule')||'OTC',
-      batch:g('batch'),
-      exp:g('exp')
-    });
+    meds.push({name:name,dose:g('dose'),days:g('days'),qty:g('qty')||'1',
+      remarks:g('remarks'),schedule:g('schedule')||'OTC',batch:g('batch'),exp:g('exp')});
   });
 
   var CS=window.CLINIC_SETTINGS||{};
   var cname=CS.name||'Clinic Pro';
-  var cdoc=CS.doctor||'';
-  var cqual=CS.qual||'';
-  var creg=CS.reg||'';
-  var caddr=(CS.address||'')+(CS.city?', '+CS.city:'');
-  var cphone=CS.phone||'';
-
+  var cdoc=CS.doctor||''; var cqual=CS.qual||''; var creg=CS.reg||'';
+  var caddr=(CS.address||'')+(CS.city?', '+CS.city:''); var cphone=CS.phone||'';
   var patName=(document.getElementById('rx-pat-search')||{value:''}).value||'Patient';
   var patAge=(document.getElementById('rx-pat-age')||{value:''}).value||'';
   var patMob=(document.getElementById('rx-pat-mob')||{value:''}).value||'';
@@ -7276,133 +7264,123 @@ function rxPrint(){
   var temp=(document.getElementById('rx-temp')||{value:''}).value||'';
   var spo2=(document.getElementById('rx-spo2')||{value:''}).value||'';
   var wt=(document.getElementById('rx-weight')||{value:''}).value||'';
-  var ht=(document.getElementById('rx-height')||{value:''}).value||'';
   var bmiVal=(document.getElementById('rx-bmi')||{textContent:''}).textContent||'';
   var rxNo=(document.getElementById('rx-number')||{textContent:'CD-RX-NEW'}).textContent||'CD-RX-NEW';
   var today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
   var H=[];
   H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rx '+rxNo+'</title><style>');
-  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}');
-  H.push('body{background:#fff;color:#0f172a}');
-  H.push('.page{max-width:210mm;margin:0 auto;background:#fff}');
+  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{background:#fff;color:#0f172a}.page{max-width:210mm;margin:0 auto}');
   H.push('.hdr{background:linear-gradient(135deg,#1A3A8C,#2d5db5);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}');
-  H.push('.cn{color:#fff;font-size:17px;font-weight:800;letter-spacing:.3px}');
-  H.push('.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
-  H.push('.rxsym{color:#fff;text-align:right}');
-  H.push('.rxbig{font-size:36px;font-weight:900;font-style:italic;line-height:1;letter-spacing:2px}');
-  H.push('.rxno{font-size:10px;opacity:.75;margin-top:2px;letter-spacing:.5px}');
-  H.push('.pat{background:#EFF6FF;border-bottom:2px solid #1A3A8C;padding:8px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px}');
-  H.push('.pf .pl{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.4px}');
-  H.push('.pf .pv{font-size:12px;font-weight:700;color:#0f172a;margin-top:1px}');
+  H.push('.cn{color:#fff;font-size:18px;font-weight:800;letter-spacing:.3px}.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
+  H.push('.rxsym{color:#fff;text-align:right}.rxbig{font-size:38px;font-weight:900;font-style:italic;line-height:1;letter-spacing:2px}.rxno{font-size:10px;opacity:.75;margin-top:2px}');
+  H.push('.pat{background:#EFF6FF;border-bottom:2px solid #1A3A8C;padding:9px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}');
+  H.push('.pl{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.4px}.pv{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px}');
   H.push('.info{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #e2e8f0}');
-  H.push('.ib{padding:7px 14px;border-right:1px solid #e2e8f0;font-size:11px}');
-  H.push('.ib:last-child{border-right:none}');
-  H.push('.il{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px}');
-  H.push('.iv{font-size:12px;font-weight:700;color:#0f172a;margin-top:2px}');
+  H.push('.ib{padding:7px 14px;border-right:1px solid #e2e8f0}.ib:last-child{border-right:none}');
+  H.push('.il{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px}.iv{font-size:12px;font-weight:700;color:#0f172a;margin-top:2px}');
   H.push('.vita{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:8px 20px;border-bottom:1px solid #e2e8f0}');
-  H.push('.vb{background:#f0f7ff;border:1px solid #BFDBFE;border-radius:5px;padding:4px 6px;text-align:center}');
-  H.push('.vl{font-size:8px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.3px}');
-  H.push('.vv{font-size:13px;font-weight:900;color:#1A3A8C}');
-  H.push('.vu{font-size:8px;color:#94a3b8}');
+  H.push('.vb{background:#f0f7ff;border:1px solid #BFDBFE;border-radius:6px;padding:5px 6px;text-align:center}');
+  H.push('.vl{font-size:8px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.3px}.vv{font-size:14px;font-weight:900;color:#1A3A8C}.vu{font-size:8px;color:#94a3b8}');
   H.push('.sec{padding:10px 20px;border-bottom:1px solid #e2e8f0}');
-  H.push('.st{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:flex;align-items:center;gap:5px}');
-  H.push('.st::before{content:"";display:inline-block;width:3px;height:11px;background:#185FA5;border-radius:2px}');
-  H.push('.diagbox{background:#f0f7ff;border-left:3px solid #1A3A8C;padding:7px 12px;border-radius:0 6px 6px 0;font-size:13px;font-weight:700;color:#1A3A8C}');
-  H.push('.meds{padding:10px 20px;border-bottom:1px solid #e2e8f0}');
-  H.push('.med{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed #f1f5f9;align-items:flex-start}');
-  H.push('.med:last-child{border-bottom:none}');
-  H.push('.num{width:22px;height:22px;background:#1A3A8C;color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}');
-  H.push('.mn{font-size:13px;font-weight:700;color:#0f172a}');
-  H.push('.md{font-size:11px;font-weight:700;color:#185FA5;margin-top:2px}');
-  H.push('.mdays{color:#7C3AED;font-weight:700}');
-  H.push('.mr{font-size:10px;color:#94a3b8;font-style:italic;margin-top:1px}');
-  H.push('.sch{display:inline-block;padding:1px 6px;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:10px;font-size:9px;font-weight:700;color:#185FA5;margin-left:6px}');
-  H.push('.advice{padding:8px 20px;background:#f0fdf4;border-bottom:1px solid #bbf7d0}');
-  H.push('.at{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}');
+  H.push('.st{font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}');
+  H.push('.st::before{content:"";display:inline-block;width:3px;height:12px;background:#185FA5;border-radius:2px}');
+  H.push('.diagbox{background:#f0f7ff;border-left:4px solid #1A3A8C;padding:8px 14px;border-radius:0 7px 7px 0;font-size:14px;font-weight:700;color:#1A3A8C}');
+  H.push('.meds{padding:12px 20px;border-bottom:1px solid #e2e8f0}');
+  H.push('.med{display:flex;gap:12px;padding:8px 0;border-bottom:1px dashed #f1f5f9;align-items:flex-start}.med:last-child{border-bottom:none}');
+  H.push('.num{width:24px;height:24px;background:#1A3A8C;color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}');
+  H.push('.mn{font-size:14px;font-weight:700;color:#0f172a}');
+  H.push('.sch{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700;margin-left:6px;background:#EFF6FF;border:0.5px solid #BFDBFE;color:#185FA5}');
+  H.push('.schH{background:#FEF2F2;border-color:#FECACA;color:#DC2626}');
+  H.push('.schH1{background:#FEF3C7;border-color:#FDE68A;color:#92400E}');
+  H.push('.schX{background:#FEF2F2;border-color:#FCA5A5;color:#991B1B}');
+  H.push('.md{font-size:11px;font-weight:700;color:#185FA5;margin-top:3px}');
+  H.push('.mdays{color:#7C3AED;font-weight:800}');
+  H.push('.mqty{color:#185FA5;font-weight:800}');
+  H.push('.mr{font-size:10px;color:#94a3b8;font-style:italic;margin-top:2px}');
+  H.push('.mbatch{font-size:10px;color:#64748b;margin-top:1px}');
+  H.push('.advice{padding:9px 20px;background:#f0fdf4;border-bottom:1px solid #bbf7d0}');
+  H.push('.at{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}');
   H.push('.achips{display:flex;gap:6px;flex-wrap:wrap}');
-  H.push('.ac{font-size:10px;color:#065f46;background:#fff;border:0.5px solid #bbf7d0;border-radius:12px;padding:2px 8px}');
-  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 20px;border-top:2px solid #1A3A8C;background:#f8faff}');
-  H.push('.next{font-size:11px;color:#185FA5;font-weight:600}');
-  H.push('.sig-line{border-top:1.5px solid #1A3A8C;width:110px;margin:0 0 3px auto}');
-  H.push('.sig-t{font-size:10px;color:#64748b;text-align:right}');
-  H.push('@media print{@page{size:A4;margin:8mm}body{margin:0}}');
-  H.push('</style></head><body><div class="page">');
+  H.push('.ac{font-size:10px;color:#065f46;background:#fff;border:0.5px solid #bbf7d0;border-radius:12px;padding:2px 9px}');
+  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:11px 20px;border-top:2px solid #1A3A8C;background:#f8faff}');
+  H.push('.next{font-size:11px;color:#185FA5;font-weight:600}.sig-line{border-top:1.5px solid #1A3A8C;width:120px;margin:0 0 4px auto}.sig-t{font-size:10px;color:#64748b;text-align:right}');
+  H.push('@media print{@page{size:A4;margin:8mm}body{margin:0}}</style></head><body><div class="page">');
 
-  // Header
+  // HEADER
   H.push('<div class="hdr"><div><div class="cn">'+cname+'</div>');
-  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' \u00b7 '+cqual:'')+(creg?' \u00b7 Reg: '+creg:''):'')+( caddr?' \u00b7 '+caddr:'')+( cphone?' \u00b7 '+cphone:'')+'</div></div>');
-  H.push('<div class="rxsym"><div class="rxbig">&#8478;</div><div class="rxno">'+rxNo+' \u00b7 '+today.toUpperCase()+'</div></div></div>');
+  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' · '+cqual:'')+(creg?' · Reg: '+creg:''):'')+( caddr?' · '+caddr:'')+( cphone?' · '+cphone:'')+'</div></div>');
+  H.push('<div class="rxsym"><div class="rxbig">℞</div><div class="rxno">'+rxNo+' · '+today.toUpperCase()+'</div></div></div>');
 
-  // Patient
+  // PATIENT BAR
   H.push('<div class="pat">');
-  H.push('<div class="pf"><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
-  H.push('<div class="pf"><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'\u2014')+'</div></div>');
-  H.push('<div class="pf"><div class="pl">Mobile</div><div class="pv">'+(patMob||'\u2014')+'</div></div>');
-  H.push('<div class="pf"><div class="pl">City</div><div class="pv">'+(patCity||'\u2014')+'</div></div>');
+  H.push('<div><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
+  H.push('<div><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'—')+'</div></div>');
+  H.push('<div><div class="pl">Mobile</div><div class="pv">'+(patMob||'—')+'</div></div>');
+  H.push('<div><div class="pl">City</div><div class="pv">'+(patCity||'—')+'</div></div>');
   H.push('</div>');
 
-  // Info bar
+  // INFO BAND
   H.push('<div class="info">');
-  H.push('<div class="ib"><div class="il">Chief Complaints</div><div class="iv">'+(complaints||'\u2014')+'</div></div>');
-  H.push('<div class="ib"><div class="il">Mode / Rx Days</div><div class="iv">'+mode+' \u00b7 '+rxDays+' days</div></div>');
-  H.push('<div class="ib"><div class="il">Next Visit</div><div class="iv" style="color:#059669">'+(nextVisit||'\u2014')+'</div></div>');
+  H.push('<div class="ib"><div class="il">Chief Complaints</div><div class="iv">'+(complaints||'—')+'</div></div>');
+  H.push('<div class="ib"><div class="il">Mode / Rx Days</div><div class="iv">'+mode+' · '+rxDays+' days</div></div>');
+  H.push('<div class="ib"><div class="il">Next Visit</div><div class="iv" style="color:#059669">'+(nextVisit||'—')+'</div></div>');
   H.push('</div>');
 
-  // Vitals
-  if(bp||pulse||temp||spo2||wt){
+  // VITALS
+  var hasVitals=bp||pulse||temp||spo2||wt;
+  if(hasVitals){
     H.push('<div class="vita">');
     if(bp)H.push('<div class="vb"><div class="vl">BP</div><div class="vv">'+bp+'</div><div class="vu">mmHg</div></div>');
     if(pulse)H.push('<div class="vb"><div class="vl">Pulse</div><div class="vv">'+pulse+'</div><div class="vu">bpm</div></div>');
-    if(temp)H.push('<div class="vb"><div class="vl">Temp</div><div class="vv">'+temp+'</div><div class="vu">\u00b0F</div></div>');
+    if(temp)H.push('<div class="vb"><div class="vl">Temp</div><div class="vv">'+temp+'</div><div class="vu">°F</div></div>');
     if(spo2)H.push('<div class="vb"><div class="vl">SpO2</div><div class="vv">'+spo2+'</div><div class="vu">%</div></div>');
     if(wt)H.push('<div class="vb"><div class="vl">Wt</div><div class="vv">'+wt+'</div><div class="vu">kg</div></div>');
-    if(bmiVal&&bmiVal!=='\u2014')H.push('<div class="vb" style="background:#fffbeb;border-color:#fde68a"><div class="vl" style="color:#854F0B">BMI</div><div class="vv" style="color:#854F0B">'+bmiVal+'</div><div class="vu">auto</div></div>');
+    if(bmiVal&&bmiVal!=='—')H.push('<div class="vb" style="background:#fffbeb;border-color:#fde68a"><div class="vl" style="color:#854F0B">BMI</div><div class="vv" style="color:#854F0B">'+bmiVal+'</div><div class="vu">auto</div></div>');
     H.push('</div>');
   }
 
-  // Diagnosis
+  // DIAGNOSIS
   if(diagnosis){
-    H.push('<div class="sec"><div class="st">Diagnosis</div>');
-    H.push('<div class="diagbox">'+diagnosis+'</div></div>');
+    H.push('<div class="sec"><div class="st">Diagnosis</div><div class="diagbox">'+diagnosis+'</div></div>');
   }
 
-  // Medications — NO PRICE
+  // MEDICATIONS — clinical card list, NO price
   if(meds.length){
     H.push('<div class="meds"><div class="st">Medications</div>');
     meds.forEach(function(m,i){
-      var schColor=m.schedule==='H'||m.schedule==='GH'||m.schedule==='G&H'?'background:#FEF2F2;border-color:#FECACA;color:#DC2626':
-                   m.schedule==='H1'?'background:#FEF3C7;border-color:#FDE68A;color:#92400E':
-                   m.schedule==='X'?'background:#FEF2F2;border-color:#FCA5A5;color:#991B1B':'';
+      var schCls=m.schedule==='H'||m.schedule==='GH'?'schH':m.schedule==='H1'?'schH1':m.schedule==='X'?'schX':'';
       H.push('<div class="med">');
       H.push('<div class="num">'+(i+1)+'</div>');
-      H.push('<div><div class="mn">'+m.name+'<span class="sch" style="'+schColor+'">'+m.schedule+'</span></div>');
-      H.push('<div class="md">'+( m.dose||'As directed')+' &nbsp;&middot;&nbsp; <span class="mdays">'+(m.days||rxDays)+' days &nbsp;&middot;&nbsp; Qty: '+m.qty+'</span></div>');
+      H.push('<div style="flex:1">');
+      H.push('<div class="mn">'+m.name+'<span class="sch '+schCls+'">'+( m.schedule||'OTC')+'</span></div>');
+      H.push('<div class="md">'+(m.dose||'As directed')+' &nbsp;·&nbsp; <span class="mdays">'+(m.days||rxDays)+' days</span> &nbsp;·&nbsp; Qty: <span class="mqty">'+(m.qty||'1')+'</span></div>');
+      if(m.batch||m.exp)H.push('<div class="mbatch">Batch: '+(m.batch||'—')+' &nbsp;·&nbsp; Exp: '+(m.exp||'—')+'</div>');
       if(m.remarks)H.push('<div class="mr">'+m.remarks+'</div>');
       H.push('</div></div>');
     });
     H.push('</div>');
   }
 
-  // General advice
-  H.push('<div class="advice"><div class="at">General Advice</div>');
-  H.push('<div class="achips">');
-  H.push('<span class="ac">\uD83D\uDCA7 Drink plenty of water</span>');
-  H.push('<span class="ac">\uD83C\uDF5A Light diet</span>');
-  H.push('<span class="ac">\uD83D\uDE34 Complete rest</span>');
-  H.push('<span class="ac">\uD83C\uDF21 Monitor temperature</span>');
-  H.push('<span class="ac">\uD83D\uDEAB Avoid cold food/drinks</span>');
+  // GENERAL ADVICE
+  H.push('<div class="advice"><div class="at">General Advice</div><div class="achips">');
+  H.push('<span class="ac">💧 Drink plenty of water</span>');
+  H.push('<span class="ac">🍚 Light diet</span>');
+  H.push('<span class="ac">😴 Complete rest</span>');
+  H.push('<span class="ac">🌡 Monitor temperature</span>');
+  H.push('<span class="ac">🚫 Avoid cold food/drinks</span>');
   H.push('</div></div>');
 
-  // Footer
+  // FOOTER
   H.push('<div class="foot">');
-  H.push('<div class="next">\uD83D\uDCC5 Next Visit: <b>'+(nextVisit||'\u2014')+'</b> &nbsp;&middot;&nbsp; Rx for '+rxDays+' days</div>');
+  H.push('<div class="next">📅 Next Visit: <b>'+(nextVisit||'—')+'</b> &nbsp;·&nbsp; Rx for '+rxDays+' days</div>');
   H.push('<div><div class="sig-line"></div><div class="sig-t">Dr. Signature &amp; Stamp</div></div>');
   H.push('</div></div></body></html>');
 
-  // Show popup
-  showPdfPopup(H.join(''),'&#8478; Prescription Preview','#1A3A8C');
+  showPdfPopup(H.join(''), '℞ Prescription — '+rxNo, '#1A3A8C');
 }
+window.rxPrint=rxPrint;
+
 window.rxPrint=rxPrint;
 
 window.rxPrint=rxPrint;
@@ -14660,19 +14638,12 @@ function printInvoice(invId){
 
   var CS=window.CLINIC_SETTINGS||{};
   var cname=CS.name||'Clinic Pro';
-  var cdoc=CS.doctor||'';
-  var cqual=CS.qual||'';
-  var creg=CS.reg||'';
-  var caddr=(CS.address||'')+(CS.city?', '+CS.city:'');
-  var cphone=CS.phone||'';
-
+  var cdoc=CS.doctor||''; var cqual=CS.qual||''; var creg=CS.reg||'';
+  var caddr=(CS.address||'')+(CS.city?', '+CS.city:''); var cphone=CS.phone||'';
   var patName=inv.patient||inv.name||'';
-  var patAge=inv.age||'';
-  var patMob=inv.mobile||inv.mob||'';
-  var patCity=inv.city||'';
+  var patAge=inv.age||''; var patMob=inv.mobile||inv.mob||''; var patCity=inv.city||'';
   var invDate=inv.date||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   var invNo=inv.id||invId;
-  var rxDays=(document.getElementById('rx-days')||{value:'5'}).value||'5';
   var nextVisit=(document.getElementById('rx-next-visit')||{textContent:''}).textContent||'';
   var mode=(document.getElementById('rx-mode')||{value:'OPD'}).value||'OPD';
 
@@ -14682,112 +14653,113 @@ function printInvoice(invId){
 
   var H=[];
   H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice '+invNo+'</title><style>');
-  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}');
-  H.push('body{background:#fff;color:#0f172a}');
-  H.push('.page{max-width:210mm;margin:0 auto;background:#fff}');
+  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{background:#fff;color:#0f172a}.page{max-width:210mm;margin:0 auto}');
   H.push('.hdr{background:linear-gradient(135deg,#059669,#0d7a5a);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}');
-  H.push('.cn{color:#fff;font-size:17px;font-weight:800}');
-  H.push('.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
-  H.push('.right{color:#fff;text-align:right}');
-  H.push('.rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.8}');
-  H.push('.rno{font-size:20px;font-weight:900;letter-spacing:.5px}');
-  H.push('.rdate{font-size:10px;opacity:.75;margin-top:2px}');
-  H.push('.pat{background:#F0FDF4;border-bottom:2px solid #059669;padding:8px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px}');
-  H.push('.pf .pl{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.4px}');
-  H.push('.pf .pv{font-size:12px;font-weight:700;color:#0f172a;margin-top:1px}');
+  H.push('.cn{color:#fff;font-size:18px;font-weight:800}.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
+  H.push('.right{color:#fff;text-align:right}.rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.8}');
+  H.push('.rno{font-size:20px;font-weight:900;letter-spacing:.5px}.rdate{font-size:10px;opacity:.75;margin-top:2px}');
+  H.push('.pat{background:#F0FDF4;border-bottom:2px solid #059669;padding:9px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}');
+  H.push('.pl{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.4px}.pv{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px}');
   H.push('.sec{padding:10px 20px 0}');
   H.push('.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}');
-  H.push('.st::before{content:"";display:inline-block;width:3px;height:11px;border-radius:2px}');
-  H.push('.st.grn{color:#059669}.st.grn::before{background:#059669}');
-  H.push('.st.blu{color:#185FA5}.st.blu::before{background:#185FA5}');
-  H.push('table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:4px}');
-  H.push('th{background:#f0fdf4;border:1px solid #d1fae5;padding:5px 8px;font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.3px;text-align:left}');
-  H.push('th.blu{background:#f0f7ff;border-color:#BFDBFE;color:#185FA5}');
+  H.push('.st::before{content:"";display:inline-block;width:3px;height:12px;border-radius:2px}');
+  H.push('.grn{color:#059669}.grn::before{background:#059669}');
+  H.push('.blu{color:#185FA5}.blu::before{background:#185FA5}');
+  H.push('table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:2px}');
+  H.push('th{border:1px solid #d1fae5;padding:6px 8px;font-size:9px;font-weight:700;color:#059669;text-align:left;text-transform:uppercase;letter-spacing:.3px;background:#f0fdf4}');
+  H.push('th.b{border-color:#BFDBFE;color:#185FA5;background:#f0f7ff}');
   H.push('td{border:1px solid #e5e7eb;padding:6px 8px;vertical-align:top}');
   H.push('tr:nth-child(even) td{background:#f8fffe}');
-  H.push('.mn{font-weight:700;font-size:12px;color:#0f172a}');
+  H.push('.mn{font-size:12px;font-weight:700;color:#0f172a}');
   H.push('.md{font-size:10px;color:#185FA5;font-weight:600;margin-top:1px}');
   H.push('.mr{font-size:10px;color:#94a3b8;font-style:italic}');
-  H.push('.tot{padding:10px 20px;display:flex;justify-content:flex-end;gap:20px;background:#F0FDF4;border-top:1px solid #d1fae5;margin-top:10px}');
-  H.push('.ti .tl{font-size:10px;color:#64748b;font-weight:600;text-align:right}');
-  H.push('.ti .tv{font-size:14px;font-weight:800;color:#059669;text-align:right}');
-  H.push('.ti .grand{font-size:22px!important;color:#065f46!important}');
-  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 20px;border-top:2px solid #059669;background:#fafafa}');
+  H.push('.tot{padding:10px 20px;display:flex;justify-content:flex-end;gap:24px;background:#F0FDF4;border-top:1px solid #d1fae5;margin-top:10px}');
+  H.push('.titem .tl{font-size:10px;color:#64748b;font-weight:600;text-align:right}.titem .tv{font-size:14px;font-weight:800;color:#059669;text-align:right;margin-top:1px}');
+  H.push('.grand .tv{font-size:22px!important;color:#065f46!important}');
+  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:11px 20px;border-top:2px solid #059669;background:#fafafa}');
   H.push('.fnext{font-size:11px;color:#059669;font-weight:600}');
   H.push('.stamp{display:inline-block;background:#F0FDF4;border:1px dashed #059669;border-radius:6px;padding:4px 12px;font-size:10px;font-weight:700;color:#059669;margin-top:5px}');
-  H.push('.sig-line{border-top:1.5px solid #059669;width:110px;margin:0 0 3px auto}');
-  H.push('.sig-t{font-size:10px;color:#64748b;text-align:right}');
-  H.push('@media print{@page{size:A4;margin:8mm}body{margin:0}}');
-  H.push('</style></head><body><div class="page">');
+  H.push('.sig-line{border-top:1.5px solid #059669;width:120px;margin:0 0 4px auto}.sig-t{font-size:10px;color:#64748b;text-align:right}');
+  H.push('@media print{@page{size:A4;margin:8mm}body{margin:0}}</style></head><body><div class="page">');
 
-  // Header
+  // HEADER
   H.push('<div class="hdr"><div><div class="cn">'+cname+'</div>');
-  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' \u00b7 '+cqual:'')+(creg?' \u00b7 Reg: '+creg:''):'')+( caddr?' \u00b7 '+caddr:'')+( cphone?' \u00b7 '+cphone:'')+'</div></div>');
+  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' · '+cqual:'')+(creg?' · Reg: '+creg:''):'')+( caddr?' · '+caddr:'')+( cphone?' · '+cphone:'')+'</div></div>');
   H.push('<div class="right"><div class="rlbl">Tax Invoice</div><div class="rno">'+invNo+'</div><div class="rdate">'+invDate+'</div></div></div>');
 
-  // Patient
+  // PATIENT
   H.push('<div class="pat">');
-  H.push('<div class="pf"><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
-  H.push('<div class="pf"><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'\u2014')+'</div></div>');
-  H.push('<div class="pf"><div class="pl">Mobile</div><div class="pv">'+(patMob||'\u2014')+'</div></div>');
-  H.push('<div class="pf"><div class="pl">City</div><div class="pv">'+(patCity||'\u2014')+'</div></div>');
+  H.push('<div><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
+  H.push('<div><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'—')+'</div></div>');
+  H.push('<div><div class="pl">Mobile</div><div class="pv">'+(patMob||'—')+'</div></div>');
+  H.push('<div><div class="pl">City</div><div class="pv">'+(patCity||'—')+'</div></div>');
   H.push('</div>');
 
-  // Medicines table
+  // MEDICINES TABLE — with Batch + Expiry + Price
   if(meds.length){
     H.push('<div class="sec"><div class="st grn">Medicines</div>');
-    H.push('<table><thead><tr><th>#</th><th>Medicine / Remarks</th><th>Dose / Freq</th><th>Sch</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate \u20b9</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
+    H.push('<table><thead><tr>');
+    H.push('<th>#</th><th>Medicine</th><th>Dose / Freq</th><th>Sch</th><th>Batch</th><th>Exp</th>');
+    H.push('<th style="text-align:center">Qty</th><th style="text-align:right">Rate ₹</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amt ₹</th>');
+    H.push('</tr></thead><tbody>');
     meds.forEach(function(m,i){
       var q=parseInt(m.qty)||0;
       var s=parseFloat(m.sale)||0;
       var d=parseFloat(m.disc)||0;
       var a=parseFloat(m.amt||(q*s*(1-d/100)))||0;
       H.push('<tr>');
-      H.push('<td style="color:#64748b;font-weight:700">'+(i+1)+'</td>');
-      H.push('<td><div class="mn">'+m.name+'</div>'+(m.dose?'<div class="md">'+m.dose+'</div>':'')+(m.remarks?'<div class="mr">'+m.remarks+'</div>':'')+'</td>');
-      H.push('<td style="color:#185FA5;font-weight:600">'+(m.dose||'\u2014')+'</td>');
+      H.push('<td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
+      H.push('<td><div class="mn">'+m.name+'</div>'+(m.remarks?'<div class="mr">'+m.remarks+'</div>':'')+'</td>');
+      H.push('<td><div class="md">'+(m.dose||'—')+'</div></td>');
       H.push('<td style="text-align:center;font-weight:700;font-size:10px">'+(m.schedule||'OTC')+'</td>');
+      H.push('<td style="font-size:10px;color:#64748b">'+(m.batch||'—')+'</td>');
+      H.push('<td style="font-size:10px;color:#64748b;text-align:center">'+(m.exp||'—')+'</td>');
       H.push('<td style="text-align:center;font-weight:800;color:#185FA5">'+q+'</td>');
-      H.push('<td style="text-align:right">\u20b9'+s.toFixed(2)+'</td>');
+      H.push('<td style="text-align:right">₹'+s.toFixed(2)+'</td>');
       H.push('<td style="text-align:center">'+(d||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700">\u20b9'+a.toFixed(2)+'</td>');
+      H.push('<td style="text-align:right;font-weight:700">₹'+a.toFixed(2)+'</td>');
       H.push('</tr>');
     });
     H.push('</tbody></table></div>');
   }
 
-  // Services table
+  // SERVICES TABLE
   if(svcs.length){
     H.push('<div class="sec" style="margin-top:10px"><div class="st blu">Services &amp; Consultation</div>');
-    H.push('<table><thead><tr><th class="blu">#</th><th class="blu">Service / Description</th><th class="blu" style="text-align:right">Rate \u20b9</th><th class="blu" style="text-align:center">Disc%</th><th class="blu" style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
+    H.push('<table><thead><tr>');
+    H.push('<th class="b">#</th><th class="b">Service / Description</th><th class="b" style="text-align:right">Rate ₹</th><th class="b" style="text-align:center">Disc%</th><th class="b" style="text-align:right">Amt ₹</th>');
+    H.push('</tr></thead><tbody>');
     svcs.forEach(function(s,i){
       var a=parseFloat(s.amt||s.price||0);
-      H.push('<tr><td style="color:#64748b;font-weight:700">'+(i+1)+'</td>');
+      H.push('<tr>');
+      H.push('<td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
       H.push('<td><div class="mn">'+s.name+'</div>'+(s.desc?'<div class="md">'+s.desc+'</div>':'')+'</td>');
-      H.push('<td style="text-align:right">\u20b9'+(parseFloat(s.price||0)).toFixed(2)+'</td>');
+      H.push('<td style="text-align:right">₹'+(parseFloat(s.price||0)).toFixed(2)+'</td>');
       H.push('<td style="text-align:center">'+(s.disc||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700;color:#059669">\u20b9'+a.toFixed(2)+'</td>');
+      H.push('<td style="text-align:right;font-weight:700;color:#059669">₹'+a.toFixed(2)+'</td>');
       H.push('</tr>');
     });
     H.push('</tbody></table></div>');
   }
 
-  // Totals
+  // TOTALS
   H.push('<div class="tot">');
-  if(meds.length)H.push('<div class="ti"><div class="tl">Medicines</div><div class="tv">\u20b9'+medTotal.toFixed(2)+'</div></div>');
-  if(svcs.length)H.push('<div class="ti"><div class="tl">Services</div><div class="tv" style="color:#185FA5">\u20b9'+svcTotal.toFixed(2)+'</div></div>');
-  H.push('<div class="ti"><div class="tl">Grand Total</div><div class="tv grand">\u20b9'+grandTotal.toFixed(2)+'</div></div>');
+  if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">₹'+medTotal.toFixed(2)+'</div></div>');
+  if(svcs.length)H.push('<div class="titem"><div class="tl">Services</div><div class="tv" style="color:#185FA5">₹'+svcTotal.toFixed(2)+'</div></div>');
+  H.push('<div class="titem grand"><div class="tl">Grand Total</div><div class="tv">₹'+grandTotal.toFixed(2)+'</div></div>');
   H.push('</div>');
 
-  // Footer
+  // FOOTER
   H.push('<div class="foot"><div>');
-  if(nextVisit)H.push('<div class="fnext">\uD83D\uDCC5 Next Visit: <b>'+nextVisit+'</b> &nbsp;\u00b7&nbsp; '+mode+'</div>');
-  H.push('<div class="stamp">\u2713 PAID</div>');
+  if(nextVisit)H.push('<div class="fnext">📅 Next Visit: <b>'+nextVisit+'</b> &nbsp;·&nbsp; '+mode+'</div>');
+  H.push('<div class="stamp">✓ PAID</div>');
   H.push('</div><div><div class="sig-line"></div><div class="sig-t">Authorised Signature</div></div></div>');
   H.push('</div></body></html>');
 
-  showPdfPopup(H.join(''),'Tax Invoice \u2014 '+invNo,'#059669');
+  showPdfPopup(H.join(''), 'Tax Invoice — '+invNo, '#059669');
 }
+window.printInvoice=printInvoice;
+
 window.printInvoice=printInvoice;
 
 window.printInvoice=printInvoice;
@@ -14982,6 +14954,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
