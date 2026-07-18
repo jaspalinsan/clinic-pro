@@ -627,174 +627,158 @@ html,body{height:100%;overflow:hidden}
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
     </div>
-    <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2);background:var(--sl)">
-      <div class="flbl" style="margin-bottom:4px;display:flex;align-items:center;gap:5px">
-        <i class="ti ti-history" style="font-size:13px;color:#6366F1"></i>
-        Old History &amp; Notes
-        <span style="font-size:10px;color:var(--ink3)">(allergies, chronic conditions, surgeries...)</span>
+    
+  <!-- ════ CHIEF COMPLAINTS ════ -->
+  <div style="border:0.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#E6F1FB;border-bottom:1.5px solid #BFDBFE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-stethoscope" style="font-size:15px;color:#185FA5"></i>Chief Complaints / Symptoms</div><span style="cursor:pointer;font-size:10px;font-weight:700;color:#DC2626;border:1px solid #FECACA;background:#FEF2F2;border-radius:6px;padding:3px 9px;text-decoration:none;display:inline-block" onclick="clearRxSyms()">Clear all</span></div>
+    <div style="padding:10px 16px;background:#fff">
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px" id="rx-sym-chips">
+        <button class="tb" onclick="addRxSym('Fever')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Fever</button>
+        <button class="tb" onclick="addRxSym('Cough')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Cough</button>
+        <button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Cold</button>
+        <button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Sore Throat</button>
+        <button class="tb" onclick="addRxSym('Headache')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Headache</button>
+        <button class="tb" onclick="addRxSym('Body Ache')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Body Ache</button>
+        <button class="tb" onclick="addRxSym('Vomiting')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Vomiting</button>
+        <button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Diarrhoea</button>
+        <button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Chest Pain</button>
+        <button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Breathlessness</button>
+        <button class="tb" onclick="addRxSym('Weakness')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Weakness</button>
+        <button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Abdominal Pain</button>
+        <button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Burning Urine</button>
+        <button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #BFDBFE;background:#EFF6FF;color:#185FA5">Skin Rash</button>
       </div>
-      <textarea class="fin" id="rx-old-history" rows="2" style="resize:vertical;font-size:12px;background:#fff" placeholder="e.g. HTN since 5 yrs, DM Type 2, allergic to Penicillin, appendix surgery 2019..."></textarea>
+      <textarea class="fin" id="rx-symptoms" rows="2" placeholder="Type or click chips above to add complaints..." style="width:100%;resize:vertical;font-size:12px"></textarea>
     </div>
-    <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2)">
-      <div class="flbl" style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
-        <span style="display:flex;align-items:center;gap:5px"><i class="ti ti-stethoscope" style="font-size:13px;color:#0891B2"></i>Chief Complaints / Symptoms</span>
-        <button class="tb" onclick="clearRxSyms()" style="font-size:10px;color:var(--rose);border-color:var(--rose)"><i class="ti ti-x"></i> Clear all</button>
+  </div>
+
+  <!-- ════ HISTORY ════ -->
+  <div style="border:0.5px solid #FDE68A;border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#FFFBEB;border-bottom:1.5px solid #FDE68A;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#633806;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-clock-history" style="font-size:15px;color:#854F0B"></i>Patient History</div><span style="font-size:10px;font-weight:700;background:#FEF3C7;color:#633806;border:0.5px solid #FDE68A;border-radius:20px;padding:2px 8px">Past Records</span></div>
+    <div style="padding:10px 16px;background:#fff">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Past Illness</div>
+          <input class="fin" id="rx-past-illness" placeholder="HTN, DM, Asthma..." style="width:100%;border-color:#FDE68A">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Allergies</div>
+          <input class="fin" id="rx-allergies" placeholder="Penicillin, Sulfa..." style="width:100%;border-color:#FDE68A">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Family History</div>
+          <input class="fin" id="rx-family-history" placeholder="DM, HTN in family..." style="width:100%;border-color:#FDE68A">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#854F0B;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Current Medications</div>
+          <input class="fin" id="rx-current-meds" placeholder="Metformin 500mg..." style="width:100%;border-color:#FDE68A">
+        </div>
       </div>
+      <textarea class="fin" id="rx-old-history" rows="2" placeholder="Additional history, surgical history, social history..." style="width:100%;resize:vertical;font-size:12px;border-color:#FDE68A"></textarea>
+    </div>
+  </div>
+
+  <!-- ════ VITALS ════ -->
+  <div style="border:0.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#E6F1FB;border-bottom:1.5px solid #BFDBFE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-activity-heartbeat" style="font-size:15px;color:#185FA5"></i>Vitals</div><span style="font-size:10px;font-weight:700;background:#EFF6FF;color:#0C447C;border:0.5px solid #BFDBFE;border-radius:20px;padding:2px 8px">Auto-saved</span></div>
+    <div style="padding:10px 16px;background:#fff">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">BP (mmHg)</div>
+          <input class="fin" id="rx-bp" placeholder="120/80" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">systolic/diastolic</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Pulse</div>
+          <input class="fin" id="rx-pulse" type="number" placeholder="72" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">beats/min</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Temp</div>
+          <input class="fin" id="rx-temp" type="number" placeholder="98.6" step="0.1" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">°F</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">SpO2</div>
+          <input class="fin" id="rx-spo2" type="number" placeholder="98" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">%</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Weight</div>
+          <input class="fin" id="rx-weight" type="number" placeholder="65" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">kg</div>
+        </div>
+        <div style="background:#f8faff;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">RR</div>
+          <input class="fin" id="rx-rr" type="number" placeholder="16" style="border:none;background:none;font-size:15px;font-weight:800;color:#185FA5;text-align:center;width:100%;padding:0">
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px">breaths/min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ DIAGNOSIS ════ -->
+  <div style="border:0.5px solid #DDD6FE;border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#EEEDFE;border-bottom:1.5px solid #DDD6FE;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#3C3489;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-microscope" style="font-size:15px;color:#534AB7"></i>Diagnosis / Impression</div><span style="cursor:pointer;font-size:10px;font-weight:700;color:#3C3489;border:1px solid #DDD6FE;background:#EEEDFE;border-radius:6px;padding:3px 9px;display:inline-block" onclick="document.getElementById('rx-diagnosis').value=''">Clear</span></div>
+    <div style="padding:10px 16px;background:#fff">
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
-        <button class="tb" onclick="addRxSym('Fever')" style="font-size:10px;padding:3px 8px">🌡 Fever</button>
-        <button class="tb" onclick="addRxSym('Cough')" style="font-size:10px;padding:3px 8px">🤧 Cough</button>
-        <button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:10px;padding:3px 8px">🤧 Cold</button>
-        <button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:10px;padding:3px 8px">😮 Sore Throat</button>
-        <button class="tb" onclick="addRxSym('Headache')" style="font-size:10px;padding:3px 8px">🤕 Headache</button>
-        <button class="tb" onclick="addRxSym('Body Pain')" style="font-size:10px;padding:3px 8px">💢 Body Pain</button>
-        <button class="tb" onclick="addRxSym('Nausea')" style="font-size:10px;padding:3px 8px">🤢 Nausea</button>
-        <button class="tb" onclick="addRxSym('Vomiting')" style="font-size:10px;padding:3px 8px">Vomiting</button>
-        <button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:10px;padding:3px 8px">Diarrhoea</button>
-        <button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:10px;padding:3px 8px">Abdomen Pain</button>
-        <button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:10px;padding:3px 8px">❤️ Chest Pain</button>
-        <button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:10px;padding:3px 8px">Breathlessness</button>
-        <button class="tb" onclick="addRxSym('Fatigue')" style="font-size:10px;padding:3px 8px">😴 Fatigue</button>
-        <button class="tb" onclick="addRxSym('Dizziness')" style="font-size:10px;padding:3px 8px">Dizziness</button>
-        <button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:10px;padding:3px 8px">Skin Rash</button>
-        <button class="tb" onclick="addRxSym('Joint Pain')" style="font-size:10px;padding:3px 8px">Joint Pain</button>
-        <button class="tb" onclick="addRxSym('Back Pain')" style="font-size:10px;padding:3px 8px">Back Pain</button>
-        <button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:10px;padding:3px 8px">Burning Urine</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':')+'URTI'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">URTI</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Viral Fever'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Viral Fever</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Gastritis'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Gastritis</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'HTN'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">HTN</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Diabetes'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Diabetes</button>
+        <button class="tb" onclick="document.getElementById('rx-diagnosis').value+=(document.getElementById('rx-diagnosis').value?', ':)+'Anaemia'" style="font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;background:#EEEDFE;color:#3C3489">Anaemia</button>
       </div>
-      <div id="rx-sym-list" style="display:flex;flex-wrap:wrap;gap:5px;min-height:32px;margin-bottom:8px;padding:6px 10px;background:var(--sl);border-radius:6px;border:0.5px solid var(--sl2)">
-        <span style="color:var(--ink3);font-size:11px;font-style:italic">Selected symptoms appear here...</span>
-      </div>
+      <textarea class="fin" id="rx-diagnosis" rows="2" placeholder="Provisional / confirmed diagnosis..." style="width:100%;resize:vertical;font-size:12px;border-color:#DDD6FE"></textarea>
+    </div>
+  </div>
+
+  <!-- ════ RX TEMPLATES ════ -->
+  <div style="border:0.5px solid #C0DD97;border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#EAF3DE;border-bottom:1.5px solid #C0DD97;padding:9px 16px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#27500A;text-transform:uppercase;letter-spacing:.6px"><i class="ti ti-template" style="font-size:15px;color:#3B6D11"></i>Rx Templates</div><span style="font-size:10px;font-weight:700;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;border-radius:20px;padding:2px 8px">Quick load</span></div>
+    <div style="padding:10px 16px;background:#fff">
+      <select id="rx-tpl-select" onchange="rxTplSelect(this.value)" style="width:100%;border:1.5px solid #C0DD97;border-radius:8px;padding:8px 10px;font-size:12px;background:#F4FAE8;color:#27500A;margin-bottom:8px;cursor:pointer;outline:none">
+        <option value="">— Select a saved template —</option>
+      </select>
       <div style="display:flex;gap:6px">
-        <input class="fin" id="rx-sym-input" placeholder="Type custom symptom + Enter..." style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){addRxSym(this.value);this.value=''}">
-        <button class="tb" onclick="addRxSym(document.getElementById('rx-sym-input').value);document.getElementById('rx-sym-input').value=''" style="font-size:11px;color:#0891B2;border-color:#0891B2"><i class="ti ti-plus"></i> Add</button>
+        <button class="tb" onclick="rxTplLoad()" style="flex:1;padding:7px 10px;background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:8px;font-size:12px;font-weight:700;color:#27500A"><i class="ti ti-player-play" style="font-size:12px"></i> Load</button>
+        <button class="tb" onclick="rxTplSave()" style="flex:1;padding:7px 10px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;font-size:12px;font-weight:700;color:#185FA5"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save Current as Template</button>
+        <button class="tb" onclick="rxTplDelete()" style="padding:7px 10px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;font-size:12px;font-weight:700;color:#DC2626"><i class="ti ti-trash" style="font-size:12px"></i></button>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;padding:10px 18px;align-items:start">
-      <div style="padding-top:22px">
-        <button class="bp" onclick="runAiDx()" style="font-size:12px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;padding:8px 16px">
-          <i class="ti ti-brain" style="font-size:15px"></i> AI Diagnose
-        </button>
+  </div>
+
+  <!-- ════ RX MODE / CONSULT INFO ════ -->
+  <div style="border:0.5px solid var(--sl2);border-radius:10px;overflow:hidden;margin:0 0 10px">
+    <div style="background:#f8fafc;border-bottom:1.5px solid var(--sl2);padding:9px 16px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px">
+      <i class="ti ti-stethoscope" style="font-size:15px;color:#64748b"></i>Consultation Info
+    </div>
+    <div style="padding:10px 16px;background:#fff;display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Rx for Days</div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" id="rx-days" oninput="rxCalcNextDate();rxSyncDaysToRows()" value="5" min="1" max="90" style="width:49px;text-align:center;font-size:16px;font-weight:900;color:#7C3AED;border:1.5px solid #c4b5fd;border-radius:7px;padding:6px 4px;outline:none">
+          <span style="font-size:11px;color:#64748b">days</span>
+        </div>
       </div>
       <div>
-        <div class="flbl" style="margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
-          <span style="display:flex;align-items:center;gap:5px"><i class="ti ti-clipboard-heart" style="font-size:13px;color:var(--rose)"></i>Diagnosis</span>
-          <span id="rx-ai-tag" style="display:none;font-size:10px;color:#6D28D9"><i class="ti ti-sparkles"></i> AI suggested</span>
-        </div>
-        <select class="fin" id="rx-dx-sel" style="margin-bottom:5px" onchange="document.getElementById('rx-pat-dx').value=this.value">
-          <option value="">— pick diagnosis or click AI Diagnose —</option>
-          <option value="URTI / Viral Fever">URTI / Viral Fever</option><option value="Upper Respiratory Tract Infection">Upper Respiratory Tract Infection</option><option value="Hypertension">Hypertension</option><option value="Hypertension Stage 2">Hypertension Stage 2</option><option value="Diabetes Mellitus Type 1">Diabetes Mellitus Type 1</option><option value="Diabetes Mellitus Type 2">Diabetes Mellitus Type 2</option><option value="Gastroenteritis">Gastroenteritis</option><option value="Dyspepsia / GERD">Dyspepsia / GERD</option><option value="IBS">IBS</option><option value="Allergic Rhinitis">Allergic Rhinitis</option><option value="Allergic Bronchitis">Allergic Bronchitis</option><option value="Urinary Tract Infection">Urinary Tract Infection</option><option value="Kidney Stone">Kidney Stone</option><option value="Bronchitis">Bronchitis</option><option value="Asthma">Asthma</option><option value="Pneumonia">Pneumonia</option><option value="Musculoskeletal Pain">Musculoskeletal Pain</option><option value="Arthritis">Arthritis</option><option value="Backache">Backache</option><option value="Migraine">Migraine</option><option value="Tension Headache">Tension Headache</option><option value="Anaemia">Anaemia</option><option value="Iron Deficiency">Iron Deficiency</option><option value="Thyroid Disorder (Hypothyroid)">Thyroid Disorder (Hypothyroid)</option><option value="Thyroid Disorder (Hyperthyroid)">Thyroid Disorder (Hyperthyroid)</option><option value="Skin Infection">Skin Infection</option><option value="Dermatitis / Eczema">Dermatitis / Eczema</option><option value="Fungal Infection">Fungal Infection</option><option value="Anxiety / Depression">Anxiety / Depression</option><option value="Stress / Insomnia">Stress / Insomnia</option><option value="Vitamin D Deficiency">Vitamin D Deficiency</option><option value="Vitamin B12 Deficiency">Vitamin B12 Deficiency</option><option value="Dengue Fever">Dengue Fever</option><option value="Malaria">Malaria</option><option value="Typhoid">Typhoid</option><option value="COVID-19">COVID-19</option><option value="Influenza">Influenza</option><option value="Antenatal Visit">Antenatal Visit</option><option value="Postnatal Visit">Postnatal Visit</option><option value="General Check-up / Follow-up">General Check-up / Follow-up</option><option value="Other">Other</option>
-        </select>
-        <input class="fin" id="rx-pat-dx" placeholder="Confirm or type custom diagnosis...">
-        <div id="rx-ai-result" style="display:none;margin-top:6px;padding:6px 10px;background:#F5F0FF;border-radius:6px;border-left:3px solid #8B5CF6;font-size:11px;color:#4C1D95"></div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Next Visit</div>
+        <div id="rx-next-visit" style="font-size:12px;font-weight:700;color:#059669;padding:6px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;min-height:34px">—</div>
       </div>
-    </div>
-    <div style="padding:10px 12px 12px;border-top:1px solid var(--sl2);background:#EAF3DE;border-radius:0">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-    <span style="font-size:13px;font-weight:600;color:#27500A;display:flex;align-items:center;gap:7px">
-      <i class="ti ti-template" style="font-size:15px"></i>Rx Templates
-    </span>
-  </div>
-
-  <select id="rx-tpl-select" onchange="rxTplSelect(this.value)"
-    style="width:100%;border:1px solid #97C459;border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:#27500A;margin-bottom:8px;cursor:pointer">
-    <option value="">— Select disease template —</option>
-    <optgroup label="Viral / Infection">
-      <option value="fever">Fever / Viral Infection</option>
-      <option value="uri">Upper Respiratory Infection</option>
-      <option value="typhoid">Typhoid</option>
-      <option value="uti">UTI</option>
-    </optgroup>
-    <optgroup label="Musculoskeletal">
-      <option value="arthritis">Arthritis / Joint Pain</option>
-      <option value="backpain">Back Pain / Sciatica</option>
-      <option value="gout">Gout</option>
-    </optgroup>
-    <optgroup label="GI / Liver">
-      <option value="fatty">Fatty Liver</option>
-      <option value="gastritis">Gastritis / Acidity</option>
-      <option value="ibs">IBS / Loose Motions</option>
-    </optgroup>
-    <optgroup label="Deficiency / Blood">
-      <option value="anemia">Anaemia</option>
-      <option value="vitd">Vitamin D Deficiency</option>
-      <option value="b12">Vitamin B12 Deficiency</option>
-    </optgroup>
-    <optgroup label="Chronic Disease">
-      <option value="diabetes">Diabetes Type 2</option>
-      <option value="htn">Hypertension</option>
-      <option value="thyroid">Hypothyroidism</option>
-      <option value="asthma">Asthma / Bronchitis</option>
-    </optgroup>
-  </select>
-
-  <div id="rx-tpl-preview" style="display:none;margin-bottom:8px">
-    <div style="font-size:9px;font-weight:700;color:#3B6D11;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid #C0DD97">
-      Medicines in template
-    </div>
-    <div id="rx-tpl-med-list" style="margin-bottom:8px"></div>
-  </div>
-
-  <button onclick="rxTplLoad()"
-    style="width:100%;padding:10px;border:none;border-radius:8px;background:#3B6D11;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
-    <i class="ti ti-arrow-down-circle" style="font-size:15px"></i>Load Template into Rx
-  </button>
-
-</div>
-
-<!-- ═══ LAB REPORTS STRIP ═══ -->
-<div style="border-top:1px solid var(--sl2);background:#E6F1FB">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0">
-    <div style="display:flex;align-items:center;gap:7px">
-      <i class="ti ti-microscope" style="font-size:15px;color:#185FA5"></i>
-      <span id="rx-lab-header" style="font-size:13px;font-weight:600;color:#0C447C">Lab Reports</span>
-      <span id="rx-lab-count" style="font-size:10px;background:#B5D4F4;color:#042C53;border-radius:10px;padding:1px 9px;display:none">0</span>
-    </div>
-  </div>
-
-  <div id="rx-lab-list" style="padding:8px 10px 10px;max-height:300px;overflow-y:auto">
-    <div style="padding:14px;text-align:center;color:#85B7EB;font-size:11.5px">
-      <i class="ti ti-microscope" style="font-size:20px;display:block;margin-bottom:5px;opacity:.4"></i>
-      Open a patient to see lab reports
-    </div>
-  </div>
-
-</div>
-
-
-    <input type="hidden" id="rx-pat-cc">
-  </div>
-
-  <div class="card" style="margin-bottom:12px">
-  <div class="ch" style="flex-wrap:wrap;gap:8px;align-items:center">
-    <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <!-- 3 pills one line -->
-    <div style="flex:1;display:flex;align-items:center;gap:8px">
-      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px">
-        <span style="font-size:10px;font-weight:700;color:#5b87c5;text-transform:uppercase;letter-spacing:.4px">Rx for</span>
-        <input type="number" id="rx-days" oninput="rxCalcNextDate();rxSyncDaysToRows()" value="5" min="1" max="90"
-          style="width:49px;text-align:center;font-size:14px;font-weight:900;border:none;background:transparent;color:#185FA5;outline:none"
-          oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
-        <span style="font-size:12px;font-weight:900;color:#185FA5">days</span>
-      </div>
-      <div style="flex:1;height:1px;background:var(--sl2)"></div>
-      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px">
-        <span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Next Visit</span>
-        <span id="rx-next-date" style="font-size:14px;font-weight:900;color:#059669">--</span>
-        <input type="hidden" id="rx-next-visit" value="">
-      </div>
-      <div style="flex:1;height:1px;background:var(--sl2)"></div>
-      <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px">
-        <span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Mode</span>
-        <select id="rx-mode" style="font-size:13px;font-weight:900;border:none;background:transparent;color:#7C3AED;outline:none;cursor:pointer">
-          <option value="Offline">Offline Rx</option>
-          <option value="Online">Online Rx</option>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Mode</div>
+        <select id="rx-mode" style="width:100%;border:1.5px solid var(--sl2);border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--ink);background:#fff;outline:none">
+          <option value="OPD">OPD</option>
+          <option value="IPD">IPD</option>
+          <option value="Emergency">Emergency</option>
+          <option value="Follow-up">Follow-up</option>
           <option value="Tele">Tele-Consult</option>
         </select>
       </div>
     </div>
   </div>
-  <div class="tbl-wrap"><table class="tbl" style="table-layout:auto;width:100%;min-width:900px">
+
+<div class="tbl-wrap"><table class="tbl" style="table-layout:auto;width:100%;min-width:900px">
     <thead><tr style="background:#f1f5f9;border-bottom:2px solid #e2e8f0">
       <th style="width:26px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">#</th>
       <th style="width:32px;padding:9px 4px"></th>
