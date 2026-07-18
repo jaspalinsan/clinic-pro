@@ -772,7 +772,7 @@ html,body{height:100%;overflow:hidden}
     <div style="flex:1;display:flex;align-items:center;gap:8px">
       <div style="display:flex;align-items:center;gap:7px;padding:7px 16px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px">
         <span style="font-size:10px;font-weight:700;color:#5b87c5;text-transform:uppercase;letter-spacing:.4px">Rx for</span>
-        <input type="number" id="rx-days" value="5" min="1" max="90"
+        <input type="number" id="rx-days" oninput="rxCalcNextDate();rxSyncDaysToRows()" value="5" min="1" max="90"
           style="width:34px;text-align:center;font-size:14px;font-weight:900;border:none;background:transparent;color:#185FA5;outline:none"
           oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days">
         <span style="font-size:12px;font-weight:900;color:#185FA5">days</span>
@@ -804,9 +804,9 @@ html,body{height:100%;overflow:hidden}
       <th style="width:95px;padding:9px 6px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Batch</th>
       <th style="width:70px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Exp</th>
       <th style="width:75px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.3px">Days</th>
-      <th style="width:95px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.3px">Qty</th>
+      <th style="width:105px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.3px">Qty</th>
       <th style="width:95px;text-align:right;padding:9px 8px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Rate &#8377;</th>
-      <th style="width:90px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Disc%</th>
+      <th style="width:100px;text-align:center;padding:9px 4px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Disc%</th>
       <th style="width:85px;text-align:right;padding:9px 8px;font-size:10px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:.3px">Amount &#8377;</th>
       <th style="width:24px;padding:9px 4px"></th>
     </tr></thead>
@@ -4205,6 +4205,19 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+function rxSyncDaysToRows(){
+  var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var rowDaysInp=tr.querySelector('[data-rx="days"]');
+    if(rowDaysInp&&!rowDaysInp.dataset.manual){
+      rowDaysInp.value=globalDays;
+      rxCalcRow(rowDaysInp);
+    }
+  });
+}
+window.rxSyncDaysToRows=rxSyncDaysToRows;
+
+
 
 
 
@@ -6877,6 +6890,7 @@ function rxAddMedRow(data){
     // Days
     '<td style="text-align:center"><input class="edit-in" data-rx="days" type="number" min="1" placeholder="5" '+
       'style="width:68px;text-align:center;font-size:14px;font-weight:900;color:#7C3AED;border-color:#c4b5fd;border-radius:6px" '+
+    'oninput="this.dataset.manual=1;rxCalcRow(this)" '+
       'oninput="rxCalcRow(this)"></td>'+
     // Qty
     '<td style="text-align:center"><input class="edit-in rx-qty" data-rx="qty" type="number" min="1" value="1" '+
@@ -9075,22 +9089,41 @@ function rxUpdateDate(val){
 window.rxUpdateDate=rxUpdateDate;
 
 function rxCalcRow(el){
-  var tr=el?el.closest('tr'):null;if(!tr)return;
-  var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  var tr=el?el.closest('tr'):null; if(!tr)return;
+
+  // Priority: use per-row Days input first, else fall back to global rx-days
+  var rowDaysInp=tr.querySelector('[data-rx="days"]');
+  var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  var days=rowDaysInp&&rowDaysInp.value?parseInt(rowDaysInp.value)||globalDays:globalDays;
+
+  // Sync row days from global if row days not manually set
+  if(rowDaysInp&&!rowDaysInp.dataset.manual&&globalDays){
+    rowDaysInp.value=globalDays;
+    days=globalDays;
+  }
+
+  // Frequency multiplier
   var doseSel=tr.querySelector('[data-rx="dose"]');
   var mult=doseSel?parseFloat(doseSel.value)||1:1;
-  var qty=Math.ceil(days*mult);
+
+  // Qty = Days × Frequency (auto, unless manually overridden)
+  var autoQty=Math.ceil(days*mult);
   var qtyInp=tr.querySelector('[data-rx="qty"]');
-  // Only auto-set qty if user hasn't manually changed it
-  if(qtyInp&&!qtyInp.dataset.manual)qtyInp.value=qty;
-  var finalQty=qtyInp?parseInt(qtyInp.value)||qty:qty;
+  if(qtyInp&&!qtyInp.dataset.manual) qtyInp.value=autoQty;
+  var finalQty=qtyInp?parseInt(qtyInp.value)||autoQty:autoQty;
+
+  // Amount = Qty × Rate × (1 - Disc/100)
   var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'0'}).value)||0;
   var disc=parseFloat((tr.querySelector('[data-rx="disc"]')||{value:'0'}).value)||0;
-  var amt=finalQty*sale*(1-disc/100);
-  var ac=tr.querySelector('.rx-amt');
-  if(ac)ac.textContent=amt>0?'\u20b9'+amt.toFixed(2):'\u2014';
+  var amt=parseFloat((finalQty*sale*(1-disc/100)).toFixed(2));
+
+  var amtCell=tr.querySelector('.rx-amt');
+  if(amtCell) amtCell.textContent=amt>0?'\u20b9'+amt.toFixed(2):'\u2014';
+
   rxCalcTotals();
 }
+window.rxCalcRow=rxCalcRow;
+
 function rxRecalcAll(){
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
     var el=tr.querySelector('[data-rx="sale"]');
@@ -14798,6 +14831,7 @@ function showPDFExtractModal(dataURL,fileName){
   document.body.appendChild(ov);
 }
 window.showPDFExtractModal=showPDFExtractModal;
+
 
 
 
