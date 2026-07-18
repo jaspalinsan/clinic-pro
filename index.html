@@ -637,7 +637,7 @@ html,body{height:100%;overflow:hidden}
         <i class="ti ti-user-circle" style="font-size:15px;color:#1A3A8C"></i>Patient
       </div>
       <div style="flex:1;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <input class="fin" id="rx-pat-search" placeholder="🔍 Search name or mobile..." style="width:170px;font-weight:600" oninput="rxPatSearch(this.value)">
+        <div style="position:relative;flex:1;min-width:200px"><input class="fin" id="rx-pat-search" placeholder="🔍 Search name / mobile / from appointment..." style="width:100%;font-weight:600" oninput="rxPatSearch(this.value)" autocomplete="off"><div id="rx-pat-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;margin-top:2px"></div></div>
         <input class="fin" id="rx-pat-age" placeholder="Age / Sex" style="width:72px">
         <input class="fin" id="rx-pat-mob" placeholder="Mobile" style="width:115px">
         <input class="fin" id="rx-pat-city" placeholder="City" style="width:95px">
@@ -4188,6 +4188,7 @@ html,body{height:100%;overflow:hidden}
 <script>
 
 
+
 function showPdfPopup(html, title, color){
   var old=document.getElementById('m-pdf-popup');if(old)old.remove();
   var ov=document.createElement('div');
@@ -4283,24 +4284,51 @@ window.rxAiDiagnose=rxAiDiagnose;
 window.rxAiDiagnose=rxAiDiagnose;
 
 function rxPatSearch(val){
-  var v=val.replace(/\D/g,'');
-  if(v.length<10&&val.length<3)return;
+  var drop=document.getElementById('rx-pat-drop');
+  if(!val||val.length<2){if(drop)drop.style.display='none';return;}
+  var v=val.toLowerCase();
+  var vNum=val.replace(/\D/g,'');
   var db=window.PAT_DB||[];
-  var found=db.find(function(p){
-    var m=(p.mobile||p.mob||'').replace(/\D/g,'');
-    return m.slice(-10)===v.slice(-10)||
-           (p.name||'').toLowerCase().startsWith(val.toLowerCase());
+  var apts=(window.APPT_DB||[]).filter(function(a){return a.status==='new'||a.status==='confirmed'||a.status==='waiting';});
+
+  // Merge sources — appointments first
+  var results=[];
+  apts.forEach(function(a){
+    var nm=(a.name||a.patient||'').toLowerCase();
+    var mob=(a.mobile||a.mob||'').replace(/\D/g,'');
+    if(nm.startsWith(v)||(vNum.length>=5&&mob.slice(-10).includes(vNum))){
+      results.push({name:a.name||a.patient,age:a.age||'',gender:a.gender||'',
+        mobile:a.mobile||a.mob||'',city:a.city||'',
+        complaint:a.complaint||'',source:'Appointment'});
+    }
   });
-  if(found){
-    var age=document.getElementById('rx-pat-age');
-    var mob=document.getElementById('rx-pat-mob');
-    var city=document.getElementById('rx-pat-city');
-    if(age)age.value=(found.age||'')+(found.gender?'/'+found.gender:'');
-    if(mob)mob.value=found.mobile||found.mob||'';
-    if(city)city.value=found.city||'';
-    toast((found.name||'Patient')+' found','success');
-  }
+  db.forEach(function(p){
+    var nm=(p.name||'').toLowerCase();
+    var mob=(p.mobile||p.mob||'').replace(/\D/g,'');
+    if(nm.startsWith(v)||(vNum.length>=5&&mob.slice(-10).includes(vNum))){
+      results.push({name:p.name,age:p.age||'',gender:p.gender||'',
+        mobile:p.mobile||p.mob||'',city:p.city||'',
+        complaint:p.complaint||'',source:'Patient'});
+    }
+  });
+
+  if(!results.length){if(drop)drop.style.display='none';return;}
+  if(!drop)return;
+  drop.innerHTML=results.slice(0,8).map(function(r){
+    return '<div onclick="rxFillPatient('+JSON.stringify(r)+')" '+
+      'style="padding:8px 12px;cursor:pointer;border-bottom:0.5px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center" '+
+      'onmouseover="this.style.background=\'#EFF6FF\'" onmouseout="this.style.background=\'#fff\'">'
+      +'<div><div style="font-size:12px;font-weight:700;color:#0f172a">'+r.name+'</div>'
+      +'<div style="font-size:10px;color:#64748b">'+(r.age?r.age:'')+( r.gender?' / '+r.gender:'')+(r.city?' · '+r.city:'')+(r.complaint?' | '+r.complaint:'')+'</div></div>'
+      +'<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;'
+      +(r.source==='Appointment'?'background:#EFF6FF;color:#185FA5':'background:#f0fdf4;color:#059669')
+      +'">'+r.source+'</span>'
+      +'</div>';
+  }).join('');
+  drop.style.display='block';
 }
+window.rxPatSearch=rxPatSearch;
+
 window.rxPatSearch=rxPatSearch;
 
 
@@ -12869,60 +12897,75 @@ function _xlsParseRows(rows){
 
 function doXLSImport(){
   if(!window._xlsRows||!window._xlsRows.length){toast('No data to import','error');return;}
-
   var tbody=document.getElementById('pat-tbody');
   if(!tbody){toast('Patient table not found','error');return;}
-
-  var added=0;
-  var skipped=0;
+  var added=0,skipped=0;
   var existing=[];
   [].slice.call(tbody.querySelectorAll('td:nth-child(3) b')).forEach(function(el){
     existing.push((el.textContent||'').toLowerCase());
   });
+  if(!window.PAT_DB)window.PAT_DB=[];
 
   window._xlsRows.forEach(function(r){
-    if(!r.name.trim())return;
-    if(existing.indexOf(r.name.toLowerCase())!==-1){skipped++;return;}
+    if(!r.name||!r.name.trim())return;
+    if(existing.indexOf(r.name.toLowerCase().trim())!==-1){skipped++;return;}
+    var code='CAD-'+String(Date.now()+added).slice(-8);
+    var ageSex=(r.age||'');
+    var gender=(r.gender||'M').charAt(0).toUpperCase();
+    var city=r.city||'';
+    var mob=(r.mob||r.mobile||'').replace(/[^0-9]/g,'');
+    var comp=r.complaint||r.complaints||'';
 
-    var code='CAD-'+String(Math.floor(100+Math.random()*8900)).padStart(4,'0');
-    var ageSex=(r.age||'—')+' / '+(r.gender||'M');
-    var city=r.city||'—';
-    var mob=r.mob||'—';
-    var comp=r.complaint||'';
+    // Save to MySQL
+    fetch('data.php?action=save_patient',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:code,name:r.name.trim(),mobile:mob,
+        age:ageSex,gender:gender,city:city,blood:'',
+        status:'Active',notes:comp?'CC: '+comp:'XLS Import'})
+    }).catch(function(){});
 
+    // Add to PAT_DB
+    window.PAT_DB.unshift({id:code,name:r.name.trim(),mob:mob,mobile:mob,
+      age:ageSex,gender:gender,city:city,status:'Active',complaint:comp});
+
+    // Add to table
     var tr=document.createElement('tr');
     tr.innerHTML=
       '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
       '<td style="font-size:11.5px;color:var(--lav);font-weight:700">'+code+'</td>'+
-      '<td><b>'+r.name+'</b>'+(comp?'<div style="font-size:11px;color:var(--ink3)">'+comp+'</div>':'')+'</td>'+
-      '<td>'+ageSex+'</td>'+
+      '<td><b>'+r.name.trim()+'</b>'+(comp?'<div style="font-size:11px;color:var(--ink3)">'+comp+'</div>':'')+'</td>'+
+      '<td>'+ageSex+(gender?' / '+gender:'')+'</td>'+
       '<td style="color:var(--ink3)">'+city+'</td>'+
       '<td>'+mob+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
-        '<button class="tb" onclick="editPatient(\''+r.name+'\',\''+code+'\',\''+r.age+'\',\''+r.gender+'\',\''+comp+'\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
-        '<button class="tb" onclick="openRxForPatient(\''+r.name+'\',\''+code+'\',\''+r.age+'\',\''+r.gender+'\',\''+mob+'\',\''+comp+'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
-        '<button class="tb" onclick="bookApptDirect(\''+r.name+'\',\''+code+'\',\''+r.age+'\',\''+r.gender+'\',\''+mob+'\',\''+comp+'\')" style="font-size:11px"><i class="ti ti-calendar-event"></i>Appt</button>'+
+        '<button class="tb" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
+        '<button class="tb" onclick="nav(\'rx\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
       '</div></td>';
-
     tbody.insertBefore(tr,tbody.firstChild);
     added++;
-    existing.push(r.name.toLowerCase());
+    existing.push(r.name.toLowerCase().trim());
   });
 
-  // Cleanup
+  // Save backup
+  setTimeout(function(){
+    fetch('data.php?action=store_set',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:'patients_backup',value:window.PAT_DB||[]})
+    }).catch(function(){});
+  },500);
+
   window._xlsRows=[];
   var prev=document.getElementById('xls-preview');if(prev)prev.style.display='none';
   var btn=document.getElementById('xls-import-btn');if(btn)btn.style.display='none';
   var inp=document.getElementById('xls-file-input');if(inp)inp.value='';
-
   closeModal('m-xls');
   if(typeof updateDashStats==='function')updateDashStats();
-
-  var msg='\u2713 '+added+' patients imported';
-  if(skipped)msg+=' ('+skipped+' skipped — already exist)';
-  toast(msg,'success');
-  if(typeof cpSaveData==='function')cpSaveData();
+  if(typeof renderDashPatients==='function')renderDashPatients();
+  var sb=document.getElementById('save-pat-list-btn');if(sb)sb.style.display='inline-flex';
+  toast('\u2713 '+added+' patients imported'+(skipped?' ('+skipped+' skipped)':''),'success');
 }
+window.doXLSImport=doXLSImport;
+
 window.doXLSImport=doXLSImport;
 
 function openLabFromBill(invId){
@@ -13781,20 +13824,23 @@ window.patAutoInput=patAutoInput;
 window.patAutoInput=patAutoInput;
 
 // Callbacks when patient picked
-function rxFillPatient(pat){
-  if(!pat)return;
-  window._rxCurrentPatient=(pat.name||'').toLowerCase();
+function rxFillPatient(r){
+  var s=document.getElementById('rx-pat-search');
   var age=document.getElementById('rx-pat-age');
   var mob=document.getElementById('rx-pat-mob');
-  var gen=document.getElementById('rx-pat-gender');
-  if(age&&pat.age)age.value=pat.age;
-  if(mob&&pat.mob)mob.value=pat.mob;
-  if(gen&&pat.gender)gen.value=pat.gender==='F'?'F':'M';
-  if(typeof renderSavedRx==='function')renderSavedRx('');
-  if(typeof renderRxLabReports==='function')renderRxLabReports();
-  if(typeof updateSrxBadge==='function')updateSrxBadge();
-  if(typeof toast==='function')toast('\u2713 '+pat.name+' loaded','success');
+  var city=document.getElementById('rx-pat-city');
+  var sym=document.getElementById('rx-symptoms');
+  if(s)s.value=r.name||'';
+  if(age)age.value=(r.age||'')+(r.gender?'/'+r.gender:'');
+  if(mob)mob.value=r.mobile||'';
+  if(city)city.value=r.city||'';
+  if(sym&&r.complaint&&!sym.value)sym.value=r.complaint;
+  var drop=document.getElementById('rx-pat-drop');
+  if(drop)drop.style.display='none';
+  toast((r.name||'Patient')+' loaded','success');
 }
+window.rxFillPatient=rxFillPatient;
+
 window.rxFillPatient=rxFillPatient;
 
 function apptFillPatient(pat){
@@ -15015,6 +15061,15 @@ window.showPDFExtractModal=showPDFExtractModal;
 
 
 
+
+
+document.addEventListener('click',function(e){
+  var drop=document.getElementById('rx-pat-drop');
+  var inp=document.getElementById('rx-pat-search');
+  if(drop&&inp&&!inp.contains(e.target)&&!drop.contains(e.target)){
+    drop.style.display='none';
+  }
+});
 
 </script>
 </body>
