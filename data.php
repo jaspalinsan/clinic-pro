@@ -184,10 +184,18 @@ try{
       if($b['data_json']){
         $bj=json_decode($b['data_json'],true);
         $b['extra']=$bj;
-        // Expose paidAmt directly for JS
-        $b['paid_amt']=$bj['paidAmt']??0;
-        $b['meds_json']=isset($bj['meds'])?$bj['meds']:[];
-        $b['svcs_json']=isset($bj['svcs'])?$bj['svcs']:[];
+        // Expose all billing fields for JS
+        $b['paidAmount']=$bj['paidAmount']??$bj['paid']??$bj['paidAmt']??0;
+        $b['prevBalance']=$bj['prevBalance']??0;
+        $b['balanceDue']=$bj['balanceDue']??null;
+        $b['grandTotal']=$bj['grandTotal']??($b['amount']??0);
+        $b['meds']=$bj['meds']??[];
+        $b['services']=$bj['svcs']??$bj['services']??[];
+        $b['patient']=$bj['patient']??$b['patient_name']??'';
+        $b['age']=$bj['age']??'';
+        $b['mobile']=$bj['mob']??$bj['mobile']??'';
+        $b['city']=$bj['city']??'';
+        $b['rxno']=$bj['rxno']??$b['rx_no']??'';
       }
     }
     $inv=$pdo->query("SELECT store_value FROM clinic_store WHERE store_key='inventory'")->fetch(PDO::FETCH_ASSOC);

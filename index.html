@@ -2268,6 +2268,8 @@ html,body{height:100%;overflow:hidden}
 <script>
 
 
+
+
 function rxCalcBalance(){
   var prevBal=window._rxPrevBalance||0;
   var grand=window._rxGrandTotal||0;
@@ -5635,7 +5637,7 @@ try{
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
   var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
-    grandTotal:total,paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
+    grandTotal:total,paid:paidNow,paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
     status:billStatus,paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs,
     rxDays:_rxDays,nextVisit:_rxNext,rxMode:_rxMode};
 
@@ -5650,7 +5652,7 @@ try{
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id:newId,patient:pname,rxno:rxno,date:rdate,
       desc:desc,amount:total,grandTotal:total,
-      paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
+      paid:paidNow,paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
       status:billStatus,paymode:'',
       age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs})
   }).catch(function(){});
@@ -12507,15 +12509,28 @@ function cpLoadData(){
         return {
           id:b.id,
           patient:b.patient_name||bj.patient||'',
+          name:b.patient_name||bj.patient||'',
           rxno:b.rx_no||bj.rxno||'',
           date:b.date||bj.date||'',
           desc:b.description||bj.desc||'',
           amount:parseFloat(b.amount||0),
+          grandTotal:parseFloat(b.grandTotal||bj.grandTotal||b.amount||0),
           status:b.status||'Pending',
           paymode:b.pay_mode||bj.paymode||'',
-          paidAmt:parseFloat(bj.paidAmt||0),
-          age:bj.age||'',mob:bj.mob||'',dx:bj.dx||'',
-          meds:bj.meds||[],svcs:bj.svcs||[]
+          // Support all paid field names
+          paid:parseFloat(b.paidAmount||bj.paidAmount||bj.paid||bj.paidAmt||0),
+          paidAmount:parseFloat(b.paidAmount||bj.paidAmount||bj.paid||bj.paidAmt||0),
+          paidAmt:parseFloat(b.paidAmount||bj.paidAmount||bj.paid||bj.paidAmt||0),
+          prevBalance:parseFloat(b.prevBalance||bj.prevBalance||0),
+          balanceDue:b.balanceDue!=null?parseFloat(b.balanceDue):bj.balanceDue!=null?parseFloat(bj.balanceDue):null,
+          age:bj.age||b.age||'',
+          mobile:bj.mob||bj.mobile||b.mobile||'',
+          mob:bj.mob||bj.mobile||b.mobile||'',
+          city:bj.city||b.city||'',
+          dx:bj.dx||'',
+          meds:bj.meds||b.meds||[],
+          services:bj.svcs||bj.services||b.services||[],
+          svcs:bj.svcs||bj.services||b.services||[]
         };
       });
     }
@@ -12927,9 +12942,12 @@ function printInvoice(invId){
   }
 
   // TOTALS
+  // Read paid/balance — support both old field names (paid) and new (paidAmount)
   var prevBal=parseFloat(inv.prevBalance||0);
-  var paidNow=parseFloat(inv.paidAmount||0);
-  var balDue=parseFloat(inv.balanceDue!=null?inv.balanceDue:Math.max(0,prevBal+grandTotal-paidNow));
+  var paidNow=parseFloat(inv.paidAmount||inv.paid||0);
+  var balDue=parseFloat(inv.balanceDue!=null&&inv.balanceDue!==undefined?inv.balanceDue:Math.max(0,prevBal+grandTotal-paidNow));
+  // If fully paid status, ensure balance = 0
+  if(inv.status==='Paid'&&balDue>0&&!inv.balanceDue)balDue=0;
 
   H.push('<div class="tot">');
   if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">₹'+medTotal.toFixed(2)+'</div></div>');
@@ -13220,6 +13238,8 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
+
 
 
 
