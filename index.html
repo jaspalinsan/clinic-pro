@@ -2270,6 +2270,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function rxCalcBalance(){
   var prevBal=window._rxPrevBalance||0;
   var grand=window._rxGrandTotal||0;
@@ -5636,16 +5638,17 @@ try{
   if(!window.BILLING_DB)window.BILLING_DB=[];
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
-  var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
+    var paidNow=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
+  var prevBal=window._rxPrevBalance||0;
+  var balDue=Math.max(0,prevBal+total-paidNow);
+  var billStatus=balDue<=0?'Paid':'Pending';
+
+var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
     grandTotal:total,paid:paidNow,paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
     status:billStatus,paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs,
     rxDays:_rxDays,nextVisit:_rxNext,rxMode:_rxMode};
 
   // Read paid amount and balance from UI
-  var paidNow=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
-  var prevBal=window._rxPrevBalance||0;
-  var balDue=Math.max(0,prevBal+total-paidNow);
-  var billStatus=balDue<=0?'Paid':'Pending';
   window.BILLING_DB.unshift(invoice);
 
   fetch('data.php?action=save_billing',{method:'POST',
@@ -13238,6 +13241,8 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
+
 
 
 
