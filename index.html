@@ -2267,6 +2267,7 @@ html,body{height:100%;overflow:hidden}
 
 <script>
 
+
 function rxCalcBalance(){
   var prevBal=window._rxPrevBalance||0;
   var grand=window._rxGrandTotal||0;
@@ -5634,15 +5635,23 @@ try{
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
   var invoice={id:newId,patient:pname,rxno:rxno,date:rdate,desc:desc,amount:total,
-    status:'Pending',paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs,
+    grandTotal:total,paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
+    status:billStatus,paymode:'',age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs,
     rxDays:_rxDays,nextVisit:_rxNext,rxMode:_rxMode};
 
+  // Read paid amount and balance from UI
+  var paidNow=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
+  var prevBal=window._rxPrevBalance||0;
+  var balDue=Math.max(0,prevBal+total-paidNow);
+  var billStatus=balDue<=0?'Paid':'Pending';
   window.BILLING_DB.unshift(invoice);
 
   fetch('data.php?action=save_billing',{method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id:newId,patient:pname,rxno:rxno,date:rdate,
-      desc:desc,amount:total,status:'Pending',paymode:'',
+      desc:desc,amount:total,grandTotal:total,
+      paidAmount:paidNow,prevBalance:prevBal,balanceDue:balDue,
+      status:billStatus,paymode:'',
       age:page,mob:pmob,dx:pdx,meds:meds,svcs:svcs})
   }).catch(function(){});
 
@@ -12920,7 +12929,7 @@ function printInvoice(invId){
   // TOTALS
   var prevBal=parseFloat(inv.prevBalance||0);
   var paidNow=parseFloat(inv.paidAmount||0);
-  var balDue=parseFloat(inv.balanceDue||Math.max(0,prevBal+grandTotal-paidNow));
+  var balDue=parseFloat(inv.balanceDue!=null?inv.balanceDue:Math.max(0,prevBal+grandTotal-paidNow));
 
   H.push('<div class="tot">');
   if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">₹'+medTotal.toFixed(2)+'</div></div>');
@@ -13211,6 +13220,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
