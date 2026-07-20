@@ -805,7 +805,7 @@ html,body{height:100%;overflow:hidden}
   <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
     
   </div>
-  <div style="border-top:2px solid #e2e8f0;background:#f8faff;padding:5px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:11px;color:#64748b;white-space:nowrap">Med: <b id="rx-med-total" style="color:#185FA5">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Svc: <b id="rx-svc-total" style="color:#059669">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Grand: <b id="rx-grand-total" style="color:var(--acc);font-size:13px">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Prev: <b id="rx-prev-balance" style="color:#DC2626">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap;display:flex;align-items:center;gap:4px">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:68px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:2px 6px;text-align:right;outline:none" oninput="rxCalcBalance()"></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Due: <b id="rx-balance-due" style="color:#DC2626;font-size:14px;font-weight:900">&#8377;0.00</b></span><div style="flex:1;min-width:8px"></div><b id="rx-new-bill" style="display:none">&#8377;0.00</b><button class="bs" onclick="rxNewBlank()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-plus"></i> New Rx</button><button class="bs" onclick="rxPrint()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-printer"></i> Print</button><button class="bp" onclick="rxSubmitBilling('all')" style="font-size:11px;padding:5px 12px;white-space:nowrap;background:#1A3A8C"><i class="ti ti-currency-rupee"></i> Submit &amp; Save</button></div>
+  <div style="border-top:2px solid #e2e8f0;background:#f8faff;padding:5px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:11px;color:#64748b;white-space:nowrap">Med: <b id="rx-med-total" style="color:#185FA5">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Svc: <b id="rx-svc-total" style="color:#059669">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Grand: <b id="rx-grand-total" style="color:var(--acc);font-size:13px">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Prev: <b id="rx-prev-balance" style="color:#DC2626">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap;display:flex;align-items:center;gap:4px">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:68px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:2px 6px;text-align:right;outline:none" oninput="rxCalcBalance()" onchange="rxCalcBalance()"></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Due: <b id="rx-balance-due" style="color:#DC2626;font-size:14px;font-weight:900">&#8377;0.00</b></span><div style="flex:1;min-width:8px"></div><b id="rx-new-bill" style="display:none">&#8377;0.00</b><button class="bs" onclick="rxNewBlank()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-plus"></i> New Rx</button><button class="bs" onclick="rxPrint()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-printer"></i> Print</button><button class="bp" onclick="rxSubmitBilling('all')" style="font-size:11px;padding:5px 12px;white-space:nowrap;background:#1A3A8C"><i class="ti ti-currency-rupee"></i> Submit &amp; Save</button></div>
 
 
 
@@ -2266,20 +2266,25 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
-  var prevBal=window._rxPrevBalance||0;
-  var grand=window._rxGrandTotal||0;
-  var paid=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
-  var balDue=prevBal+grand-paid;
+  var prevBal = parseFloat(window._rxPrevBalance)||0;
+  var grand   = parseFloat(window._rxGrandTotal)||0;
+  var paidEl  = document.getElementById('rx-paid-now');
+  var paid    = paidEl ? parseFloat(paidEl.value)||0 : 0;
+  var balDue  = prevBal + grand - paid;
 
   function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
-  set('rx-prev-balance','\u20b9'+prevBal.toFixed(2));
-  set('rx-new-bill','\u20b9'+grand.toFixed(2));
-  set('rx-balance-due','\u20b9'+Math.max(0,balDue).toFixed(2));
+  set('rx-prev-balance', '\u20b9'+prevBal.toFixed(2));
+  set('rx-grand-total',  '\u20b9'+grand.toFixed(2));
+  set('rx-new-bill',     '\u20b9'+grand.toFixed(2));
+  set('rx-balance-due',  '\u20b9'+Math.max(0,balDue).toFixed(2));
 
-  var due=document.getElementById('rx-balance-due');
-  if(due)due.style.color=balDue<=0?'#059669':'#DC2626';
+  var due = document.getElementById('rx-balance-due');
+  if(due) due.style.color = balDue<=0 ? '#059669' : '#DC2626';
 }
+window.rxCalcBalance=rxCalcBalance;
+
 window.rxCalcBalance=rxCalcBalance;
 
 function rxLoadPrevBalance(patName){
@@ -5618,7 +5623,10 @@ try{
   if(!window.BILLING_DB)window.BILLING_DB=[];
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
 
-    var paidNow=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
+  // Force recalc before submit
+  if(typeof rxCalcTotals==='function')rxCalcTotals();
+    var paidEl2=document.getElementById('rx-paid-now');
+    var paidNow=paidEl2?parseFloat(paidEl2.value)||0:0;
   var prevBal=window._rxPrevBalance||0;
   var balDue=Math.max(0,prevBal+total-paidNow);
   var billStatus=balDue<=0?'Paid':'Pending';
@@ -13219,6 +13227,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
