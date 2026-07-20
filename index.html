@@ -795,19 +795,20 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr>
-      <th style="width:24px">#</th>
-      <th style="width:62px;text-align:center">Type</th>
-      <th style="width:22%">Item Name</th>
-      <th style="width:7%;text-align:center">Sch</th>
-      <th style="width:8%">MFR</th>
-      <th style="width:8%">Batch</th>
-      <th style="width:7%;text-align:center">Exp</th>
-      <th style="width:6%;text-align:center">Qty</th>
-      <th style="width:8%;text-align:right">Sale &#8377;</th>
-      <th style="width:10%;text-align:center">Disc %</th>
-      <th style="width:8%;text-align:right">Amt &#8377;</th>
-      <th style="width:20px"></th>
+    <thead><tr style="background:#f1f5f9">
+      <th style="width:24px;text-align:center">#</th>
+      <th style="width:58px;text-align:center">Type</th>
+      <th style="width:18%">Item Name</th>
+      <th style="width:14%">Dose / Frequency</th>
+      <th style="width:46px;text-align:center">Sch</th>
+      <th style="width:7%">Batch</th>
+      <th style="width:58px;text-align:center">Exp</th>
+      <th style="width:52px;text-align:center">Days</th>
+      <th style="width:52px;text-align:center">Qty</th>
+      <th style="width:72px;text-align:right">Rate &#8377;</th>
+      <th style="width:54px;text-align:center">Disc%</th>
+      <th style="width:76px;text-align:right">Amt &#8377;</th>
+      <th style="width:22px"></th>
     </tr></thead>
     <tbody id="rx-med-tbody"></tbody>
   </table></div>
@@ -816,8 +817,7 @@ html,body{height:100%;overflow:hidden}
   <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
     
   </div>
-  <div style="border-top:2px solid #e2e8f0;background:#f8faff"><div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 16px 6px;border-bottom:1px solid #e2e8f0"><span style="font-size:12px;color:var(--ink2)">Med: <b id="rx-med-total" style="color:#185FA5">&#8377;0.00</b></span><span style="font-size:12px;color:var(--ink2)">Services: <b id="rx-svc-total" style="color:#059669">&#8377;0.00</b></span><span style="font-size:13px;font-weight:700;color:var(--acc)">Grand Total: <b id="rx-grand-total">&#8377;0.00</b></span></div><div style="display:flex;align-items:center;gap:0;padding:8px 16px"><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Prev Balance</div><div id="rx-prev-balance" style="font-size:16px;font-weight:800;color:#DC2626">&#8377;0.00</div></div><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">+ New Bill</div><div id="rx-new-bill" style="font-size:16px;font-weight:800;color:#185FA5">&#8377;0.00</div></div><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">− Paid</div><div style="display:flex;align-items:center;justify-content:center;gap:6px"><input id="rx-paid-now" type="number" min="0" placeholder="0.00" style="width:90px;text-align:center;font-size:15px;font-weight:800;color:#059669;border:1.5px solid #bbf7d0;border-radius:7px;padding:3px 6px;outline:none" oninput="rxCalcBalance()"></div></div><div style="flex:1;text-align:center;padding:6px 10px;background:#FEF2F2;border-radius:0 0 8px 0"><div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">= Balance Due</div><div id="rx-balance-due" style="font-size:18px;font-weight:900;color:#DC2626">&#8377;0.00</div></div></div></div>
-</div>
+  <div style="border-top:2px solid #e2e8f0;background:#f8faff;padding:6px 14px"><div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap"><span style="font-size:11px;color:#64748b">Med: <b id="rx-med-total" style="color:#185FA5;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Svc: <b id="rx-svc-total" style="color:#059669;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Grand: <b id="rx-grand-total" style="color:var(--acc);font-size:13px;font-weight:800">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Prev Bal: <b id="rx-prev-balance" style="color:#DC2626;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">New: <b id="rx-new-bill" style="color:#185FA5;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:72px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:2px 6px;text-align:right;outline:none" oninput="rxCalcBalance()"></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Due: <b id="rx-balance-due" style="color:#DC2626;font-size:14px;font-weight:900">&#8377;0.00</b></span></div></div>
 
 
 
@@ -2266,6 +2266,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4986,41 +4987,30 @@ function rxInit(){
   if(!tbody)return;
   tbody.innerHTML='';
 
-    // ROW 1: Consultancy Fee — locked row
+      // ROW 1: Consultancy Fee — locked
   var tr1=document.createElement('tr');
-  tr1.style.background='linear-gradient(90deg,#fffbeb,#fff)';
-  tr1.style.borderBottom='2px solid #fde68a';
+  tr1.style.cssText='background:linear-gradient(90deg,#fffbeb,#fff);border-bottom:2px solid #fde68a';
   tr1.innerHTML=
     '<td style="text-align:center;font-size:11px;font-weight:700;color:#92400E">1</td>'+
     '<td style="text-align:center"><span style="display:inline-flex;align-items:center;padding:2px 6px;border-radius:20px;font-size:9px;font-weight:700;background:#FEF3C7;color:#92400E;border:0.5px solid #FDE68A"><i class="ti ti-stethoscope" style="font-size:10px;margin-right:2px"></i>Fee</span></td>'+
-    '<td>'+
+    '<td style="background:#fffbeb">'+
       '<input class="fin" data-rx="name" value="Consultancy Fee" readonly '+
-        'style="width:100%;font-size:13px;font-weight:700;color:#92400E;background:#fffbeb;border-color:#FDE68A;cursor:default">'+
-      '<div style="font-size:10px;color:#92400e;margin-top:3px;font-style:italic">General / Follow-up consultation</div>'+
+        'style="width:100%;font-size:12px;font-weight:700;color:#92400E;background:#fffbeb;border-color:#FDE68A;cursor:default">'+
     '</td>'+
-    // Frequency — locked
-    '<td><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
-    // Sch — locked
-    '<td style="text-align:center"><span style="font-size:10px;font-weight:700;color:#64748b">—</span></td>'+
-    // Batch — locked
-    '<td><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
-    // Exp — locked
-    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">—</div></td>'+
-    // Days — locked
-    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:12px;color:var(--ink3);text-align:center">—</div></td>'+
-    // Qty — locked
-    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:12px;color:var(--ink3);text-align:center">1</div></td>'+
-    // Rate ₹ — editable (default 150)
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#cbd5e1">—</td>'+
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#cbd5e1">—</td>'+
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#cbd5e1">—</td>'+
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#cbd5e1">—</td>'+
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#cbd5e1">—</td>'+
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#94a3b8;font-weight:700">1</td>'+
     '<td><input class="edit-in" data-rx="sale" type="number" value="150" '+
       'style="width:100%;text-align:right;font-size:15px;font-weight:900;color:#92400E;border-color:#FDE68A" '+
       'oninput="rxCalcRow(this)"></td>'+
-    // Disc% — locked
-    '<td style="text-align:center"><div style="background:var(--sk2);border:1px solid var(--sl2);border-radius:6px;padding:5px 6px;font-size:11px;color:var(--ink3);text-align:center">0%</div></td>'+
-    // Amount
-    '<td class="rx-amt" style="text-align:right;font-size:16px;font-weight:900;color:#92400E">₹150</td>'+
-    // No delete for consultancy
+    '<td style="background:#f8fafc;border:1px solid #e2e8f0;text-align:center;color:#94a3b8">0%</td>'+
+    '<td class="rx-amt" style="text-align:right;font-size:15px;font-weight:900;color:#92400E">₹150</td>'+
     '<td></td>';
   tbody.appendChild(tr1);
+
 
   rxCalcRow(tr1.querySelector('[data-rx="sale"]'));
 
@@ -13238,6 +13228,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
