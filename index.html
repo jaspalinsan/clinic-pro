@@ -2272,6 +2272,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
   var prevBal=window._rxPrevBalance||0;
   var grand=window._rxGrandTotal||0;
@@ -12834,51 +12835,63 @@ window.updateApptBulkBar=updateApptBulkBar;
 
 
 function printInvoice(invId){
-  var inv=(window.BILLING_DB||[]).find(function(b){return b.id===invId;})||{};
-  var meds=(inv.meds||[]).filter(function(m){return m.name;});
-  var svcs=(inv.services||[]).filter(function(s){return s.name;});
+  var inv=(window.BILLING_DB||[]).find(function(b){return b.id===invId;});
+  if(!inv){toast('Invoice not found: '+invId,'error');return;}
+
+  var meds=(inv.meds||inv.svcs&&[]||[]).filter?( inv.meds||[]).filter(function(m){return m&&m.name;}):[];
+  var svcs=(inv.services||inv.svcs||[]).filter(function(s){return s&&s.name;});
 
   var CS=window.CLINIC_SETTINGS||{};
   var cname=CS.name||'Clinic Pro';
   var cdoc=CS.doctor||''; var cqual=CS.qual||''; var creg=CS.reg||'';
   var caddr=(CS.address||'')+(CS.city?', '+CS.city:''); var cphone=CS.phone||'';
+
   var patName=inv.patient||inv.name||'';
   var patAge=inv.age||''; var patMob=inv.mobile||inv.mob||''; var patCity=inv.city||'';
   var invDate=inv.date||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   var invNo=inv.id||invId;
-  var nextVisit=(document.getElementById('rx-next-visit')||{textContent:''}).textContent||'';
-  var mode=(document.getElementById('rx-mode')||{value:'OPD'}).value||'OPD';
+  var nextVisit=inv.nextVisit||(document.getElementById('rx-next-visit')||{textContent:''}).textContent||'';
+  var mode=inv.rxMode||inv.mode||(document.getElementById('rx-mode')||{value:'OPD'}).value||'OPD';
 
-  var medTotal=0; meds.forEach(function(m){medTotal+=parseFloat(m.amt||0);});
-  var svcTotal=0; svcs.forEach(function(s){svcTotal+=parseFloat(s.amt||s.price||0);});
+  // TOTALS
+  var medTotal=0;
+  meds.forEach(function(m){
+    var q=parseInt(m.qty)||0; var s=parseFloat(m.sale)||0; var d=parseFloat(m.disc)||0;
+    medTotal+=parseFloat(m.amt||(q*s*(1-d/100)))||0;
+  });
+  var svcTotal=0;
+  svcs.forEach(function(s){svcTotal+=parseFloat(s.amt||s.price||0);});
   var grandTotal=medTotal+svcTotal;
+
+  // BALANCE — read directly from inv fields
+  var prevBal = parseFloat(inv.prevBalance||0);
+  var paidNow = parseFloat(inv.paidAmount||inv.paid||inv.paidAmt||0);
+  var balDue  = inv.balanceDue!=null ? parseFloat(inv.balanceDue) : Math.max(0,prevBal+grandTotal-paidNow);
 
   var H=[];
   H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice '+invNo+'</title><style>');
   H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{background:#fff;color:#0f172a}.page{max-width:210mm;margin:0 auto}');
   H.push('.hdr{background:linear-gradient(135deg,#059669,#0d7a5a);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}');
   H.push('.cn{color:#fff;font-size:18px;font-weight:800}.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
-  H.push('.right{color:#fff;text-align:right}.rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.8}');
-  H.push('.rno{font-size:20px;font-weight:900;letter-spacing:.5px}.rdate{font-size:10px;opacity:.75;margin-top:2px}');
+  H.push('.right{color:#fff;text-align:right}.rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.8}.rno{font-size:20px;font-weight:900;letter-spacing:.5px}.rdate{font-size:10px;opacity:.75;margin-top:2px}');
   H.push('.pat{background:#F0FDF4;border-bottom:2px solid #059669;padding:9px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}');
   H.push('.pl{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.4px}.pv{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px}');
-  H.push('.sec{padding:10px 20px 0}');
-  H.push('.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}');
-  H.push('.st::before{content:"";display:inline-block;width:3px;height:12px;border-radius:2px}');
-  H.push('.grn{color:#059669}.grn::before{background:#059669}');
-  H.push('.blu{color:#185FA5}.blu::before{background:#185FA5}');
+  H.push('.sec{padding:10px 20px 0}.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}');
+  H.push('.st::before{content:"";display:inline-block;width:3px;height:12px;border-radius:2px}.grn{color:#059669}.grn::before{background:#059669}.blu{color:#185FA5}.blu::before{background:#185FA5}');
   H.push('table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:2px}');
   H.push('th{border:1px solid #d1fae5;padding:6px 8px;font-size:9px;font-weight:700;color:#059669;text-align:left;text-transform:uppercase;letter-spacing:.3px;background:#f0fdf4}');
   H.push('th.b{border-color:#BFDBFE;color:#185FA5;background:#f0f7ff}');
   H.push('td{border:1px solid #e5e7eb;padding:6px 8px;vertical-align:top}');
   H.push('tr:nth-child(even) td{background:#f8fffe}');
-  H.push('.mn{font-size:12px;font-weight:700;color:#0f172a}');
-  H.push('.md{font-size:10px;color:#185FA5;font-weight:600;margin-top:1px}');
-  H.push('.mr{font-size:10px;color:#94a3b8;font-style:italic}');
+  H.push('.mn{font-size:12px;font-weight:700;color:#0f172a}.md{font-size:10px;color:#185FA5;font-weight:600;margin-top:1px}.mr{font-size:10px;color:#94a3b8;font-style:italic}');
   H.push('.tot{padding:10px 20px;display:flex;justify-content:flex-end;gap:24px;background:#F0FDF4;border-top:1px solid #d1fae5;margin-top:10px}');
   H.push('.titem .tl{font-size:10px;color:#64748b;font-weight:600;text-align:right}.titem .tv{font-size:14px;font-weight:800;color:#059669;text-align:right;margin-top:1px}');
-  H.push('.grand .tv{font-size:22px!important;color:#065f46!important}');
-  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:11px 20px;border-top:2px solid #059669;background:#fafafa}');
+  H.push('.grand .tv{font-size:20px!important;color:#065f46!important}');
+  H.push('.bal-bar{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid #059669;background:#f0fdf4}');
+  H.push('.bb{padding:10px 14px;text-align:center;border-right:1px solid #d1fae5}.bb:last-child{border-right:none}');
+  H.push('.bbl{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}');
+  H.push('.bbv{font-size:16px;font-weight:900}');
+  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:11px 20px;border-top:1px solid #e5e7eb;background:#fafafa}');
   H.push('.fnext{font-size:11px;color:#059669;font-weight:600}');
   H.push('.stamp{display:inline-block;background:#F0FDF4;border:1px dashed #059669;border-radius:6px;padding:4px 12px;font-size:10px;font-weight:700;color:#059669;margin-top:5px}');
   H.push('.sig-line{border-top:1.5px solid #059669;width:120px;margin:0 0 4px auto}.sig-t{font-size:10px;color:#64748b;text-align:right}');
@@ -12886,95 +12899,79 @@ function printInvoice(invId){
 
   // HEADER
   H.push('<div class="hdr"><div><div class="cn">'+cname+'</div>');
-  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' · '+cqual:'')+(creg?' · Reg: '+creg:''):'')+( caddr?' · '+caddr:'')+( cphone?' · '+cphone:'')+'</div></div>');
+  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' \u00b7 '+cqual:'')+(creg?' \u00b7 Reg: '+creg:''):'')+( caddr?' \u00b7 '+caddr:'')+( cphone?' \u00b7 '+cphone:'')+'</div></div>');
   H.push('<div class="right"><div class="rlbl">Tax Invoice</div><div class="rno">'+invNo+'</div><div class="rdate">'+invDate+'</div></div></div>');
 
   // PATIENT
   H.push('<div class="pat">');
   H.push('<div><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
-  H.push('<div><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'—')+'</div></div>');
-  H.push('<div><div class="pl">Mobile</div><div class="pv">'+(patMob||'—')+'</div></div>');
-  H.push('<div><div class="pl">City</div><div class="pv">'+(patCity||'—')+'</div></div>');
+  H.push('<div><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'\u2014')+'</div></div>');
+  H.push('<div><div class="pl">Mobile</div><div class="pv">'+(patMob||'\u2014')+'</div></div>');
+  H.push('<div><div class="pl">City</div><div class="pv">'+(patCity||'\u2014')+'</div></div>');
   H.push('</div>');
 
-  // MEDICINES TABLE — with Batch + Expiry + Price
+  // MEDICINES
   if(meds.length){
     H.push('<div class="sec"><div class="st grn">Medicines</div>');
-    H.push('<table><thead><tr>');
-    H.push('<th>#</th><th>Medicine</th><th>Dose / Freq</th><th>Sch</th><th>Batch</th><th>Exp</th>');
-    H.push('<th style="text-align:center">Qty</th><th style="text-align:right">Rate ₹</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amt ₹</th>');
-    H.push('</tr></thead><tbody>');
+    H.push('<table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Sch</th><th>Batch</th><th>Exp</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate \u20b9</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
     meds.forEach(function(m,i){
-      var q=parseInt(m.qty)||0;
-      var s=parseFloat(m.sale)||0;
-      var d=parseFloat(m.disc)||0;
+      var q=parseInt(m.qty)||0; var s=parseFloat(m.sale)||0; var d=parseFloat(m.disc)||0;
       var a=parseFloat(m.amt||(q*s*(1-d/100)))||0;
-      H.push('<tr>');
-      H.push('<td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
+      H.push('<tr><td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
       H.push('<td><div class="mn">'+m.name+'</div>'+(m.remarks?'<div class="mr">'+m.remarks+'</div>':'')+'</td>');
-      H.push('<td><div class="md">'+(m.dose||'—')+'</div></td>');
-      H.push('<td style="text-align:center;font-weight:700;font-size:10px">'+(m.schedule||'OTC')+'</td>');
-      H.push('<td style="font-size:10px;color:#64748b">'+(m.batch||'—')+'</td>');
-      H.push('<td style="font-size:10px;color:#64748b;text-align:center">'+(m.exp||'—')+'</td>');
+      H.push('<td><div class="md">'+(m.dose||'\u2014')+'</div></td>');
+      H.push('<td style="text-align:center;font-size:10px;font-weight:700">'+(m.schedule||'OTC')+'</td>');
+      H.push('<td style="font-size:10px;color:#64748b">'+(m.batch||'\u2014')+'</td>');
+      H.push('<td style="font-size:10px;color:#64748b;text-align:center">'+(m.exp||'\u2014')+'</td>');
       H.push('<td style="text-align:center;font-weight:800;color:#185FA5">'+q+'</td>');
-      H.push('<td style="text-align:right">₹'+s.toFixed(2)+'</td>');
+      H.push('<td style="text-align:right">\u20b9'+s.toFixed(2)+'</td>');
       H.push('<td style="text-align:center">'+(d||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700">₹'+a.toFixed(2)+'</td>');
-      H.push('</tr>');
+      H.push('<td style="text-align:right;font-weight:700">\u20b9'+a.toFixed(2)+'</td></tr>');
     });
     H.push('</tbody></table></div>');
   }
 
-  // SERVICES TABLE
+  // SERVICES
   if(svcs.length){
     H.push('<div class="sec" style="margin-top:10px"><div class="st blu">Services &amp; Consultation</div>');
-    H.push('<table><thead><tr>');
-    H.push('<th class="b">#</th><th class="b">Service / Description</th><th class="b" style="text-align:right">Rate ₹</th><th class="b" style="text-align:center">Disc%</th><th class="b" style="text-align:right">Amt ₹</th>');
-    H.push('</tr></thead><tbody>');
+    H.push('<table><thead><tr><th class="b">#</th><th class="b">Service</th><th class="b" style="text-align:right">Rate \u20b9</th><th class="b" style="text-align:center">Disc%</th><th class="b" style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
     svcs.forEach(function(s,i){
       var a=parseFloat(s.amt||s.price||0);
-      H.push('<tr>');
-      H.push('<td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
-      H.push('<td><div class="mn">'+s.name+'</div>'+(s.desc?'<div class="md">'+s.desc+'</div>':'')+'</td>');
-      H.push('<td style="text-align:right">₹'+(parseFloat(s.price||0)).toFixed(2)+'</td>');
+      H.push('<tr><td style="color:#64748b;text-align:center">'+(i+1)+'</td>');
+      H.push('<td><div class="mn">'+s.name+'</div></td>');
+      H.push('<td style="text-align:right">\u20b9'+(parseFloat(s.price||0)).toFixed(2)+'</td>');
       H.push('<td style="text-align:center">'+(s.disc||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700;color:#059669">₹'+a.toFixed(2)+'</td>');
-      H.push('</tr>');
+      H.push('<td style="text-align:right;font-weight:700;color:#059669">\u20b9'+a.toFixed(2)+'</td></tr>');
     });
     H.push('</tbody></table></div>');
   }
 
-  // TOTALS
-  // Read paid/balance — support both old field names (paid) and new (paidAmount)
-  var prevBal=parseFloat(inv.prevBalance||0);
-  var paidNow=parseFloat(inv.paidAmount||inv.paid||0);
-  var balDue=parseFloat(inv.balanceDue!=null&&inv.balanceDue!==undefined?inv.balanceDue:Math.max(0,prevBal+grandTotal-paidNow));
-  // If fully paid status, ensure balance = 0
-  if(inv.status==='Paid'&&balDue>0&&!inv.balanceDue)balDue=0;
-
+  // GRAND TOTAL
   H.push('<div class="tot">');
-  if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">₹'+medTotal.toFixed(2)+'</div></div>');
-  if(svcs.length)H.push('<div class="titem"><div class="tl">Services</div><div class="tv" style="color:#185FA5">₹'+svcTotal.toFixed(2)+'</div></div>');
-  H.push('<div class="titem grand"><div class="tl">Grand Total</div><div class="tv">₹'+grandTotal.toFixed(2)+'</div></div>');
+  if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">\u20b9'+medTotal.toFixed(2)+'</div></div>');
+  if(svcs.length)H.push('<div class="titem"><div class="tl">Services</div><div class="tv" style="color:#185FA5">\u20b9'+svcTotal.toFixed(2)+'</div></div>');
+  H.push('<div class="titem grand"><div class="tl">Grand Total</div><div class="tv">\u20b9'+grandTotal.toFixed(2)+'</div></div>');
   H.push('</div>');
 
-  // Balance summary bar
-  H.push('<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid #059669;background:#F0FDF4">');
-  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">Prev Balance</div><div style="font-size:15px;font-weight:800;color:#DC2626">₹'+prevBal.toFixed(2)+'</div></div>');
-  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">+ New Bill</div><div style="font-size:15px;font-weight:800;color:#185FA5">₹'+grandTotal.toFixed(2)+'</div></div>');
-  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">− Paid Now</div><div style="font-size:15px;font-weight:800;color:#059669">₹'+paidNow.toFixed(2)+'</div></div>');
-  H.push('<div style="padding:8px 14px;text-align:center;background:'+(balDue<=0?'#f0fdf4':'#fef2f2')+';"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">= Balance Due</div><div style="font-size:16px;font-weight:900;color:'+(balDue<=0?'#059669':'#DC2626')+'">₹'+balDue.toFixed(2)+'</div></div>');
+  // BALANCE BAR — always shown
+  H.push('<div class="bal-bar">');
+  H.push('<div class="bb"><div class="bbl">Prev Balance</div><div class="bbv" style="color:'+(prevBal>0?'#DC2626':'#059669')+'">\u20b9'+prevBal.toFixed(2)+'</div></div>');
+  H.push('<div class="bb"><div class="bbl">+ New Bill</div><div class="bbv" style="color:#185FA5">\u20b9'+grandTotal.toFixed(2)+'</div></div>');
+  H.push('<div class="bb"><div class="bbl">\u2212 Paid Now</div><div class="bbv" style="color:#059669">\u20b9'+paidNow.toFixed(2)+'</div></div>');
+  H.push('<div class="bb" style="background:'+(balDue<=0?'#f0fdf4':'#fef2f2')+'"><div class="bbl">= Balance Due</div><div class="bbv" style="color:'+(balDue<=0?'#059669':'#DC2626')+'">\u20b9'+balDue.toFixed(2)+'</div></div>');
   H.push('</div>');
 
   // FOOTER
   H.push('<div class="foot"><div>');
-  if(nextVisit)H.push('<div class="fnext">📅 Next Visit: <b>'+nextVisit+'</b> &nbsp;·&nbsp; '+mode+'</div>');
-  H.push('<div class="stamp">✓ PAID</div>');
+  if(nextVisit)H.push('<div class="fnext">\uD83D\uDCC5 Next Visit: <b>'+nextVisit+'</b> \u00b7 '+mode+'</div>');
+  H.push('<div class="stamp">'+(balDue<=0?'\u2713 PAID':'⏳ PENDING \u20b9'+balDue.toFixed(2))+'</div>');
   H.push('</div><div><div class="sig-line"></div><div class="sig-t">Authorised Signature</div></div></div>');
   H.push('</div></body></html>');
 
-  showPdfPopup(H.join(''), 'Tax Invoice — '+invNo, '#059669');
+  showPdfPopup(H.join(''), 'Tax Invoice \u2014 '+invNo, '#059669');
 }
+window.printInvoice=printInvoice;
+
 window.printInvoice=printInvoice;
 
 window.printInvoice=printInvoice;
@@ -13241,6 +13238,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
