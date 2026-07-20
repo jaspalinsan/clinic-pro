@@ -816,11 +816,7 @@ html,body{height:100%;overflow:hidden}
   <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
     
   </div>
-  <div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 16px;border-top:0.5px solid var(--sl2)">
-    <span style="font-size:12px;color:var(--ink2)">Med Total: <b id="rx-med-total">&#8377;0.00</b></span>
-    <span style="font-size:12px;color:var(--ink2)">Svc Total: <b id="rx-svc-total">&#8377;0.00</b></span>
-    <span style="font-size:13px;font-weight:700;color:var(--acc)">Grand Total: <b id="rx-grand-total">&#8377;0.00</b></span>
-  </div>
+  <div style="border-top:2px solid #e2e8f0;background:#f8faff"><div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 16px 6px;border-bottom:1px solid #e2e8f0"><span style="font-size:12px;color:var(--ink2)">Med: <b id="rx-med-total" style="color:#185FA5">&#8377;0.00</b></span><span style="font-size:12px;color:var(--ink2)">Services: <b id="rx-svc-total" style="color:#059669">&#8377;0.00</b></span><span style="font-size:13px;font-weight:700;color:var(--acc)">Grand Total: <b id="rx-grand-total">&#8377;0.00</b></span></div><div style="display:flex;align-items:center;gap:0;padding:8px 16px"><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Prev Balance</div><div id="rx-prev-balance" style="font-size:16px;font-weight:800;color:#DC2626">&#8377;0.00</div></div><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">+ New Bill</div><div id="rx-new-bill" style="font-size:16px;font-weight:800;color:#185FA5">&#8377;0.00</div></div><div style="flex:1;text-align:center;padding:6px 10px;border-right:1px solid #e2e8f0"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">− Paid</div><div style="display:flex;align-items:center;justify-content:center;gap:6px"><input id="rx-paid-now" type="number" min="0" placeholder="0.00" style="width:90px;text-align:center;font-size:15px;font-weight:800;color:#059669;border:1.5px solid #bbf7d0;border-radius:7px;padding:3px 6px;outline:none" oninput="rxCalcBalance()"></div></div><div style="flex:1;text-align:center;padding:6px 10px;background:#FEF2F2;border-radius:0 0 8px 0"><div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">= Balance Due</div><div id="rx-balance-due" style="font-size:18px;font-weight:900;color:#DC2626">&#8377;0.00</div></div></div></div>
 </div>
 
 
@@ -2270,6 +2266,41 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+function rxCalcBalance(){
+  var prevBal=window._rxPrevBalance||0;
+  var grand=window._rxGrandTotal||0;
+  var paid=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
+  var balDue=prevBal+grand-paid;
+
+  function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  set('rx-prev-balance','\u20b9'+prevBal.toFixed(2));
+  set('rx-new-bill','\u20b9'+grand.toFixed(2));
+  set('rx-balance-due','\u20b9'+Math.max(0,balDue).toFixed(2));
+
+  var due=document.getElementById('rx-balance-due');
+  if(due)due.style.color=balDue<=0?'#059669':'#DC2626';
+}
+window.rxCalcBalance=rxCalcBalance;
+
+function rxLoadPrevBalance(patName){
+  // Calculate previous unpaid balance from BILLING_DB for this patient
+  var prevBal=0;
+  if(!patName||!window.BILLING_DB){window._rxPrevBalance=0;rxCalcBalance();return;}
+  var nm=patName.trim().toLowerCase();
+  window.BILLING_DB.forEach(function(inv){
+    var iname=(inv.patient||inv.name||'').trim().toLowerCase();
+    if(iname!==nm)return;
+    var total=(inv.grandTotal||inv.total||inv.amount||0);
+    var paid=(inv.paidAmount||inv.paid||0);
+    if(inv.status==='Paid')return; // fully paid - skip
+    prevBal+=parseFloat(total)-parseFloat(paid);
+  });
+  window._rxPrevBalance=Math.max(0,prevBal);
+  rxCalcBalance();
+}
+window.rxLoadPrevBalance=rxLoadPrevBalance;
+
 
 
 
@@ -5193,65 +5224,33 @@ function rxCalcSvc(el){
 }
 window.rxCalcSvc=rxCalcSvc;
 
-function rxCalcTotals() {
-  var medT=0, svcT=0;
+function rxCalcTotals(){
+  // Sum medicines
+  var medT=0;
   document.querySelectorAll('#rx-med-tbody .rx-amt').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9')) medT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
+    if(el.textContent.startsWith('\u20b9'))medT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
   });
+  // Sum services
+  var svcT=0;
   document.querySelectorAll('#rx-svc-tbody .rx-net').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9')) svcT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
+    if(el.textContent.startsWith('\u20b9'))svcT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
   });
   var grand=medT+svcT;
-  var g=document.getElementById.bind(document);
-  var set=function(id,v){var el=g(id);if(el)el.textContent=v;};
-  set('rx-med-total', '\u20b9'+medT.toFixed(2));
-  set('rx-svc-total', '\u20b9'+svcT.toFixed(2));
-  if(g('rx-gt-med')) g('rx-gt-med').textContent='\u20b9'+medT.toFixed(2);
-  if(g('rx-gt-svc')) g('rx-gt-svc').textContent='\u20b9'+svcT.toFixed(2);
+
+  // Update totals display
+  function sid(id){return document.getElementById(id);}
+  function set(id,v){var el=sid(id);if(el)el.textContent=v;}
+  set('rx-med-total','\u20b9'+medT.toFixed(2));
+  set('rx-svc-total','\u20b9'+svcT.toFixed(2));
   set('rx-grand-total','\u20b9'+grand.toFixed(2));
+  set('rx-new-bill','\u20b9'+grand.toFixed(2));
 
-  // Compute paid services from BILLING_DB for this patient
-  var pname=(g('rx-pat-name')||{}).value||'';
-  var paidSvc=0;
-  if(pname&&window.BILLING_DB){
-    window.BILLING_DB.forEach(function(b){
-      if(b.patient!==pname) return;
-      if(b.status!=='Paid') return;
-      // Count service amounts from paid invoices
-      if(b.svcs&&b.svcs.length){
-        b.svcs.forEach(function(s){paidSvc+=parseFloat(s.net)||0;});
-      } else if(b.desc&&/serv|lab|ecg|physio|test/i.test(b.desc)){
-        paidSvc+=parseFloat(b.amount)||0;
-      }
-    });
-  }
-
-  var pending=Math.max(0,grand-paidSvc);
-  set('rx-paid-services','\u20b9'+paidSvc.toFixed(2));
-  set('rx-pending-bill', '\u20b9'+pending.toFixed(2));
-
-  // Show note if paid services exist
-  var note=g('rx-billing-note');
-  var noteText=g('rx-billing-note-text');
-  if(note&&paidSvc>0){
-    note.style.display='block';
-    if(noteText) noteText.textContent=
-      'Services \u20b9'+svcT.toFixed(2)+' \u2212 Already paid \u20b9'+paidSvc.toFixed(2)+
-      ' = New bill \u20b9'+pending.toFixed(2)+
-      (medT>0?' (includes medicines \u20b9'+medT.toFixed(2)+')':'');
-  } else if(note){
-    note.style.display='none';
-  }
-
-  // Highlight pending bill
-  var pendEl=g('rx-pending-bill');
-  if(pendEl){
-    pendEl.style.color=pending>0?'var(--acc)':'#10B981';
-  }
-
-  var svcDisp=document.getElementById('rx-svc-total-display');
-  if(svcDisp)svcDisp.textContent='₹'+svcT.toFixed(2);
+  // Store grand for balance calc
+  window._rxGrandTotal=grand;
+  rxCalcBalance();
 }
+window.rxCalcTotals=rxCalcTotals;
+
 
 function rxSave(){
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
@@ -5559,7 +5558,7 @@ window.rxCalcSvc=rxCalcSvc;
 window.rxCalcTotals=rxCalcTotals;
 function rxSubmitBilling(section){
 try{
-  var pname=(document.getElementById('rx-pat-name')||{}).value||'';
+  var pname=(document.getElementById('rx-pat-search')||document.getElementById('rx-pat-name')||{value:''}).value||'';
   if(!pname){
     toast('Enter patient name first','error');
     var el=document.getElementById('rx-pat-name');
@@ -11967,6 +11966,7 @@ function rxFillPatient(r){
   var drop=document.getElementById('rx-pat-drop');
   if(drop)drop.style.display='none';
   toast((r.name||'Patient')+' loaded','success');
+  rxLoadPrevBalance(r.name||'');
 }
 window.rxFillPatient=rxFillPatient;
 
@@ -12918,10 +12918,22 @@ function printInvoice(invId){
   }
 
   // TOTALS
+  var prevBal=parseFloat(inv.prevBalance||0);
+  var paidNow=parseFloat(inv.paidAmount||0);
+  var balDue=parseFloat(inv.balanceDue||Math.max(0,prevBal+grandTotal-paidNow));
+
   H.push('<div class="tot">');
   if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">₹'+medTotal.toFixed(2)+'</div></div>');
   if(svcs.length)H.push('<div class="titem"><div class="tl">Services</div><div class="tv" style="color:#185FA5">₹'+svcTotal.toFixed(2)+'</div></div>');
   H.push('<div class="titem grand"><div class="tl">Grand Total</div><div class="tv">₹'+grandTotal.toFixed(2)+'</div></div>');
+  H.push('</div>');
+
+  // Balance summary bar
+  H.push('<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid #059669;background:#F0FDF4">');
+  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">Prev Balance</div><div style="font-size:15px;font-weight:800;color:#DC2626">₹'+prevBal.toFixed(2)+'</div></div>');
+  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">+ New Bill</div><div style="font-size:15px;font-weight:800;color:#185FA5">₹'+grandTotal.toFixed(2)+'</div></div>');
+  H.push('<div style="padding:8px 14px;border-right:1px solid #d1fae5;text-align:center"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">− Paid Now</div><div style="font-size:15px;font-weight:800;color:#059669">₹'+paidNow.toFixed(2)+'</div></div>');
+  H.push('<div style="padding:8px 14px;text-align:center;background:'+(balDue<=0?'#f0fdf4':'#fef2f2')+';"><div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase">= Balance Due</div><div style="font-size:16px;font-weight:900;color:'+(balDue<=0?'#059669':'#DC2626')+'">₹'+balDue.toFixed(2)+'</div></div>');
   H.push('</div>');
 
   // FOOTER
@@ -13199,6 +13211,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 </script>
