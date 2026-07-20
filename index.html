@@ -565,19 +565,7 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-rx">
   <div class="ph">
     <div><div class="ptitle"><i class="ti ti-file-description" style="color:#8B5CF6;margin-right:6px"></i>Prescription</div><div class="psub" id="rx-sub">New prescription</div></div>
-    <div class="ha">
-      <button id="srx-toggle-btn"
-        onclick="toggleSavedRxPanel()"
-        style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;border:1.5px solid #B5D4F4;background:#E6F1FB;color:#0C447C">
-        <i class="ti ti-history" style="font-size:15px"></i>
-        Saved Rx
-        <span id="srx-count-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#B5D4F4;color:#042C53">0</span>
-      </button>
-      <button class="bs" onclick="rxNewBlank()"><i class="ti ti-plus"></i>New Rx</button>
-      <button class="bs" onclick="rxPrint()"><i class="ti ti-printer"></i>Print</button>
-      <button class="bp" onclick="rxSubmitBilling('all')"><i class="ti ti-currency-rupee"></i>Submit to Billing</button>
-    </div>
-  </div>
+    
   <!-- Saved Rx Toggle Panel -->
   <div id="srx-panel" style="display:none;background:#F0F2F5;border:1px solid #C0C0C0;border-radius:10px;overflow:hidden;margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid #C8C8C8;background:rgba(255,255,255,.5)">
@@ -817,7 +805,7 @@ html,body{height:100%;overflow:hidden}
   <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
     
   </div>
-  <div style="border-top:2px solid #e2e8f0;background:#f8faff;padding:6px 14px"><div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap"><span style="font-size:11px;color:#64748b">Med: <b id="rx-med-total" style="color:#185FA5;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Svc: <b id="rx-svc-total" style="color:#059669;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Grand: <b id="rx-grand-total" style="color:var(--acc);font-size:13px;font-weight:800">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Prev Bal: <b id="rx-prev-balance" style="color:#DC2626;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">New: <b id="rx-new-bill" style="color:#185FA5;font-size:12px">&#8377;0.00</b></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:72px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:2px 6px;text-align:right;outline:none" oninput="rxCalcBalance()"></span><span style="color:#d1d5db">|</span><span style="font-size:11px;color:#64748b">Due: <b id="rx-balance-due" style="color:#DC2626;font-size:14px;font-weight:900">&#8377;0.00</b></span></div></div>
+  <div style="border-top:2px solid #e2e8f0;background:#f8faff;padding:5px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:11px;color:#64748b;white-space:nowrap">Med: <b id="rx-med-total" style="color:#185FA5">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Svc: <b id="rx-svc-total" style="color:#059669">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Grand: <b id="rx-grand-total" style="color:var(--acc);font-size:13px">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Prev: <b id="rx-prev-balance" style="color:#DC2626">&#8377;0.00</b></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap;display:flex;align-items:center;gap:4px">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:68px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:2px 6px;text-align:right;outline:none" oninput="rxCalcBalance()"></span><span style="color:#e2e8f0">|</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Due: <b id="rx-balance-due" style="color:#DC2626;font-size:14px;font-weight:900">&#8377;0.00</b></span><div style="flex:1;min-width:8px"></div><b id="rx-new-bill" style="display:none">&#8377;0.00</b><button class="bs" onclick="rxNewBlank()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-plus"></i> New Rx</button><button class="bs" onclick="rxPrint()" style="font-size:11px;padding:5px 10px;white-space:nowrap"><i class="ti ti-printer"></i> Print</button><button class="bp" onclick="rxSubmitBilling('all')" style="font-size:11px;padding:5px 12px;white-space:nowrap;background:#1A3A8C"><i class="ti ti-currency-rupee"></i> Submit &amp; Save</button></div>
 
 
 
@@ -2266,6 +2254,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -13230,6 +13219,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
