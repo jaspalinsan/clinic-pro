@@ -2230,6 +2230,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -4921,6 +4922,7 @@ var _rxSaved = [];
 var _rxCounter = 1;
 
 function rxInit(){
+try{
   var CS=window.CLINIC_SETTINGS||{};
   var cn=document.getElementById('rx-clinic-name');
   var cs_el=document.getElementById('rx-clinic-sub');
@@ -4966,10 +4968,8 @@ function rxInit(){
     '<td class="rx-amt" style="text-align:right;font-size:14px;font-weight:900;color:#92400E">₹150</td>'+
     '<td></td>';
   tbody.appendChild(tr1);
-
-
-
-  rxCalcRow(tr1.querySelector('[data-rx="sale"]'));
+  // Calc consultancy after append
+  try{rxCalcRow(tr1.querySelector('[data-rx="sale"]'));}catch(e){}
 
   // ROW 2: One blank medicine row
   rxAddMedRow();
@@ -4977,6 +4977,7 @@ function rxInit(){
   // Service rows
   // Services now in unified table - no separate tbody
   if(typeof renderSvcList==='function')renderSvcList();
+}catch(e){console.error('rxInit error:',e);}
 }
 window.rxInit=rxInit;
 window.rxInit=rxInit;
@@ -13198,6 +13199,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
