@@ -614,39 +614,7 @@ html,body{height:100%;overflow:hidden}
       </div>
       <textarea class="fin" id="rx-old-history" rows="2" style="resize:vertical;font-size:12px;background:#fff" placeholder="e.g. HTN since 5 yrs, DM Type 2, allergic to Penicillin, appendix surgery 2019..."></textarea>
     </div>
-    <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2)">
-      <div class="flbl" style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
-        <span style="display:flex;align-items:center;gap:5px"><i class="ti ti-stethoscope" style="font-size:13px;color:#0891B2"></i>Chief Complaints / Symptoms</span>
-        <button class="tb" onclick="clearRxSyms()" style="font-size:10px;color:var(--rose);border-color:var(--rose)"><i class="ti ti-x"></i> Clear all</button>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
-        <button class="tb" onclick="addRxSym('Fever')" style="font-size:10px;padding:3px 8px">🌡 Fever</button>
-        <button class="tb" onclick="addRxSym('Cough')" style="font-size:10px;padding:3px 8px">🤧 Cough</button>
-        <button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:10px;padding:3px 8px">🤧 Cold</button>
-        <button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:10px;padding:3px 8px">😮 Sore Throat</button>
-        <button class="tb" onclick="addRxSym('Headache')" style="font-size:10px;padding:3px 8px">🤕 Headache</button>
-        <button class="tb" onclick="addRxSym('Body Pain')" style="font-size:10px;padding:3px 8px">💢 Body Pain</button>
-        <button class="tb" onclick="addRxSym('Nausea')" style="font-size:10px;padding:3px 8px">🤢 Nausea</button>
-        <button class="tb" onclick="addRxSym('Vomiting')" style="font-size:10px;padding:3px 8px">Vomiting</button>
-        <button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:10px;padding:3px 8px">Diarrhoea</button>
-        <button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:10px;padding:3px 8px">Abdomen Pain</button>
-        <button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:10px;padding:3px 8px">❤️ Chest Pain</button>
-        <button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:10px;padding:3px 8px">Breathlessness</button>
-        <button class="tb" onclick="addRxSym('Fatigue')" style="font-size:10px;padding:3px 8px">😴 Fatigue</button>
-        <button class="tb" onclick="addRxSym('Dizziness')" style="font-size:10px;padding:3px 8px">Dizziness</button>
-        <button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:10px;padding:3px 8px">Skin Rash</button>
-        <button class="tb" onclick="addRxSym('Joint Pain')" style="font-size:10px;padding:3px 8px">Joint Pain</button>
-        <button class="tb" onclick="addRxSym('Back Pain')" style="font-size:10px;padding:3px 8px">Back Pain</button>
-        <button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:10px;padding:3px 8px">Burning Urine</button>
-      </div>
-      <div id="rx-sym-list" style="display:flex;flex-wrap:wrap;gap:5px;min-height:32px;margin-bottom:8px;padding:6px 10px;background:var(--sl);border-radius:6px;border:0.5px solid var(--sl2)">
-        <span style="color:var(--ink3);font-size:11px;font-style:italic">Selected symptoms appear here...</span>
-      </div>
-      <div style="display:flex;gap:6px">
-        <input class="fin" id="rx-sym-input" placeholder="Type custom symptom + Enter..." style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){addRxSym(this.value);this.value=''}">
-        <button class="tb" onclick="addRxSym(document.getElementById('rx-sym-input').value);document.getElementById('rx-sym-input').value=''" style="font-size:11px;color:#0891B2;border-color:#0891B2"><i class="ti ti-plus"></i> Add</button>
-      </div>
-    </div>
+    <div style="padding:7px 14px;border-bottom:0.5px solid var(--sl2)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:nowrap"><span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#0891B2;flex-shrink:0"><i class="ti ti-stethoscope" style="font-size:13px;color:#0891B2"></i>Symptoms</span><input class="fin" id="rx-sym-input" placeholder="Type symptom + Enter..." style="flex:1;font-size:12px;min-width:0" onkeydown="if(event.key==='Enter'&&this.value){addRxSym(this.value);this.value=''}"><button class="tb" onclick="addRxSym(document.getElementById('rx-sym-input').value);document.getElementById('rx-sym-input').value=''" style="font-size:11px;color:#0891B2;border-color:#0891B2;flex-shrink:0"><i class="ti ti-plus"></i> Add</button><button class="tb" onclick="clearRxSyms()" style="font-size:10px;color:var(--rose);border-color:var(--rose);flex-shrink:0"><i class="ti ti-x"></i> Clear</button></div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"><button class="tb" onclick="addRxSym('Fever')" style="font-size:10px;padding:3px 8px">🌡 Fever</button><button class="tb" onclick="addRxSym('Cough')" style="font-size:10px;padding:3px 8px">🤧 Cough</button><button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:10px;padding:3px 8px">🤧 Cold</button><button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:10px;padding:3px 8px">😮 Sore Throat</button><button class="tb" onclick="addRxSym('Headache')" style="font-size:10px;padding:3px 8px">🤕 Headache</button><button class="tb" onclick="addRxSym('Body Pain')" style="font-size:10px;padding:3px 8px">💢 Body Pain</button><button class="tb" onclick="addRxSym('Nausea')" style="font-size:10px;padding:3px 8px">🤢 Nausea</button><button class="tb" onclick="addRxSym('Vomiting')" style="font-size:10px;padding:3px 8px">Vomiting</button><button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:10px;padding:3px 8px">Diarrhoea</button><button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:10px;padding:3px 8px">Abdomen Pain</button><button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:10px;padding:3px 8px">❤️ Chest Pain</button><button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:10px;padding:3px 8px">Breathlessness</button><button class="tb" onclick="addRxSym('Fatigue')" style="font-size:10px;padding:3px 8px">😴 Fatigue</button><button class="tb" onclick="addRxSym('Dizziness')" style="font-size:10px;padding:3px 8px">Dizziness</button><button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:10px;padding:3px 8px">Skin Rash</button><button class="tb" onclick="addRxSym('Joint Pain')" style="font-size:10px;padding:3px 8px">Joint Pain</button><button class="tb" onclick="addRxSym('Back Pain')" style="font-size:10px;padding:3px 8px">Back Pain</button><button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:10px;padding:3px 8px">Burning Urine</button></div><div id="rx-sym-list" style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:5px 10px;background:var(--sl);border-radius:6px;border:0.5px solid var(--sl2)"><span style="color:var(--ink3);font-size:11px;font-style:italic">Selected symptoms appear here...</span></div></div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;padding:10px 18px;align-items:start">
       <div style="padding-top:22px">
         <button class="bp" onclick="runAiDx()" style="font-size:12px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;padding:8px 16px">
@@ -2192,6 +2160,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -11141,7 +11110,6 @@ function rxAddUnifiedSvcRow(data){
       return '<option value="'+i+'" data-price="'+pr+'" data-disc="'+dc+'">'+nm+'</option>';
     }).join('');
   var tr=document.createElement('tr');tr.setAttribute('data-row-type','svc');
-  tr.setAttribute('data-row-type','service');
   tr.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">'+n+'</td>'+
     '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;background:#EAF3DE;color:#3B6D11;border:0.5px solid #C0DD97"><i class="ti ti-stethoscope" style="font-size:11px"></i>Svc</span></td>'+
@@ -13179,6 +13147,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
