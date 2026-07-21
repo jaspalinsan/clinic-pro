@@ -545,7 +545,19 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-rx">
   <div class="ph">
     <div><div class="ptitle"><i class="ti ti-file-description" style="color:#8B5CF6;margin-right:6px"></i>Prescription</div><div class="psub" id="rx-sub">New prescription</div></div>
-    
+    <div class="ha">
+      <button id="srx-toggle-btn"
+        onclick="toggleSavedRxPanel()"
+        style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;border:1.5px solid #B5D4F4;background:#E6F1FB;color:#0C447C">
+        <i class="ti ti-history" style="font-size:15px"></i>
+        Saved Rx
+        <span id="srx-count-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#B5D4F4;color:#042C53">0</span>
+      </button>
+      <button class="bs" onclick="rxNewBlank()"><i class="ti ti-plus"></i>New Rx</button>
+      <button class="bs" onclick="rxPrint()"><i class="ti ti-printer"></i>Print</button>
+      <button class="bp" onclick="rxSubmitBilling('all')"><i class="ti ti-currency-rupee"></i>Submit to Billing</button>
+    </div>
+  </div>
   <!-- Saved Rx Toggle Panel -->
   <div id="srx-panel" style="display:none;background:#F0F2F5;border:1px solid #C0C0C0;border-radius:10px;overflow:hidden;margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid #C8C8C8;background:rgba(255,255,255,.5)">
@@ -585,9 +597,57 @@ html,body{height:100%;overflow:hidden}
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:0.5px solid var(--sl2);flex-wrap:nowrap"><div style="flex:0 0 220px"><div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px"><i class="ti ti-calendar-check" style="font-size:10px"></i> Appointment</div><select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:6px 10px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:11px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select today's patient —</option></select></div><div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Patient Name</div><div class="pat-drop-wrap" style="position:relative"><input class="fin" id="rx-pat-name" placeholder="Type patient name..." style="width:100%;font-weight:600;font-size:12px" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div><div style="flex:0 0 80px"><div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / M" style="width:100%"></div><div style="flex:0 0 130px"><div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000" style="width:100%"></div><div style="flex:0 0 100px"><div style="font-size:9px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City" style="width:100%"></div></div><div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-bottom:0.5px solid var(--sl2);background:#f8faff;flex-wrap:nowrap;overflow-x:auto"><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">BP</span><input id="rx-bp" placeholder="120/80" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:54px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">mmHg</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Pulse</span><input id="rx-pulse" placeholder="72" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:34px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">bpm</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Temp</span><input id="rx-temp" placeholder="98.6" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:38px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">°F</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">SpO2</span><input id="rx-spo2" placeholder="98" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:30px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">%</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Wt</span><input id="rx-weight" placeholder="65" oninput="rxCalcBMI()" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:30px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">kg</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Ht</span><input id="rx-height" placeholder="165" oninput="rxCalcBMI()" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#059669;width:36px;text-align:center"><span style="font-size:10px;font-weight:700;color:#5a9e82">cm</span></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.4px">BMI</span><span id="rx-bmi" style="font-size:14px;font-weight:900;color:#D97706;min-width:32px;text-align:center">—</span><span style="font-size:10px;font-weight:700;color:#92400E">auto</span></div><div style="flex:1;height:1px;background:var(--sl2);min-width:8px"></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Mode</span><select id="rx-mode" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#7C3AED;cursor:pointer"><option value="Offline">OPD</option><option value="Online">Online</option><option value="Tele">Tele</option><option value="IPD">IPD</option></select></div><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.4px">Rx days</span><input type="number" id="rx-days" value="5" min="1" max="90" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#7C3AED;width:36px;text-align:center" oninput="rxRecalcAll();rxCalcNextDate()" title="Treatment days"></div><div style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.4px">Next visit</span><span id="rx-next-date" style="font-size:14px;font-weight:900;color:#059669;white-space:nowrap">--</span><input type="hidden" id="rx-next-visit" value=""></div></div></div>
-    <div style="border-bottom:0.5px solid var(--sl2)"><div style="display:flex;align-items:center;gap:7px;padding:6px 14px;border-bottom:0.5px solid var(--sl2);flex-wrap:nowrap;background:var(--bg)"><span style="font-size:11px;font-weight:700;color:#6366F1;white-space:nowrap;flex-shrink:0"><i class="ti ti-history" style="font-size:12px"></i> History</span><span style="color:var(--sl2);flex-shrink:0">|</span><div style="display:flex;gap:5px;flex:1;overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px"><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'HTN'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">HTN</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'DM Type 2'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">DM Type 2</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Asthma'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">Asthma</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Thyroid'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">Thyroid</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Cardiac'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">Cardiac</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Kidney Disease'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">Kidney</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Liver Disease'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#6366F1;color:#6366F1">Liver</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Allergic to Penicillin'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#DC2626;color:#DC2626">⚠ Penicillin</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Allergic to Sulpha'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#DC2626;color:#DC2626">⚠ Sulpha</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'NSAID allergy'" style="font-size:10px;padding:3px 8px;white-space:nowrap;border-color:#DC2626;color:#DC2626">⚠ NSAID</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'Appendix Surgery'" style="font-size:10px;padding:3px 8px;white-space:nowrap">🔪 Appendix</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'CABG Surgery'" style="font-size:10px;padding:3px 8px;white-space:nowrap">🔪 CABG</button><button class="tb" onclick="var e=document.getElementById('rx-old-history');e.value+=(e.value?', ':'')+ 'On regular medication'" style="font-size:10px;padding:3px 8px;white-space:nowrap">💊 Regular meds</button><button class="tb" onclick="document.getElementById('rx-old-history').value=''" style="font-size:10px;padding:3px 8px;white-space:nowrap;color:var(--rose);border-color:var(--rose)"><i class="ti ti-x"></i> Clear</button></div></div><div style="padding:5px 14px;background:var(--sl)"><input class="fin" id="rx-old-history" placeholder="Past illness, allergies, surgeries, current medications... e.g. HTN since 5 yrs, DM Type 2, allergic to Penicillin" style="width:100%;font-size:11px;background:#fff"></div></div>
-    <div style="border-bottom:0.5px solid var(--sl2)"><div style="display:flex;align-items:center;gap:7px;padding:6px 14px;border-bottom:0.5px solid var(--sl2);flex-wrap:nowrap;background:var(--bg)"><span style="font-size:11px;font-weight:700;color:#0891B2;white-space:nowrap;flex-shrink:0"><i class="ti ti-stethoscope" style="font-size:12px"></i> Symptoms</span><input class="fin" id="rx-sym-input" placeholder="Type + Enter..." style="width:150px;flex-shrink:0;font-size:11px" onkeydown="if(event.key==='Enter'&&this.value){addRxSym(this.value);this.value=''}"><button class="tb" onclick="addRxSym(document.getElementById('rx-sym-input').value);document.getElementById('rx-sym-input').value=''" style="font-size:11px;color:#0891B2;border-color:#0891B2;flex-shrink:0;padding:4px 9px"><i class="ti ti-plus"></i></button><button class="tb" onclick="clearRxSyms()" style="font-size:11px;color:var(--rose);border-color:var(--rose);flex-shrink:0;padding:4px 9px"><i class="ti ti-x"></i></button><span style="color:var(--sl2);flex-shrink:0">|</span><div style="display:flex;gap:5px;flex:1;overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px"><button class="tb" onclick="addRxSym('Fever')" style="font-size:10px;padding:3px 8px;white-space:nowrap">🌡 Fever</button><button class="tb" onclick="addRxSym('Cough')" style="font-size:10px;padding:3px 8px;white-space:nowrap">🤧 Cough</button><button class="tb" onclick="addRxSym('Cold')" style="font-size:10px;padding:3px 8px;white-space:nowrap">🤧 Cold</button><button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:10px;padding:3px 8px;white-space:nowrap">😮 Sore Throat</button><button class="tb" onclick="addRxSym('Headache')" style="font-size:10px;padding:3px 8px;white-space:nowrap">🤕 Headache</button><button class="tb" onclick="addRxSym('Body Pain')" style="font-size:10px;padding:3px 8px;white-space:nowrap">💢 Body Pain</button><button class="tb" onclick="addRxSym('Nausea')" style="font-size:10px;padding:3px 8px;white-space:nowrap">🤢 Nausea</button><button class="tb" onclick="addRxSym('Vomiting')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Vomiting</button><button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Diarrhoea</button><button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Abdomen Pain</button><button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:10px;padding:3px 8px;white-space:nowrap">❤️ Chest Pain</button><button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Breathlessness</button><button class="tb" onclick="addRxSym('Fatigue')" style="font-size:10px;padding:3px 8px;white-space:nowrap">😴 Fatigue</button><button class="tb" onclick="addRxSym('Dizziness')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Dizziness</button><button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Skin Rash</button><button class="tb" onclick="addRxSym('Joint Pain')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Joint Pain</button><button class="tb" onclick="addRxSym('Back Pain')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Back Pain</button><button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:10px;padding:3px 8px;white-space:nowrap">Burning Urine</button></div></div><div id="rx-sym-list" style="display:flex;flex-wrap:wrap;gap:5px;padding:5px 14px;min-height:30px;background:var(--sl)"><span style="color:var(--ink3);font-size:11px;font-style:italic">Selected symptoms appear here...</span></div></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr;gap:10px;padding:10px 18px;border-bottom:0.5px solid var(--sl2)">
+      <div><div class="flbl" style="margin-bottom:3px">Patient Name</div><div style="margin-bottom:8px">
+  <div style="font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px"><i class="ti ti-calendar-check" style="font-size:11px"></i> Today's Patients</div>
+  <select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:8px 12px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:13px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select>
+</div>
+<div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
+      <div><div class="flbl" style="margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
+      <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
+      <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
+    </div>
+    <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2);background:var(--sl)">
+      <div class="flbl" style="margin-bottom:4px;display:flex;align-items:center;gap:5px">
+        <i class="ti ti-history" style="font-size:13px;color:#6366F1"></i>
+        Old History &amp; Notes
+        <span style="font-size:10px;color:var(--ink3)">(allergies, chronic conditions, surgeries...)</span>
+      </div>
+      <textarea class="fin" id="rx-old-history" rows="2" style="resize:vertical;font-size:12px;background:#fff" placeholder="e.g. HTN since 5 yrs, DM Type 2, allergic to Penicillin, appendix surgery 2019..."></textarea>
+    </div>
+    <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2)">
+      <div class="flbl" style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:5px"><i class="ti ti-stethoscope" style="font-size:13px;color:#0891B2"></i>Chief Complaints / Symptoms</span>
+        <button class="tb" onclick="clearRxSyms()" style="font-size:10px;color:var(--rose);border-color:var(--rose)"><i class="ti ti-x"></i> Clear all</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+        <button class="tb" onclick="addRxSym('Fever')" style="font-size:10px;padding:3px 8px">🌡 Fever</button>
+        <button class="tb" onclick="addRxSym('Cough')" style="font-size:10px;padding:3px 8px">🤧 Cough</button>
+        <button class="tb" onclick="addRxSym('Cold / Running Nose')" style="font-size:10px;padding:3px 8px">🤧 Cold</button>
+        <button class="tb" onclick="addRxSym('Sore Throat')" style="font-size:10px;padding:3px 8px">😮 Sore Throat</button>
+        <button class="tb" onclick="addRxSym('Headache')" style="font-size:10px;padding:3px 8px">🤕 Headache</button>
+        <button class="tb" onclick="addRxSym('Body Pain')" style="font-size:10px;padding:3px 8px">💢 Body Pain</button>
+        <button class="tb" onclick="addRxSym('Nausea')" style="font-size:10px;padding:3px 8px">🤢 Nausea</button>
+        <button class="tb" onclick="addRxSym('Vomiting')" style="font-size:10px;padding:3px 8px">Vomiting</button>
+        <button class="tb" onclick="addRxSym('Diarrhoea')" style="font-size:10px;padding:3px 8px">Diarrhoea</button>
+        <button class="tb" onclick="addRxSym('Abdominal Pain')" style="font-size:10px;padding:3px 8px">Abdomen Pain</button>
+        <button class="tb" onclick="addRxSym('Chest Pain')" style="font-size:10px;padding:3px 8px">❤️ Chest Pain</button>
+        <button class="tb" onclick="addRxSym('Breathlessness')" style="font-size:10px;padding:3px 8px">Breathlessness</button>
+        <button class="tb" onclick="addRxSym('Fatigue')" style="font-size:10px;padding:3px 8px">😴 Fatigue</button>
+        <button class="tb" onclick="addRxSym('Dizziness')" style="font-size:10px;padding:3px 8px">Dizziness</button>
+        <button class="tb" onclick="addRxSym('Skin Rash')" style="font-size:10px;padding:3px 8px">Skin Rash</button>
+        <button class="tb" onclick="addRxSym('Joint Pain')" style="font-size:10px;padding:3px 8px">Joint Pain</button>
+        <button class="tb" onclick="addRxSym('Back Pain')" style="font-size:10px;padding:3px 8px">Back Pain</button>
+        <button class="tb" onclick="addRxSym('Burning Urine')" style="font-size:10px;padding:3px 8px">Burning Urine</button>
+      </div>
+      <div id="rx-sym-list" style="display:flex;flex-wrap:wrap;gap:5px;min-height:32px;margin-bottom:8px;padding:6px 10px;background:var(--sl);border-radius:6px;border:0.5px solid var(--sl2)">
+        <span style="color:var(--ink3);font-size:11px;font-style:italic">Selected symptoms appear here...</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <input class="fin" id="rx-sym-input" placeholder="Type custom symptom + Enter..." style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){addRxSym(this.value);this.value=''}">
+        <button class="tb" onclick="addRxSym(document.getElementById('rx-sym-input').value);document.getElementById('rx-sym-input').value=''" style="font-size:11px;color:#0891B2;border-color:#0891B2"><i class="ti ti-plus"></i> Add</button>
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;padding:10px 18px;align-items:start">
       <div style="padding-top:22px">
         <button class="bp" onclick="runAiDx()" style="font-size:12px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;padding:8px 16px">
@@ -666,7 +726,7 @@ html,body{height:100%;overflow:hidden}
 
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0">
     <div style="display:flex;align-items:center;gap:7px">
-      <i class="ti ti-microscope" style="font-size:15px;color:#1A3A8C"></i>
+      <i class="ti ti-microscope" style="font-size:15px;color:#185FA5"></i>
       <span id="rx-lab-header" style="font-size:13px;font-weight:600;color:#0C447C">Lab Reports</span>
       <span id="rx-lab-count" style="font-size:10px;background:#B5D4F4;color:#042C53;border-radius:10px;padding:1px 9px;display:none">0</span>
     </div>
@@ -686,25 +746,31 @@ html,body{height:100%;overflow:hidden}
   </div>
 
   <div class="card" style="margin-bottom:12px">
-  <div class="ch" style="flex-wrap:wrap;gap:8px;align-items:center">
+  <div class="ch" style="flex-wrap:wrap;gap:8px">
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <!-- 3 pills one line -->
-    
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <span style="font-size:12px;color:var(--ink2);font-weight:600">Rx For</span>
+      <input type="number" id="rx-days" value="5" min="1" max="90"
+        style="width:68px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--sl2);border-radius:6px;padding:3px 6px;background:var(--bg)"
+        oninput="rxRecalcAll()" title="Treatment days">
+      <span style="font-size:12px;color:var(--ink2)">days</span>
+    </div>
+  </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr style="background:#f1f5f9">
-      <th style="width:24px;text-align:center">#</th>
-      <th style="width:58px;text-align:center">Type</th>
-      <th style="width:18%">Item Name</th>
-      <th style="width:14%">Dose / Frequency</th>
-      <th style="width:46px;text-align:center">Sch</th>
-      <th style="width:7%">Batch</th>
-      <th style="width:58px;text-align:center">Exp</th>
-      <th style="width:52px;text-align:center">Days</th>
-      <th style="width:52px;text-align:center">Qty</th>
-      <th style="width:72px;text-align:right">Rate &#8377;</th>
-      <th style="width:54px;text-align:center">Disc%</th>
-      <th style="width:76px;text-align:right">Amt &#8377;</th>
-      <th style="width:22px"></th>
+    <thead><tr>
+      <th style="width:24px">#</th>
+      <th style="width:62px;text-align:center">Type</th>
+      <th style="width:22%">Item Name</th>
+      <th style="width:13%">Dose</th>
+      <th style="width:7%;text-align:center">Sch</th>
+      <th style="width:8%">MFR</th>
+      <th style="width:8%">Batch</th>
+      <th style="width:7%;text-align:center">Exp</th>
+      <th style="width:6%;text-align:center">Qty</th>
+      <th style="width:8%;text-align:right">Sale &#8377;</th>
+      <th style="width:10%;text-align:center">Disc %</th>
+      <th style="width:8%;text-align:right">Amt &#8377;</th>
+      <th style="width:20px"></th>
     </tr></thead>
     <tbody id="rx-med-tbody"></tbody>
   </table></div>
@@ -713,7 +779,13 @@ html,body{height:100%;overflow:hidden}
   <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
     
   </div>
-  <div style="border-top:2px solid #1A3A8C;background:#f8faff;padding:7px 14px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto"><span style="font-size:11px;color:#64748b;white-space:nowrap">Prev: <b id="rx-prev-balance" style="color:#DC2626;font-size:12px">₹0.00</b></span><span style="color:#94a3b8;font-weight:700">+</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Svc: <b id="rx-svc-total" style="color:#059669;font-size:12px">₹0.00</b></span><span style="color:#94a3b8;font-weight:700">+</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Med: <b id="rx-med-total" style="color:#185FA5;font-size:12px">₹0.00</b></span><span style="color:#94a3b8;font-weight:700">=</span><span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Grand: <b id="rx-grand-total" style="color:#1A3A8C;font-size:14px">₹0.00</b></span><span style="color:#94a3b8;font-weight:700">−</span><span style="font-size:11px;color:#64748b;white-space:nowrap;display:flex;align-items:center;gap:5px">Paid: <input id="rx-paid-now" type="number" min="0" placeholder="0" style="width:70px;font-size:12px;font-weight:700;color:#059669;border:1.5px solid #bbf7d0;border-radius:6px;padding:3px 6px;text-align:right;outline:none" oninput="rxCalcBalance()" onchange="rxCalcBalance()"></span><span style="color:#94a3b8;font-weight:700">=</span><span style="font-size:11px;color:#64748b;white-space:nowrap">Balance: <b id="rx-balance-due" style="color:#DC2626;font-size:15px;font-weight:900">₹0.00</b></span><b id="rx-new-bill" style="display:none">₹0.00</b><div style="flex:1;min-width:10px"></div><button class="bp" onclick="rxSubmitBilling('all')" style="font-size:12px;padding:7px 20px;white-space:nowrap;background:#1A3A8C;border-radius:8px;display:flex;align-items:center;gap:6px;font-weight:700;flex-shrink:0"><i class="ti ti-currency-rupee"></i> Submit &amp; Save</button></div>
+  <div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 16px;border-top:0.5px solid var(--sl2)">
+    <span style="font-size:12px;color:var(--ink2)">Med Total: <b id="rx-med-total">&#8377;0.00</b></span>
+    <span style="font-size:12px;color:var(--ink2)">Svc Total: <b id="rx-svc-total">&#8377;0.00</b></span>
+    <span style="font-size:13px;font-weight:700;color:var(--acc)">Grand Total: <b id="rx-grand-total">&#8377;0.00</b></span>
+  </div>
+</div>
+
 
 
   <!-- Lab Results Section - hidden until lab results attached -->
@@ -758,6 +830,34 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
 
+  <!-- Grand Total Bar -->
+  <div style="background:#fff;border-radius:10px;border:1px solid var(--sl2);padding:14px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div>
+          <span style="font-size:11px;color:var(--ink3);display:block;margin-bottom:2px">Grand Total</span>
+          <span id="rx-grand-total" style="font-size:22px;font-weight:800;color:var(--ink)">&#8377;0.00</span>
+        </div>
+        <div style="font-size:20px;color:var(--sl3);font-weight:300">&#8722;</div>
+        <div>
+          <span style="font-size:11px;color:var(--rose);display:block;margin-bottom:2px">Paid Services</span>
+          <span id="rx-paid-services" style="font-size:22px;font-weight:800;color:var(--rose)">&#8377;0.00</span>
+        </div>
+        <div style="font-size:20px;color:var(--sl3);font-weight:300">=</div>
+        <div style="background:var(--m);border-radius:10px;padding:8px 16px;border:2px solid var(--acc)">
+          <span style="font-size:11px;color:var(--acc);display:block;margin-bottom:2px">Pending / New Bill</span>
+          <span id="rx-pending-bill" style="font-size:22px;font-weight:800;color:var(--acc)">&#8377;0.00</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="bs" onclick="rxSave()"><i class="ti ti-device-floppy"></i>Save Rx</button>
+        <button class="bp" onclick="rxSubmitBilling('all')"><i class="ti ti-currency-rupee"></i>Submit to Billing</button>
+      </div>
+    </div>
+    <div id="rx-billing-note" style="display:none;background:var(--sk2);border-radius:8px;padding:8px 14px;font-size:12px;color:#1E40AF">
+      <i class="ti ti-info-circle" style="margin-right:6px"></i>
+      <span id="rx-billing-note-text"></span>
+    </div>
   </div>
 
   <!-- Lab Reports Section - always visible at bottom of Rx -->
@@ -1966,8 +2066,6 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
-
-
 
 
 
@@ -3971,30 +4069,64 @@ function rxCalcSvc(el){
 }
 window.rxCalcSvc=rxCalcSvc;
 
-function rxCalcTotals(){
-  // Med total: .rx-amt cells that are NOT .rx-svc-amt
-  var medT=0;
-  document.querySelectorAll('#rx-med-tbody tr .rx-amt').forEach(function(el){
-    if(el.classList.contains('rx-svc-amt'))return; // skip svc rows
-    var v=parseFloat((el.textContent||'').replace('\u20b9','').replace('\u2014',''))||0;
-    medT+=v;
+function rxCalcTotals() {
+  var medT=0, svcT=0;
+  document.querySelectorAll('#rx-med-tbody .rx-amt').forEach(function(el){
+    if(el.textContent.startsWith('\u20b9')) medT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
   });
-
-  // Svc total: .rx-svc-amt cells
-  var svcT=0;
-  document.querySelectorAll('#rx-med-tbody tr .rx-svc-amt').forEach(function(el){
-    var v=parseFloat((el.textContent||'').replace('\u20b9','').replace('\u2014',''))||0;
-    svcT+=v;
+  document.querySelectorAll('#rx-svc-tbody .rx-net').forEach(function(el){
+    if(el.textContent.startsWith('\u20b9')) svcT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
   });
-
   var grand=medT+svcT;
-  function _setEl(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
-  _setEl('rx-med-total','\u20b9'+medT.toFixed(2));
-  _setEl('rx-svc-total','\u20b9'+svcT.toFixed(2));
-  _setEl('rx-grand-total','\u20b9'+grand.toFixed(2));
-  _setEl('rx-new-bill','\u20b9'+grand.toFixed(2));
-  window._rxGrandTotal=grand;
-  rxCalcBalance();
+  var g=document.getElementById.bind(document);
+  var set=function(id,v){var el=g(id);if(el)el.textContent=v;};
+  set('rx-med-total', '\u20b9'+medT.toFixed(2));
+  set('rx-svc-total', '\u20b9'+svcT.toFixed(2));
+  if(g('rx-gt-med')) g('rx-gt-med').textContent='\u20b9'+medT.toFixed(2);
+  if(g('rx-gt-svc')) g('rx-gt-svc').textContent='\u20b9'+svcT.toFixed(2);
+  set('rx-grand-total','\u20b9'+grand.toFixed(2));
+
+  // Compute paid services from BILLING_DB for this patient
+  var pname=(g('rx-pat-name')||{}).value||'';
+  var paidSvc=0;
+  if(pname&&window.BILLING_DB){
+    window.BILLING_DB.forEach(function(b){
+      if(b.patient!==pname) return;
+      if(b.status!=='Paid') return;
+      // Count service amounts from paid invoices
+      if(b.svcs&&b.svcs.length){
+        b.svcs.forEach(function(s){paidSvc+=parseFloat(s.net)||0;});
+      } else if(b.desc&&/serv|lab|ecg|physio|test/i.test(b.desc)){
+        paidSvc+=parseFloat(b.amount)||0;
+      }
+    });
+  }
+
+  var pending=Math.max(0,grand-paidSvc);
+  set('rx-paid-services','\u20b9'+paidSvc.toFixed(2));
+  set('rx-pending-bill', '\u20b9'+pending.toFixed(2));
+
+  // Show note if paid services exist
+  var note=g('rx-billing-note');
+  var noteText=g('rx-billing-note-text');
+  if(note&&paidSvc>0){
+    note.style.display='block';
+    if(noteText) noteText.textContent=
+      'Services \u20b9'+svcT.toFixed(2)+' \u2212 Already paid \u20b9'+paidSvc.toFixed(2)+
+      ' = New bill \u20b9'+pending.toFixed(2)+
+      (medT>0?' (includes medicines \u20b9'+medT.toFixed(2)+')':'');
+  } else if(note){
+    note.style.display='none';
+  }
+
+  // Highlight pending bill
+  var pendEl=g('rx-pending-bill');
+  if(pendEl){
+    pendEl.style.color=pending>0?'var(--acc)':'#10B981';
+  }
+
+  var svcDisp=document.getElementById('rx-svc-total-display');
+  if(svcDisp)svcDisp.textContent='₹'+svcT.toFixed(2);
 }
 
 function rxSave(){
@@ -11238,221 +11370,6 @@ window.updateApptBulkBar=updateApptBulkBar;
 
 
 
-
-
-function rxCalcBMI(){
-  var w=parseFloat((document.getElementById('rx-weight')||{}).value)||0;
-  var h=parseFloat((document.getElementById('rx-height')||{}).value)||0;
-  var bmi=document.getElementById('rx-bmi');
-  if(!bmi)return;
-  if(w&&h){
-    var hm=h/100;
-    var b=(w/(hm*hm)).toFixed(1);
-    bmi.textContent=b;
-    bmi.style.color=b<18.5?'#DC2626':b<25?'#059669':b<30?'#D97706':'#DC2626';
-  } else {
-    bmi.textContent='—';
-  }
-}
-function rxCalcBalance(){
-  var prevBal = parseFloat(window._rxPrevBalance)||0;
-  var grand   = parseFloat(window._rxGrandTotal)||0;
-  var paidEl  = document.getElementById('rx-paid-now');
-  var paid    = paidEl ? parseFloat(paidEl.value)||0 : 0;
-  var balDue  = prevBal + grand - paid;
-
-  function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
-  set('rx-prev-balance', '\u20b9'+prevBal.toFixed(2));
-  set('rx-grand-total',  '\u20b9'+grand.toFixed(2));
-  set('rx-new-bill',     '\u20b9'+grand.toFixed(2));
-  set('rx-balance-due',  '\u20b9'+Math.max(0,balDue).toFixed(2));
-
-  var due = document.getElementById('rx-balance-due');
-  if(due) due.style.color = balDue<=0 ? '#059669' : '#DC2626';
-}
-function rxCalcNextDate(){
-  var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
-  var d=new Date();
-  d.setDate(d.getDate()+days);
-  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var label=String(d.getDate()).padStart(2,'0')+' '+MF[d.getMonth()]+' '+d.getFullYear();
-  var el=document.getElementById('rx-next-date');if(el)el.textContent=label;
-  var hid=document.getElementById('rx-next-visit');if(hid)hid.value=label;
-}
-function rxLoadPrevBalance(patName){
-  // Calculate previous unpaid balance from BILLING_DB for this patient
-  var prevBal=0;
-  if(!patName||!window.BILLING_DB){window._rxPrevBalance=0;rxCalcBalance();return;}
-  var nm=patName.trim().toLowerCase();
-  window.BILLING_DB.forEach(function(inv){
-    var iname=(inv.patient||inv.name||'').trim().toLowerCase();
-    if(iname!==nm)return;
-    var total=(inv.grandTotal||inv.total||inv.amount||0);
-    var paid=(inv.paidAmount||inv.paid||0);
-    if(inv.status==='Paid')return; // fully paid - skip
-    prevBal+=parseFloat(total)-parseFloat(paid);
-  });
-  window._rxPrevBalance=Math.max(0,prevBal);
-  rxCalcBalance();
-}
-function printInvoice(invId){
-  var inv=(window.BILLING_DB||[]).find(function(b){return b.id===invId;});
-  if(!inv){toast('Invoice not found: '+invId,'error');return;}
-
-  var meds=(inv.meds||inv.svcs&&[]||[]).filter?( inv.meds||[]).filter(function(m){return m&&m.name;}):[];
-  var svcs=(inv.services||inv.svcs||[]).filter(function(s){return s&&s.name;});
-
-  var CS=window.CLINIC_SETTINGS||{};
-  var cname=CS.name||'Clinic Pro';
-  var cdoc=CS.doctor||''; var cqual=CS.qual||''; var creg=CS.reg||'';
-  var caddr=(CS.address||'')+(CS.city?', '+CS.city:''); var cphone=CS.phone||'';
-
-  var patName=inv.patient||inv.name||'';
-  var patAge=inv.age||''; var patMob=inv.mobile||inv.mob||''; var patCity=inv.city||'';
-  var invDate=inv.date||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  var invNo=inv.id||invId;
-  var nextVisit=inv.nextVisit||(document.getElementById('rx-next-visit')||{textContent:''}).textContent||'';
-  var mode=inv.rxMode||inv.mode||(document.getElementById('rx-mode')||{value:'OPD'}).value||'OPD';
-
-  // TOTALS
-  var medTotal=0;
-  meds.forEach(function(m){
-    var q=parseInt(m.qty)||0; var s=parseFloat(m.sale)||0; var d=parseFloat(m.disc)||0;
-    medTotal+=parseFloat(m.amt||(q*s*(1-d/100)))||0;
-  });
-  var svcTotal=0;
-  svcs.forEach(function(s){svcTotal+=parseFloat(s.amt||s.price||0);});
-  var grandTotal=medTotal+svcTotal;
-
-  // BALANCE — read directly from inv fields
-  var prevBal = parseFloat(inv.prevBalance||0);
-  var paidNow = parseFloat(inv.paidAmount||inv.paid||inv.paidAmt||0);
-  var balDue  = inv.balanceDue!=null ? parseFloat(inv.balanceDue) : Math.max(0,prevBal+grandTotal-paidNow);
-
-  var H=[];
-  H.push('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice '+invNo+'</title><style>');
-  H.push('*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{background:#fff;color:#0f172a}.page{max-width:210mm;margin:0 auto}');
-  H.push('.hdr{background:linear-gradient(135deg,#059669,#0d7a5a);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}');
-  H.push('.cn{color:#fff;font-size:18px;font-weight:800}.cs{color:rgba(255,255,255,.8);font-size:10px;margin-top:2px}');
-  H.push('.right{color:#fff;text-align:right}.rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.8}.rno{font-size:20px;font-weight:900;letter-spacing:.5px}.rdate{font-size:10px;opacity:.75;margin-top:2px}');
-  H.push('.pat{background:#F0FDF4;border-bottom:2px solid #059669;padding:9px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}');
-  H.push('.pl{font-size:9px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.4px}.pv{font-size:13px;font-weight:700;color:#0f172a;margin-top:1px}');
-  H.push('.sec{padding:10px 20px 0}.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}');
-  H.push('.st::before{content:"";display:inline-block;width:3px;height:12px;border-radius:2px}.grn{color:#059669}.grn::before{background:#059669}.blu{color:#185FA5}.blu::before{background:#185FA5}');
-  H.push('table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:2px}');
-  H.push('th{border:1px solid #d1fae5;padding:6px 8px;font-size:9px;font-weight:700;color:#059669;text-align:left;text-transform:uppercase;letter-spacing:.3px;background:#f0fdf4}');
-  H.push('th.b{border-color:#BFDBFE;color:#185FA5;background:#f0f7ff}');
-  H.push('td{border:1px solid #e5e7eb;padding:6px 8px;vertical-align:top}');
-  H.push('tr:nth-child(even) td{background:#f8fffe}');
-  H.push('.mn{font-size:12px;font-weight:700;color:#0f172a}.md{font-size:10px;color:#185FA5;font-weight:600;margin-top:1px}.mr{font-size:10px;color:#94a3b8;font-style:italic}');
-  H.push('.tot{padding:10px 20px;display:flex;justify-content:flex-end;gap:24px;background:#F0FDF4;border-top:1px solid #d1fae5;margin-top:10px}');
-  H.push('.titem .tl{font-size:10px;color:#64748b;font-weight:600;text-align:right}.titem .tv{font-size:14px;font-weight:800;color:#059669;text-align:right;margin-top:1px}');
-  H.push('.grand .tv{font-size:20px!important;color:#065f46!important}');
-  H.push('.bal-bar{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid #059669;background:#f0fdf4}');
-  H.push('.bb{padding:10px 14px;text-align:center;border-right:1px solid #d1fae5}.bb:last-child{border-right:none}');
-  H.push('.bbl{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}');
-  H.push('.bbv{font-size:16px;font-weight:900}');
-  H.push('.foot{display:flex;justify-content:space-between;align-items:flex-end;padding:11px 20px;border-top:1px solid #e5e7eb;background:#fafafa}');
-  H.push('.fnext{font-size:11px;color:#059669;font-weight:600}');
-  H.push('.stamp{display:inline-block;background:#F0FDF4;border:1px dashed #059669;border-radius:6px;padding:4px 12px;font-size:10px;font-weight:700;color:#059669;margin-top:5px}');
-  H.push('.sig-line{border-top:1.5px solid #059669;width:120px;margin:0 0 4px auto}.sig-t{font-size:10px;color:#64748b;text-align:right}');
-  H.push('@media print{@page{size:A4;margin:8mm}body{margin:0}}</style></head><body><div class="page">');
-
-  // HEADER
-  H.push('<div class="hdr"><div><div class="cn">'+cname+'</div>');
-  H.push('<div class="cs">'+(cdoc?'Dr. '+cdoc+(cqual?' \u00b7 '+cqual:'')+(creg?' \u00b7 Reg: '+creg:''):'')+( caddr?' \u00b7 '+caddr:'')+( cphone?' \u00b7 '+cphone:'')+'</div></div>');
-  H.push('<div class="right"><div class="rlbl">Tax Invoice</div><div class="rno">'+invNo+'</div><div class="rdate">'+invDate+'</div></div></div>');
-
-  // PATIENT
-  H.push('<div class="pat">');
-  H.push('<div><div class="pl">Patient</div><div class="pv">'+patName+'</div></div>');
-  H.push('<div><div class="pl">Age / Sex</div><div class="pv">'+(patAge||'\u2014')+'</div></div>');
-  H.push('<div><div class="pl">Mobile</div><div class="pv">'+(patMob||'\u2014')+'</div></div>');
-  H.push('<div><div class="pl">City</div><div class="pv">'+(patCity||'\u2014')+'</div></div>');
-  H.push('</div>');
-
-  // MEDICINES
-  if(meds.length){
-    H.push('<div class="sec"><div class="st grn">Medicines</div>');
-    H.push('<table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Sch</th><th>Batch</th><th>Exp</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate \u20b9</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
-    meds.forEach(function(m,i){
-      var q=parseInt(m.qty)||0; var s=parseFloat(m.sale)||0; var d=parseFloat(m.disc)||0;
-      var a=parseFloat(m.amt||(q*s*(1-d/100)))||0;
-      H.push('<tr><td style="color:#64748b;font-weight:700;text-align:center">'+(i+1)+'</td>');
-      H.push('<td><div class="mn">'+m.name+'</div>'+(m.remarks?'<div class="mr">'+m.remarks+'</div>':'')+'</td>');
-      H.push('<td><div class="md">'+(m.dose||'\u2014')+'</div></td>');
-      H.push('<td style="text-align:center;font-size:10px;font-weight:700">'+(m.schedule||'OTC')+'</td>');
-      H.push('<td style="font-size:10px;color:#64748b">'+(m.batch||'\u2014')+'</td>');
-      H.push('<td style="font-size:10px;color:#64748b;text-align:center">'+(m.exp||'\u2014')+'</td>');
-      H.push('<td style="text-align:center;font-weight:800;color:#185FA5">'+q+'</td>');
-      H.push('<td style="text-align:right">\u20b9'+s.toFixed(2)+'</td>');
-      H.push('<td style="text-align:center">'+(d||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700">\u20b9'+a.toFixed(2)+'</td></tr>');
-    });
-    H.push('</tbody></table></div>');
-  }
-
-  // SERVICES
-  if(svcs.length){
-    H.push('<div class="sec" style="margin-top:10px"><div class="st blu">Services &amp; Consultation</div>');
-    H.push('<table><thead><tr><th class="b">#</th><th class="b">Service</th><th class="b" style="text-align:right">Rate \u20b9</th><th class="b" style="text-align:center">Disc%</th><th class="b" style="text-align:right">Amt \u20b9</th></tr></thead><tbody>');
-    svcs.forEach(function(s,i){
-      var a=parseFloat(s.amt||s.price||0);
-      H.push('<tr><td style="color:#64748b;text-align:center">'+(i+1)+'</td>');
-      H.push('<td><div class="mn">'+s.name+'</div></td>');
-      H.push('<td style="text-align:right">\u20b9'+(parseFloat(s.price||0)).toFixed(2)+'</td>');
-      H.push('<td style="text-align:center">'+(s.disc||0)+'%</td>');
-      H.push('<td style="text-align:right;font-weight:700;color:#059669">\u20b9'+a.toFixed(2)+'</td></tr>');
-    });
-    H.push('</tbody></table></div>');
-  }
-
-  // GRAND TOTAL
-  H.push('<div class="tot">');
-  if(meds.length)H.push('<div class="titem"><div class="tl">Medicines</div><div class="tv">\u20b9'+medTotal.toFixed(2)+'</div></div>');
-  if(svcs.length)H.push('<div class="titem"><div class="tl">Services</div><div class="tv" style="color:#185FA5">\u20b9'+svcTotal.toFixed(2)+'</div></div>');
-  H.push('<div class="titem grand"><div class="tl">Grand Total</div><div class="tv">\u20b9'+grandTotal.toFixed(2)+'</div></div>');
-  H.push('</div>');
-
-  // BALANCE BAR — always shown
-  H.push('<div class="bal-bar">');
-  H.push('<div class="bb"><div class="bbl">Prev Balance</div><div class="bbv" style="color:'+(prevBal>0?'#DC2626':'#059669')+'">\u20b9'+prevBal.toFixed(2)+'</div></div>');
-  H.push('<div class="bb"><div class="bbl">+ New Bill</div><div class="bbv" style="color:#185FA5">\u20b9'+grandTotal.toFixed(2)+'</div></div>');
-  H.push('<div class="bb"><div class="bbl">\u2212 Paid Now</div><div class="bbv" style="color:#059669">\u20b9'+paidNow.toFixed(2)+'</div></div>');
-  H.push('<div class="bb" style="background:'+(balDue<=0?'#f0fdf4':'#fef2f2')+'"><div class="bbl">= Balance Due</div><div class="bbv" style="color:'+(balDue<=0?'#059669':'#DC2626')+'">\u20b9'+balDue.toFixed(2)+'</div></div>');
-  H.push('</div>');
-
-  // FOOTER
-  H.push('<div class="foot"><div>');
-  if(nextVisit)H.push('<div class="fnext">\uD83D\uDCC5 Next Visit: <b>'+nextVisit+'</b> \u00b7 '+mode+'</div>');
-  H.push('<div class="stamp">'+(balDue<=0?'\u2713 PAID':'⏳ PENDING \u20b9'+balDue.toFixed(2))+'</div>');
-  H.push('</div><div><div class="sig-line"></div><div class="sig-t">Authorised Signature</div></div></div>');
-  H.push('</div></body></html>');
-
-  showPdfPopup(H.join(''), 'Tax Invoice \u2014 '+invNo, '#059669');
-}
-function updateDateDisplay(inputId,spanId){
-  var inp=document.getElementById(inputId);
-  var span=document.getElementById(spanId);
-  if(inp&&span)span.textContent=isoToDisplay(inp.value)||'Select date';
-}
-function rxAddDiag(s){
-  var el=document.getElementById('rx-diagnosis');
-  if(!el)return;
-  var v=el.value.trim();
-  el.value=v?(v+', '+s):s;
-}
-function rxSyncDaysToRows(){
-  var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
-  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var rowDaysInp=tr.querySelector('[data-rx="days"]');
-    if(rowDaysInp&&!rowDaysInp.dataset.manual){
-      rowDaysInp.value=globalDays;
-      rxCalcRow(rowDaysInp);
-    }
-  });
-}
 
 </script>
 </body>
