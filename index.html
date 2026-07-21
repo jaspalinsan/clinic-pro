@@ -1974,6 +1974,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3987,11 +3988,11 @@ function rxCalcTotals(){
   });
 
   var grand=medT+svcT;
-  function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
-  set('rx-med-total','\u20b9'+medT.toFixed(2));
-  set('rx-svc-total','\u20b9'+svcT.toFixed(2));
-  set('rx-grand-total','\u20b9'+grand.toFixed(2));
-  set('rx-new-bill','\u20b9'+grand.toFixed(2));
+  function _setEl(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  _setEl('rx-med-total','\u20b9'+medT.toFixed(2));
+  _setEl('rx-svc-total','\u20b9'+svcT.toFixed(2));
+  _setEl('rx-grand-total','\u20b9'+grand.toFixed(2));
+  _setEl('rx-new-bill','\u20b9'+grand.toFixed(2));
   window._rxGrandTotal=grand;
   rxCalcBalance();
 }
@@ -11239,8 +11240,6 @@ window.updateApptBulkBar=updateApptBulkBar;
 
 
 
-
-// === ADDED FROM fc1e8ba ===
 function rxCalcBMI(){
   var w=parseFloat((document.getElementById('rx-weight')||{}).value)||0;
   var h=parseFloat((document.getElementById('rx-height')||{}).value)||0;
@@ -11296,22 +11295,6 @@ function rxLoadPrevBalance(patName){
   });
   window._rxPrevBalance=Math.max(0,prevBal);
   rxCalcBalance();
-}
-function rxAddDiag(s){
-  var el=document.getElementById('rx-diagnosis');
-  if(!el)return;
-  var v=el.value.trim();
-  el.value=v?(v+', '+s):s;
-}
-function rxSyncDaysToRows(){
-  var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
-  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var rowDaysInp=tr.querySelector('[data-rx="days"]');
-    if(rowDaysInp&&!rowDaysInp.dataset.manual){
-      rowDaysInp.value=globalDays;
-      rxCalcRow(rowDaysInp);
-    }
-  });
 }
 function printInvoice(invId){
   var inv=(window.BILLING_DB||[]).find(function(b){return b.id===invId;});
@@ -11449,76 +11432,26 @@ function printInvoice(invId){
 
   showPdfPopup(H.join(''), 'Tax Invoice \u2014 '+invNo, '#059669');
 }
-function rxAiDiagnose(){
-  var sym=(document.getElementById('rx-symptoms')||{value:''}).value.trim();
-  if(!sym){toast('Add chief complaints first','info');return;}
-  var diagEl=document.getElementById('rx-diagnosis');
-  if(!diagEl)return;
-  toast('AI analyzing symptoms...','info');
-
-  // Simple rule-based suggestions
-  var s=sym.toLowerCase();
-  var sugg=[];
-  if(s.includes('fever')&&(s.includes('cough')||s.includes('cold')||s.includes('throat')))sugg.push('Viral URTI');
-  if(s.includes('fever')&&s.includes('body ache'))sugg.push('Viral Fever');
-  if(s.includes('gastritis')||s.includes('stomach')||s.includes('abdomen')||s.includes('nausea'))sugg.push('Acute Gastritis');
-  if(s.includes('headache')&&s.includes('fever'))sugg.push('Febrile Headache');
-  if(s.includes('chest pain')||s.includes('breathless')||s.includes('sob'))sugg.push('Respiratory Illness - needs evaluation');
-  if(s.includes('diarrhoea')||s.includes('diarrhea')||s.includes('loose'))sugg.push('Acute Gastroenteritis');
-  if(s.includes('urine')||s.includes('burning')||s.includes('uti'))sugg.push('Urinary Tract Infection');
-  if(s.includes('rash')||s.includes('skin')||s.includes('itch'))sugg.push('Dermatitis / Allergic Reaction');
-  if(s.includes('joint')||s.includes('swelling')||s.includes('arthritis'))sugg.push('Inflammatory Arthritis');
-  if(sugg.length===0)sugg.push('Viral Illness - Clinical correlation advised');
-
-  var result=sugg.join(', ');
-  diagEl.value=diagEl.value?(diagEl.value+', '+result):result;
-  toast('AI suggested: '+result,'success');
-}
 function updateDateDisplay(inputId,spanId){
   var inp=document.getElementById(inputId);
   var span=document.getElementById(spanId);
   if(inp&&span)span.textContent=isoToDisplay(inp.value)||'Select date';
 }
-function labFilterToday(){
-  var t=new Date();
-  var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  var df=document.getElementById('lab-date-from');
-  var dt=document.getElementById('lab-date-to');
-  if(df)df.value=iso; if(dt)dt.value=iso;
-  var fl=document.getElementById('lab-from-lbl');
-  var tl=document.getElementById('lab-to-lbl');
-  var disp=isoToDisplay(iso);
-  if(fl)fl.textContent=disp; if(tl)tl.textContent=disp;
-  window._labDateFilter='';
-  if(typeof renderLabQueue==='function')renderLabQueue();
+function rxAddDiag(s){
+  var el=document.getElementById('rx-diagnosis');
+  if(!el)return;
+  var v=el.value.trim();
+  el.value=v?(v+', '+s):s;
 }
-function labFilterClear(){
-  var df=document.getElementById('lab-date-from');
-  var dt=document.getElementById('lab-date-to');
-  if(df)df.value=''; if(dt)dt.value='';
-  window._labDateFilter='';
-  if(typeof renderLabQueue==='function')renderLabQueue();
-}
-function phFilterToday(){
-  var t=new Date();
-  var iso=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  var df=document.getElementById('ph-date-from');
-  var dt=document.getElementById('ph-date-to');
-  if(df)df.value=iso; if(dt)dt.value=iso;
-  var fl=document.getElementById('ph-from-lbl');
-  var tl=document.getElementById('ph-to-lbl');
-  var disp=isoToDisplay(iso);
-  if(fl)fl.textContent=disp; if(tl)tl.textContent=disp;
-  if(typeof renderPharmacy==='function')renderPharmacy();
-}
-function phFilterClear(){
-  var df=document.getElementById('ph-date-from');
-  var dt=document.getElementById('ph-date-to');
-  if(df)df.value=''; if(dt)dt.value='';
-  var fl=document.getElementById('ph-from-lbl');
-  var tl=document.getElementById('ph-to-lbl');
-  if(fl)fl.textContent='Select from'; if(tl)tl.textContent='Select to';
-  if(typeof renderPharmacy==='function')renderPharmacy();
+function rxSyncDaysToRows(){
+  var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var rowDaysInp=tr.querySelector('[data-rx="days"]');
+    if(rowDaysInp&&!rowDaysInp.dataset.manual){
+      rowDaysInp.value=globalDays;
+      rxCalcRow(rowDaysInp);
+    }
+  });
 }
 
 </script>
