@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clinic Pro</title>
+<title>Clinic Pro v210227</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -2160,6 +2160,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -5127,21 +5128,22 @@ function rxCalcSvc(el){
 window.rxCalcSvc=rxCalcSvc;
 
 function rxCalcTotals(){
-  var medT=0, svcT=0;
-  var tbody=document.getElementById('rx-med-tbody');
-  if(tbody){
-    [].forEach.call(tbody.rows, function(tr){
-      var type=tr.getAttribute('data-row-type')||'med';
-      var amtEl=tr.querySelector('.rx-amt');
-      if(!amtEl)return;
-      var val=parseFloat((amtEl.textContent||'').replace('\u20b9',''))||0;
-      if(type==='svc') svcT+=val;
-      else if(type!=='fee') medT+=val;
-      else medT+=val; // consultancy fee goes to med
-    });
-  }
-  var grand=medT+svcT;
+  // Med total: .rx-amt cells that are NOT .rx-svc-amt
+  var medT=0;
+  document.querySelectorAll('#rx-med-tbody tr .rx-amt').forEach(function(el){
+    if(el.classList.contains('rx-svc-amt'))return; // skip svc rows
+    var v=parseFloat((el.textContent||'').replace('\u20b9','').replace('\u2014',''))||0;
+    medT+=v;
+  });
 
+  // Svc total: .rx-svc-amt cells
+  var svcT=0;
+  document.querySelectorAll('#rx-med-tbody tr .rx-svc-amt').forEach(function(el){
+    var v=parseFloat((el.textContent||'').replace('\u20b9','').replace('\u2014',''))||0;
+    svcT+=v;
+  });
+
+  var grand=medT+svcT;
   function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
   set('rx-med-total','\u20b9'+medT.toFixed(2));
   set('rx-svc-total','\u20b9'+svcT.toFixed(2));
@@ -5150,6 +5152,8 @@ function rxCalcTotals(){
   window._rxGrandTotal=grand;
   rxCalcBalance();
 }
+window.rxCalcTotals=rxCalcTotals;
+
 window.rxCalcTotals=rxCalcTotals;
 
 window.rxCalcTotals=rxCalcTotals;
@@ -13147,6 +13151,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
