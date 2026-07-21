@@ -2178,6 +2178,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -3425,6 +3426,7 @@ function nav(p) {
   // Hide all pages, show the target
   document.querySelectorAll('.page').forEach(function(el) {
     el.classList.remove('on');
+    el.style.display = '';
   });
   var target = document.getElementById('page-' + p);
   if (target) {
@@ -13177,6 +13179,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
