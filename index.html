@@ -1976,6 +1976,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2350,12 +2351,12 @@ function nav(p) {
   if (sc) sc.scrollTop = 0;
 
   // Page-specific render
-  if (p === 'inventory')   renderInventory();
-  if (p === 'lab')           setTimeout(renderLabQueue,30);
+  if (p === 'inventory')  { renderInventory(); if(!window.INV_DB||!window.INV_DB.length){cpLoadData();setTimeout(renderInventory,800);} }
+  if (p === 'lab')        { setTimeout(renderLabQueue,30); if(!window.LAB_DB||!window.LAB_DB.length){cpLoadData();setTimeout(renderLabQueue,800);} }
   if (p === 'finance')      renderFinance();
-  if (p === 'pharmacy')    renderPharmacy();
-  if (p === 'dashboard')   updateDashStats();
-  if (p === 'pharmacy')    renderPharmacy();
+  if (p === 'pharmacy')  { renderPharmacy(); if(!window.BILLING_DB||!window.BILLING_DB.length){cpLoadData();setTimeout(renderPharmacy,800);} }
+  if (p === 'vendor')    { if(typeof loadVendorSample==='function')loadVendorSample(); }
+  if (p === 'dashboard')    updateDashStats();
   // rxInit not called here — called only by New Rx button
 
   if (p === 'appointments') renderApptPanes();
@@ -11315,6 +11316,7 @@ function rxCalcNextDate(){
   var el=document.getElementById('rx-next-date');if(el)el.textContent=label;
   var hid=document.getElementById('rx-next-visit');if(hid)hid.value=label;
 }
+
 </script>
 </body>
 </html>
