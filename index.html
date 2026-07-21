@@ -2258,6 +2258,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -7375,28 +7376,34 @@ window.rxUpdateDate=rxUpdateDate;
 function rxCalcRow(el){
   var tr=el?el.closest('tr'):null; if(!tr)return;
 
-  // Priority: use per-row Days input first, else fall back to global rx-days
+  // CONSULTANCY ROW — always fixed: Amt = Rate only, no Days/Qty multiply
+  var nameInp=tr.querySelector('[data-rx="name"]');
+  if(nameInp&&nameInp.value==='Consultancy Fee'){
+    var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'150'}).value)||150;
+    var amtCell=tr.querySelector('.rx-amt');
+    if(amtCell)amtCell.textContent='\u20b9'+sale.toFixed(2);
+    rxCalcTotals();
+    return;
+  }
+
+  // Normal medicine rows
   var rowDaysInp=tr.querySelector('[data-rx="days"]');
   var globalDays=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
   var days=rowDaysInp&&rowDaysInp.value?parseInt(rowDaysInp.value)||globalDays:globalDays;
 
-  // Sync row days from global if row days not manually set
   if(rowDaysInp&&!rowDaysInp.dataset.manual&&globalDays){
     rowDaysInp.value=globalDays;
     days=globalDays;
   }
 
-  // Frequency multiplier
   var doseSel=tr.querySelector('[data-rx="dose"]');
   var mult=doseSel?parseFloat(doseSel.value)||1:1;
 
-  // Qty = Days × Frequency (auto, unless manually overridden)
   var autoQty=Math.ceil(days*mult);
   var qtyInp=tr.querySelector('[data-rx="qty"]');
   if(qtyInp&&!qtyInp.dataset.manual) qtyInp.value=autoQty;
   var finalQty=qtyInp?parseInt(qtyInp.value)||autoQty:autoQty;
 
-  // Amount = Qty × Rate × (1 - Disc/100)
   var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'0'}).value)||0;
   var disc=parseFloat((tr.querySelector('[data-rx="disc"]')||{value:'0'}).value)||0;
   var amt=parseFloat((finalQty*sale*(1-disc/100)).toFixed(2));
@@ -7406,6 +7413,8 @@ function rxCalcRow(el){
 
   rxCalcTotals();
 }
+window.rxCalcRow=rxCalcRow;
+
 window.rxCalcRow=rxCalcRow;
 
 function rxRecalcAll(){
@@ -13218,6 +13227,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
