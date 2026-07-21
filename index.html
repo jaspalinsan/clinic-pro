@@ -2175,6 +2175,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -3439,10 +3441,27 @@ function nav(p) {
   if (p === 'inventory')   renderInventory();
   if (p === 'lab')           setTimeout(renderLabQueue,30);
   if (p === 'finance')      renderFinance();
-  if (p === 'pharmacy')    renderPharmacy();
+  if (p === 'pharmacy') {
+    if(window.BILLING_DB&&window.BILLING_DB.length>0){
+      renderPharmacy();
+    } else {
+      if(typeof cpLoadData==='function')cpLoadData();
+      setTimeout(renderPharmacy,800);
+    }
+  }
   if (p === 'dashboard')   updateDashStats();
-  if (p === 'pharmacy')    renderPharmacy();
-  if (p === 'vendor')      { if(typeof renderVendorPage==='function')renderVendorPage(); }
+  if (p === 'inventory') {
+    if(window.INV_DB&&window.INV_DB.length>0){
+      renderInventory();
+    } else {
+      if(typeof cpLoadData==='function')cpLoadData();
+      setTimeout(renderInventory,800);
+    }
+  }
+  if (p === 'vendor') {
+    if(typeof cpLoadData==='function')cpLoadData();
+    setTimeout(function(){if(typeof renderVendorPage==='function')renderVendorPage();},800);
+  }
   // rxInit not called here — called only by New Rx button
 
   if(p==='appointments'){
@@ -12477,6 +12496,14 @@ function cpLoadData(){
     }catch(ex2){}
     if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
   });
+  var _acp=window._currentPage||'dashboard';
+  setTimeout(function(){
+    if(_acp==='pharmacy'&&typeof renderPharmacy==='function')renderPharmacy();
+    if(_acp==='inventory'&&typeof renderInventory==='function')renderInventory();
+    if(_acp==='vendor'&&typeof renderVendorPage==='function')renderVendorPage();
+    if(_acp==='lab'&&typeof renderLabQueue==='function')renderLabQueue();
+  },300);
+
 }
 window.cpLoadData=cpLoadData;
 
@@ -13146,6 +13173,8 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
+
 
 
 
