@@ -2177,6 +2177,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -3426,7 +3427,10 @@ function nav(p) {
     el.classList.remove('on');
   });
   var target = document.getElementById('page-' + p);
-  if (target) target.classList.add('on');
+  if (target) {
+    target.classList.add('on');
+    target.style.display='block';
+  }
 
   // Update nav buttons
   document.querySelectorAll('.nl').forEach(function(el) { el.classList.remove('on'); });
@@ -13173,6 +13177,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
