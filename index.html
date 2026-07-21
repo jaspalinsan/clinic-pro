@@ -23,7 +23,7 @@ html,body{height:100%;overflow:hidden}
 .tnav{background:#F0F2F5;border-bottom:2px solid #C0C0C0;border-top:none;display:flex;align-items:center;padding:4px 12px;gap:4px;z-index:200;height:72px}
 .body{overflow:hidden;height:100%}
 .scroll{overflow-y:auto;height:100%;background:#F1F5F9}
-.page{display:none!important;padding:0;min-height:calc(100vh - 72px)}
+.page{display:none;padding:0;min-height:calc(100vh - 72px)}
 .page-padded{padding:16px}
 
 
@@ -124,7 +124,8 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#374151;width:100%;text-align:left;border-left:3px solid transparent;transition:all .15s}
 .smenu-btn:hover{background:#EEF2FF;color:#4338CA}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
-.smenu-btn i{font-size:16px;width:18px;flex-.page.on{display:block!important;animation:fadeUp .15s ease}
+.smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
+.page.on{display:block;animation:fadeUp .15s ease}
 #page-settings,#page-finance{padding:0!important;margin-top:0!important}
 #page-settings.on,#page-finance.on{padding:0!important}
 
@@ -2174,7 +2175,6 @@ html,body{height:100%;overflow:hidden}
 
 
 
-
 function rxCalcBalance(){
   var prevBal = parseFloat(window._rxPrevBalance)||0;
   var grand   = parseFloat(window._rxGrandTotal)||0;
@@ -3414,12 +3414,6 @@ let _rc, _dc, _pc, _mc;
 const PAGES = ['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','analytics','ai','settings','login'];
 function nav(p) {
   window._currentPage=p;
-  var _pg=document.getElementById('page-'+p);
-  // Safety guard: force hide ALL pages first
-  document.querySelectorAll('.page').forEach(function(el){
-    el.classList.remove('on');
-    el.style.display='';
-  });
   var _pg=document.getElementById('page-'+p);
   if(_pg&&_pg.getAttribute('data-blocked')==='1'){
     if(window.CURRENT_USER&&typeof toast==='function')toast('Access denied','error');
@@ -13152,7 +13146,6 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
-
 
 
 
