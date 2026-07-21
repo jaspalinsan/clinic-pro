@@ -979,10 +979,6 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
 </div>
-<div class="page" 
-</div>
-</div>
-</div>
 <div class="page" id="page-finance" style="padding:0">
   <div class="ph" style="margin:0">
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
@@ -2153,6 +2149,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -3418,74 +3416,64 @@ let _rc, _dc, _pc, _mc;
 // ── NAV ──────────────────────────────────────────────────────
 const PAGES = ['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','analytics','ai','settings','login'];
 function nav(p) {
-  window._currentPage = p;
-
-  // Check access
-  var _pg = document.getElementById('page-'+p);
-  if(_pg && _pg.getAttribute('data-blocked')==='1'){
-    if(window.CURRENT_USER && typeof toast==='function') toast('Access denied','error');
+  window._currentPage=p;
+  var _pg=document.getElementById('page-'+p);
+  if(_pg&&_pg.getAttribute('data-blocked')==='1'){
+    if(window.CURRENT_USER&&typeof toast==='function')toast('Access denied','error');
     return;
   }
+  // Hide all pages, show the target
+  document.querySelectorAll('.page').forEach(function(el) {
+    el.classList.remove('on');
+  });
+  var target = document.getElementById('page-' + p);
+  if (target) target.classList.add('on');
 
-  // Hide ALL pages
-  var allPages = document.querySelectorAll('.page');
-  for(var i=0;i<allPages.length;i++){
-    allPages[i].style.cssText='display:none!important';
-  }
+  // Update nav buttons
+  document.querySelectorAll('.nl').forEach(function(el) { el.classList.remove('on'); });
+  var btn = document.getElementById('nl-' + p);
+  if (btn) btn.classList.add('on');
 
-  // Show target page
-  var target = document.getElementById('page-'+p);
-  if(target){
-    target.style.cssText='display:block!important';
-  }
+  // Scroll to top
+  var sc = document.querySelector('.scroll');
+  if (sc) sc.scrollTop = 0;
 
-  // Update nav highlight
-  var navBtns = document.querySelectorAll('.nl');
-  for(var j=0;j<navBtns.length;j++) navBtns[j].classList.remove('on');
-  var btn = document.getElementById('nl-'+p);
-  if(btn) btn.classList.add('on');
+  // Page-specific render
+  if (p === 'inventory')   renderInventory();
+  if (p === 'lab')           setTimeout(renderLabQueue,30);
+  if (p === 'finance')      renderFinance();
+  if (p === 'pharmacy')    renderPharmacy();
+  if (p === 'dashboard')   updateDashStats();
+  if (p === 'pharmacy')    renderPharmacy();
+  // rxInit not called here — called only by New Rx button
 
-  // Scroll top
-  var sc2 = document.querySelector('.scroll');
-  if(sc2) sc2.scrollTop = 0;
-
-  // Render page content
-  try{
-    if(p==='pharmacy')   { renderPharmacy(); }
-    if(p==='inventory')  { renderInventory(); }
-    if(p==='vendor')     { if(typeof renderVendorPage==='function')renderVendorPage(); else if(typeof renderVendor==='function')renderVendor(); }
-    if(p==='lab')        { setTimeout(function(){if(typeof renderLabQueue==='function')renderLabQueue();},50); }
-    if(p==='dashboard')  { updateDashStats(); }
-    if(p==='finance')    { if(typeof renderFinance==='function')renderFinance(); }
-    if(p==='rx')         { rxInit(); setTimeout(function(){if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();},200); }
-    if(p==='appointments'){
-      fetch('data.php?action=get_all&r='+Math.random())
-      .then(function(r){return r.json();})
-      .then(function(resp){
-        if(resp.appointments){
-          window._apptData=(resp.appointments||[]).map(function(a){
-            return{id:a.id,name:a.patient_name,pid:a.patient_id,
-                   age:a.age,gender:a.gender,mob:a.mobile,
-                   date:a.date,time:a.time,token:a.token,
-                   complaint:a.complaint,status:a.status};
-          });
-        }
-        renderApptPanes();
-      }).catch(function(){renderApptPanes();});
-    }
-    if(p==='settings'){
-      setTimeout(function(){
-        var CS=window.CLINIC_SETTINGS||{};
-        var map={cname:'name',dname:'doctor',qual:'qual',reg:'reg',phone:'phone',email:'email',address:'address',city:'city',lic:'lic',pin:'pin',tagline:'tagline',footer:'footer'};
-        Object.keys(map).forEach(function(fid){
-          var el=document.getElementById('set-'+fid);
-          if(el&&CS[map[fid]])el.value=CS[map[fid]];
+  if(p==='appointments'){
+    fetch('data.php?action=get_all&r='+Math.random())
+    .then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp.appointments){
+        window._apptData=(resp.appointments||[]).map(function(a){
+          return{id:a.id,name:a.patient_name,pid:a.patient_id,
+                 age:a.age,gender:a.gender,mob:a.mobile,
+                 date:a.date,time:a.time,token:a.token,
+                 complaint:a.complaint,status:a.status};
         });
-        if(typeof spTab==='function')spTab('clinic');
-      },30);
-    }
-  } catch(e) {
-    console.error('nav render error for page '+p+':', e);
+      }
+      renderApptPanes();
+    }).catch(function(){renderApptPanes();});
+  }
+  if (p === 'rx') { rxInit(); setTimeout(function(){if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();},200); }
+  if (p === 'settings') {
+    // Load saved clinic settings into fields
+    setTimeout(function(){
+      var CS=window.CLINIC_SETTINGS||{};
+      var map={cname:'name',dname:'doctor',qual:'qual',reg:'reg',phone:'phone',email:'email',address:'address',city:'city',lic:'lic',pin:'pin',tagline:'tagline',footer:'footer'};
+      Object.keys(map).forEach(function(fid){
+        var el=document.getElementById('set-'+fid);
+        if(el&&CS[map[fid]])el.value=CS[map[fid]];
+      });
+      spTab('clinic');
+    },30);
   }
 }
 window.nav=nav;
@@ -13170,6 +13158,8 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
+
 
 
 
