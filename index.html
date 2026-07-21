@@ -605,7 +605,8 @@ html,body{height:100%;overflow:hidden}
         </div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:2.5fr 0.8fr 1.1fr 0.9fr;gap:10px;padding:10px 18px;border-bottom:0.5px solid var(--sl2);align-items:start"><div><div class="flbl" style="margin-bottom:3px">Patient Name</div><div style="margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px"><i class="ti ti-calendar-check" style="font-size:11px"></i> Today's Patients</div><select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:7px 10px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:12px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select></div><div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div><div style="display:flex;gap:3px;margin-top:7px;align-items:stretch"><span style="display:flex;align-items:center;font-size:9px;font-weight:700;color:#0C447C;white-space:nowrap;margin-right:3px;padding:0 2px"><i class="ti ti-heart-rate" style="font-size:11px;margin-right:2px"></i>Vitals</span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">BP</span><input id="rx-bp" placeholder="120/80" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">mmHg</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">Pulse</span><input id="rx-pulse" placeholder="72" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">bpm</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">Temp</span><input id="rx-temp" placeholder="98.6" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">°F</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">SpO2</span><input id="rx-spo2" placeholder="98" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">%</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">Wt</span><input id="rx-weight" placeholder="65" oninput="rxCalcBMI()" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">kg</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#185FA5">Ht</span><input id="rx-height" placeholder="165" oninput="rxCalcBMI()" style="border:none;width:100%;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent;min-width:0"><span style="font-size:6px;color:#94a3b8">cm</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fffbeb;border:0.5px solid #fde68a;border-radius:5px;padding:2px 4px;flex:1;min-width:0"><span style="font-size:7px;font-weight:700;color:#854F0B">BMI</span><span id="rx-bmi" style="font-weight:700;color:#854F0B;font-size:10px;min-height:14px;line-height:14px">—</span><span style="font-size:6px;color:#94a3b8">auto</span></span></div></div><div><div class="flbl" style="margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F" style="width:100%"></div><div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000" style="width:100%"></div><div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City" style="width:100%"></div></div></div>
+    <div style="display:grid;grid-template-columns:2fr 0.8fr 1.1fr 0.9fr auto;gap:10px;padding:10px 18px;border-bottom:0.5px solid var(--sl2);align-items:start"><div><div class="flbl" style="margin-bottom:3px">Patient Name</div><div style="margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px"><i class="ti ti-calendar-check" style="font-size:11px"></i> Today's Patients</div><select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:7px 10px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:12px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select></div><div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div><div><div class="flbl" style="margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F" style="width:100%"></div><div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000" style="width:100%"></div><div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City" style="width:100%"></div>
+<div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:4px;justify-content:center"><div style="font-size:9px;font-weight:700;color:#0C447C;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px"><i class="ti ti-heart-rate" style="font-size:11px"></i> Vitals</div><div style="display:flex;gap:3px;align-items:stretch"><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:48px"><span style="font-size:7px;font-weight:700;color:#185FA5">BP</span><input id="rx-bp" placeholder="120/80" style="border:none;width:44px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">mmHg</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:36px"><span style="font-size:7px;font-weight:700;color:#185FA5">Pulse</span><input id="rx-pulse" placeholder="72" style="border:none;width:32px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">bpm</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:36px"><span style="font-size:7px;font-weight:700;color:#185FA5">Temp</span><input id="rx-temp" placeholder="98.6" style="border:none;width:32px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">°F</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:32px"><span style="font-size:7px;font-weight:700;color:#185FA5">SpO2</span><input id="rx-spo2" placeholder="98" style="border:none;width:28px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">%</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:30px"><span style="font-size:7px;font-weight:700;color:#185FA5">Wt</span><input id="rx-weight" placeholder="65" oninput="rxCalcBMI()" style="border:none;width:26px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">kg</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fff;border:0.5px solid #BFDBFE;border-radius:5px;padding:2px 5px;text-align:center;min-width:30px"><span style="font-size:7px;font-weight:700;color:#185FA5">Ht</span><input id="rx-height" placeholder="165" oninput="rxCalcBMI()" style="border:none;width:26px;text-align:center;font-weight:700;color:#1A3A8C;outline:none;font-size:10px;background:transparent"><span style="font-size:6px;color:#94a3b8">cm</span></span><span style="display:flex;flex-direction:column;align-items:center;background:#fffbeb;border:0.5px solid #fde68a;border-radius:5px;padding:2px 5px;text-align:center;min-width:32px"><span style="font-size:7px;font-weight:700;color:#854F0B">BMI</span><span id="rx-bmi" style="font-weight:700;color:#854F0B;font-size:10px;min-height:14px;line-height:14px">—</span><span style="font-size:6px;color:#94a3b8">auto</span></span></div></div></div></div>
     <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2);background:var(--sl)">
       <div class="flbl" style="margin-bottom:4px;display:flex;align-items:center;gap:5px">
         <i class="ti ti-history" style="font-size:13px;color:#6366F1"></i>
@@ -2216,6 +2217,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4951,7 +4953,7 @@ try{
   tbody.innerHTML='';
 
         // ROW 1: Consultancy Fee — locked row, 13 cols
-  var tr1=document.createElement('tr');
+  var tr1=document.createElement('tr');tr1.setAttribute('data-row-type','fee');
   tr1.style.cssText='background:linear-gradient(90deg,#fffbeb,#fff);border-bottom:2px solid #fde68a';
   tr1.innerHTML=
     '<td style="text-align:center;font-size:11px;font-weight:700;color:#92400E">1</td>'+
@@ -5179,30 +5181,31 @@ function rxCalcSvc(el){
 window.rxCalcSvc=rxCalcSvc;
 
 function rxCalcTotals(){
-  // Sum medicines
-  var medT=0;
-  document.querySelectorAll('#rx-med-tbody .rx-amt').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9'))medT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
-  });
-  // Sum services
-  var svcT=0;
-  document.querySelectorAll('#rx-svc-tbody .rx-net').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9'))svcT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
-  });
+  var medT=0, svcT=0;
+  var tbody=document.getElementById('rx-med-tbody');
+  if(tbody){
+    [].forEach.call(tbody.rows, function(tr){
+      var type=tr.getAttribute('data-row-type')||'med';
+      var amtEl=tr.querySelector('.rx-amt');
+      if(!amtEl)return;
+      var val=parseFloat((amtEl.textContent||'').replace('\u20b9',''))||0;
+      if(type==='svc') svcT+=val;
+      else if(type!=='fee') medT+=val;
+      else medT+=val; // consultancy fee goes to med
+    });
+  }
   var grand=medT+svcT;
 
-  // Update totals display
-  function sid(id){return document.getElementById(id);}
-  function set(id,v){var el=sid(id);if(el)el.textContent=v;}
+  function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
   set('rx-med-total','\u20b9'+medT.toFixed(2));
   set('rx-svc-total','\u20b9'+svcT.toFixed(2));
   set('rx-grand-total','\u20b9'+grand.toFixed(2));
   set('rx-new-bill','\u20b9'+grand.toFixed(2));
-
-  // Store grand for balance calc
   window._rxGrandTotal=grand;
   rxCalcBalance();
 }
+window.rxCalcTotals=rxCalcTotals;
+
 window.rxCalcTotals=rxCalcTotals;
 
 
@@ -11160,7 +11163,7 @@ function rxAddUnifiedSvcRow(data){
       var dc=typeof s==='object'?(s.disc||0):0;
       return '<option value="'+i+'" data-price="'+pr+'" data-disc="'+dc+'">'+nm+'</option>';
     }).join('');
-  var tr=document.createElement('tr');
+  var tr=document.createElement('tr');tr.setAttribute('data-row-type','svc');
   tr.setAttribute('data-row-type','service');
   tr.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">'+n+'</td>'+
@@ -11171,7 +11174,7 @@ function rxAddUnifiedSvcRow(data){
     '<td><input class="edit-in" data-rx="qty" type="number" value="1" style="width:100%;text-align:center;font-size:13px;font-weight:700" oninput="rxCalcUnifiedSvc(this)"></td>'+
     '<td><input class="edit-in" data-rx="sale" type="number" placeholder="0.00" style="width:100%;text-align:right;font-size:11px" value="'+(d.price||'')+'" oninput="rxCalcUnifiedSvc(this)"></td>'+
     '<td><input class="edit-in" data-rx="disc" type="number" placeholder="0" style="width:100%;text-align:center;font-size:11px" value="'+(d.disc||'0')+'" oninput="rxCalcUnifiedSvc(this)"></td>'+
-    '<td class="rx-amt" style="text-align:right;font-size:12px;font-weight:700;color:#3B6D11">\u2014</td>'+
+    '<td class="rx-amt rx-svc-amt" style="text-align:right;font-size:12px;font-weight:700;color:#3B6D11">\u2014</td>'+
     '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:2px 4px" onclick="this.closest(\'tr\').remove();rxCalcTotals()"><i class="ti ti-trash" style="font-size:12px"></i></button></td>';
   tbody.appendChild(tr);
   // Pre-fill name if passed (custom service not in list)
@@ -13199,6 +13202,7 @@ document.addEventListener('click',function(e){
     drop.style.display='none';
   }
 });
+
 
 
 
