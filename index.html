@@ -2082,6 +2082,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3876,7 +3877,7 @@ function rxInit(){
   tbody.innerHTML='';
 
   // ROW 1: Consultancy Fee — default fixed row
-  var tr1=document.createElement('tr');
+  var tr1=document.createElement('tr');tr1.setAttribute('data-row-type','fee');
   tr1.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">1</td>'+
     '<td><input class="fin" data-rx="name" value="Consultancy Fee" readonly '+
@@ -3894,9 +3895,7 @@ function rxInit(){
     '<td><input class="edit-in" data-rx="mfr" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
     '<td><input class="edit-in" data-rx="batch" placeholder="\u2014" style="width:100%;font-size:11px"></td>'+
     '<td><input class="edit-in" data-rx="exp" placeholder="\u2014" style="width:100%;font-size:11px;text-align:center"></td>'+
-    '<td><input class="edit-in rx-qty" data-rx="qty" type="number" min="1" value="1" '+
-      'style="width:100%;text-align:center;font-size:13px;font-weight:700;color:var(--sky)" '+
-      'oninput="this.dataset.manual=1;rxCalcRow(this)"></td>'+
+    '<td style="text-align:center;font-size:13px;font-weight:700;color:var(--ink3)">1</td>'+
     '<td><input class="edit-in" data-rx="sale" type="number" value="300" '+
       'style="width:100%;text-align:right;font-size:11px" oninput="rxCalcRow(this)"></td>'+
     '<td><input class="edit-in" data-rx="disc" type="number" value="0" placeholder="0" '+
@@ -4078,65 +4077,31 @@ function rxCalcSvc(el){
 }
 window.rxCalcSvc=rxCalcSvc;
 
-function rxCalcTotals() {
+function rxCalcTotals(){
   var medT=0, svcT=0;
-  document.querySelectorAll('#rx-med-tbody .rx-amt').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9')) medT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
-  });
-  document.querySelectorAll('#rx-svc-tbody .rx-net').forEach(function(el){
-    if(el.textContent.startsWith('\u20b9')) svcT+=parseFloat(el.textContent.replace('\u20b9',''))||0;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var type=tr.getAttribute('data-row-type')||'med';
+    var amtEl=tr.querySelector('.rx-amt');
+    if(!amtEl)return;
+    var v=parseFloat((amtEl.textContent||'').replace('\u20b9','').replace('\u2014',''))||0;
+    if(type==='svc'||type==='fee'){
+      // consultancy fee goes to svc total
+      svcT+=v;
+    } else {
+      medT+=v;
+    }
   });
   var grand=medT+svcT;
   var g=document.getElementById.bind(document);
-  var set=function(id,v){var el=g(id);if(el)el.textContent=v;};
-  set('rx-med-total', '\u20b9'+medT.toFixed(2));
-  set('rx-svc-total', '\u20b9'+svcT.toFixed(2));
-  if(g('rx-gt-med')) g('rx-gt-med').textContent='\u20b9'+medT.toFixed(2);
-  if(g('rx-gt-svc')) g('rx-gt-svc').textContent='\u20b9'+svcT.toFixed(2);
+  function set(id,v){var el=g(id);if(el)el.textContent=v;}
+  set('rx-med-total','\u20b9'+medT.toFixed(2));
+  set('rx-svc-total','\u20b9'+svcT.toFixed(2));
   set('rx-grand-total','\u20b9'+grand.toFixed(2));
-
-  // Compute paid services from BILLING_DB for this patient
-  var pname=(g('rx-pat-name')||{}).value||'';
-  var paidSvc=0;
-  if(pname&&window.BILLING_DB){
-    window.BILLING_DB.forEach(function(b){
-      if(b.patient!==pname) return;
-      if(b.status!=='Paid') return;
-      // Count service amounts from paid invoices
-      if(b.svcs&&b.svcs.length){
-        b.svcs.forEach(function(s){paidSvc+=parseFloat(s.net)||0;});
-      } else if(b.desc&&/serv|lab|ecg|physio|test/i.test(b.desc)){
-        paidSvc+=parseFloat(b.amount)||0;
-      }
-    });
-  }
-
-  var pending=Math.max(0,grand-paidSvc);
-  set('rx-paid-services','\u20b9'+paidSvc.toFixed(2));
-  set('rx-pending-bill', '\u20b9'+pending.toFixed(2));
-
-  // Show note if paid services exist
-  var note=g('rx-billing-note');
-  var noteText=g('rx-billing-note-text');
-  if(note&&paidSvc>0){
-    note.style.display='block';
-    if(noteText) noteText.textContent=
-      'Services \u20b9'+svcT.toFixed(2)+' \u2212 Already paid \u20b9'+paidSvc.toFixed(2)+
-      ' = New bill \u20b9'+pending.toFixed(2)+
-      (medT>0?' (includes medicines \u20b9'+medT.toFixed(2)+')':'');
-  } else if(note){
-    note.style.display='none';
-  }
-
-  // Highlight pending bill
-  var pendEl=g('rx-pending-bill');
-  if(pendEl){
-    pendEl.style.color=pending>0?'var(--acc)':'#10B981';
-  }
-
-  var svcDisp=document.getElementById('rx-svc-total-display');
-  if(svcDisp)svcDisp.textContent='₹'+svcT.toFixed(2);
+  set('rx-new-bill','\u20b9'+grand.toFixed(2));
+  window._rxGrandTotal=grand;
+  if(typeof rxCalcBalance==='function')rxCalcBalance();
 }
+window.rxCalcTotals=rxCalcTotals;
 
 function rxSave(){
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
@@ -9917,7 +9882,7 @@ function rxAddUnifiedSvcRow(data){
       var dc=typeof s==='object'?(s.disc||0):0;
       return '<option value="'+i+'" data-price="'+pr+'" data-disc="'+dc+'">'+nm+'</option>';
     }).join('');
-  var tr=document.createElement('tr');
+  var tr=document.createElement('tr');tr.setAttribute('data-row-type','svc');
   tr.setAttribute('data-row-type','service');
   tr.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">'+n+'</td>'+
@@ -9925,7 +9890,7 @@ function rxAddUnifiedSvcRow(data){
     '<td><select class="fin" style="font-size:11px;width:100%" onchange="rxUnifiedSvcPick(this)">'+opts+'</select></td>'+
     '<td><input class="edit-in" placeholder="\u2014" style="width:100%;font-size:11px;color:var(--ink3)"></td>'+
     '<td><input class="edit-in" placeholder="\u2014" style="width:100%;font-size:11px;text-align:center;color:var(--ink3)"></td>'+
-    '<td><input class="edit-in" data-rx="qty" type="number" value="1" style="width:100%;text-align:center;font-size:13px;font-weight:700" oninput="rxCalcUnifiedSvc(this)"></td>'+
+    '<td style="text-align:center;font-size:13px;font-weight:700;color:var(--ink3)">1</td>'+
     '<td><input class="edit-in" data-rx="sale" type="number" placeholder="0.00" style="width:100%;text-align:right;font-size:11px" value="'+(d.price||'')+'" oninput="rxCalcUnifiedSvc(this)"></td>'+
     '<td><input class="edit-in" data-rx="disc" type="number" placeholder="0" style="width:100%;text-align:center;font-size:11px" value="'+(d.disc||'0')+'" oninput="rxCalcUnifiedSvc(this)"></td>'+
     '<td class="rx-amt" style="text-align:right;font-size:12px;font-weight:700;color:#3B6D11">\u2014</td>'+
@@ -11590,6 +11555,7 @@ function printInvoice(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 
 </script>
 </body>
