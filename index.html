@@ -2083,6 +2083,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -9883,7 +9884,6 @@ function rxAddUnifiedSvcRow(data){
       return '<option value="'+i+'" data-price="'+pr+'" data-disc="'+dc+'">'+nm+'</option>';
     }).join('');
   var tr=document.createElement('tr');tr.setAttribute('data-row-type','svc');
-  tr.setAttribute('data-row-type','service');
   tr.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3);vertical-align:middle">'+n+'</td>'+
     '<td style="text-align:center"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;background:#EAF3DE;color:#3B6D11;border:0.5px solid #C0DD97"><i class="ti ti-stethoscope" style="font-size:11px"></i>Svc</span></td>'+
@@ -11555,6 +11555,7 @@ function printInvoice(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 
 
 </script>
