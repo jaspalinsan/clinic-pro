@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clinic Pro v220154</title>
+<title>Clinic Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -791,7 +791,6 @@ html,body{height:100%;overflow:hidden}
 <div class="page" 
 </div></div>
 <div class="page" id="page-pharmacy">
-  <div style="background:#DC2626;color:#fff;padding:8px 16px;font-weight:700;font-size:14px;text-align:center">✓ FILE UPDATED - PHARMACY PAGE LOADED v220154</div>
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px">
@@ -1971,12 +1970,7 @@ html,body{height:100%;overflow:hidden}
 <script>
 
 
-// Global error catcher
-window.onerror = function(msg, src, line, col, err) {
-  if(typeof toast === 'function') toast('JS Error: ' + msg + ' (line ' + line + ')', 'error');
-  console.error('GLOBAL ERROR:', msg, src, line, err);
-  return false;
-};
+
 
 
 
@@ -2012,15 +2006,15 @@ var CP_USERS_DEFAULT={
   'admin':        {pass:'2024admin',        name:'Admin',         role:'Admin',
     pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
   'doctor':       {pass:'2024doctor',       name:'Doctor',        role:'Doctor',
-    pages:['dashboard','appointments','rx','lab']},
+    pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
   'pharmacist':   {pass:'2024pharmacist',   name:'Pharmacist',    role:'Pharmacist',
-    pages:['dashboard','appointments','pharmacy','inventory','vendor']},
+    pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
   'lab':          {pass:'2024lab',          name:'Lab Technician',role:'Lab',
-    pages:['lab']},
+    pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
   'receptionist': {pass:'2024receptionist', name:'Receptionist',  role:'Receptionist',
-    pages:['dashboard','appointments','pharmacy']},
+    pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
   'staff':        {pass:'2024staff',        name:'Staff',         role:'Staff',
-    pages:['dashboard','appointments']}
+    pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']}
 };
 
 function cpGetUsers(){
@@ -11326,6 +11320,7 @@ function rxCalcNextDate(){
   var el=document.getElementById('rx-next-date');if(el)el.textContent=label;
   var hid=document.getElementById('rx-next-visit');if(hid)hid.value=label;
 }
+
 
 
 
