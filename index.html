@@ -775,14 +775,49 @@ html,body{height:100%;overflow:hidden}
     <tbody id="rx-med-tbody"></tbody>
   </table></div>
   <div style="display:flex;gap:8px;padding:7px 12px;border-top:0.5px solid var(--sl2)"><button class="tb" onclick="rxAddMedRow()" style="flex:1;justify-content:center;font-size:12px;color:var(--acc);border-color:var(--acc)"><i class="ti ti-plus"></i> Add Medicine Row</button><button class="tb" onclick="rxAddUnifiedSvcRow()" style="flex:1;justify-content:center;font-size:12px;color:#3B6D11;border-color:#3B6D11"><i class="ti ti-plus"></i> Add Service Row</button></div>
-  <!-- ADD ROW BUTTON — below the rows -->
-  <div style="padding:6px 14px;border-top:0.5px solid var(--sl2)">
-    
-  </div>
-  <div style="display:flex;justify-content:flex-end;gap:16px;padding:8px 16px;border-top:0.5px solid var(--sl2)">
-    <span style="font-size:12px;color:var(--ink2)">Med Total: <b id="rx-med-total">&#8377;0.00</b></span>
-    <span style="font-size:12px;color:var(--ink2)">Svc Total: <b id="rx-svc-total">&#8377;0.00</b></span>
-    <span style="font-size:13px;font-weight:700;color:var(--acc)">Grand Total: <b id="rx-grand-total">&#8377;0.00</b></span>
+  <!-- BILLING STRIP -->
+  <div style="border-top:2px solid #1A3A8C;background:#f8faff;padding:7px 14px;display:flex;align-items:center;gap:7px;flex-wrap:nowrap;overflow-x:auto">
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#92400E">Prev Bal</span>
+      <span id="rx-prev-balance" style="font-size:13px;font-weight:900;color:#DC2626">&#8377;0.00</span>
+    </div>
+    <span style="color:#cbd5e1;font-size:16px;font-weight:300">+</span>
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#5a9e82">Svc</span>
+      <span id="rx-svc-total" style="font-size:13px;font-weight:900;color:#059669">&#8377;0.00</span>
+    </div>
+    <span style="color:#cbd5e1;font-size:16px;font-weight:300">+</span>
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#185FA5">Med</span>
+      <span id="rx-med-total" style="font-size:13px;font-weight:900;color:#185FA5">&#8377;0.00</span>
+    </div>
+    <span style="color:#cbd5e1;font-size:16px;font-weight:300">=</span>
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#7C3AED">Grand</span>
+      <span id="rx-grand-total" style="font-size:13px;font-weight:900;color:#7C3AED">&#8377;0.00</span>
+    </div>
+    <span style="color:#cbd5e1;font-size:16px;font-weight:300">&#8722;</span>
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#5a9e82">Paid</span>
+      <input id="rx-paid-now" type="number" min="0" placeholder="0" oninput="rxCalcBalance()" onchange="rxCalcBalance()"
+        style="border:none;background:transparent;outline:none;font-size:13px;font-weight:900;color:#059669;width:70px;text-align:center">
+    </div>
+    <span style="color:#cbd5e1;font-size:16px;font-weight:300">=</span>
+    <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#FFF1F2;border:1.5px solid #FECDD3;border-radius:8px;flex-shrink:0">
+      <span style="font-size:10px;font-weight:700;color:#9F1239">Pending</span>
+      <span id="rx-balance-due" style="font-size:15px;font-weight:900;color:#DC2626">&#8377;0.00</span>
+    </div>
+    <b id="rx-new-bill" style="display:none">&#8377;0.00</b>
+    <div style="flex:1;min-width:8px"></div>
+    <button class="bp" onclick="rxPrint()" style="font-size:11px;padding:6px 14px;white-space:nowrap;border-radius:8px;display:flex;align-items:center;gap:5px;background:#1A3A8C">
+      <i class="ti ti-printer"></i> Rx PDF
+    </button>
+    <button class="bp" onclick="printInvoice()" style="font-size:11px;padding:6px 14px;white-space:nowrap;border-radius:8px;display:flex;align-items:center;gap:5px;background:#059669">
+      <i class="ti ti-receipt"></i> Bill PDF
+    </button>
+    <button class="bp" onclick="rxSubmitBilling('all')" style="font-size:11px;padding:6px 14px;white-space:nowrap;border-radius:8px;display:flex;align-items:center;gap:5px;background:#7C3AED">
+      <i class="ti ti-device-floppy"></i> Save
+    </button>
   </div>
 </div>
 
@@ -830,35 +865,6 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
 
-  <!-- Grand Total Bar -->
-  <div style="background:#fff;border-radius:10px;border:1px solid var(--sl2);padding:14px 20px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-        <div>
-          <span style="font-size:11px;color:var(--ink3);display:block;margin-bottom:2px">Grand Total</span>
-          <span id="rx-grand-total" style="font-size:22px;font-weight:800;color:var(--ink)">&#8377;0.00</span>
-        </div>
-        <div style="font-size:20px;color:var(--sl3);font-weight:300">&#8722;</div>
-        <div>
-          <span style="font-size:11px;color:var(--rose);display:block;margin-bottom:2px">Paid Services</span>
-          <span id="rx-paid-services" style="font-size:22px;font-weight:800;color:var(--rose)">&#8377;0.00</span>
-        </div>
-        <div style="font-size:20px;color:var(--sl3);font-weight:300">=</div>
-        <div style="background:var(--m);border-radius:10px;padding:8px 16px;border:2px solid var(--acc)">
-          <span style="font-size:11px;color:var(--acc);display:block;margin-bottom:2px">Pending / New Bill</span>
-          <span id="rx-pending-bill" style="font-size:22px;font-weight:800;color:var(--acc)">&#8377;0.00</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-shrink:0">
-        <button class="bs" onclick="rxSave()"><i class="ti ti-device-floppy"></i>Save Rx</button>
-        <button class="bp" onclick="rxSubmitBilling('all')"><i class="ti ti-currency-rupee"></i>Submit to Billing</button>
-      </div>
-    </div>
-    <div id="rx-billing-note" style="display:none;background:var(--sk2);border-radius:8px;padding:8px 14px;font-size:12px;color:#1E40AF">
-      <i class="ti ti-info-circle" style="margin-right:6px"></i>
-      <span id="rx-billing-note-text"></span>
-    </div>
-  </div>
 
   <!-- Lab Reports Section - always visible at bottom of Rx -->
   <div class="card" style="border:2px solid #06B6D4;margin-top:2px">
@@ -2066,6 +2072,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4257,73 +4264,104 @@ function rxLoad(id) {
   rxCalcTotals(); toast('Loaded '+rx.number,'success');
 }
 
-function rxPrint() {
-  var pname=(document.getElementById('rx-pat-name')||{}).value||'Patient';
-  var age=(document.getElementById('rx-pat-age')||{}).value||'';
-  var mob=(document.getElementById('rx-pat-mob')||{}).value||'';
-  var city=(document.getElementById('rx-pat-city')||{}).value||'';
-  var dx=(document.getElementById('rx-pat-dx')||{}).value||'';
-  var date=(document.getElementById('rx-date')||{}).textContent||'';
-  var rxno=(document.getElementById('rx-number')||{}).textContent||'';
-  var grand=(document.getElementById('rx-grand-total')||{}).textContent||'';
-  var medRows='',sn=1;
+function rxPrint(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var cn=CS.name||'Clinic';
+  var cdoc=CS.doctor||'Doctor';
+  var cqual=CS.qual||'';var creg=CS.reg||'';var cph=CS.phone||'';var ccity=CS.city||'';
+  var g=function(id){return(document.getElementById(id)||{}).textContent||'';};
+  var gv=function(id){return(document.getElementById(id)||{}).value||'';};
+  var pname=gv('rx-pat-name')||'Patient';
+  var age=gv('rx-pat-age');var mob=gv('rx-pat-mob');var city=gv('rx-pat-city');
+  var bp=gv('rx-bp');var pulse=gv('rx-pulse');var temp=gv('rx-temp');
+  var spo2=gv('rx-spo2');var wt=gv('rx-weight');var ht=gv('rx-height');
+  var bmi=g('rx-bmi');
+  var vitals=[bp?'BP '+bp:'',pulse?'P '+pulse:''  ,temp?'T '+temp+'°F':'',
+    spo2?'SpO2 '+spo2+'%':'',wt?'Wt '+wt+'kg':'',ht?'Ht '+ht+'cm':'',bmi&&bmi!='—'?'BMI '+bmi:'']
+    .filter(Boolean).join(' · ');
+  var hist=gv('rx-old-history');
+  var syms=(window._rxSymptoms||[]).join(', ');
+  var dx=gv('rx-pat-dx');
+  var rxno=g('rx-number');var date=g('rx-date');
+  var mode=gv('rx-mode');var days=gv('rx-days');var nxt=g('rx-next-date');
+
+  // Medicines rows - NO price
+  var medRows='';var sn=1;
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var sel=tr.querySelector('select');
+    var type=tr.getAttribute('data-row-type')||'med';
+    if(type==='svc')return;
+    var sel=tr.querySelector('select[data-rx="item"],select[data-rx="name"]');
+    if(!sel)sel=tr.querySelector('select');
     var name=sel?sel.options[sel.selectedIndex].text:'';
-    if(!name||name.includes('\u2014')) return;
-    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-    medRows+='<tr><td>'+sn+'</td><td>'+name+'</td><td>'+g('dose')+'</td><td>'+g('mfr')+'</td>'+
-      '<td>'+g('batch')+'</td><td>'+g('exp')+'</td><td>'+g('qty')+'</td>'+
-      '<td style="text-align:right">\u20b9'+g('sale')+'</td>'+
-      '<td style="text-align:right">'+(tr.querySelector('.rx-amt')?tr.querySelector('.rx-amt').textContent:'')+'</td></tr>';
+    if(!name||name.indexOf('\u2014')!==-1)return;
+    var gk=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?(el.value||el.textContent||''):''};
+    var dose=gk('dose');var freq=gk('freq')||gk('schedule');var sch=gk('schedule');
+    var d2=gk('days');var inst=gk('instruction')||gk('notes')||'';
+    medRows+='<tr><td style="text-align:center">'+sn+'</td><td>'+name+'</td>'+
+      '<td style="text-align:center">'+dose+'</td><td style="text-align:center">'+(freq||sch)+'</td>'+
+      '<td style="text-align:center">'+d2+'</td>'+
+      '<td>'+inst+'</td></tr>';
     sn++;
   });
-  var svcRows='',ss=1;
-  document.querySelectorAll('#rx-svc-tbody tr').forEach(function(tr){
+
+  // Service rows - name only
+  var svcRows='';var ss=1;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var type=tr.getAttribute('data-row-type')||'med';
+    if(type!=='svc'&&type!=='fee')return;
     var sel=tr.querySelector('select');
     var name=sel?sel.options[sel.selectedIndex].text:'';
-    if(!name||name.includes('\u2014')) return;
-    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-    svcRows+='<tr><td>'+ss+'</td><td>'+name+'</td><td style="text-align:right">\u20b9'+g('price')+'</td>'+
-      '<td style="text-align:right">\u20b9'+g('disc')+'</td>'+
-      '<td style="text-align:right">'+(tr.querySelector('.rx-net')?tr.querySelector('.rx-net').textContent:'')+'</td></tr>';
+    if(!name||name.indexOf('\u2014')!==-1)name=type==='fee'?'Consultancy Fee':'';
+    if(!name)return;
+    svcRows+='<tr><td style="text-align:center">'+ss+'</td><td>'+name+'</td><td></td></tr>';
     ss++;
   });
+
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+rxno+'</title>'+
-    '<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px}'+
-    '.hdr{border-bottom:2px solid #12AA7C;padding-bottom:10px;margin-bottom:12px}'+
-    '.clinic{font-size:20px;font-weight:800;color:#12AA7C}'+
-    '.pat{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;background:#f8f8f8;padding:10px;border-radius:6px;margin-bottom:14px}'+
-    '.lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#666}'+
-    '.val{font-size:13px;font-weight:600;margin-top:2px}'+
-    'table{width:100%;border-collapse:collapse;margin-bottom:12px}'+
-    'th{background:#f0f0f0;padding:6px 8px;text-align:left;font-size:10px;text-transform:uppercase;border:1px solid #ddd}'+
-    'td{padding:6px 8px;border:1px solid #ddd}'+
-    '.stitle{font-size:13px;font-weight:700;margin:12px 0 6px;color:#12AA7C}'+
-    '.total{text-align:right;font-size:14px;font-weight:700;color:#12AA7C;margin-top:10px;padding-top:8px;border-top:2px solid #12AA7C}'+
-    '</style></head><body>'+
-    '<div class="hdr"><div class="clinic">Dr. Cadium Healthcare</div>'+
-    '<div style="font-size:11px;color:#666;margin-top:2px">MBBS, MD \u00b7 Reg No. MCI-12345 \u00b7 Ph: 98765-00000 \u00b7 Barnala</div>'+
-    '<div style="display:flex;justify-content:space-between;margin-top:6px">'+
-    '<b>'+rxno+'</b><span style="color:#666">'+date+'</span></div></div>'+
-    '<div class="pat">'+
-    '<div><div class="lbl">Patient</div><div class="val">'+pname+'</div></div>'+
-    '<div><div class="lbl">Age/Sex</div><div class="val">'+age+'</div></div>'+
-    '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
-    '<div><div class="lbl">City</div><div class="val">'+city+'</div></div>'+
-    '<div><div class="lbl">Diagnosis</div><div class="val">'+dx+'</div></div></div>'+
-    (medRows?'<div class="stitle">\ud83d\udc8a Medicines</div>'+
-    '<table><thead><tr><th>S.N</th><th>Item Name</th><th>Dose</th><th>MFR</th><th>Batch</th><th>Exp</th><th>Qty</th><th>Sale \u20b9</th><th>Amount \u20b9</th></tr></thead>'+
-    '<tbody>'+medRows+'</tbody></table>':'')+
-    (svcRows?'<div class="stitle">\ud83d\udd2c Lab / Physio Services</div>'+
-    '<table><thead><tr><th>S.N</th><th>Service</th><th>Price \u20b9</th><th>Discount \u20b9</th><th>Net \u20b9</th></tr></thead>'+
-    '<tbody>'+svcRows+'</tbody></table>':'')+
-    '<div class="total">Grand Total: '+grand+'</div>'+
-    '<div style="margin-top:30px;border-top:1px solid #ddd;padding-top:10px;display:flex;justify-content:space-between;font-size:11px;color:#999">'+
-    '<span>Dr. Cadium Healthcare</span><span>Doctor Signature _______________</span></div>'+
-    '</body></html>';
-  var w=window.open('','_blank');
-  if(w){w.document.write(html);w.document.close();w.print();}
+  '<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}'+
+  'body{padding:18px;font-size:11px;color:#111}'+
+  '.hdr{border-bottom:2.5px solid #1A3A8C;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-end}'+
+  '.clinic{font-size:18px;font-weight:900;color:#1A3A8C}'+
+  '.csub{font-size:9px;color:#555;margin-top:3px}'+
+  '.rxno{font-size:13px;font-weight:700;color:#1A3A8C;text-align:right}'+
+  '.rdate{font-size:10px;color:#666;text-align:right}'+
+  '.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#EFF6FF;padding:8px;border-radius:6px;margin-bottom:10px}'+
+  '.lbl{font-size:8px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:1px}'+
+  '.val{font-size:11px;font-weight:600}'+
+  '.vrow{background:#f0f7ff;border:1px solid #BFDBFE;border-radius:5px;padding:5px 10px;margin-bottom:8px;font-size:10px;color:#1A3A8C}'+
+  '.sec{font-size:11px;font-weight:700;color:#1A3A8C;margin:8px 0 4px;padding-bottom:2px;border-bottom:1px solid #BFDBFE}'+
+  '.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}'+
+  '.chip{padding:2px 7px;border-radius:10px;background:#EFF6FF;border:0.5px solid #BFDBFE;font-size:9px;color:#1A3A8C}'+
+  'table{width:100%;border-collapse:collapse;margin-bottom:8px}'+
+  'th{background:#EFF6FF;padding:5px 6px;text-align:left;font-size:8px;text-transform:uppercase;border:0.5px solid #BFDBFE;color:#1A3A8C}'+
+  'td{padding:5px 6px;border:0.5px solid #e2e8f0}'+
+  '.sig{margin-top:20px;padding-top:8px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#666}'+
+  '</style></head><body>'+
+  '<div class="hdr">'+
+  '<div><div class="clinic">'+cn+'</div>'+
+  '<div class="csub">'+[cdoc,cqual,creg?'Reg: '+creg:'',cph?'Ph: '+cph:'',ccity].filter(Boolean).join(' \u00b7 ')+'</div></div>'+
+  '<div><div class="rxno">'+rxno+'</div><div class="rdate">'+date+'</div></div>'+
+  '</div>'+
+  '<div class="pgrid">'+
+  '<div><div class="lbl">Patient</div><div class="val">'+pname+'</div></div>'+
+  '<div><div class="lbl">Age / Sex</div><div class="val">'+age+'</div></div>'+
+  '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
+  '<div><div class="lbl">City</div><div class="val">'+city+'</div></div>'+
+  '<div><div class="lbl">Mode</div><div class="val">'+mode+'</div></div>'+
+  '<div><div class="lbl">Next Visit</div><div class="val">'+nxt+'</div></div>'+
+  '</div>'+
+  (vitals?'<div class="vrow">\u2665 Vitals: '+vitals+'</div>':'')+
+  (hist?'<div class="sec">History</div><div style="margin-bottom:8px;color:#444">'+hist+'</div>':'')+
+  (syms?'<div class="sec">Symptoms</div><div class="chips">'+syms.split(', ').map(function(s){return'<span class="chip">'+s+'</span>';}).join('')+'</div>':'')+
+  (dx?'<div class="sec">Diagnosis</div><div style="margin-bottom:8px;color:#333;font-weight:600">'+dx+'</div>':'')+
+  (svcRows?'<div class="sec">Services</div>'+
+  '<table><thead><tr><th>#</th><th>Service</th><th>Notes</th></tr></thead><tbody>'+svcRows+'</tbody></table>':'')+
+  (medRows?'<div class="sec">\ud83d\udc8a Medicines &amp; Prescription</div>'+
+  '<table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Days</th><th>Instructions</th></tr></thead>'+
+  '<tbody>'+medRows+'</tbody></table>':'')+
+  '<div class="sig"><span>'+cn+'</span><span>Doctor Signature _______________</span></div>'+
+  '</body></html>';
+  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();w.print();}
 }
 
 function renderSvcList(){
@@ -11424,6 +11462,126 @@ function rxCalcNextDate(){
 
 
 
+
+function printInvoice(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var cn=CS.name||'Clinic';
+  var cdoc=CS.doctor||'Doctor';
+  var cqual=CS.qual||'';var creg=CS.reg||'';var cph=CS.phone||'';var ccity=CS.city||'';
+  var g=function(id){return(document.getElementById(id)||{}).textContent||'';};
+  var gv=function(id){return(document.getElementById(id)||{}).value||'';};
+  var pname=gv('rx-pat-name')||'Patient';
+  var age=gv('rx-pat-age');var mob=gv('rx-pat-mob');var city=gv('rx-pat-city');
+  var rxno=g('rx-number');var date=g('rx-date');
+
+  var prevBal=parseFloat((g('rx-prev-balance')||'0').replace('\u20b9',''))||0;
+  var svcT=parseFloat((g('rx-svc-total')||'0').replace('\u20b9',''))||0;
+  var medT=parseFloat((g('rx-med-total')||'0').replace('\u20b9',''))||0;
+  var grand=parseFloat((g('rx-grand-total')||'0').replace('\u20b9',''))||0;
+  var paid=parseFloat(gv('rx-paid-now'))||0;
+  var pending=parseFloat((g('rx-balance-due')||'0').replace('\u20b9',''))||0;
+
+  // Medicine rows WITH price, dose, batch, exp, discount
+  var medRows='';var sn=1;var medTotal=0;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var type=tr.getAttribute('data-row-type')||'med';
+    if(type==='svc')return;
+    var sel=tr.querySelector('select[data-rx="item"],select[data-rx="name"]');
+    if(!sel)sel=tr.querySelector('select');
+    var name=sel?sel.options[sel.selectedIndex].text:'';
+    if(!name||name.indexOf('\u2014')!==-1)return;
+    var gk=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?(el.value||el.textContent||''):''};
+    var dose=gk('dose');var qty=gk('qty');var rate=gk('sale')||gk('rate');
+    var batch=gk('batch');var exp=gk('exp');var disc=gk('disc')||'0';
+    var amtEl=tr.querySelector('.rx-amt');
+    var amt=amtEl?amtEl.textContent:'\u20b9'+(parseFloat(qty||1)*parseFloat(rate||0)*(1-parseFloat(disc||0)/100)).toFixed(2);
+    medTotal+=parseFloat(amt.replace('\u20b9','')||'0');
+    medRows+='<tr><td style="text-align:center">'+sn+'</td><td>'+name+'</td>'+
+      '<td style="text-align:center">'+dose+'</td>'+
+      '<td style="text-align:center">'+batch+'</td>'+
+      '<td style="text-align:center">'+exp+'</td>'+
+      '<td style="text-align:center">'+qty+'</td>'+
+      '<td style="text-align:right">\u20b9'+rate+'</td>'+
+      '<td style="text-align:center">'+disc+'%</td>'+
+      '<td style="text-align:right">'+amt+'</td></tr>';
+    sn++;
+  });
+
+  // Service rows WITH price
+  var svcRows='';var ss=1;
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var type=tr.getAttribute('data-row-type')||'med';
+    if(type!=='svc'&&type!=='fee')return;
+    var sel=tr.querySelector('select');
+    var name=sel?sel.options[sel.selectedIndex].text:'';
+    if(!name||name.indexOf('\u2014')!==-1)name=type==='fee'?'Consultancy Fee':'';
+    if(!name)return;
+    var gk=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?(el.value||el.textContent||''):''};
+    var rate=gk('sale')||gk('rate');
+    var amtEl=tr.querySelector('.rx-amt,.rx-svc-amt');
+    var amt=amtEl?amtEl.textContent:'\u20b9'+rate;
+    svcRows+='<tr><td style="text-align:center">'+ss+'</td><td>'+name+'</td>'+
+      '<td style="text-align:right">\u20b9'+rate+'</td>'+
+      '<td style="text-align:right">'+amt+'</td></tr>';
+    ss++;
+  });
+
+  var f2=function(n){return'\u20b9'+(parseFloat(n)||0).toFixed(2);};
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice '+rxno+'</title>'+
+  '<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}'+
+  'body{padding:18px;font-size:11px;color:#111}'+
+  '.hdr{border-bottom:2.5px solid #059669;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-end}'+
+  '.clinic{font-size:18px;font-weight:900;color:#059669}'+
+  '.csub{font-size:9px;color:#555;margin-top:3px}'+
+  '.invno{font-size:13px;font-weight:700;color:#059669;text-align:right}'+
+  '.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#F0FDF4;padding:8px;border-radius:6px;margin-bottom:10px}'+
+  '.lbl{font-size:8px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:1px}'+
+  '.val{font-size:11px;font-weight:600}'+
+  '.sec{font-size:11px;font-weight:700;color:#059669;margin:8px 0 4px;padding-bottom:2px;border-bottom:1px solid #BBF7D0}'+
+  'table{width:100%;border-collapse:collapse;margin-bottom:8px}'+
+  'th{background:#F0FDF4;padding:5px 6px;text-align:left;font-size:8px;text-transform:uppercase;border:0.5px solid #BBF7D0;color:#065F46}'+
+  'td{padding:5px 6px;border:0.5px solid #e2e8f0}'+
+  '.bill{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;margin:10px 0}'+
+  '.bl{font-size:9px;font-weight:700;text-transform:uppercase;color:#065F46;white-space:nowrap}'+
+  '.bv{font-size:14px;font-weight:900;white-space:nowrap}'+
+  '.bsep{font-size:16px;color:#cbd5e1;font-weight:300}'+
+  '.sig{margin-top:20px;padding-top:8px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#666}'+
+  '</style></head><body>'+
+  '<div class="hdr">'+
+  '<div><div class="clinic">'+cn+'</div>'+
+  '<div class="csub">'+[cdoc,cqual,creg?'Reg: '+creg:'',cph?'Ph: '+cph:'',ccity].filter(Boolean).join(' \u00b7 ')+'</div></div>'+
+  '<div><div class="invno">Invoice '+rxno+'</div><div style="font-size:10px;color:#666;text-align:right">'+date+'</div></div>'+
+  '</div>'+
+  '<div class="pgrid">'+
+  '<div><div class="lbl">Patient</div><div class="val">'+pname+'</div></div>'+
+  '<div><div class="lbl">Age / Sex</div><div class="val">'+age+'</div></div>'+
+  '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
+  '</div>'+
+  (svcRows?'<div class="sec">Services</div>'+
+  '<table><thead><tr><th>#</th><th>Service</th><th style="text-align:right">Rate \u20b9</th><th style="text-align:right">Amount \u20b9</th></tr></thead>'+
+  '<tbody>'+svcRows+'</tbody></table>':'')+
+  (medRows?'<div class="sec">Medicines</div>'+
+  '<table><thead><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Batch</th><th>Exp</th><th>Qty</th><th style="text-align:right">Rate \u20b9</th><th style="text-align:center">Disc%</th><th style="text-align:right">Amount \u20b9</th></tr></thead>'+
+  '<tbody>'+medRows+'</tbody></table>':'')+
+  '<div class="bill">'+
+  '<span class="bl">Prev Bal</span><span class="bv" style="color:#DC2626">'+f2(prevBal)+'</span>'+
+  '<span class="bsep">+</span>'+
+  '<span class="bl">Svc</span><span class="bv" style="color:#059669">'+f2(svcT)+'</span>'+
+  '<span class="bsep">+</span>'+
+  '<span class="bl">Med</span><span class="bv" style="color:#185FA5">'+f2(medT)+'</span>'+
+  '<span class="bsep">=</span>'+
+  '<span class="bl">Grand</span><span class="bv" style="color:#7C3AED">'+f2(grand)+'</span>'+
+  '<span class="bsep">\u2212</span>'+
+  '<span class="bl">Paid</span><span class="bv" style="color:#059669">'+f2(paid)+'</span>'+
+  '<span class="bsep">=</span>'+
+  '<span class="bl">Pending</span><span class="bv" style="color:#DC2626;font-size:16px">'+f2(pending)+'</span>'+
+  '</div>'+
+  '<div class="sig"><span>'+cn+'</span><span>Received by _______________</span></div>'+
+  '</body></html>';
+  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();w.print();}
+}
+window.printInvoice=printInvoice;
 </script>
 </body>
 </html>
