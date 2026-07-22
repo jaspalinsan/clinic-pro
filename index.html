@@ -748,13 +748,7 @@ html,body{height:100%;overflow:hidden}
   <div class="card" style="margin-bottom:12px">
   <div class="ch" style="flex-wrap:wrap;gap:8px">
     <span class="ct"><i class="ti ti-pill" style="color:#1A3A8C;margin-right:6px"></i>Medicines</span>
-    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-      <span style="font-size:12px;color:var(--ink2);font-weight:600">Rx For</span>
-      <input type="number" id="rx-days" value="5" min="1" max="90"
-        style="width:68px;text-align:center;font-size:14px;font-weight:700;border:1.5px solid var(--sl2);border-radius:6px;padding:3px 6px;background:var(--bg)"
-        oninput="rxRecalcAll()" title="Treatment days">
-      <span style="font-size:12px;color:var(--ink2)">days</span>
-    </div>
+    
   </div>
   <div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
     <thead><tr>
@@ -774,7 +768,7 @@ html,body{height:100%;overflow:hidden}
     </tr></thead>
     <tbody id="rx-med-tbody"></tbody>
   </table></div>
-  <div style="display:flex;gap:8px;padding:7px 12px;border-top:0.5px solid var(--sl2)"><button class="tb" onclick="rxAddMedRow()" style="flex:1;justify-content:center;font-size:12px;color:var(--acc);border-color:var(--acc)"><i class="ti ti-plus"></i> Add Medicine Row</button><button class="tb" onclick="rxAddUnifiedSvcRow()" style="flex:1;justify-content:center;font-size:12px;color:#3B6D11;border-color:#3B6D11"><i class="ti ti-plus"></i> Add Service Row</button></div>
+  <div style="display:flex;gap:8px;padding:7px 12px;border-top:0.5px solid var(--sl2)"><button class="tb" onclick="rxAddMedRow()" style="flex:1;justify-content:center;font-size:12px;color:var(--acc);border-color:var(--acc)"><i class="ti ti-plus"></i> Add Medicine Row</button><button class="tb" onclick="rxAddUnifiedSvcRow()" style="flex:1;justify-content:center;font-size:12px;color:#3B6D11;border-color:#3B6D11"><i class="ti ti-plus"></i> Add Service Row</button></div><div style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-top:0.5px solid var(--sl2);background:var(--sl);flex-wrap:nowrap"><div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.3px">Rx Days</span><input type="number" id="rx-days" value="5" min="1" max="90" oninput="rxRecalcAll();rxCalcNextDate()" style="border:none;background:transparent;outline:none;font-size:14px;font-weight:900;color:#7C3AED;width:36px;text-align:center"></div><div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#5a9e82;text-transform:uppercase;letter-spacing:.3px">Next Visit</span><span id="rx-next-date" style="font-size:13px;font-weight:900;color:#059669;white-space:nowrap">--</span><input type="hidden" id="rx-next-visit" value=""></div><div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:#FAF5FF;border:1.5px solid #E9D5FF;border-radius:8px;flex-shrink:0"><span style="font-size:10px;font-weight:700;color:#9d72d4;text-transform:uppercase;letter-spacing:.3px">Mode</span><select id="rx-mode" style="border:none;background:transparent;outline:none;font-size:13px;font-weight:900;color:#7C3AED;cursor:pointer"><option value="OPD">OPD</option><option value="Online">Online</option><option value="Tele">Tele</option><option value="IPD">IPD</option></select></div></div>
   <!-- BILLING STRIP -->
   <div style="border-top:2px solid #1A3A8C;background:#f8faff;padding:7px 14px;display:flex;align-items:center;gap:7px;flex-wrap:nowrap;overflow-x:auto">
     <div style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;flex-shrink:0">
@@ -2072,6 +2066,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -6283,12 +6278,25 @@ window.rxUpdateDate=rxUpdateDate;
 
 function rxCalcRow(el){
   var tr=el?el.closest('tr'):null;if(!tr)return;
+  var type=tr.getAttribute('data-row-type')||'med';
+
+  // Consultancy fee and service rows: amount = rate only (no days multiply)
+  if(type==='fee'||type==='svc'){
+    var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'0'}).value)||0;
+    var disc=parseFloat((tr.querySelector('[data-rx="disc"]')||{value:'0'}).value)||0;
+    var amt=sale*(1-disc/100);
+    var ac=tr.querySelector('.rx-amt');
+    if(ac)ac.textContent=amt>0?'\u20b9'+amt.toFixed(2):'\u2014';
+    rxCalcTotals();
+    return;
+  }
+
+  // Medicine rows: qty = days × dose frequency
   var days=parseInt((document.getElementById('rx-days')||{value:'5'}).value)||5;
   var doseSel=tr.querySelector('[data-rx="dose"]');
   var mult=doseSel?parseFloat(doseSel.value)||1:1;
   var qty=Math.ceil(days*mult);
   var qtyInp=tr.querySelector('[data-rx="qty"]');
-  // Only auto-set qty if user hasn't manually changed it
   if(qtyInp&&!qtyInp.dataset.manual)qtyInp.value=qty;
   var finalQty=qtyInp?parseInt(qtyInp.value)||qty:qty;
   var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'0'}).value)||0;
@@ -11582,6 +11590,7 @@ function printInvoice(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();w.print();}
 }
 window.printInvoice=printInvoice;
+
 </script>
 </body>
 </html>
