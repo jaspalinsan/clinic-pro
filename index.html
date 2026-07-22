@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clinic Pro</title>
+<title>Clinic Pro v220154</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -1968,6 +1968,14 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+// Global error catcher
+window.onerror = function(msg, src, line, col, err) {
+  if(typeof toast === 'function') toast('JS Error: ' + msg + ' (line ' + line + ')', 'error');
+  console.error('GLOBAL ERROR:', msg, src, line, err);
+  return false;
+};
+
 
 
 
@@ -11316,6 +11324,7 @@ function rxCalcNextDate(){
   var el=document.getElementById('rx-next-date');if(el)el.textContent=label;
   var hid=document.getElementById('rx-next-visit');if(hid)hid.value=label;
 }
+
 
 </script>
 </body>
