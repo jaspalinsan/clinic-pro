@@ -2087,6 +2087,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4455,10 +4456,19 @@ try{
   var isUpdate=existingIdx!==-1;
   var invId=isUpdate?window.BILLING_DB[existingIdx].id:('INV-'+String(Date.now()).slice(-6));
 
+  // Collect lab tests from Rx lab section
+  var labTests=[];
+  document.querySelectorAll('#rx-lab-entries .rx-lab-entry').forEach(function(el){
+    var nm=el.getAttribute('data-test')||(el.querySelector('.lab-test-name')||{}).textContent||'';
+    if(nm&&nm.trim())labTests.push(nm.trim());
+  });
+  // Also check window._rxLabTests if set
+  if(!labTests.length&&window._rxLabTests&&window._rxLabTests.length)
+    labTests=window._rxLabTests.slice();
   var record={
     id:invId,patient:pname,rxno:rxno,date:todayStr,
     age:page,mob:pmob,city:pcity,dx:pdx,
-    meds:meds,svcs:svcs,
+    meds:meds,svcs:svcs,labTests:labTests,
     medTotal:medTotal,svcTotal:svcTotal,
     grandTotal:grand,prevBalance:prevBal,
     paidAmount:paidNow,balanceDue:balanceDue,
@@ -7153,6 +7163,8 @@ function updateLabSelected(){
   } else {
     div.textContent='Selected tests will appear here';div.style.color='var(--ink3)';
   }
+  // Sync to global for billing
+  window._rxLabTests=Array.from(window._rxSelectedLabs||[]);
 }
 
 // ── Upload Result ─────────────────────────────────────────────
@@ -9797,14 +9809,19 @@ function openLabFromBill(invId){
   var DB=window.BILLING_DB||[];
   var inv=DB.find(function(b){return String(b.id)===String(invId);})||{};
 
-  // Extract lab/service tests from invoice svcs[]
-  var svcs=inv.svcs||[];
-  // Send ALL services to lab — not just pattern-matched ones
-  var labTests=svcs.map(function(s){
-    return typeof s==='object'?s.name:s;
-  }).filter(function(n){return n&&n.trim();});
-  // If no matching keyword, use all services (doctor may order any as lab)
-  if(!labTests.length&&svcs.length) labTests=svcs;
+  // 1. Check dedicated labTests field (set by Rx page)
+  var labTests=(inv.labTests||[]).filter(function(n){return n&&n.trim();});
+  // 2. Fallback: extract from svcs (skip consultancy/fee)
+  if(!labTests.length){
+    var skip=/consult|fee|visit/i;
+    labTests=(inv.svcs||[]).map(function(s){
+      return typeof s==='object'?s.name:s;
+    }).filter(function(n){return n&&n.trim()&&!skip.test(n);});
+  }
+  // 3. Fallback: use ALL svcs if still nothing
+  if(!labTests.length&&(inv.svcs||[]).length){
+    labTests=(inv.svcs||[]).map(function(s){return typeof s==='object'?s.name:s;});
+  }
 
   // Check already ordered
   if(!window.LAB_DB)window.LAB_DB=[];
@@ -9843,21 +9860,9 @@ function openLabFromBill(invId){
     return;
   }
 
-  // ── Fallback: open modal so doctor can pick tests manually ──
-  window._labPending={patient:inv.patient||'',invId:String(invId)};
+  // No lab tests found — navigate to lab page directly
+  toast('No lab tests in this invoice — add from Lab page','info');
   nav('lab');
-  setTimeout(function(){
-    if(typeof openNewLabTest==='function')openNewLabTest();
-    setTimeout(function(){
-      var lp=window._labPending||{};
-      if(!lp.patient)return;
-      var el=document.getElementById('lab-pat');
-      if(el&&!el.value)el.value=lp.patient;
-      var ei=document.getElementById('lab-inv');
-      if(ei&&!ei.value)ei.value=lp.invId||'';
-    },300);
-  },200);
-  toast('No lab services found — select tests manually','info');
 }
 window.openLabFromBill=openLabFromBill;
 window.openLabFromBill=openLabFromBill;
@@ -11574,6 +11579,7 @@ function rxLoadPrevBalance(patName){
   if(typeof rxCalcBalance==='function')rxCalcBalance();
 }
 window.rxLoadPrevBalance=rxLoadPrevBalance;
+
 
 </script>
 </body>
