@@ -2088,6 +2088,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3854,6 +3855,7 @@ var _rxSaved = [];
 var _rxCounter = 1;
 
 function rxInit(){
+  window._currentInvId=null;
   var CS=window.CLINIC_SETTINGS||{};
   var cn=document.getElementById('rx-clinic-name');
   var cs_el=document.getElementById('rx-clinic-sub');
@@ -3911,6 +3913,7 @@ window.rxInit=rxInit;
 window.rxInit=rxInit;
 
 function rxNewBlank(){
+  window._currentInvId=null; // clear session invoice
   // Clear all patient fields
   ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city',
    'rx-pat-cc','rx-pat-dx','rx-old-history','rx-sym-input'].forEach(function(id){
@@ -4398,7 +4401,6 @@ try{
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
     var type=tr.getAttribute('data-row-type')||'med';
     var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-
     if(type==='svc'||type==='fee'){
       var sel=tr.querySelector('select');
       var sname='';
@@ -4442,19 +4444,32 @@ try{
 
   if(!window.BILLING_DB)window.BILLING_DB=[];
 
-  // ══ OPTION A LOGIC: Find existing invoice for same patient+date ══
-  var todayStr=rdate;
+  // ══ OPTION A: Match by stored invId on this Rx session ══════════
+  // window._currentInvId is set when we create/update an invoice in this session
   var existingIdx=-1;
-  for(var i=0;i<window.BILLING_DB.length;i++){
-    var b=window.BILLING_DB[i];
-    var samePat=b.patient&&b.patient.trim().toLowerCase()===pname.trim().toLowerCase();
-    var sameDate=b.date===todayStr;
-    var sameRx=b.rxno===rxno;
-    if(samePat&&(sameDate||sameRx)){existingIdx=i;break;}
+
+  // 1. Check if this Rx session already has an invoice ID
+  if(window._currentInvId){
+    for(var i=0;i<window.BILLING_DB.length;i++){
+      if(window.BILLING_DB[i].id===window._currentInvId){
+        existingIdx=i; break;
+      }
+    }
+  }
+
+  // 2. Fallback: match by patient name + same Rx number
+  if(existingIdx===-1&&rxno){
+    for(var i=0;i<window.BILLING_DB.length;i++){
+      var b=window.BILLING_DB[i];
+      if(b.rxno&&b.rxno===rxno){existingIdx=i;break;}
+    }
   }
 
   var isUpdate=existingIdx!==-1;
   var invId=isUpdate?window.BILLING_DB[existingIdx].id:('INV-'+String(Date.now()).slice(-6));
+
+  // Store this invoice ID for this Rx session
+  window._currentInvId=invId;
 
   // Collect lab tests from Rx lab section
   var labTests=[];
@@ -4462,11 +4477,11 @@ try{
     var nm=el.getAttribute('data-test')||(el.querySelector('.lab-test-name')||{}).textContent||'';
     if(nm&&nm.trim())labTests.push(nm.trim());
   });
-  // Also check window._rxLabTests if set
   if(!labTests.length&&window._rxLabTests&&window._rxLabTests.length)
     labTests=window._rxLabTests.slice();
+
   var record={
-    id:invId,patient:pname,rxno:rxno,date:todayStr,
+    id:invId,patient:pname,rxno:rxno,date:rdate,
     age:page,mob:pmob,city:pcity,dx:pdx,
     meds:meds,svcs:svcs,labTests:labTests,
     medTotal:medTotal,svcTotal:svcTotal,
@@ -4479,10 +4494,10 @@ try{
 
   if(isUpdate){
     window.BILLING_DB[existingIdx]=record;
-    toast('\u2713 Updated '+invId+' \u2014 Balance \u20b9'+balanceDue.toFixed(2),'success');
+    toast('\u2713 '+invId+' updated \u2014 Balance \u20b9'+balanceDue.toFixed(2),'success');
   } else {
     window.BILLING_DB.unshift(record);
-    toast('\u2713 Created '+invId+' \u2014 \u20b9'+grand.toFixed(2),'success');
+    toast('\u2713 '+invId+' created \u2014 \u20b9'+grand.toFixed(2),'success');
   }
 
   // Save to server
@@ -4491,7 +4506,7 @@ try{
     body:JSON.stringify(record)
   }).then(function(r){return r.json();}).catch(function(){});
 
-  // Update prev balance display for next time
+  // Update prev balance display
   var pb=document.getElementById('rx-prev-balance');
   if(pb)pb.textContent='\u20b9'+balanceDue.toFixed(2);
 
@@ -11563,14 +11578,18 @@ window.printInvoice=printInvoice;
 function rxLoadPrevBalance(patName){
   if(!patName||!window.BILLING_DB)return;
   var name=patName.trim().toLowerCase();
-  var today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  var prev=0;
-  // Find most recent record for this patient that is NOT today
+  var prev=0; var foundId=null;
+  // Find most recent invoice for this patient that has a balance
   for(var i=0;i<window.BILLING_DB.length;i++){
     var b=window.BILLING_DB[i];
-    if(b.patient&&b.patient.trim().toLowerCase()===name&&b.date!==today){
-      prev=parseFloat(b.balanceDue||b.balance||0)||0;
-      break;
+    if(b.patient&&b.patient.trim().toLowerCase()===name){
+      // If unpaid/partial from a PREVIOUS session (different rxno from current)
+      var curRx=(document.getElementById('rx-number')||{}).textContent||'';
+      if(b.rxno!==curRx&&(b.status==='Partial'||b.status==='Pending')){
+        prev=parseFloat(b.balanceDue||b.balance||0)||0;
+        foundId=b.id;
+        break;
+      }
     }
   }
   var el=document.getElementById('rx-prev-balance');
@@ -11579,6 +11598,8 @@ function rxLoadPrevBalance(patName){
   if(typeof rxCalcBalance==='function')rxCalcBalance();
 }
 window.rxLoadPrevBalance=rxLoadPrevBalance;
+window.rxLoadPrevBalance=rxLoadPrevBalance;
+
 
 
 </script>
