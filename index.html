@@ -602,7 +602,7 @@ html,body{height:100%;overflow:hidden}
   <div style="font-size:10px;font-weight:700;color:#185FA5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px"><i class="ti ti-calendar-check" style="font-size:11px"></i> Today's Patients</div>
   <select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:8px 12px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:13px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select>
 </div>
-<div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
+<div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();if(typeof rxLoadPrevBalance==='function')rxLoadPrevBalance(this.value);"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
       <div><div class="flbl" style="margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
@@ -2066,6 +2066,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -4377,118 +4379,118 @@ try{
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
   var page=(document.getElementById('rx-pat-age')||{}).value||'';
   var pmob=(document.getElementById('rx-pat-mob')||{}).value||'';
+  var pcity=(document.getElementById('rx-pat-city')||{}).value||'';
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
   var rdate=(document.getElementById('rx-date')||{}).textContent||
     new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 
   if(!pname){
-    toast('Please fill Patient Name in Rx first','error');
+    toast('Please fill Patient Name first','error');
     var el=document.getElementById('rx-pat-name');
     if(el){el.style.border='2px solid red';el.focus();setTimeout(function(){el.style.border='';},3000);}
     return;
   }
 
+  // Collect medicines
   var meds=[]; var svcs=[];
-
-  // Read ALL rows from unified table — detect type by data-row-type attribute
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-    var isSvc=tr.getAttribute('data-row-type')==='service'||
-           tr.classList.contains('svc-row')||
-           tr.querySelector('.svc-name-select')!==null;
+    var type=tr.getAttribute('data-row-type')||'med';
+    var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
 
-    if(isSvc){
-      // Service row — try multiple ways to get name
+    if(type==='svc'||type==='fee'){
       var sel=tr.querySelector('select');
       var sname='';
-      if(sel&&sel.selectedIndex>0&&!sel.options[sel.selectedIndex].text.toLowerCase().includes('select'))
-        sname=sel.options[sel.selectedIndex].text;
-      if(!sname){var sni=tr.querySelector('input[type="text"]');if(sni)sname=sni.value.trim();}
-      if(!sname||sname.toLowerCase().includes('select service'))return;
-      var g=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-      var price=parseFloat(g('sale'))||parseFloat(g('price'))||0;
+      if(type==='fee') sname='Consultancy Fee';
+      else if(sel&&sel.selectedIndex>0) sname=sel.options[sel.selectedIndex].text;
+      if(!sname||sname.toLowerCase().includes('select'))return;
+      var price=parseFloat(g('sale'))||0;
       var disc=parseFloat(g('disc'))||0;
-      var qty=parseFloat(g('qty'))||1;
-      var net=parseFloat((qty*price*(1-disc/100)).toFixed(2));
-      if(price<=0&&net<=0)return;
-      svcs.push({name:sname,price:price,disc:disc,net:net||price});
+      var net=parseFloat((price*(1-disc/100)).toFixed(2));
+      if(price<=0)return;
+      svcs.push({name:sname,price:price,disc:disc,net:net});
     } else {
-      // Medicine row
       var nameInp=tr.querySelector('[data-rx="name"]');
       var sel2=tr.querySelector('select');
       var mname='';
       if(nameInp&&nameInp.value.trim())mname=nameInp.value.trim();
-      else if(tr.getAttribute('data-tpl-name'))mname=tr.getAttribute('data-tpl-name');
-      else if(sel2&&sel2.selectedIndex>0){
-        var selTxt=sel2.options[sel2.selectedIndex].text;
-        mname=selTxt.replace(' (template)','');
-      }
-      if(!mname||mname.includes('\u2014')||mname.toLowerCase().includes('pick medicine'))return;
-      var g2=function(k){var el=tr.querySelector('[data-rx="'+k+'"]');return el?el.value:'';};
-      var qty2=parseFloat(g2('qty'))||1;
-      var sale=parseFloat(g2('sale'))||0;
-      var discPct=parseFloat(g2('disc'))||0;
-      var amt=parseFloat((qty2*sale*(1-discPct/100)).toFixed(2));
+      else if(sel2&&sel2.selectedIndex>0)mname=sel2.options[sel2.selectedIndex].text;
+      if(!mname||mname.includes('\u2014')||mname.toLowerCase().includes('pick'))return;
+      var qty=parseFloat(g('qty'))||1;
+      var sale=parseFloat(g('sale'))||0;
+      var disc=parseFloat(g('disc'))||0;
+      var amt=parseFloat((qty*sale*(1-disc/100)).toFixed(2));
       if(sale<=0&&amt<=0)return;
       var doseEl=tr.querySelector('[data-rx="dose"]');
-      var doseLbl=doseEl?(doseEl.options&&doseEl.options[doseEl.selectedIndex]?doseEl.options[doseEl.selectedIndex].text:doseEl.value):g2('dose');
-      meds.push({name:mname,dose:doseLbl,schedule:g2('schedule'),mfr:g2('mfr'),
-                 batch:g2('batch'),exp:g2('exp'),qty:qty2,sale:sale,disc:discPct,amt:amt});
+      var doseLbl=doseEl?(doseEl.options&&doseEl.options[doseEl.selectedIndex]?doseEl.options[doseEl.selectedIndex].text:doseEl.value):g('dose');
+      meds.push({name:mname,dose:doseLbl,schedule:g('schedule'),batch:g('batch'),
+                 exp:g('exp'),qty:qty,sale:sale,disc:disc,amt:amt});
     }
   });
 
   var medTotal=meds.reduce(function(s,m){return s+(m.amt||0);},0);
   var svcTotal=svcs.reduce(function(s,v){return s+(v.net||0);},0);
-  var total=parseFloat((medTotal+svcTotal).toFixed(2));
+  var grand=parseFloat((medTotal+svcTotal).toFixed(2));
 
-  if(!meds.length&&!svcs.length){
-    toast('Add at least one medicine or service with a price','error');return;
-  }
-  if(total<=0){
-    toast('Total is \u20b90 — please enter prices','error');return;
-  }
+  if(!meds.length&&!svcs.length){toast('Add at least one medicine or service','error');return;}
+  if(grand<=0){toast('Total is \u20b90 \u2014 please enter prices','error');return;}
+
+  var paidNow=parseFloat((document.getElementById('rx-paid-now')||{value:'0'}).value)||0;
+  var prevBal=parseFloat(((document.getElementById('rx-prev-balance')||{}).textContent||'0').replace('\u20b9',''))||0;
+  var balanceDue=parseFloat((prevBal+grand-paidNow).toFixed(2));
 
   if(!window.BILLING_DB)window.BILLING_DB=[];
-  if(!window._apptData)window._apptData=[];
-  var newId='INV-'+String(Date.now()).slice(-6);
-  var medNames=meds.map(function(m){return m.name;}).join(', ');
-  var svcNames=svcs.map(function(s){return s.name;}).join(', ');
-  var desc='';
-  if(medNames&&svcNames)desc=medNames+' | '+svcNames;
-  else if(medNames)desc=medNames;
-  else desc=svcNames;
 
-  window.BILLING_DB.unshift({
-    id:newId,patient:pname,rxno:rxno,
-    date:rdate,desc:desc,amount:total,
-    status:'Pending',paymode:'',
-    age:page,mob:pmob,dx:pdx,
-    meds:meds,svcs:svcs
-  });
+  // ══ OPTION A LOGIC: Find existing invoice for same patient+date ══
+  var todayStr=rdate;
+  var existingIdx=-1;
+  for(var i=0;i<window.BILLING_DB.length;i++){
+    var b=window.BILLING_DB[i];
+    var samePat=b.patient&&b.patient.trim().toLowerCase()===pname.trim().toLowerCase();
+    var sameDate=b.date===todayStr;
+    var sameRx=b.rxno===rxno;
+    if(samePat&&(sameDate||sameRx)){existingIdx=i;break;}
+  }
+
+  var isUpdate=existingIdx!==-1;
+  var invId=isUpdate?window.BILLING_DB[existingIdx].id:('INV-'+String(Date.now()).slice(-6));
+
+  var record={
+    id:invId,patient:pname,rxno:rxno,date:todayStr,
+    age:page,mob:pmob,city:pcity,dx:pdx,
+    meds:meds,svcs:svcs,
+    medTotal:medTotal,svcTotal:svcTotal,
+    grandTotal:grand,prevBalance:prevBal,
+    paidAmount:paidNow,balanceDue:balanceDue,
+    amount:grand,
+    status:balanceDue<=0?'Paid':(paidNow>0?'Partial':'Pending'),
+    paymode:''
+  };
+
+  if(isUpdate){
+    window.BILLING_DB[existingIdx]=record;
+    toast('\u2713 Updated '+invId+' \u2014 Balance \u20b9'+balanceDue.toFixed(2),'success');
+  } else {
+    window.BILLING_DB.unshift(record);
+    toast('\u2713 Created '+invId+' \u2014 \u20b9'+grand.toFixed(2),'success');
+  }
+
+  // Save to server
+  fetch('data.php?action=save_billing',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(record)
+  }).then(function(r){return r.json();}).catch(function(){});
+
+  // Update prev balance display for next time
+  var pb=document.getElementById('rx-prev-balance');
+  if(pb)pb.textContent='\u20b9'+balanceDue.toFixed(2);
 
   if(typeof rxSave==='function')rxSave();
   if(typeof renderPharmacy==='function')renderPharmacy();
   if(typeof renderFinance==='function')renderFinance();
-  toast('\u2713 '+newId+' \u2014 \u20b9'+total.toFixed(2)+' submitted to Pharmacy','success');
-  // nav to pharmacy removed — pharmacist sees bill via sync
-
-  // Save billing to data.php proper table
-  var _bill=window.BILLING_DB[0];
-  if(_bill){
-    fetch('data.php?action=save_billing',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        id:_bill.id,patient:_bill.patient,rxno:_bill.rxno,
-        date:_bill.date,desc:_bill.desc,amount:_bill.amount,
-        status:_bill.status,paymode:_bill.paymode||'',
-        meds:_bill.meds,svcs:_bill.svcs,
-        age:_bill.age,mob:_bill.mob,dx:_bill.dx
-      })
-    }).then(function(r){return r.json();}).catch(function(){});
-  }
   if(typeof cpSaveData==='function')cpSaveData();
 
-}catch(e){console.error('rxSubmitBilling error:',e);toast('Error: '+e.message,'error');}
+}catch(e){console.error('rxSubmitBilling:',e);toast('Error: '+e.message,'error');}
 }
 window.rxSubmitBilling=rxSubmitBilling;
 window.rxSubmitBilling=rxSubmitBilling;
@@ -11551,6 +11553,27 @@ window.printInvoice=printInvoice;
 
 
 
+
+
+function rxLoadPrevBalance(patName){
+  if(!patName||!window.BILLING_DB)return;
+  var name=patName.trim().toLowerCase();
+  var today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var prev=0;
+  // Find most recent record for this patient that is NOT today
+  for(var i=0;i<window.BILLING_DB.length;i++){
+    var b=window.BILLING_DB[i];
+    if(b.patient&&b.patient.trim().toLowerCase()===name&&b.date!==today){
+      prev=parseFloat(b.balanceDue||b.balance||0)||0;
+      break;
+    }
+  }
+  var el=document.getElementById('rx-prev-balance');
+  if(el)el.textContent='\u20b9'+prev.toFixed(2);
+  window._rxPrevBalance=prev;
+  if(typeof rxCalcBalance==='function')rxCalcBalance();
+}
+window.rxLoadPrevBalance=rxLoadPrevBalance;
 
 </script>
 </body>
