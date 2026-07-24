@@ -901,7 +901,7 @@ html,body{height:100%;overflow:hidden}
         <button class="tb" onclick="clearPharmaFilter()" style="font-size:11px"><i class="ti ti-x"></i>Clear</button>
       </div>
       <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
-      <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
+      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
   <div id="ph-bulk-bar" style="display:none;align-items:center;gap:10px;padding:9px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;margin-bottom:10px">
@@ -2067,6 +2067,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -11861,6 +11862,188 @@ window.rxDraftRestore=rxDraftRestore;
 
 
 
+
+
+function openClientReport(){
+  // Show modal with patient search
+  var old=document.getElementById('m-client-report');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='m-client-report';ov.className='overlay open';
+  ov.innerHTML=
+    '<div class="modal" style="max-width:520px">'+
+    '<div class="mh"><h2><i class="ti ti-report-analytics" style="color:#185FA5;margin-right:6px"></i>Client Ledger</h2>'+
+    '<button class="mclose" onclick="document.getElementById(\'m-client-report\').remove()"><i class="ti ti-x"></i></button></div>'+
+    '<div class="mbody">'+
+    '<div class="frow" style="margin-bottom:12px">'+
+    '<div style="flex:1"><div class="flbl">Patient Name</div>'+
+    '<input class="fin" id="cr-name" placeholder="Type name..." oninput="crSearch()" style="width:100%"></div>'+
+    '</div>'+
+    '<div id="cr-results" style="max-height:200px;overflow-y:auto;border:0.5px solid var(--sl2);border-radius:8px;display:none"></div>'+
+    '<div id="cr-preview" style="display:none">'+
+      '<div style="background:var(--sl);border-radius:8px;padding:12px;margin-top:10px">'+
+        '<div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:0.5px solid var(--sl2)">'+
+          '<div style="flex:1;padding:10px 14px;text-align:center;border-right:0.5px solid var(--sl2)">'+
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Total Billed</div>'+
+            '<div id="cr-tot" style="font-size:18px;font-weight:900;color:#185FA5">\u20b90</div>'+
+          '</div>'+
+          '<div style="flex:1;padding:10px 14px;text-align:center;border-right:0.5px solid var(--sl2)">'+
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Paid</div>'+
+            '<div id="cr-paid" style="font-size:18px;font-weight:900;color:#059669">\u20b90</div>'+
+          '</div>'+
+          '<div style="flex:1;padding:10px 14px;text-align:center;border-right:0.5px solid var(--sl2)">'+
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Balance</div>'+
+            '<div id="cr-bal" style="font-size:18px;font-weight:900;color:#DC2626">\u20b90</div>'+
+          '</div>'+
+          '<div style="flex:1;padding:10px 14px;text-align:center">'+
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Visits</div>'+
+            '<div id="cr-visits" style="font-size:18px;font-weight:900;color:#7C3AED">0</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="mfooter">'+
+    '<button class="bs" onclick="document.getElementById(\'m-client-report\').remove()">Close</button>'+
+    '<button class="bp" id="cr-dl-btn" onclick="downloadLedgerPDF()" style="display:none">'+
+      '<i class="ti ti-download"></i> Download PDF Ledger</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=document.getElementById('cr-name');if(el)el.focus();},100);
+}
+
+function crSearch(){
+  var q=(document.getElementById('cr-name')||{}).value||'';
+  var res=document.getElementById('cr-results');
+  var prev=document.getElementById('cr-preview');
+  var dlBtn=document.getElementById('cr-dl-btn');
+  if(!res||!prev)return;
+  if(q.length<2){res.style.display='none';prev.style.display='none';if(dlBtn)dlBtn.style.display='none';return;}
+  // Get unique patient names matching query
+  var names={};
+  (window.BILLING_DB||[]).forEach(function(inv){
+    var n=inv.patient||'';
+    if(n.toLowerCase().indexOf(q.toLowerCase())!==-1)names[n.toLowerCase()]=(names[n.toLowerCase()]||0)+1;
+  });
+  var list=Object.keys(names);
+  if(!list.length){
+    res.style.display='block';
+    res.innerHTML='<div style="padding:10px 14px;color:var(--ink3);font-size:11px">No patient found</div>';
+    prev.style.display='none';if(dlBtn)dlBtn.style.display='none';
+    return;
+  }
+  res.style.display='block';
+  res.innerHTML=list.map(function(n){
+    var display=(window.BILLING_DB.find(function(b){return(b.patient||'').toLowerCase()===n;})||{}).patient||n;
+    return '<div onclick="crSelect(\''+display.replace(/'/g,"\\'")+'\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--sl2);font-weight:600" '+
+      'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'+
+      display+'</div>';
+  }).join('');
+}
+
+function crSelect(name){
+  window._crSelectedPatient=name;
+  var el=document.getElementById('cr-name');if(el)el.value=name;
+  var res=document.getElementById('cr-results');if(res)res.style.display='none';
+  // Calculate summary
+  var invs=(window.BILLING_DB||[]).filter(function(b){
+    return(b.patient||'').toLowerCase()===name.toLowerCase();
+  }).slice().reverse(); // oldest first
+  var tot=0,paid=0,bal=0;
+  invs.forEach(function(inv){
+    tot+=parseFloat(inv.grandTotal||inv.amount||0);
+    paid+=parseFloat(inv.paidAmount||inv.paidAmt||0);
+    bal+=parseFloat(inv.balanceDue||inv.balance||0);
+  });
+  function s(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  var fmt=function(n){return'\u20b9'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  s('cr-tot',fmt(tot));s('cr-paid',fmt(paid));s('cr-bal',fmt(bal));s('cr-visits',invs.length);
+  var prev=document.getElementById('cr-preview');if(prev)prev.style.display='block';
+  var dlBtn=document.getElementById('cr-dl-btn');if(dlBtn)dlBtn.style.display='';
+}
+
+function downloadLedgerPDF(){
+  var name=window._crSelectedPatient||'Patient';
+  var invs=(window.BILLING_DB||[]).filter(function(b){
+    return(b.patient||'').toLowerCase()===name.toLowerCase();
+  }).slice().reverse();
+  if(!invs.length){toast('No invoices found for '+name,'error');return;}
+
+  var tot=0,paid=0,bal=0;
+  var rows='';
+  invs.forEach(function(inv,i){
+    var grand=parseFloat(inv.grandTotal||inv.amount||0);
+    var p=parseFloat(inv.paidAmount||inv.paidAmt||0);
+    var b=parseFloat(inv.balanceDue||inv.balance||0);
+    tot+=grand;paid+=p;bal+=b;
+    var mN=(inv.meds||[]).map(function(m){return m.name||m;}).filter(Boolean).join(', ');
+    var sN=(inv.svcs||[]).map(function(s){return s.name||s;}).filter(Boolean).join(', ');
+    var desc=mN&&sN?mN+' \u00b7 '+sN:mN||sN||inv.desc||'—';
+    var stColor=inv.status==='Paid'?'#059669':inv.status==='Partial'?'#D97706':'#DC2626';
+    rows+=
+      '<tr style="background:'+(i%2===0?'#fff':'#F9FAFB')+'">'+
+      '<td style="padding:7px 8px;font-size:11px;color:#6B7280">'+( inv.date||'—')+'</td>'+
+      '<td style="padding:7px 8px;font-size:11px;font-weight:600">'+String(inv.id)+'</td>'+
+      '<td style="padding:7px 8px;font-size:11px;color:#555;max-width:200px">'+desc+'</td>'+
+      '<td style="padding:7px 8px;text-align:right;font-weight:600">\u20b9'+grand.toFixed(2)+'</td>'+
+      '<td style="padding:7px 8px;text-align:right;color:#059669;font-weight:600">\u20b9'+p.toFixed(2)+'</td>'+
+      '<td style="padding:7px 8px;text-align:right;color:'+(b>0?'#DC2626':'#059669')+';font-weight:700">\u20b9'+b.toFixed(2)+'</td>'+
+      '<td style="padding:7px 8px;text-align:center"><span style="padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;background:'+(inv.status==='Paid'?'#F0FDF4':inv.status==='Partial'?'#FFFBEB':'#FFF1F2')+';color:'+stColor+'">'+inv.status+'</span></td>'+
+      '</tr>';
+  });
+
+  var CS=window.CLINIC_SETTINGS||{};
+  var fmt=function(n){return'\u20b9'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ledger - '+name+'</title>'+
+    '<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px;color:#111}'+
+    'table{width:100%;border-collapse:collapse}th{background:#1A3A8C;color:#fff;padding:8px 8px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px}'+
+    'td{border-bottom:0.5px solid #e5e7eb}'+
+    '.sum{display:flex;gap:0;border:1.5px solid #1A3A8C;border-radius:8px;overflow:hidden;margin-bottom:16px}'+
+    '.sc{flex:1;padding:10px 14px;text-align:center;border-right:0.5px solid #1A3A8C}'+
+    '.sc:last-child{border-right:none}'+
+    '.sl{font-size:9px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:4px}'+
+    '.sv{font-size:18px;font-weight:900}'+
+    '</style></head><body>'+
+    '<div style="border-bottom:3px solid #1A3A8C;padding-bottom:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end">'+
+      '<div><div style="font-size:20px;font-weight:900;color:#1A3A8C">'+(CS.name||'Clinic')+'</div>'+
+        '<div style="font-size:10px;color:#555;margin-top:2px">'+(CS.doctor||'')+(CS.phone?' \u00b7 Ph: '+CS.phone:'')+'</div></div>'+
+      '<div style="text-align:right"><div style="font-size:14px;font-weight:700">Patient Ledger</div>'+
+        '<div style="font-size:11px;color:#555">As on '+today+'</div></div>'+
+    '</div>'+
+    '<div style="margin-bottom:12px">'+
+      '<div style="font-size:16px;font-weight:700">'+name+'</div>'+
+      '<div style="font-size:11px;color:#555">'+invs.length+' visit'+(invs.length===1?'':'s')+' recorded</div>'+
+    '</div>'+
+    '<div class="sum">'+
+      '<div class="sc"><div class="sl">Total Billed</div><div class="sv" style="color:#185FA5">'+fmt(tot)+'</div></div>'+
+      '<div class="sc"><div class="sl">Total Paid</div><div class="sv" style="color:#059669">'+fmt(paid)+'</div></div>'+
+      '<div class="sc"><div class="sl">Balance Due</div><div class="sv" style="color:#DC2626">'+fmt(bal)+'</div></div>'+
+      '<div class="sc"><div class="sl">Visits</div><div class="sv" style="color:#7C3AED">'+invs.length+'</div></div>'+
+    '</div>'+
+    '<table><thead><tr><th style="width:90px">Date</th><th style="width:90px">Invoice</th>'+
+      '<th>Description</th><th style="text-align:right;width:90px">Grand \u20b9</th>'+
+      '<th style="text-align:right;width:80px">Paid \u20b9</th>'+
+      '<th style="text-align:right;width:80px">Balance \u20b9</th>'+
+      '<th style="text-align:center;width:70px">Status</th></tr></thead>'+
+    '<tbody>'+rows+
+    '<tr style="background:#F3F4F6;font-weight:700">'+
+      '<td colspan="3" style="padding:8px 8px;text-align:right">TOTAL</td>'+
+      '<td style="padding:8px 8px;text-align:right">\u20b9'+tot.toFixed(2)+'</td>'+
+      '<td style="padding:8px 8px;text-align:right;color:#059669">\u20b9'+paid.toFixed(2)+'</td>'+
+      '<td style="padding:8px 8px;text-align:right;color:'+(bal>0?'#DC2626':'#059669')+'">\u20b9'+bal.toFixed(2)+'</td>'+
+      '<td></td></tr>'+
+    '</tbody></table>'+
+    '<div style="margin-top:24px;padding-top:8px;border-top:0.5px solid #e5e7eb;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF">'+
+      '<span>Generated by '+(CS.name||'Clinic')+'</span><span>'+today+'</span></div>'+
+    '</body></html>';
+
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},400);}
+}
+window.openClientReport=openClientReport;
+window.crSearch=crSearch;
+window.crSelect=crSelect;
+window.downloadLedgerPDF=downloadLedgerPDF;
 
 </script>
 </body>
