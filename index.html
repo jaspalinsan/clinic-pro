@@ -2095,6 +2095,9 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4576,18 +4579,31 @@ function downloadInvoicePDF(id){
   // Build item rows
   var rows='';
   var allItems=[];
-  meds.forEach(function(m){allItems.push({name:m.name||'',company:m.mfr||'—',batch:m.batch||'—',exp:m.exp||'—',qty:m.qty||1,rate:parseFloat(m.sale)||0,amt:(m.qty||1)*(parseFloat(m.sale)||0)});});
-  svcs.forEach(function(s){allItems.push({name:s.name||'',company:'—',batch:'—',exp:'—',qty:1,rate:parseFloat(s.net||s.price)||0,amt:parseFloat(s.net||s.price)||0});});
+  meds.forEach(function(m){
+    var q=parseFloat(m.qty)||1;
+    var r=parseFloat(m.sale)||0;
+    var d=parseFloat(m.disc)||0;
+    var a=parseFloat(m.amt)||parseFloat((q*r*(1-d/100)).toFixed(2));
+    allItems.push({name:m.name||'',company:m.mfr||'—',batch:m.batch||'—',exp:m.exp||'—',qty:q,rate:r,disc:d,amt:a,isSvc:false});
+  });
+  svcs.forEach(function(s){
+    var r=parseFloat(s.net||s.price)||0;
+    var d=parseFloat(s.disc)||0;
+    allItems.push({name:s.name||'',company:'—',batch:'—',exp:'—',qty:1,rate:parseFloat(s.price||s.rate||r)||r,disc:d,amt:r,isSvc:true});
+  });
 
   allItems.forEach(function(item,i){
     rows+='<tr style="background:'+(i%2===0?'#fff':'#F9FAFB')+'">'
       +'<td style="color:#9CA3AF;padding:6px 8px">'+(i+1)+'</td>'
       +'<td style="font-weight:600;padding:6px 8px">'+item.name+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.company+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.batch+'</td>'
-      +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.exp+'</td>'
+      +(item.isSvc?'<td colspan="3" style="font-size:11px;color:#555;padding:6px 8px;text-align:center">Service</td>'
+        :('<td style="font-size:11px;color:#555;padding:6px 8px">'+item.company+'</td>'
+        +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.batch+'</td>'
+        +'<td style="font-size:11px;color:#555;padding:6px 8px">'+item.exp+'</td>'))
       +'<td style="text-align:right;padding:6px 8px">'+item.qty+'</td>'
       +'<td style="text-align:right;padding:6px 8px">'+item.rate.toFixed(2)+'</td>'
+      +'<td style="text-align:center;padding:6px 8px;color:'+(item.disc>0?'#DC2626':'#9CA3AF')+'">'
+        +(item.disc>0?item.disc+'%':'—')+'</td>'
       +'<td style="text-align:right;font-weight:500;padding:6px 8px">'+item.amt.toFixed(2)+'</td>'
       +'</tr>';
   });
@@ -4666,6 +4682,7 @@ function downloadInvoicePDF(id){
           +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:55px">Exp.</th>'
           +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:40px;text-align:right">Qty</th>'
           +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:72px;text-align:right">Rate \u20b9</th>'
+          +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:48px;text-align:center">Disc%</th>'
           +'<th style="padding:7px 8px;font-size:11px;font-weight:700;color:#374151;border-bottom:2px solid #1A3A8C;width:80px;text-align:right">Amount \u20b9</th>'
         +'</tr></thead>'
         +'<tbody>'+rows+'</tbody>'
@@ -11832,6 +11849,9 @@ function rxDraftRestore(){
 }
 window.rxDraftSave=rxDraftSave;
 window.rxDraftRestore=rxDraftRestore;
+
+
+
 
 </script>
 </body>
