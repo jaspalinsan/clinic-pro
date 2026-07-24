@@ -2093,6 +2093,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4798,14 +4799,17 @@ function renderPharmacy(){
     bLab.onclick=(function(id){return function(){openLabFromBill(id);};})(iid);
 
     var bAct;
-    if(inv.status!=='Paid'&&inv.status!=='Partial'){
-      bAct=document.createElement('button');bAct.className='tb prim';bAct.style.fontSize='11px';
-      bAct.innerHTML='<i class="ti ti-currency-rupee"></i>Pay';
-      bAct.onclick=(function(id){return function(){openPayModal(id);};})(iid);
-    } else {
+    if(inv.status==='Paid'){
       bAct=document.createElement('span');
-      bAct.style.cssText='font-size:11px;color:var(--acc);font-weight:700;padding:0 4px';
+      bAct.style.cssText='font-size:11px;color:#059669;font-weight:700;padding:0 4px';
       bAct.textContent='\u2714 Paid';
+    } else {
+      // Pending or Partial — show Pay button
+      bAct=document.createElement('button');
+      bAct.className='tb prim';
+      bAct.style.cssText='font-size:11px;'+(inv.status==='Partial'?'background:#FFF7ED;color:#92400E;border-color:#FED7AA;':'');
+      bAct.innerHTML='<i class="ti ti-currency-rupee"></i>'+(inv.status==='Partial'?' Part Pay':' Pay');
+      bAct.onclick=(function(id){return function(){openPayModal(id);};})(iid);
     }
 
     var bDel=document.createElement('button');bDel.className='tb danger';bDel.title='Delete';bDel.style.fontSize='11px';
@@ -11692,6 +11696,7 @@ function rxLoadPrevBalance(patName){
 window.rxLoadPrevBalance=rxLoadPrevBalance;
 window.rxLoadPrevBalance=rxLoadPrevBalance;
 window.rxLoadPrevBalance=rxLoadPrevBalance;
+
 
 
 
