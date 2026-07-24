@@ -2098,6 +2098,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -11734,124 +11735,99 @@ window.rxLoadPrevBalance=rxLoadPrevBalance;
 
 
 // ── Rx Draft: auto-save/restore when navigating away ──────────
-function rxDraftSave(){
-  try{
-    var draft={};
-    // Patient fields
-    ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city','rx-pat-dx','rx-old-history','rx-paid-now']
-      .forEach(function(id){
-        var el=document.getElementById(id);
-        if(el)draft[id]=el.value||'';
-      });
-    // Vitals
-    ['rx-bp','rx-pulse','rx-temp','rx-spo2','rx-weight','rx-height']
-      .forEach(function(id){
-        var el=document.getElementById(id);
-        if(el)draft[id]=el.value||'';
-      });
-    // Mode and days
-    ['rx-mode','rx-days'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el)draft[id]=el.value||'';
-    });
-    // Medicine rows
-    var rows=[];
-    document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
-      var type=tr.getAttribute('data-row-type')||'med';
-      var row={type:type,cells:{}};
-      ['name','dose','schedule','batch','exp','qty','sale','disc'].forEach(function(k){
-        var el=tr.querySelector('[data-rx="'+k+'"]');
-        if(el){
-          if(el.tagName==='SELECT')row.cells[k]=el.selectedIndex;
-          else row.cells[k]=el.value||'';
-        }
-      });
-      var amtEl=tr.querySelector('.rx-amt');
-      if(amtEl)row.cells.amt=amtEl.textContent||'';
-      // For fee row, save name
-      var nameInp=tr.querySelector('[data-rx="name"],[data-rx="item"]');
-      if(nameInp)row.cells.nameVal=nameInp.value||'';
-      rows.push(row);
-    });
-    draft.rows=rows;
-    draft.invId=window._currentInvId||'';
-    draft.ts=Date.now();
-    window._rxDraft=draft;
-  }catch(e){}
-}
 
-function rxDraftRestore(){
-  try{
-    var draft=window._rxDraft;
-    if(!draft||!draft['rx-pat-name'])return false;
-    // Check draft is recent (within 4 hours)
-    if(Date.now()-draft.ts>4*3600*1000)return false;
 
-    // Restore patient fields
-    ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city','rx-pat-dx','rx-old-history','rx-paid-now']
-      .forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&draft[id]!==undefined)el.value=draft[id];
-      });
-    // Vitals
-    ['rx-bp','rx-pulse','rx-temp','rx-spo2','rx-weight','rx-height']
-      .forEach(function(id){
-        var el=document.getElementById(id);
-        if(el&&draft[id]!==undefined)el.value=draft[id];
-      });
-    // Mode and days
-    ['rx-mode','rx-days'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el&&draft[id]!==undefined)el.value=draft[id];
-    });
-    // Restore session invoice
-    if(draft.invId)window._currentInvId=draft.invId;
-    // Restore rows
-    if(draft.rows&&draft.rows.length){
-      var tbody=document.getElementById('rx-med-tbody');
-      if(tbody){
-        tbody.innerHTML='';
-        draft.rows.forEach(function(row,idx){
-          if(row.type==='fee'){
-            // Recreate consultancy row
-            if(typeof rxInit==='function'&&idx===0)rxInit();
-            // After rxInit, update the rate
-            var tr=tbody.rows[0];
-            if(tr){
-              var saleEl=tr.querySelector('[data-rx="sale"]');
-              if(saleEl&&row.cells.sale)saleEl.value=row.cells.sale;
-              var discEl=tr.querySelector('[data-rx="disc"]');
-              if(discEl&&row.cells.disc)discEl.value=row.cells.disc;
-              if(typeof rxCalcRow==='function')rxCalcRow(saleEl);
-            }
-          } else if(row.type==='svc'){
-            if(typeof rxAddUnifiedSvcRow==='function')rxAddUnifiedSvcRow({rate:row.cells.sale||0,disc:row.cells.disc||0});
-            var tr=tbody.rows[tbody.rows.length-1];
-            if(tr){
-              var amtEl=tr.querySelector('.rx-amt');
-              if(amtEl&&row.cells.amt)amtEl.textContent=row.cells.amt;
-            }
-          } else {
-            if(typeof rxAddMedRow==='function')rxAddMedRow(row.cells);
-          }
-        });
-      }
-    }
-    // Trigger calcs
-    if(typeof rxCalcTotals==='function')rxCalcTotals();
-    if(typeof rxCalcNextDate==='function')rxCalcNextDate();
-    if(typeof rxCalcBMI==='function')rxCalcBMI();
-    // Load prev balance for this patient
-    if(draft['rx-pat-name']&&typeof rxLoadPrevBalance==='function')
-      rxLoadPrevBalance(draft['rx-pat-name']);
-    return true;
-  }catch(e){console.error('rxDraftRestore:',e);return false;}
-}
+
 window.rxDraftSave=rxDraftSave;
 window.rxDraftRestore=rxDraftRestore;
 
 
 
+
+
+function rxDraftSave(){
+  try{
+    if(!document.getElementById('rx-med-tbody'))return;
+    var pname=(document.getElementById('rx-pat-name')||{}).value||'';
+    if(!pname)return; // nothing to save
+    // Snapshot: patient fields
+    var d={ts:Date.now(),patient:pname};
+    ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city','rx-pat-dx',
+     'rx-old-history','rx-paid-now','rx-bp','rx-pulse','rx-temp',
+     'rx-spo2','rx-weight','rx-height','rx-mode','rx-days']
+    .forEach(function(id){
+      var el=document.getElementById(id);
+      if(el)d[id]=el.tagName==='SELECT'?el.value:el.value||'';
+    });
+    // Snapshot: entire tbody HTML
+    var tbody=document.getElementById('rx-med-tbody');
+    d.tbodyHTML=tbody?tbody.innerHTML:'';
+    // Snapshot: symptoms
+    var symList=document.getElementById('rx-sym-list');
+    d.symHTML=symList?symList.innerHTML:'';
+    // Snapshot: billing
+    d.prevBal=(document.getElementById('rx-prev-balance')||{}).textContent||'\u20b90.00';
+    d.invId=window._currentInvId||'';
+    window._rxDraft=d;
+  }catch(e){console.error('rxDraftSave:',e);}
+}
+
+function rxDraftRestore(){
+  try{
+    var d=window._rxDraft;
+    if(!d||!d.patient)return false;
+    if(Date.now()-d.ts>8*3600*1000){window._rxDraft=null;return false;} // 8hr expiry
+
+    // Restore patient fields
+    ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city','rx-pat-dx',
+     'rx-old-history','rx-paid-now','rx-bp','rx-pulse','rx-temp',
+     'rx-spo2','rx-weight','rx-height','rx-mode','rx-days']
+    .forEach(function(id){
+      var el=document.getElementById(id);
+      if(el&&d[id]!==undefined)el.value=d[id];
+    });
+
+    // Restore tbody HTML directly
+    if(d.tbodyHTML){
+      var tbody=document.getElementById('rx-med-tbody');
+      if(tbody){
+        tbody.innerHTML=d.tbodyHTML;
+        // Re-attach event listeners by re-triggering oninput on sale/disc cells
+        tbody.querySelectorAll('[data-rx="sale"],[data-rx="disc"],[data-rx="qty"]')
+          .forEach(function(el){
+            try{rxCalcRow(el);}catch(e){}
+          });
+      }
+    }
+
+    // Restore symptoms
+    if(d.symHTML){
+      var symList=document.getElementById('rx-sym-list');
+      if(symList)symList.innerHTML=d.symHTML;
+    }
+
+    // Restore prev balance display
+    if(d.prevBal){
+      var pb=document.getElementById('rx-prev-balance');
+      if(pb)pb.textContent=d.prevBal;
+    }
+
+    // Restore session invoice
+    if(d.invId)window._currentInvId=d.invId;
+
+    // Recalculate totals
+    setTimeout(function(){
+      try{rxCalcTotals();}catch(e){}
+      try{rxCalcNextDate();}catch(e){}
+      try{rxCalcBMI();}catch(e){}
+      try{rxCalcBalance();}catch(e){}
+    },100);
+
+    return true;
+  }catch(e){console.error('rxDraftRestore:',e);return false;}
+}
+window.rxDraftSave=rxDraftSave;
+window.rxDraftRestore=rxDraftRestore;
 
 </script>
 </body>
