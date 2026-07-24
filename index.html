@@ -2089,6 +2089,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3855,7 +3856,6 @@ var _rxSaved = [];
 var _rxCounter = 1;
 
 function rxInit(){
-  window._currentInvId=null;
   var CS=window.CLINIC_SETTINGS||{};
   var cn=document.getElementById('rx-clinic-name');
   var cs_el=document.getElementById('rx-clinic-sub');
@@ -4444,21 +4444,20 @@ try{
 
   if(!window.BILLING_DB)window.BILLING_DB=[];
 
-  // ══ OPTION A: Match by stored invId on this Rx session ══════════
-  // window._currentInvId is set when we create/update an invoice in this session
+  // ══ MATCH LOGIC ══
+  // Priority 1: Session ID (set when invoice created in this Rx session)
+  // Priority 2: Patient name match on SAME Rx number (not CD-RX-NEW)
+  // NEVER create new invoice if _currentInvId already exists
   var existingIdx=-1;
 
-  // 1. Check if this Rx session already has an invoice ID
   if(window._currentInvId){
     for(var i=0;i<window.BILLING_DB.length;i++){
-      if(window.BILLING_DB[i].id===window._currentInvId){
-        existingIdx=i; break;
-      }
+      if(window.BILLING_DB[i].id===window._currentInvId){existingIdx=i;break;}
     }
   }
 
-  // 2. Fallback: match by patient name + same Rx number
-  if(existingIdx===-1&&rxno){
+  // Fallback: match by rxno ONLY if rxno is a real Rx number (not placeholder)
+  if(existingIdx===-1&&rxno&&rxno!=='Rx'&&rxno!=='CD-RX-NEW'&&rxno.indexOf('RX-NEW')===-1){
     for(var i=0;i<window.BILLING_DB.length;i++){
       var b=window.BILLING_DB[i];
       if(b.rxno&&b.rxno===rxno){existingIdx=i;break;}
@@ -4467,9 +4466,7 @@ try{
 
   var isUpdate=existingIdx!==-1;
   var invId=isUpdate?window.BILLING_DB[existingIdx].id:('INV-'+String(Date.now()).slice(-6));
-
-  // Store this invoice ID for this Rx session
-  window._currentInvId=invId;
+  window._currentInvId=invId; // lock this invoice for this session
 
   // Collect lab tests from Rx lab section
   var labTests=[];
@@ -11599,6 +11596,7 @@ function rxLoadPrevBalance(patName){
 }
 window.rxLoadPrevBalance=rxLoadPrevBalance;
 window.rxLoadPrevBalance=rxLoadPrevBalance;
+
 
 
 
