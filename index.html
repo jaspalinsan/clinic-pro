@@ -2091,6 +2091,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4490,6 +4492,8 @@ try{
     paymode:''
   };
 
+  // Rule 1: clear session if fully paid so next Rx creates new invoice
+  if(balanceDue<=0)window._currentInvId=null;
   if(isUpdate){
     window.BILLING_DB[existingIdx]=record;
     toast('\u2713 '+invId+' updated \u2014 Balance \u20b9'+balanceDue.toFixed(2),'success');
@@ -4721,8 +4725,10 @@ function renderPharmacy(){
   }
   var tot=0,pen=0;
   data.forEach(function(inv){
-    var amt=parseFloat(inv.amount)||0;
-    tot+=amt; if(inv.status!=='Paid')pen+=amt;
+    var amt=parseFloat(inv.grandTotal||inv.amount)||0;
+    var balDue=parseFloat(inv.balanceDue||inv.balance||0);
+    // Rule 3: tot=sum of grandTotal, pen=sum of outstanding balanceDue only
+    tot+=amt; pen+=balDue;
     var stClass=inv.status==='Paid'?'p-g':inv.status==='Partial'?'p-b':'p-a';
     var iid=String(inv.id);
     var tr=document.createElement('tr');
@@ -4760,9 +4766,15 @@ function renderPharmacy(){
     }
     td5.textContent=dispDesc;
 
-    // Amount
-    var td6=document.createElement('td');td6.style.fontWeight='700';td6.style.color='var(--acc)';
-    td6.textContent='₹'+amt.toLocaleString('en-IN',{minimumFractionDigits:2});
+    // Amount + Balance
+    var td6=document.createElement('td');td6.style.fontWeight='700';
+    var amtStr='₹'+amt.toLocaleString('en-IN',{minimumFractionDigits:2});
+    if(balDue>0&&inv.status!=='Paid'){
+      td6.innerHTML=amtStr+'<br><span style="font-size:10px;color:#DC2626;font-weight:600">'+'₹'+balDue.toFixed(2)+' due</span>';
+    } else {
+      td6.textContent=amtStr;
+      td6.style.color=inv.status==='Paid'?'#059669':'var(--acc)';
+    }
 
     // Status
     var td7=document.createElement('td');
@@ -4850,6 +4862,7 @@ function submitPayment(invId,fullAmt){
 
   if(balanceDue<=0.01){
     toast('\u2714 \u20b9'+received.toFixed(2)+' via '+mode+' \u2014 FULLY PAID!','success');
+    if(window._currentInvId===invId)window._currentInvId=null;
   } else {
     toast('Partial \u20b9'+received.toFixed(2)+' via '+mode+
       ' \u2014 Balance \u20b9'+balanceDue.toFixed(2)+' pending','info');
@@ -11654,19 +11667,22 @@ window.printInvoice=printInvoice;
 function rxLoadPrevBalance(patName){
   if(!patName||!window.BILLING_DB)return;
   var name=patName.trim().toLowerCase();
-  var prev=0; var foundId=null;
-  // Find most recent invoice for this patient that has a balance
+  var curRxno=(document.getElementById('rx-number')||{}).textContent||'';
+  var prev=0;
+  // Find most recent invoice for this patient with outstanding balance
+  // Skip the current session's invoice
   for(var i=0;i<window.BILLING_DB.length;i++){
     var b=window.BILLING_DB[i];
-    if(b.patient&&b.patient.trim().toLowerCase()===name){
-      // If unpaid/partial from a PREVIOUS session (different rxno from current)
-      var curRx=(document.getElementById('rx-number')||{}).textContent||'';
-      if(b.rxno!==curRx&&(b.status==='Partial'||b.status==='Pending')){
-        prev=parseFloat(b.balanceDue||b.balance||0)||0;
-        foundId=b.id;
-        break;
-      }
-    }
+    if(!b.patient||b.patient.trim().toLowerCase()!==name)continue;
+    // Skip current session invoice
+    if(window._currentInvId&&b.id===window._currentInvId)continue;
+    // Skip same rxno (same visit)
+    if(b.rxno&&b.rxno===curRxno)continue;
+    // Use balanceDue from this invoice
+    var bd=parseFloat(b.balanceDue||b.balance||0)||0;
+    if(bd>0){prev=bd;break;}
+    // Even if zero balance (paid), stop looking - no carry forward
+    break;
   }
   var el=document.getElementById('rx-prev-balance');
   if(el)el.textContent='\u20b9'+prev.toFixed(2);
@@ -11675,6 +11691,9 @@ function rxLoadPrevBalance(patName){
 }
 window.rxLoadPrevBalance=rxLoadPrevBalance;
 window.rxLoadPrevBalance=rxLoadPrevBalance;
+window.rxLoadPrevBalance=rxLoadPrevBalance;
+
+
 
 
 
