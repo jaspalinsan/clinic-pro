@@ -1055,8 +1055,106 @@ html,body{height:100%;overflow:hidden}
       </div>
       <button class="tb" onclick="renderFinance()" style="font-size:11px"><i class="ti ti-refresh"></i>Refresh</button>
     </div>
+  
+  </div><!-- end fsec-plbs -->
+
+  <!-- ═══ P&L SECTION ═══ -->
+  <div id="fsec-pl" style="display:none;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:700">📋 Profit &amp; Loss Account</div>
+      <div style="display:flex;gap:8px">
+        <span id="pl-period" style="font-size:11px;color:var(--ink3)"></span>
+        <button class="tb" onclick="printPL()" style="font-size:11px"><i class="ti ti-printer"></i> Print</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <!-- INCOME -->
+      <div style="border:1px solid #BBF7D0;border-radius:10px;overflow:hidden">
+        <div style="background:#059669;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">INCOME (Cr)</div>
+        <div id="pl-income-rows"></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#F0FDF4;border-top:1.5px solid #BBF7D0;font-weight:700;font-size:13px">
+          <span>Total Income</span><span id="pl-income-total" style="color:#059669">₹0.00</span>
+        </div>
+      </div>
+      <!-- EXPENSES -->
+      <div style="border:1px solid #FECDD3;border-radius:10px;overflow:hidden">
+        <div style="background:#DC2626;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">EXPENSES (Dr)</div>
+        <div id="pl-expense-rows"></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
+          <button onclick="addExpense()" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Expense</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#FFF1F2;border-top:1.5px solid #FECDD3;font-weight:700;font-size:13px">
+          <span>Total Expenses</span><span id="pl-expense-total" style="color:#DC2626">₹0.00</span>
+        </div>
+      </div>
+    </div>
+    <!-- NET PROFIT -->
+    <div id="pl-net-box" style="margin-top:14px;padding:14px 20px;background:#F0FDF4;border:2px solid #059669;border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#065F46;margin-bottom:3px">NET PROFIT / LOSS</div>
+        <div style="font-size:11px;color:#065F46">Income − Expenses</div>
+      </div>
+      <span id="pl-net" style="font-size:22px;font-weight:900;color:#059669">₹0.00</span>
+    </div>
   </div>
 
+  <!-- ═══ BALANCE SHEET SECTION ═══ -->
+  <div id="fsec-bs" style="display:none;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:700">⚖️ Balance Sheet</div>
+      <button class="tb" onclick="printBS()" style="font-size:11px"><i class="ti ti-printer"></i> Print</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <!-- LIABILITIES -->
+      <div style="border:1px solid #BFDBFE;border-radius:10px;overflow:hidden">
+        <div style="background:#185FA5;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">LIABILITIES (Cr)</div>
+        <div id="bs-liab-rows"></div>
+        <div style="padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
+          <button onclick="addBSEntry('liab')" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Liability</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#EFF6FF;border-top:1.5px solid #BFDBFE;font-weight:700;font-size:13px">
+          <span>Total Liabilities</span><span id="bs-liab-total" style="color:#185FA5">₹0.00</span>
+        </div>
+      </div>
+      <!-- ASSETS -->
+      <div style="border:1px solid #E9D5FF;border-radius:10px;overflow:hidden">
+        <div style="background:#7C3AED;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">ASSETS (Dr)</div>
+        <div id="bs-asset-rows"></div>
+        <div style="padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
+          <button onclick="addBSEntry('asset')" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Asset</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#FAF5FF;border-top:1.5px solid #E9D5FF;font-weight:700;font-size:13px">
+          <span>Total Assets</span><span id="bs-asset-total" style="color:#7C3AED">₹0.00</span>
+        </div>
+      </div>
+    </div>
+    <!-- BALANCE CHECK -->
+    <div id="bs-check-box" style="margin-top:14px;padding:12px 20px;border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;font-weight:700">Difference (Liabilities − Assets)</span>
+      <span id="bs-diff" style="font-size:18px;font-weight:900">₹0.00</span>
+    </div>
+  </div>
+
+  <!-- ═══ LEDGER ACCOUNTS SECTION ═══ -->
+  <div id="fsec-ledger" style="display:none;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:700">📒 Chart of Accounts</div>
+      <button class="bp" onclick="addLedgerAccount()" style="font-size:11px"><i class="ti ti-plus"></i> New Account</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="ledger-account-grid"></div>
+  </div>
+
+</div>
+
+  <div style="display:flex;gap:0;border-bottom:1.5px solid var(--sl2);background:var(--bg);overflow-x:auto;flex-wrap:nowrap">
+    <button id="ftab-revenue"  onclick="finTab('revenue')"  class="ftab ftab-on" style="padding:10px 18px;border:none;border-bottom:2.5px solid #1A3A8C;font-size:12px;font-weight:700;color:#1A3A8C;background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-chart-bar" style="margin-right:5px"></i>Revenue</button>
+    <button id="ftab-pl"       onclick="finTab('pl')"       class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-file-analytics" style="margin-right:5px"></i>P&amp;L Account</button>
+    <button id="ftab-bs"       onclick="finTab('bs')"       class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-scale" style="margin-right:5px"></i>Balance Sheet</button>
+    <button id="ftab-ledger"   onclick="finTab('ledger')"   class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-notebook" style="margin-right:5px"></i>Ledger Accounts</button>
+    <button id="ftab-purchase" onclick="finTab('purchase')" class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-shopping-cart" style="margin-right:5px"></i>Purchase</button>
+  </div>
+
+  <div id="fsec-revenue">
   <div class="card" id="fin-cat-card">
     <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
       <span class="ct"><i class="ti ti-chart-bar" style="color:#1A3A8C;margin-right:6px"></i>Revenue by Category</span>
@@ -1077,6 +1175,9 @@ html,body{height:100%;overflow:hidden}
     </table></div>
   </div>
 
+  </div><!-- end fsec-revenue -->
+
+  <div id="fsec-purchase" style="display:none">
   <div class="card" id="fin-purchase-card" style="margin-top:12px">
     <div class="ch"><span class="ct"><i class="ti ti-truck" style="color:var(--gold);margin-right:6px"></i>Purchase / Expenses</span></div>
     <div style="overflow-x:auto"><table class="tbl">
@@ -1092,6 +1193,9 @@ html,body{height:100%;overflow:hidden}
     </table></div>
   </div>
 
+  </div><!-- end fsec-purchase -->
+
+  <div id="fsec-plbs" style="display:none">
   <div class="card" id="fin-ledger-card" style="margin-top:12px">
     <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
       <span class="ct"><i class="ti ti-book" style="color:var(--rose);margin-right:6px"></i>Vendor Ledger — <span id="fin-ledger-vendor">select a vendor</span></span>
@@ -2193,6 +2297,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -12445,6 +12551,425 @@ window.phSetDateLbl=phSetDateLbl;
 
 
 
+
+
+
+// ── Finance Tab System ─────────────────────────────────────────
+function finTab(name){
+  var tabs=['revenue','pl','bs','ledger','purchase'];
+  tabs.forEach(function(t){
+    var btn=document.getElementById('ftab-'+t);
+    if(btn){
+      if(t===name){
+        btn.style.borderBottomColor='#1A3A8C';
+        btn.style.color='#1A3A8C';
+        btn.style.fontWeight='700';
+      } else {
+        btn.style.borderBottomColor='transparent';
+        btn.style.color='var(--ink3)';
+        btn.style.fontWeight='600';
+      }
+    }
+    var sec=document.getElementById('fsec-'+t);
+    if(sec)sec.style.display=t===name?'':'none';
+  });
+  if(name==='pl')renderPL();
+  if(name==='bs')renderBS();
+  if(name==='ledger')renderLedgerAccounts();
+}
+window.finTab=finTab;
+
+// ── P&L Render ────────────────────────────────────────────────
+function renderPL(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var DB=window.BILLING_DB||[];
+
+  // Auto-calculate income from billing
+  var income={};
+  DB.forEach(function(inv){
+    // Services
+    (inv.svcs||[]).forEach(function(s){
+      var name=s.name||'Service';
+      if(!income[name])income[name]=0;
+      income[name]+=(s.net||s.price||0);
+    });
+    // Medicine sales
+    var medAmt=parseFloat(inv.medTotal||0);
+    if(medAmt>0){
+      if(!income['Medicine Sales'])income['Medicine Sales']=0;
+      income['Medicine Sales']+=medAmt;
+    }
+  });
+
+  var totalIncome=Object.values(income).reduce(function(a,b){return a+b;},0);
+
+  // Render income rows
+  var incomeEl=document.getElementById('pl-income-rows');
+  if(incomeEl){
+    var html='';
+    Object.keys(income).forEach(function(k){
+      var v=income[k];
+      html+='<div style="display:flex;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
+        +'<span style="color:var(--ink2)">'+k+'</span>'
+        +'<span style="font-weight:600;color:#059669">₹'+v.toFixed(2)+'</span></div>';
+    });
+    if(!html)html='<div style="padding:16px 14px;color:var(--ink3);font-size:11px;text-align:center">No billing data — add invoices from Rx or Pharmacy</div>';
+    incomeEl.innerHTML=html;
+  }
+
+  // Render expense rows from CLINIC_SETTINGS.expenses
+  var expenses=CS.expenses||[];
+  var totalExpense=expenses.reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
+  var expEl=document.getElementById('pl-expense-rows');
+  if(expEl){
+    var html2='';
+    expenses.forEach(function(e,i){
+      html2+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
+        +'<div><div style="font-weight:600">'+e.name+'</div>'
+        +'<div style="font-size:10px;color:var(--ink3)">'+e.date+(e.note?' · '+e.note:'')+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-weight:600;color:#DC2626">₹'+parseFloat(e.amount||0).toFixed(2)+'</span>'
+        +'<button onclick="deleteExpense('+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:0">×</button>'
+        +'</div></div>';
+    });
+    if(!html2)html2='<div style="padding:16px 14px;color:var(--ink3);font-size:11px;text-align:center">No expenses added — click + Add Expense</div>';
+    expEl.innerHTML=html2;
+  }
+
+  var fmt=function(n){return'₹'+Math.abs(n).toFixed(2);};
+  var incEl=document.getElementById('pl-income-total');
+  if(incEl)incEl.textContent='₹'+totalIncome.toFixed(2);
+  var exEl=document.getElementById('pl-expense-total');
+  if(exEl)exEl.textContent='₹'+totalExpense.toFixed(2);
+
+  var net=totalIncome-totalExpense;
+  var netEl=document.getElementById('pl-net');
+  if(netEl){netEl.textContent=fmt(net);netEl.style.color=net>=0?'#059669':'#DC2626';}
+  var netBox=document.getElementById('pl-net-box');
+  if(netBox){
+    netBox.style.background=net>=0?'#F0FDF4':'#FFF1F2';
+    netBox.style.borderColor=net>=0?'#059669':'#DC2626';
+    var lbl=netBox.querySelector('div>div:first-child');
+    if(lbl)lbl.style.color=net>=0?'#065F46':'#9F1239';
+  }
+}
+window.renderPL=renderPL;
+
+// ── Add Expense ───────────────────────────────────────────────
+function addExpense(){
+  var old=document.getElementById('m-expense');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='m-expense';ov.className='overlay open';
+  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return d.getFullYear()+'-'+mm+'-'+dd;})();
+  ov.innerHTML='<div class="modal" style="max-width:440px">'
+    +'<div class="mh"><h2><i class="ti ti-minus-vertical" style="color:#DC2626;margin-right:6px"></i>Add Expense</h2>'
+    +'<button class="mclose" onclick="document.getElementById(\'m-expense\').remove()"><i class="ti ti-x"></i></button></div>'
+    +'<div class="mbody"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Expense Head *</div>'
+    +'<input class="fin" id="exp-name" placeholder="e.g. Staff Salary, Rent, Electricity" style="width:100%"></div>'
+    +'<div><div class="flbl" style="margin-bottom:4px">Amount ₹ *</div>'
+    +'<input class="fin" id="exp-amount" type="number" min="0" placeholder="0.00" style="width:100%"></div>'
+    +'<div><div class="flbl" style="margin-bottom:4px">Date</div>'
+    +'<input class="fin" id="exp-date" type="date" value="'+today+'" style="width:100%"></div>'
+    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Note (optional)</div>'
+    +'<input class="fin" id="exp-note" placeholder="Description..." style="width:100%"></div>'
+    +'</div></div>'
+    +'<div class="mfooter"><button class="bs" onclick="document.getElementById(\'m-expense\').remove()">Cancel</button>'
+    +'<button class="bp" onclick="saveExpense()"><i class="ti ti-check"></i> Save Expense</button></div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=document.getElementById('exp-name');if(el)el.focus();},100);
+}
+window.addExpense=addExpense;
+
+function saveExpense(){
+  var name=(document.getElementById('exp-name')||{}).value||'';
+  var amount=parseFloat((document.getElementById('exp-amount')||{}).value)||0;
+  var date=(document.getElementById('exp-date')||{}).value||'';
+  var note=(document.getElementById('exp-note')||{}).value||'';
+  if(!name){toast('Enter expense name','error');return;}
+  if(amount<=0){toast('Enter amount','error');return;}
+  // Format date
+  var d=date?new Date(date):new Date();
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mm=String(d.getMonth()+1).padStart(2,'0');
+  var dateStr=dd+'-'+mm+'-'+d.getFullYear();
+  var CS=window.CLINIC_SETTINGS||{};
+  if(!CS.expenses)CS.expenses=[];
+  CS.expenses.push({name:name,amount:amount,date:dateStr,note:note});
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  var old=document.getElementById('m-expense');if(old)old.remove();
+  toast('Expense saved \u2713','success');
+  renderPL();
+}
+window.saveExpense=saveExpense;
+
+function deleteExpense(idx){
+  var CS=window.CLINIC_SETTINGS||{};
+  if(CS.expenses)CS.expenses.splice(idx,1);
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  renderPL();
+}
+window.deleteExpense=deleteExpense;
+
+// ── Balance Sheet ─────────────────────────────────────────────
+function renderBS(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var liabs=CS.bsLiabilities||[];
+  var assets=CS.bsAssets||[];
+
+  // Auto-add: patient debtors from BILLING_DB
+  var debtors=(window.BILLING_DB||[]).reduce(function(a,b){return a+parseFloat(b.balanceDue||0);},0);
+  // Auto-add: net profit from P&L
+  var DB=window.BILLING_DB||[];
+  var totalIncome=0;
+  DB.forEach(function(inv){
+    totalIncome+=parseFloat(inv.grandTotal||inv.amount||0);
+  });
+  var totalExpense=(CS.expenses||[]).reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
+  var netProfit=totalIncome-totalExpense;
+
+  function renderGroup(el_id, items, color, type){
+    var el=document.getElementById(el_id);if(!el)return;
+    var html='';
+    if(type==='liab'&&netProfit!==0){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px;background:var(--sl)">'
+        +'<div><div style="font-weight:600">Net '+(netProfit>=0?'Profit':'Loss')+'</div>'
+        +'<div style="font-size:10px;color:var(--ink3)">Auto from P&amp;L</div></div>'
+        +'<span style="font-weight:600;color:'+(netProfit>=0?'#059669':'#DC2626')+'">₹'+Math.abs(netProfit).toFixed(2)+'</span></div>';
+    }
+    if(type==='asset'&&debtors>0){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px;background:var(--sl)">'
+        +'<div><div style="font-weight:600">Patient Debtors</div>'
+        +'<div style="font-size:10px;color:var(--ink3)">Auto from billing</div></div>'
+        +'<span style="font-weight:600;color:#DC2626">₹'+debtors.toFixed(2)+'</span></div>';
+    }
+    items.forEach(function(item,i){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
+        +'<div><div style="font-weight:600">'+item.name+'</div>'
+        +(item.note?'<div style="font-size:10px;color:var(--ink3)">'+item.note+'</div>':'')+'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-weight:600;color:'+color+'">₹'+parseFloat(item.amount||0).toFixed(2)+'</span>'
+        +'<button onclick="deleteBSEntry(\''+type+'\','+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:0">×</button>'
+        +'</div></div>';
+    });
+    if(!html)html='<div style="padding:14px;color:var(--ink3);font-size:11px;text-align:center">Click + Add to get started</div>';
+    el.innerHTML=html;
+  }
+
+  renderGroup('bs-liab-rows',liabs,'#185FA5','liab');
+  renderGroup('bs-asset-rows',assets,'#7C3AED','asset');
+
+  var totalLiab=liabs.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+(netProfit>0?netProfit:0);
+  var totalAsset=assets.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+debtors;
+
+  var el1=document.getElementById('bs-liab-total');if(el1)el1.textContent='₹'+totalLiab.toFixed(2);
+  var el2=document.getElementById('bs-asset-total');if(el2)el2.textContent='₹'+totalAsset.toFixed(2);
+
+  var diff=totalLiab-totalAsset;
+  var diffEl=document.getElementById('bs-diff');
+  var box=document.getElementById('bs-check-box');
+  if(diffEl)diffEl.textContent=(diff===0?'✓ Balanced':'₹'+Math.abs(diff).toFixed(2));
+  if(diffEl)diffEl.style.color=diff===0?'#059669':'#DC2626';
+  if(box)box.style.background=diff===0?'#F0FDF4':'#FFF1F2';
+}
+window.renderBS=renderBS;
+
+function addBSEntry(type){
+  var old=document.getElementById('m-bs');if(old)old.remove();
+  var label=type==='liab'?'Liability':'Asset';
+  var ov=document.createElement('div');ov.id='m-bs';ov.className='overlay open';
+  ov.innerHTML='<div class="modal" style="max-width:420px">'
+    +'<div class="mh"><h2>Add '+label+'</h2>'
+    +'<button class="mclose" onclick="document.getElementById(\'m-bs\').remove()"><i class="ti ti-x"></i></button></div>'
+    +'<div class="mbody"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Account Name *</div>'
+    +'<input class="fin" id="bs-name" placeholder="e.g. Capital, Cash in Hand, Bank..." style="width:100%"></div>'
+    +'<div><div class="flbl" style="margin-bottom:4px">Amount ₹ *</div>'
+    +'<input class="fin" id="bs-amount" type="number" min="0" style="width:100%"></div>'
+    +'<div><div class="flbl" style="margin-bottom:4px">Note</div>'
+    +'<input class="fin" id="bs-note" placeholder="Optional..." style="width:100%"></div>'
+    +'</div></div>'
+    +'<div class="mfooter"><button class="bs" onclick="document.getElementById(\'m-bs\').remove()">Cancel</button>'
+    +'<button class="bp" onclick="saveBSEntry(\''+type+'\')"><i class="ti ti-check"></i> Save</button></div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){var el=document.getElementById('bs-name');if(el)el.focus();},100);
+}
+window.addBSEntry=addBSEntry;
+
+function saveBSEntry(type){
+  var name=(document.getElementById('bs-name')||{}).value||'';
+  var amount=parseFloat((document.getElementById('bs-amount')||{}).value)||0;
+  var note=(document.getElementById('bs-note')||{}).value||'';
+  if(!name||amount<=0){toast('Fill name and amount','error');return;}
+  var CS=window.CLINIC_SETTINGS||{};
+  var key=type==='liab'?'bsLiabilities':'bsAssets';
+  if(!CS[key])CS[key]=[];
+  CS[key].push({name:name,amount:amount,note:note});
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  var old=document.getElementById('m-bs');if(old)old.remove();
+  toast('Saved \u2713','success');
+  renderBS();
+}
+window.saveBSEntry=saveBSEntry;
+
+function deleteBSEntry(type,idx){
+  var CS=window.CLINIC_SETTINGS||{};
+  var key=type==='liab'?'bsLiabilities':'bsAssets';
+  if(CS[key])CS[key].splice(idx,1);
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  renderBS();
+}
+window.deleteBSEntry=deleteBSEntry;
+
+// ── Ledger Accounts ───────────────────────────────────────────
+var LEDGER_GROUPS=[
+  {id:'income',  label:'Income Accounts',   color:'#059669',bg:'#F0FDF4',border:'#BBF7D0',
+   defaults:['Consultation Fees','Medicine Sales','Lab Revenue','Procedure Fees','Other Income']},
+  {id:'expense', label:'Expense Accounts',  color:'#DC2626',bg:'#FFF1F2',border:'#FECDD3',
+   defaults:['Medicine Purchase','Staff Salary','Rent','Electricity','Lab Consumables','Miscellaneous']},
+  {id:'bs',      label:'Balance Sheet A/c', color:'#7C3AED',bg:'#FAF5FF',border:'#E9D5FF',
+   defaults:['Capital Account','Cash in Hand','Bank Account','Stock / Medicine','Equipment','Creditors (Vendors)']}
+];
+
+function renderLedgerAccounts(){
+  var grid=document.getElementById('ledger-account-grid');if(!grid)return;
+  var CS=window.CLINIC_SETTINGS||{};
+  var ledger=CS.ledgerAccounts||{};
+  var html='';
+  LEDGER_GROUPS.forEach(function(grp){
+    var accounts=ledger[grp.id]||grp.defaults;
+    html+='<div style="border:1px solid '+grp.border+';border-radius:10px;overflow:hidden">'
+      +'<div style="background:'+grp.color+';color:#fff;padding:9px 14px;font-size:11px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'
+      +'<span>'+grp.label+'</span>'
+      +'<button onclick="addLedgerItem(\''+grp.id+'\')" style="border:none;background:rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700">+ Add</button>'
+      +'</div>';
+    accounts.forEach(function(acc,i){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:0.5px solid '+grp.border+';font-size:11px">'
+        +'<span>'+acc+'</span>'
+        +'<button onclick="deleteLedgerItem(\''+grp.id+'\','+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px">×</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+window.renderLedgerAccounts=renderLedgerAccounts;
+
+function addLedgerItem(groupId){
+  var name=prompt('New account name:');
+  if(!name||!name.trim())return;
+  var CS=window.CLINIC_SETTINGS||{};
+  if(!CS.ledgerAccounts)CS.ledgerAccounts={};
+  var grp=LEDGER_GROUPS.find(function(g){return g.id===groupId;});
+  if(!CS.ledgerAccounts[groupId])CS.ledgerAccounts[groupId]=grp?grp.defaults.slice():[];
+  CS.ledgerAccounts[groupId].push(name.trim());
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  renderLedgerAccounts();
+}
+window.addLedgerItem=addLedgerItem;
+
+function deleteLedgerItem(groupId,idx){
+  var CS=window.CLINIC_SETTINGS||{};
+  if(!CS.ledgerAccounts)CS.ledgerAccounts={};
+  var grp=LEDGER_GROUPS.find(function(g){return g.id===groupId;});
+  if(!CS.ledgerAccounts[groupId])CS.ledgerAccounts[groupId]=grp?grp.defaults.slice():[];
+  CS.ledgerAccounts[groupId].splice(idx,1);
+  window.CLINIC_SETTINGS=CS;
+  if(typeof cpSaveData==='function')cpSaveData();
+  renderLedgerAccounts();
+}
+window.deleteLedgerItem=deleteLedgerItem;
+
+function addLedgerAccount(){addLedgerItem('income');}
+window.addLedgerAccount=addLedgerAccount;
+
+// ── Print P&L ─────────────────────────────────────────────────
+function printPL(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var cn=CS.name||'Clinic';
+  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
+  var DB=window.BILLING_DB||[];
+  var income={};
+  DB.forEach(function(inv){
+    (inv.svcs||[]).forEach(function(s){var n=s.name||'Service';if(!income[n])income[n]=0;income[n]+=(s.net||s.price||0);});
+    var m=parseFloat(inv.medTotal||0);if(m>0){if(!income['Medicine Sales'])income['Medicine Sales']=0;income['Medicine Sales']+=m;}
+  });
+  var totalIncome=Object.values(income).reduce(function(a,b){return a+b;},0);
+  var expenses=CS.expenses||[];
+  var totalExpense=expenses.reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
+  var net=totalIncome-totalExpense;
+  var fmt=function(n){return'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+
+  var incRows=Object.keys(income).map(function(k){return'<tr><td style="padding:7px 10px">'+k+'</td><td style="padding:7px 10px;text-align:right;color:#059669">'+fmt(income[k])+'</td></tr>';}).join('');
+  var expRows=expenses.map(function(e){return'<tr><td style="padding:7px 10px">'+e.name+(e.note?' ('+e.note+')':'')+'</td><td style="padding:7px 10px;text-align:right;color:#DC2626">'+fmt(parseFloat(e.amount||0))+'</td></tr>';}).join('');
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>P&L - '+cn+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px}'
+    +'table{width:100%;border-collapse:collapse}th{background:#1A3A8C;color:#fff;padding:8px 10px;font-size:10px;text-transform:uppercase}'
+    +'td{border-bottom:0.5px solid #e5e7eb}.total{font-weight:700;background:#F3F4F6}</style></head><body>'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #059669;padding-bottom:10px;margin-bottom:16px">'
+    +'<div><div style="font-size:20px;font-weight:900;color:#059669">'+cn+'</div>'
+    +'<div style="font-size:10px;color:#666">'+(CS.doctor||'')+(CS.phone?' · Ph: '+CS.phone:'')+'</div></div>'
+    +'<div style="text-align:right"><div style="font-size:14px;font-weight:700">PROFIT &amp; LOSS ACCOUNT</div>'
+    +'<div style="font-size:10px;color:#666">As on '+today+'</div></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+    +'<div><table><thead><tr><th colspan="2">INCOME (Cr)</th></tr></thead><tbody>'+incRows
+    +'<tr class="total"><td style="padding:8px 10px">Total Income</td><td style="padding:8px 10px;text-align:right;color:#059669">'+fmt(totalIncome)+'</td></tr></tbody></table></div>'
+    +'<div><table><thead><tr><th colspan="2">EXPENSES (Dr)</th></tr></thead><tbody>'+expRows
+    +'<tr class="total"><td style="padding:8px 10px">Total Expenses</td><td style="padding:8px 10px;text-align:right;color:#DC2626">'+fmt(totalExpense)+'</td></tr></tbody></table></div>'
+    +'</div><div style="margin-top:16px;padding:12px 16px;background:'+(net>=0?'#F0FDF4':'#FFF1F2')+';border:2px solid '+(net>=0?'#059669':'#DC2626')+';border-radius:8px;display:flex;justify-content:space-between">'
+    +'<div style="font-size:14px;font-weight:700">NET '+(net>=0?'PROFIT':'LOSS')+'</div>'
+    +'<div style="font-size:18px;font-weight:900;color:'+(net>=0?'#059669':'#DC2626')+'">'+fmt(Math.abs(net))+'</div></div>'
+    +'<div style="margin-top:24px;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF"><span>'+cn+'</span><span>'+today+'</span></div>'
+    +'</body></html>';
+  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
+}
+window.printPL=printPL;
+
+function printBS(){
+  var CS=window.CLINIC_SETTINGS||{};
+  var cn=CS.name||'Clinic';
+  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
+  var liabs=CS.bsLiabilities||[];
+  var assets=CS.bsAssets||[];
+  var debtors=(window.BILLING_DB||[]).reduce(function(a,b){return a+parseFloat(b.balanceDue||0);},0);
+  var DB=window.BILLING_DB||[];
+  var ti=DB.reduce(function(a,b){return a+parseFloat(b.grandTotal||b.amount||0);},0);
+  var te=(CS.expenses||[]).reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
+  var np=ti-te;
+  var fmt=function(n){return'₹'+parseFloat(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var liabRows=(np!==0?'<tr><td style="padding:7px 10px">Net '+(np>=0?'Profit':'Loss')+'</td><td style="padding:7px 10px;text-align:right;color:'+(np>=0?'#059669':'#DC2626')+'">'+fmt(Math.abs(np))+'</td></tr>':'')
+    +liabs.map(function(l){return'<tr><td style="padding:7px 10px">'+l.name+'</td><td style="padding:7px 10px;text-align:right">'+fmt(l.amount)+'</td></tr>';}).join('');
+  var totalLiab=liabs.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+(np>0?np:0);
+  var assetRows=(debtors>0?'<tr><td style="padding:7px 10px">Patient Debtors</td><td style="padding:7px 10px;text-align:right;color:#DC2626">'+fmt(debtors)+'</td></tr>':'')
+    +assets.map(function(a){return'<tr><td style="padding:7px 10px">'+a.name+'</td><td style="padding:7px 10px;text-align:right">'+fmt(a.amount)+'</td></tr>';}).join('');
+  var totalAsset=assets.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+debtors;
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balance Sheet - '+cn+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px}'
+    +'table{width:100%;border-collapse:collapse}th{padding:8px 10px;font-size:10px;text-transform:uppercase;color:#fff}'
+    +'td{border-bottom:0.5px solid #e5e7eb}.total{font-weight:700;background:#F3F4F6}</style></head><body>'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #185FA5;padding-bottom:10px;margin-bottom:16px">'
+    +'<div><div style="font-size:20px;font-weight:900;color:#185FA5">'+cn+'</div>'
+    +'<div style="font-size:10px;color:#666">'+(CS.doctor||'')+(CS.phone?' · Ph: '+CS.phone:'')+'</div></div>'
+    +'<div style="text-align:right"><div style="font-size:14px;font-weight:700">BALANCE SHEET</div>'
+    +'<div style="font-size:10px;color:#666">As on '+today+'</div></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+    +'<div><table><thead><tr style="background:#185FA5"><th colspan="2">LIABILITIES (Cr)</th></tr></thead><tbody>'+liabRows
+    +'<tr class="total"><td style="padding:8px 10px">Total Liabilities</td><td style="padding:8px 10px;text-align:right;color:#185FA5">'+fmt(totalLiab)+'</td></tr></tbody></table></div>'
+    +'<div><table><thead><tr style="background:#7C3AED"><th colspan="2">ASSETS (Dr)</th></tr></thead><tbody>'+assetRows
+    +'<tr class="total"><td style="padding:8px 10px">Total Assets</td><td style="padding:8px 10px;text-align:right;color:#7C3AED">'+fmt(totalAsset)+'</td></tr></tbody></table></div>'
+    +'</div><div style="margin-top:14px;padding:10px 16px;background:'+(totalLiab===totalAsset?'#F0FDF4':'#FFF1F2')+';border-radius:8px;display:flex;justify-content:space-between">'
+    +'<span style="font-weight:700">Difference</span>'
+    +'<span style="font-weight:700;color:'+(totalLiab===totalAsset?'#059669':'#DC2626')+'">'+(totalLiab===totalAsset?'✓ Balanced ₹0.00':fmt(Math.abs(totalLiab-totalAsset)))+'</span></div>'
+    +'<div style="margin-top:24px;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF"><span>'+cn+'</span><span>'+today+'</span></div>'
+    +'</body></html>';
+  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
+}
+window.printBS=printBS;
 
 
 </script>
