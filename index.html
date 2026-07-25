@@ -510,7 +510,7 @@ html,body{height:100%;overflow:hidden}
     <div class="ha"><button class="bp" onclick="openModal('m-appt')"><i class="ti ti-plus"></i>New Appointment</button></div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;padding:0 0 10px;flex-wrap:wrap">
-    <label style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #B5D4F4;border-radius:8px;padding:7px 12px;cursor:pointer"><i class="ti ti-calendar" style="font-size:15px;color:#185FA5"></i><input type="date" id="appt-date-filter" onchange="filterApptsByDate(this.value)" style="border:none;background:transparent;font-size:13px;color:var(--ink);outline:none;cursor:pointer"></label>
+    <label style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #B5D4F4;border-radius:8px;padding:7px 12px;cursor:pointer"><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" style="gap:6px;padding:5px 12px;border-color:#185FA5" onclick="document.getElementById('appt-date-filter').showPicker?document.getElementById('appt-date-filter').showPicker():document.getElementById('appt-date-filter').focus()"><i class="ti ti-calendar" style="font-size:13px;color:#185FA5"></i><span id="appt-date-lbl" style="min-width:90px;color:#185FA5;font-weight:600">Pick date</span><input type="date" id="appt-date-filter" onchange="phSetDateLbl('appt-date-filter','appt-date-lbl');filterApptsByDate(this.value)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div></label>
     <button onclick="filterApptToday()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid #B5D4F4;border-radius:8px;background:#EFF6FF;color:#185FA5;font-size:12px;cursor:pointer;font-weight:600">Today</button>
     <button onclick="clearApptDateFilter()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--sl2);border-radius:8px;background:var(--bg);color:var(--ink3);font-size:12px;cursor:pointer;font-weight:500"><i class="ti ti-x" style="font-size:12px"></i> All</button>
     <span id="appt-filter-label" style="font-size:12px;color:#185FA5;font-weight:600"></span>
@@ -1051,10 +1051,7 @@ html,body{height:100%;overflow:hidden}
     <div><div class="ptitle"><i class="ti ti-report-money" style="color:#10B981;margin-right:6px"></i>Finance</div><div class="psub" id="fin-sub">Revenue report</div></div>
     <div class="ha" style="gap:6px">
       <div style="display:flex;align-items:center;gap:5px">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">From</span>
-        <input type="date" id="fin-from" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderFinance()">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">To</span>
-        <input type="date" id="fin-to" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderFinance()">
+        <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('fin-from').showPicker?document.getElementById('fin-from').showPicker():document.getElementById('fin-from').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="fin-from-lbl" style="min-width:90px">From date</span><input type="date" id="fin-from" onchange="phSetDateLbl('fin-from','fin-from-lbl');renderFinance()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><span style="font-size:13px;color:var(--ink3);font-weight:300">→</span><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('fin-to').showPicker?document.getElementById('fin-to').showPicker():document.getElementById('fin-to').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="fin-to-lbl" style="min-width:90px">To date</span><input type="date" id="fin-to" onchange="phSetDateLbl('fin-to','fin-to-lbl');renderFinance()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div>
       </div>
       <button class="tb" onclick="renderFinance()" style="font-size:11px"><i class="ti ti-refresh"></i>Refresh</button>
     </div>
@@ -2196,6 +2193,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12509,12 +12507,20 @@ function phSetDateLbl(inputId, lblId){
   var val=document.getElementById(inputId).value;
   var lbl=document.getElementById(lblId);
   if(!lbl)return;
-  if(!val){lbl.textContent=inputId==='ph-date-from'?'From date':'To date';return;}
+  if(!val){
+    // Reset to default label
+    var defaults={'ph-date-from':'From date','ph-date-to':'To date',
+      'fin-from':'From date','fin-to':'To date','appt-date-filter':'Pick date'};
+    lbl.textContent=defaults[inputId]||'Pick date';
+    return;
+  }
   var d=new Date(val);
   var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   lbl.textContent=d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
 }
 window.phSetDateLbl=phSetDateLbl;
+window.phSetDateLbl=phSetDateLbl;
+
 
 </script>
 </body>
