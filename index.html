@@ -1133,6 +1133,11 @@ html,body{height:100%;overflow:hidden}
       </button>
 
       <button onclick="spTab('backup')"     id="spt-backup"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-database" style="font-size:16px;flex-shrink:0;width:18px"></i>Backup / Export</button>
+      <button onclick="spTab('billing')"   id="spt-billing"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-receipt-2" style="font-size:16px;flex-shrink:0;width:18px"></i>Billing</button>
+      <button onclick="spTab('rxset')"     id="spt-rxset"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-prescription" style="font-size:16px;flex-shrink:0;width:18px"></i>Rx Settings</button>
+      <button onclick="spTab('phset')"     id="spt-phset"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-pill" style="font-size:16px;flex-shrink:0;width:18px"></i>Pharmacy/Stock</button>
+      <button onclick="spTab('access')"    id="spt-access"    style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-shield-lock" style="font-size:16px;flex-shrink:0;width:18px"></i>Access Control</button>
+      <button onclick="spTab('datactl')"   id="spt-datactl"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-database-cog" style="font-size:16px;flex-shrink:0;width:18px"></i>Data Controls</button>
     </div>
   </div>
 
@@ -1661,6 +1666,139 @@ html,body{height:100%;overflow:hidden}
       <button class="bs" style="color:#ef4444;border-color:#fecaca;background:#fef2f2;font-size:12px" onclick="if(confirm('Clear ALL data? This cannot be undone.'))clearAllData()"><i class="ti ti-trash"></i> Clear All Data</button>
     </div>
 
+
+<!-- BILLING SETTINGS -->
+<div id="sp-billing" class="sp" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4B0; Billing Controls</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Default values for new invoices and Rx.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Default Consultancy Fee &#8377;</div>
+    <input class="fin" id="set-consult-fee" type="number" value="150" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Rx Days</div>
+    <input class="fin" id="set-rx-days" type="number" value="5" min="1" max="90" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Payment Mode</div>
+    <select class="fin" id="set-pay-mode" style="width:100%">
+      <option value="Cash">Cash</option><option value="UPI">UPI</option>
+      <option value="Card">Card</option><option value="Online">Online</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Invoice Prefix</div>
+    <input class="fin" id="set-inv-prefix" value="INV-" placeholder="INV- / OHC-" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">GST / Tax %</div>
+    <input class="fin" id="set-gst" type="number" value="0" min="0" max="28" step="0.5" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Discount %</div>
+    <input class="fin" id="set-disc" type="number" value="0" min="0" max="100" style="width:100%"></div>
+  </div>
+  <button class="bp" onclick="saveBillingSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
+</div>
+
+<!-- RX SETTINGS -->
+<div id="sp-rxset" class="sp" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F48A; Rx / Prescription</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Prescription defaults and PDF output controls.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Default Visit Mode</div>
+    <select class="fin" id="set-visit-mode" style="width:100%">
+      <option value="OPD">OPD</option><option value="Online">Online</option>
+      <option value="Tele">Tele</option><option value="IPD">IPD</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Rx Number Prefix</div>
+    <input class="fin" id="set-rx-prefix" value="CD-RX-" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Rx Start Number</div>
+    <input class="fin" id="set-rx-start" type="number" value="1" min="1" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show Vitals in Rx PDF</div>
+    <select class="fin" id="set-vitals-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show Diagnosis in PDF</div>
+    <select class="fin" id="set-dx-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show History in PDF</div>
+    <select class="fin" id="set-hist-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="saveRxSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
+</div>
+
+<!-- PHARMACY SETTINGS -->
+<div id="sp-phset" class="sp" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F3EA; Pharmacy / Stock</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Stock alerts and default pricing.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Low Stock Alert (qty)</div>
+    <input class="fin" id="set-low-stock" type="number" value="10" min="0" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Expiry Alert (days before)</div>
+    <input class="fin" id="set-exp-alert" type="number" value="90" min="7" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Sale Margin %</div>
+    <input class="fin" id="set-margin" type="number" value="20" min="0" max="500" style="width:100%">
+    <div style="font-size:10px;color:var(--ink3);margin-top:3px">Sale = Purchase x (1 + margin%)</div></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Stock Unit</div>
+    <select class="fin" id="set-stock-unit" style="width:100%">
+      <option value="Tabs">Tablets</option><option value="Caps">Capsules</option>
+      <option value="Strips">Strips</option><option value="Bottles">Bottles</option>
+      <option value="Vials">Vials</option><option value="Units">Units</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="savePharmacySettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
+</div>
+
+<!-- ACCESS CONTROL -->
+<div id="sp-access" class="sp" style="display:none;padding:24px;max-width:720px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F510; Access Control</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Which pages each role can access. Takes effect on next login.</p>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:11px">
+    <thead><tr style="background:var(--sl)">
+      <th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--sl2)">Page</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Admin</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Doctor</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Pharmacist</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Lab</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Receptionist</th>
+    </tr></thead>
+    <tbody id="access-tbody"></tbody>
+  </table>
+  </div>
+  <div style="margin-top:12px;padding:10px 14px;background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;font-size:11px;color:#92400E">
+    Admin always has full access and cannot be restricted.
+  </div>
+  <button class="bp" onclick="saveAccessSettings()" style="margin-top:14px"><i class="ti ti-device-floppy"></i> Save Access Settings</button>
+</div>
+
+<!-- DATA CONTROLS -->
+<div id="sp-datactl" class="sp" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4BE; Data Controls</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Sync, timeout and display settings.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Auto-sync Interval</div>
+    <select class="fin" id="set-sync-interval" style="width:100%">
+      <option value="15">Every 15 seconds</option>
+      <option value="30">Every 30 seconds</option>
+      <option value="60">Every 60 seconds</option>
+      <option value="0">Manual only</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Session Timeout</div>
+    <select class="fin" id="set-timeout" style="width:100%">
+      <option value="0">Never</option>
+      <option value="15">15 minutes</option>
+      <option value="30">30 minutes</option>
+      <option value="60">60 minutes</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Display Mode</div>
+    <select class="fin" id="set-compact" style="width:100%">
+      <option value="no">Spacious (default)</option>
+      <option value="yes">Compact (desktop)</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Date Format</div>
+    <select class="fin" id="set-date-fmt" style="width:100%">
+      <option value="dd-mm-yyyy">25-07-2026</option>
+      <option value="dd Mon yyyy">25 Jul 2026</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="saveDataSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
+</div>
+
   </div><!-- end right content -->
 </div><!-- end flex -->
 </div>
@@ -2058,6 +2196,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -3906,6 +4045,7 @@ function rxInit(){
   tbody.innerHTML='';
 
   // ROW 1: Consultancy Fee — fixed service row
+  var _csFee=(window.CLINIC_SETTINGS&&window.CLINIC_SETTINGS.consultFee)||150;
   var tr1=document.createElement('tr');tr1.setAttribute('data-row-type','fee');
   tr1.innerHTML=
     '<td style="text-align:center;font-size:11px;color:var(--ink3)">1</td>'+
@@ -8183,8 +8323,13 @@ window.setFontSize=setFontSize;
 window.applyFontWeight=applyFontWeight;
 
 function spTab(name){
-  var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl'];
+  var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl','billing','rxset','phset','access','datactl'];
   if(name==='users'&&typeof renderUserList==='function')renderUserList();
+  if(name==='access'&&typeof renderAccessTable==='function')renderAccessTable();
+  if(name==='billing'&&typeof loadBillingSettings==='function')loadBillingSettings();
+  if(name==='rxset'&&typeof loadRxSettings==='function')loadRxSettings();
+  if(name==='phset'&&typeof loadPharmacySettings==='function')loadPharmacySettings();
+  if(name==='datactl'&&typeof loadDataSettings==='function')loadDataSettings();
   var _ut=document.getElementById('spt-users');if(_ut)_ut.style.display=(window.CURRENT_USER&&window.CURRENT_USER.role==='Admin')?'':'none';
   tabs.forEach(function(t){
     var btn=document.getElementById('spt-'+t);
@@ -12197,6 +12342,175 @@ function billFillPatient(pat){
 }
 window.billFillPatient=billFillPatient;
 
+
+
+function loadBillingSettings(){
+  var s=window.CLINIC_SETTINGS||{};
+  function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+  sv('set-consult-fee',s.consultFee||150);
+  sv('set-rx-days',s.rxDays||5);
+  sv('set-pay-mode',s.payMode||'Cash');
+  sv('set-inv-prefix',s.invPrefix||'INV-');
+  sv('set-gst',s.gst||0);
+  sv('set-disc',s.defDisc||0);
+}
+function saveBillingSettings(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var s=window.CLINIC_SETTINGS||{};
+  s.consultFee=parseFloat(g('set-consult-fee'))||150;
+  s.rxDays=parseInt(g('set-rx-days'))||5;
+  s.payMode=g('set-pay-mode')||'Cash';
+  s.invPrefix=g('set-inv-prefix')||'INV-';
+  s.gst=parseFloat(g('set-gst'))||0;
+  s.defDisc=parseFloat(g('set-disc'))||0;
+  window.CLINIC_SETTINGS=s;
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Billing settings saved \u2713','success');
+}
+window.saveBillingSettings=saveBillingSettings;
+window.loadBillingSettings=loadBillingSettings;
+
+function loadRxSettings(){
+  var s=window.CLINIC_SETTINGS||{};
+  function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+  sv('set-visit-mode',s.visitMode||'OPD');
+  sv('set-rx-prefix',s.rxPrefix||'CD-RX-');
+  sv('set-rx-start',s.rxStart||1);
+  sv('set-vitals-pdf',s.vitalsPdf||'yes');
+  sv('set-dx-pdf',s.dxPdf||'yes');
+  sv('set-hist-pdf',s.histPdf||'yes');
+}
+function saveRxSettings(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var s=window.CLINIC_SETTINGS||{};
+  s.visitMode=g('set-visit-mode')||'OPD';
+  s.rxPrefix=g('set-rx-prefix')||'CD-RX-';
+  s.rxStart=parseInt(g('set-rx-start'))||1;
+  s.vitalsPdf=g('set-vitals-pdf')||'yes';
+  s.dxPdf=g('set-dx-pdf')||'yes';
+  s.histPdf=g('set-hist-pdf')||'yes';
+  window.CLINIC_SETTINGS=s;
+  var modeEl=document.getElementById('rx-mode');
+  if(modeEl)modeEl.value=s.visitMode;
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Rx settings saved \u2713','success');
+}
+window.saveRxSettings=saveRxSettings;
+window.loadRxSettings=loadRxSettings;
+
+function loadPharmacySettings(){
+  var s=window.CLINIC_SETTINGS||{};
+  function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+  sv('set-low-stock',s.lowStock||10);
+  sv('set-exp-alert',s.expAlert||90);
+  sv('set-margin',s.margin||20);
+  sv('set-stock-unit',s.stockUnit||'Tabs');
+}
+function savePharmacySettings(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var s=window.CLINIC_SETTINGS||{};
+  s.lowStock=parseInt(g('set-low-stock'))||10;
+  s.expAlert=parseInt(g('set-exp-alert'))||90;
+  s.margin=parseFloat(g('set-margin'))||20;
+  s.stockUnit=g('set-stock-unit')||'Tabs';
+  window.CLINIC_SETTINGS=s;
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Pharmacy settings saved \u2713','success');
+}
+window.savePharmacySettings=savePharmacySettings;
+window.loadPharmacySettings=loadPharmacySettings;
+
+function renderAccessTable(){
+  var tbody=document.getElementById('access-tbody');
+  if(!tbody)return;
+  var pages=[
+    {id:'dashboard',label:'Dashboard'},
+    {id:'appointments',label:'Appointments'},
+    {id:'rx',label:'Rx / Prescription'},
+    {id:'pharmacy',label:'Pharmacy'},
+    {id:'inventory',label:'Stock / Inventory'},
+    {id:'vendor',label:'Vendor'},
+    {id:'lab',label:'Lab'},
+    {id:'finance',label:'Finance'},
+    {id:'settings',label:'Settings'}
+  ];
+  var roles=['doctor','pharmacist','lab','receptionist','staff'];
+  var s=window.CLINIC_SETTINGS||{};
+  var acc=s.accessRoles||{};
+  tbody.innerHTML='';
+  pages.forEach(function(pg){
+    var tr=document.createElement('tr');
+    tr.style.borderBottom='0.5px solid var(--sl2)';
+    var tdN=document.createElement('td');
+    tdN.style.cssText='padding:8px 10px;font-weight:600;font-size:11px';
+    tdN.textContent=pg.label;
+    tr.appendChild(tdN);
+    // Admin always on
+    var tdA=document.createElement('td');
+    tdA.style.cssText='padding:8px 8px;text-align:center';
+    tdA.innerHTML='<input type="checkbox" checked disabled style="width:14px;height:14px;accent-color:#059669">';
+    tr.appendChild(tdA);
+    roles.forEach(function(role){
+      var td=document.createElement('td');
+      td.style.cssText='padding:8px 8px;text-align:center';
+      var def=['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings'];
+      var roleAcc=acc[role]||def;
+      var checked=roleAcc.indexOf(pg.id)!==-1;
+      td.innerHTML='<input type="checkbox" id="acc-'+role+'-'+pg.id+'"'+(checked?' checked':'')+' style="width:14px;height:14px;accent-color:#3b82f6">';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+function saveAccessSettings(){
+  var roles=['doctor','pharmacist','lab','receptionist','staff'];
+  var pages=['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings'];
+  var s=window.CLINIC_SETTINGS||{};
+  s.accessRoles={};
+  roles.forEach(function(role){
+    s.accessRoles[role]=pages.filter(function(pg){
+      var el=document.getElementById('acc-'+role+'-'+pg);
+      return el&&el.checked;
+    });
+    if(s.accessRoles[role].indexOf('dashboard')===-1)s.accessRoles[role].unshift('dashboard');
+  });
+  window.CLINIC_SETTINGS=s;
+  roles.forEach(function(role){
+    if(window.CP_USERS_DEFAULT&&window.CP_USERS_DEFAULT[role])
+      window.CP_USERS_DEFAULT[role].pages=s.accessRoles[role];
+  });
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Access saved \u2713 takes effect on next login','success');
+}
+window.renderAccessTable=renderAccessTable;
+window.saveAccessSettings=saveAccessSettings;
+
+function loadDataSettings(){
+  var s=window.CLINIC_SETTINGS||{};
+  function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+  sv('set-sync-interval',s.syncInterval||15);
+  sv('set-timeout',s.sessionTimeout||0);
+  sv('set-compact',s.compact||'no');
+  sv('set-date-fmt',s.dateFmt||'dd-mm-yyyy');
+}
+function saveDataSettings(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var s=window.CLINIC_SETTINGS||{};
+  s.syncInterval=parseInt(g('set-sync-interval'))||15;
+  s.sessionTimeout=parseInt(g('set-timeout'))||0;
+  s.compact=g('set-compact')||'no';
+  s.dateFmt=g('set-date-fmt')||'dd-mm-yyyy';
+  window.CLINIC_SETTINGS=s;
+  document.body.classList.toggle('compact-mode',s.compact==='yes');
+  if(s.syncInterval>0&&window._syncTimer){
+    clearInterval(window._syncTimer);
+    window._syncTimer=setInterval(function(){if(typeof cpLoadData==='function')cpLoadData();},s.syncInterval*1000);
+  }
+  if(typeof cpSaveData==='function')cpSaveData();
+  toast('Data settings saved \u2713','success');
+}
+window.saveDataSettings=saveDataSettings;
+window.loadDataSettings=loadDataSettings;
 
 </script>
 </body>
