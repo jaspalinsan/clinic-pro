@@ -892,14 +892,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px"><div style="position:relative;margin-right:4px"><i class="ti ti-search" style="position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:11px;pointer-events:none"></i><input class="fin" id="ph-search" placeholder="Search name / phone" oninput="renderPharmacy()" style="padding:4px 8px 4px 24px;width:180px;font-size:11px"></div>
-      <div style="display:flex;align-items:center;gap:5px">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">From</span>
-        <input type="date" id="ph-date-from" class="fin" style="font-size:11px;padding:4px 8px;width:132px" onchange="filterPharmaDate()">
-        <span style="font-size:11px;color:var(--ink2);font-weight:500">To</span>
-        <input type="date" id="ph-date-to" class="fin" style="font-size:11px;padding:4px 8px;width:132px" onchange="filterPharmaDate()">
-        <button class="tb" onclick="filterPharmaDate()" style="font-size:11px"><i class="ti ti-filter"></i>Filter</button>
-        <button class="tb" onclick="clearPharmaFilter()" style="font-size:11px"><i class="ti ti-x"></i>Clear</button>
-      </div>
+      
       <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
       <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
@@ -911,7 +904,7 @@ html,body{height:100%;overflow:hidden}
     <button class="bs" onclick="phClearSel()"><i class="ti ti-x"></i>Clear</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr><th style="width:28px"><input type="checkbox" id="ph-check-all" onchange="phCheckAll(this)" style="cursor:pointer;width:13px;height:13px"></th><th style="width:22%">Name (Invoice)</th><th style="width:88px;white-space:nowrap">Date</th><th>Description</th><th style="width:100px;text-align:right">Amount</th><th style="width:72px">Status</th><th style="width:60px">Mode</th><th style="width:22%">Actions</th></tr></thead>
+    <thead><tr><th style="width:28px"><input type="checkbox" id="ph-check-all" onchange="phCheckAll(this)" style="cursor:pointer;width:13px;height:13px"></th><th style="width:20%">Name (Invoice)</th><th style="width:96px;white-space:nowrap">Date</th><th style="width:26%">Description</th><th style="width:14%;text-align:right">Amount</th><th style="width:8%">Status</th><th style="width:7%">Mode</th><th style="width:25%">Actions</th></tr></thead>
     <tbody id="ph-tbody"></tbody>
   </table></div></div>
 <div style="padding:8px 14px;background:var(--sl);border-top:1px solid var(--sl2);display:flex;gap:16px;font-size:11px;color:var(--ink2)"><span>Total: <b id="ph-tot" style="color:var(--ink)">₹0.00</b></span><span>Paid: <b id="ph-paid" style="color:#059669">₹0.00</b></span><span>Balance Due: <b id="ph-due" style="color:#DC2626">₹0.00</b></span></div>
@@ -1687,7 +1680,7 @@ html,body{height:100%;overflow:hidden}
 
     <!-- Patient Info -->
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><div class="flbl" style="margin-bottom:4px">Patient Name *</div><input class="fin" id="bill-patient" placeholder="Full name"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Patient Name *</div><div style="position:relative"><input class="fin" id="bill-patient" placeholder="Search patient..." autocomplete="off" oninput="billPatSearch(this.value)" style="width:100%"><div id="bill-pat-drop" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg);border:1px solid var(--sl2);border-radius:6px;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div></div></div>
       <div><div class="flbl" style="margin-bottom:4px">Age / Sex</div><input class="fin" id="bill-age" placeholder="35M"></div>
       <div><div class="flbl" style="margin-bottom:4px">Mobile</div><input class="fin" id="bill-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:4px">Date</div><input class="fin" id="bill-date" type="date"></div>
@@ -2067,6 +2060,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12044,6 +12038,45 @@ window.openClientReport=openClientReport;
 window.crSearch=crSearch;
 window.crSelect=crSelect;
 window.downloadLedgerPDF=downloadLedgerPDF;
+
+
+function billPatSearch(q){
+  var drop=document.getElementById('bill-pat-drop');
+  if(!drop)return;
+  if(!q||q.length<1){drop.style.display='none';return;}
+  // Get unique patient names from DB + PAT_DB
+  var names={};
+  (window.BILLING_DB||[]).forEach(function(b){if(b.patient)names[b.patient.toLowerCase()]=b.patient;});
+  (window.PAT_DB||[]).forEach(function(p){if(p.name)names[p.name.toLowerCase()]=p.name;});
+  var matches=Object.values(names).filter(function(n){
+    return n.toLowerCase().indexOf(q.toLowerCase())!==-1;
+  }).slice(0,8);
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(function(n){
+    return '<div onclick="billPatPick(\''+n.replace(/'/g,"\\'")+'\')" '
+      +'style="padding:8px 12px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:0.5px solid var(--sl2)" '
+      +'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'+n+'</div>';
+  }).join('');
+  drop.style.display='block';
+}
+function billPatPick(name){
+  var inp=document.getElementById('bill-patient');if(inp)inp.value=name;
+  var drop=document.getElementById('bill-pat-drop');if(drop)drop.style.display='none';
+  // Also fill mob/age from PAT_DB if found
+  var pat=(window.PAT_DB||[]).find(function(p){return(p.name||'').toLowerCase()===name.toLowerCase();});
+  if(pat){
+    var age=document.getElementById('bill-age');if(age&&pat.age)age.value=pat.age;
+    var mob=document.getElementById('bill-mob');if(mob&&pat.mob)mob.value=pat.mob;
+  }
+}
+window.billPatSearch=billPatSearch;
+window.billPatPick=billPatPick;
+// Close dropdown on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest||(!e.target.closest('#bill-pat-drop')&&e.target.id!=='bill-patient')){
+    var d=document.getElementById('bill-pat-drop');if(d)d.style.display='none';
+  }
+});
 
 </script>
 </body>
