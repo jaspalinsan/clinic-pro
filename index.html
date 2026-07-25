@@ -891,7 +891,7 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-pharmacy">
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
-    <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><div style="display:flex;align-items:center;gap:5px"><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">From</span><div style="position:relative"><input type="date" id="ph-date-from" class="fin" onchange="phDateLabel('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;z-index:2"><div id="ph-from-lbl" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').focus()" style="min-width:100px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);font-size:11px;color:var(--ink);background:var(--bg);cursor:pointer;position:relative;z-index:1">Pick date</div></div></div><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">To</span><div style="position:relative"><input type="date" id="ph-date-to" class="fin" onchange="phDateLabel('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;z-index:2"><div id="ph-to-lbl" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').focus()" style="min-width:100px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);font-size:11px;color:var(--ink);background:var(--bg);cursor:pointer;position:relative;z-index:1">Pick date</div></div><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';document.getElementById('ph-from-lbl').textContent='Pick date';document.getElementById('ph-to-lbl').textContent='Pick date';renderPharmacy()" style="font-size:11px">Clear</button>
+    <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">From</span><input type="date" id="ph-date-from" class="fin" onchange="renderPharmacy()" style="font-size:11px;padding:4px 8px;width:130px"><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">To</span><input type="date" id="ph-date-to" class="fin" onchange="renderPharmacy()" style="font-size:11px;padding:4px 8px;width:130px"><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';renderPharmacy()" style="font-size:11px">Clear</button>
       <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
@@ -1678,7 +1678,7 @@ html,body{height:100%;overflow:hidden}
 
     <!-- Patient Info -->
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><div class="flbl" style="margin-bottom:4px">Patient Name *</div><div style="position:relative"><input class="fin" id="bill-patient" placeholder="Search patient..." autocomplete="off" oninput="billPatSearch(this.value)" style="width:100%"><div id="bill-pat-drop" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:9999;background:#fff;border:1.5px solid #1A3A8C;border-radius:8px;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.18)"></div></div></div>
+      <div><div class="flbl" style="margin-bottom:4px">Patient Name *</div><div style="position:relative"><input class="fin" id="bill-patient" placeholder="Search patient..." autocomplete="off" oninput="patAutoInput(this,'billFillPatient')" style="width:100%"><div id="drop-bill-patient" class="pat-drop" style="display:none"></div></div></div>
       <div><div class="flbl" style="margin-bottom:4px">Age / Sex</div><input class="fin" id="bill-age" placeholder="35M"></div>
       <div><div class="flbl" style="margin-bottom:4px">Mobile</div><input class="fin" id="bill-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:4px">Date</div><input class="fin" id="bill-date" type="date"></div>
@@ -2058,6 +2058,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12057,31 +12058,7 @@ window.crSelect=crSelect;
 window.downloadLedgerPDF=downloadLedgerPDF;
 
 
-function billPatSearch(q){
-  var drop=document.getElementById('bill-pat-drop');
-  if(!drop)return;
-  if(!q||q.length<1){drop.style.display='none';return;}
-  var names={};
-  (window.PAT_DB||[]).forEach(function(p){if(p.name)names[p.name.toLowerCase()]={name:p.name,age:p.age||'',mob:p.mob||p.phone||''};});
-  (window.BILLING_DB||[]).forEach(function(b){
-    if(b.patient&&!names[b.patient.toLowerCase()])
-      names[b.patient.toLowerCase()]={name:b.patient,age:b.age||'',mob:b.mob||b.mobile||''};
-  });
-  var matches=Object.values(names).filter(function(n){
-    return n.name.toLowerCase().indexOf(q.toLowerCase())!==-1;
-  }).slice(0,8);
-  if(!matches.length){drop.style.display='none';return;}
-  drop.innerHTML=matches.map(function(n){
-    var safe=n.name.replace(/'/g,"\\'");
-    var age=n.age?'<span style="color:var(--ink3);font-size:10px"> \u00b7 '+n.age+'</span>':'';
-    var mob=n.mob?'<span style="color:var(--ink3);font-size:10px"> \u00b7 '+n.mob+'</span>':'';
-    return '<div onclick="billPatPick(\''+safe+'\')" '+
-      'style="padding:9px 14px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:0.5px solid #e5e7eb;color:#111;background:#fff" '+
-      'onmouseover="this.style.background=\'#EFF6FF\'" onmouseout="this.style.background=\'#fff\'">'+
-      n.name+age+mob+'</div>';
-  }).join('');
-  drop.style.display='block';
-}
+
 function billPatPick(name){
   var inp=document.getElementById('bill-patient');if(inp)inp.value=name;
   var drop=document.getElementById('bill-pat-drop');if(drop)drop.style.display='none';
@@ -12137,6 +12114,16 @@ function phDateLabel(inputId, labelId){
   lbl.textContent=dd+' '+months[d.getMonth()]+' '+d.getFullYear();
 }
 window.phDateLabel=phDateLabel;
+
+
+function billFillPatient(pat){
+  if(!pat)return;
+  var age=document.getElementById('bill-age');
+  var mob=document.getElementById('bill-mob');
+  if(age&&pat.age)age.value=pat.age+(pat.gender?' '+pat.gender:'');
+  if(mob&&pat.mob)mob.value=pat.mob;
+}
+window.billFillPatient=billFillPatient;
 
 </script>
 </body>
