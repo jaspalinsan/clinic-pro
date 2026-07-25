@@ -2355,6 +2355,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -12312,14 +12313,7 @@ function billPatPick(name){
     var mob=document.getElementById('bill-mob');if(mob&&pat.mob)mob.value=pat.mob;
   }
 }
-window.billPatSearch=billPatSearch;
-window.billPatPick=billPatPick;
-// Close dropdown on outside click
-document.addEventListener('click',function(e){
-  if(!e.target.closest||(!e.target.closest('#bill-pat-drop')&&e.target.id!=='bill-patient')){
-    var d=document.getElementById('bill-pat-drop');if(d)d.style.display='none';
-  }
-});
+// bill-patient uses patAutoInput - no separate search function needed
 
 
 function fmtDate(dateStr){
@@ -12972,6 +12966,7 @@ function printBS(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
 }
 window.printBS=printBS;
+
 
 
 
