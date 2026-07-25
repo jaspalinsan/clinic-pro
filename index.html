@@ -370,7 +370,7 @@ html,body{height:100%;overflow:hidden}
       <div id="user-menu" style="display:none;position:absolute;right:0;top:40px;background:#fff;
         border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;z-index:9999;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:#F0FDF9">
-          <div id="um-name" style="font-size:13px;font-weight:800;color:#1a1a2e">Dr. Rajan Kumar</div>
+          <div id="um-name" style="font-size:13px;font-weight:800;color:#1a1a2e"></div>
           <div id="um-role" style="font-size:11px;color:#12AA7C;font-weight:600;margin-top:2px">
             <i class="ti ti-shield-check" style="margin-right:3px"></i>Admin Account</div>
           <div id="sync-status" style="font-size:10px;color:#12AA7C;margin-top:4px"></div>
@@ -1152,7 +1152,7 @@ html,body{height:100%;overflow:hidden}
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Doctor Name <span style="color:#ef4444">*</span></label>
-          <input class="fin" id="set-dname" placeholder="Dr. Rajan Kumar" style="width:100%">
+          <input class="fin" id="set-dname" placeholder="Dr. Name" style="width:100%">
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Qualification</label>
@@ -2241,6 +2241,12 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
+
+
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2568,16 +2574,7 @@ window.addEventListener('beforeunload',function(){if(window.CURRENT_USER)cpSaveD
 
 if(!window._svcList||!window._svcList.length){
   // Always include Consultancy Fee as first item
-  window._svcList=[
-    {name:'Consultancy Fee',price:150,disc:0},
-    {name:'CBC Blood Test',price:300,disc:0},{name:'Urine Routine',price:150,disc:0},
-    {name:'Blood Sugar (Fasting)',price:80,disc:0},{name:'Blood Sugar (PP)',price:80,disc:0},
-    {name:'Lipid Profile',price:400,disc:0},{name:'Thyroid (TSH)',price:350,disc:0},
-    {name:'ECG',price:200,disc:0},{name:'X-Ray Chest',price:300,disc:0},{name:'USG Abdomen',price:500,disc:0},
-    {name:'Physiotherapy Session',price:400,disc:0},{name:'Dressing',price:150,disc:0},
-    {name:'Injection Administration',price:100,disc:0},{name:'BP Check',price:50,disc:0},
-    {name:'Eye Test',price:200,disc:0}
-  ];
+  if(!window._svcList)window._svcList=[]
 }
 var DB=[]
 
@@ -2585,7 +2582,7 @@ window.INV_DB=DB; // expose inventory for H1 report
 
 var _apptData = [];
 
-window.BILLING_DB=[];
+if(!window.BILLING_DB)window.BILLING_DB=[]
 let _nextId=1,_editId=null, _csvRows = [], _vendorRows = [];
 let _rc, _dc, _pc, _mc;
 
@@ -2752,7 +2749,7 @@ function submitAddPatient() {
     '</div></td>';
 
   // Push to PAT_DB for autocomplete
-  if(!window.PAT_DB)window.PAT_DB=[];
+  if(!window.PAT_DB)if(!window.PAT_DB)if(!window.PAT_DB)if(!window.PAT_DB)window.PAT_DB=[]
   var _np={id:code,name:name.trim(),age:age,gender:gen,mob:mobile,city:city,blood:'',status:'Active'};
   window.PAT_DB.unshift(_np);
   if(typeof dbSavePatient==='function')dbSavePatient({id:code,name:name.trim(),age:age,gender:gen,mobile:mobile,city:city,blood:'',status:'Active'});
@@ -2798,19 +2795,9 @@ function parseCSV(fileOrInput) {
   rd.readAsText(file);
   if (fileOrInput.value !== undefined) fileOrInput.value = '';
 }
-function loadSampleCSV() {
-  _csvRows = [
-    {'Full Name':'Kavita Devi','Age':'45','Gender':'Female','Mobile':'99001-12345','City':'Ludhiana'},
-    {'Full Name':'Harbhajan Singh','Age':'62','Gender':'Male','Mobile':'88002-23456','City':'Amritsar'},
-    {'Full Name':'Sneha Patel','Age':'31','Gender':'Female','Mobile':'77003-34567','City':'Chandigarh'},
-  ];
-  const keys = Object.keys(_csvRows[0]);
-  document.getElementById('csv-thead').innerHTML = '<tr>' + keys.map(k => `<th>${k}</th>`).join('') + '</tr>';
-  document.getElementById('csv-tbody').innerHTML = _csvRows.map(r => '<tr>' + keys.map(k => `<td>${r[k]||'—'}</td>`).join('') + '</tr>').join('');
-  document.getElementById('csv-count').textContent = _csvRows.length;
-  document.getElementById('csv-preview').style.display = 'block';
-  const btn = document.getElementById('csv-import-btn'); btn.disabled = false; btn.style.opacity = '1';
-  toast('Sample data loaded — 3 patients', 'info');
+function loadSampleCSV(){
+  _csvRows=[];
+  renderCSVPreview();
 }
 function importCSV() {
   if (!_csvRows.length) { toast('No data to import', 'error'); return; }
@@ -2909,11 +2896,7 @@ function showInvoice(inv, pat, amt) {
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px">
       <thead><tr style="background:var(--sl)"><th style="padding:6px 10px;text-align:left;font-size:9.5px;color:var(--ink3)">ITEM</th><th style="padding:6px 10px;text-align:right;font-size:9.5px;color:var(--ink3)">QTY</th><th style="padding:6px 10px;text-align:right;font-size:9.5px;color:var(--ink3)">AMT</th></tr></thead>
-      <tbody>
-        <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(0,0,0,.05)">AMPICILLIN 500 MG</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05)">30</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05);font-weight:600">₹144</td></tr>
-        <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(0,0,0,.05)">CARDIO-F TABLETS</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05)">60</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05);font-weight:600">₹720</td></tr>
-        <tr><td style="padding:7px 10px">Consultation Fee</td><td style="padding:7px 10px;text-align:right">1</td><td style="padding:7px 10px;text-align:right;font-weight:600">₹500</td></tr>
-      </tbody>
+      <tbody></tbody>
     </table>
     <div style="border-top:2px solid var(--ink);padding-top:8px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:12px"><span>Total</span><span>${amt}</span></div>
     <div style="background:var(--m);border-radius:7px;padding:9px;text-align:center;font-size:12px;font-weight:600;color:var(--m4);margin-bottom:12px">✓ PAID — Cash</div>
@@ -3152,7 +3135,7 @@ function submitAddItem(){
     status:qty>0?'In Stock':'Out of Stock'
   };
   if(typeof DB!=='undefined')DB.unshift(newItem);
-  if(!window.INV_DB)window.INV_DB=[];
+  if(!window.INV_DB)if(!window.INV_DB)window.INV_DB=[]
   window.INV_DB.unshift(newItem);
   if(typeof syncInvDB==='function')syncInvDB();
   if(typeof renderInventory==='function')renderInventory();
@@ -3444,12 +3427,8 @@ function clearVdImg(){
 }
 
 function loadVendorSample(){
-  var sample=[
-    {name:'TAB AMPICILLIN 500MG',company:'Ranbaxy',desc:'Tablet',batch:'B2401',expiry:'06/27',qty:'100',rate:'3.20',sale:'4.80'},
-    {name:'CAP OMEPRAZOLE 20MG',company:'Cipla',desc:'Capsule',batch:'OM2405',expiry:'09/27',qty:'120',rate:'3.80',sale:'5.50'},
-    {name:'SYR AMOXICILLIN 250MG',company:'GSK',desc:'Syrup',batch:'AM241',expiry:'06/27',qty:'30',rate:'45.00',sale:'65.00'},
-  ];
-  fillVendorTable(sample,'Sample Data');
+  // No sample data — add your own vendor items
+  fillVendorTable([],'');
 }
 
 // ── VENDOR REVIEW TABLE ──────────────────────────────────────
@@ -4699,7 +4678,7 @@ function downloadInvoicePDF(id){
   var CS=window.CLINIC_SETTINGS||{};
   var cName=CS.name||'Sach Medicose';
   var cDoctor=CS.doctor||'Dr. Cadium Healthcare';
-  var cQual=CS.qual||'MBBS, MD';
+  var cQual=CS.qual||'';
   var cReg=CS.reg||'MCI-12345';
   var cPhone=CS.phone||'98765-00000';
   var cCity=CS.city||'Barnala, Punjab';
@@ -5923,7 +5902,7 @@ function routeToLab(inv){
     return (typeof s==='object'?s.name:s)||'';
   }).filter(function(n){return n&&!skip.test(n);});
   if(!tests.length)return;
-  if(!window.LAB_DB)window.LAB_DB=[];
+  if(!window.LAB_DB)if(!window.LAB_DB)window.LAB_DB=[]
   if(window.LAB_DB.some(function(x){return x.invId===inv.id;}))return;
   var id='LAB-'+String(window.LAB_DB.length+1).padStart(3,'0');
   window.LAB_DB.push({
@@ -7945,8 +7924,8 @@ function reuseRx(rx){
 function viewSavedRx(rx){
   var CS=window.CLINIC_SETTINGS||{};
   var cName=CS.name||'Cadium Healthcare';
-  var cDoc=CS.doctor||'Dr. Rajan Kumar';
-  var cQual=CS.qual||'MBBS, MD';
+  var cDoc=CS.doctor||'';
+  var cQual=CS.qual||'';
   var cReg=CS.reg||'MCI-12345';
   var cPhone=CS.phone||'98765-00000';
   var cCity=CS.city||'Barnala, Punjab';
@@ -8945,67 +8924,7 @@ function fmt2(v){return v>0?('\u20b9'+v.toLocaleString('en-IN',{minimumFractionD
 
 if(!window.BILLING_DB||!window.BILLING_DB.length){
   var _td=new Date().toISOString().slice(0,10);
-  window.BILLING_DB=[
-    {id:'INV-001',date:_td,patient:'Rajan Kumar',    paymode:'Cash', status:'Paid',   paid:850,  amount:850,
-     meds:[{name:'Paracetamol',qty:2,sale:50,disc:0,amt:100},{name:'Amoxicillin',qty:1,sale:250,disc:0,amt:250},{name:'Pantoprazole',qty:1,sale:120,disc:0,amt:120}],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-002',date:_td,patient:'Sunita Devi',    paymode:'Cash', status:'Paid',   paid:300,  amount:300,
-     meds:[],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-003',date:_td,patient:'Harjinder Singh',paymode:'UPI',  status:'Partial',paid:1000, amount:1200,
-     meds:[{name:'Azithromycin',qty:1,sale:400,disc:0,amt:400},{name:'Pantoprazole',qty:2,sale:100,disc:0,amt:200}],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300},{name:'CBC Blood Test',price:300,disc:0,net:300}]},
-
-    {id:'INV-004',date:_td,patient:'Priya Sharma',   paymode:'Cash', status:'Paid',   paid:350,  amount:350,
-     meds:[],
-     svcs:[{name:'CBC Blood Test',price:200,disc:0,net:200},{name:'Blood Sugar',price:150,disc:0,net:150}]},
-
-    {id:'INV-005',date:_td,patient:'Gurpreet Kaur',  paymode:'',     status:'Pending',paid:0,    amount:300,
-     meds:[],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-006',date:_td,patient:'Mohit Verma',    paymode:'Cash', status:'Paid',   paid:650,  amount:650,
-     meds:[{name:'Metformin',qty:3,sale:80,disc:0,amt:240},{name:'Vitamin D',qty:1,sale:200,disc:0,amt:200}],
-     svcs:[{name:'Consultation Fee',price:210,disc:0,net:210}]},
-
-    {id:'INV-007',date:_td,patient:'Anjali Singh',   paymode:'Card', status:'Paid',   paid:500,  amount:500,
-     meds:[],
-     svcs:[{name:'Thyroid TSH',price:350,disc:0,net:350},{name:'Blood Sugar Fasting',price:150,disc:0,net:150}]},
-
-    {id:'INV-008',date:_td,patient:'Sukhdev Rao',    paymode:'Cash', status:'Paid',   paid:400,  amount:400,
-     meds:[],
-     svcs:[{name:'Physiotherapy Session',price:400,disc:0,net:400}]},
-
-    {id:'INV-009',date:_td,patient:'Kavita Mehta',   paymode:'UPI',  status:'Paid',   paid:980,  amount:980,
-     meds:[{name:'Cetirizine',qty:2,sale:40,disc:0,amt:80},{name:'Montelukast',qty:2,sale:120,disc:0,amt:240}],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300},{name:'CBC Blood Test',price:360,disc:10,net:324}]},
-
-    {id:'INV-010',date:_td,patient:'Balwinder Singh',paymode:'Cash', status:'Paid',   paid:300,  amount:300,
-     meds:[],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-011',date:_td,patient:'Neha Gupta',     paymode:'',     status:'Pending',paid:0,    amount:200,
-     meds:[],
-     svcs:[{name:'Urine Routine',price:200,disc:0,net:200}]},
-
-    {id:'INV-012',date:_td,patient:'Ramesh Kumar',   paymode:'Cash', status:'Paid',   paid:760,  amount:760,
-     meds:[{name:'Atorvastatin',qty:1,sale:180,disc:0,amt:180},{name:'Telmisartan',qty:2,sale:140,disc:0,amt:280}],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-013',date:_td,patient:'Deepika Arora',  paymode:'UPI',  status:'Paid',   paid:400,  amount:400,
-     meds:[],
-     svcs:[{name:'Physiotherapy Session',price:400,disc:0,net:400}]},
-
-    {id:'INV-014',date:_td,patient:'Vikram Joshi',   paymode:'Cash', status:'Paid',   paid:300,  amount:300,
-     meds:[],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
-
-    {id:'INV-015',date:_td,patient:'Manpreet Kaur',  paymode:'Card', status:'Partial',paid:800,  amount:1100,
-     meds:[{name:'Insulin Glargine',qty:1,sale:800,disc:0,amt:800}],
-     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]}
-  ];
+  if(!window.BILLING_DB)window.BILLING_DB=[]
 }
 
 function showSvcSaved(){
@@ -12520,6 +12439,12 @@ function phSetDateLbl(inputId, lblId){
 }
 window.phSetDateLbl=phSetDateLbl;
 window.phSetDateLbl=phSetDateLbl;
+
+
+
+
+
+
 
 
 </script>
