@@ -891,9 +891,7 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-pharmacy">
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
-    <div class="ha" style="flex-wrap:wrap;gap:6px"><div style="position:relative;margin-right:4px"><i class="ti ti-search" style="position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:11px;pointer-events:none"></i><input class="fin" id="ph-search" placeholder="Search name / phone" oninput="renderPharmacy()" style="padding:4px 8px 4px 24px;width:180px;font-size:11px"></div>
-      
-      <input class="fin" placeholder="Search..." style="width:130px;font-size:11px" oninput="filterPharma(this.value)">
+    <div class="ha" style="flex-wrap:wrap;gap:6px"><span style="font-size:11px;color:var(--ink2);font-weight:500">From</span><input type="date" id="ph-date-from" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderPharmacy()"><span style="font-size:11px;color:var(--ink2);font-weight:500">To</span><input type="date" id="ph-date-to" class="fin" style="font-size:11px;padding:4px 8px;width:130px" onchange="renderPharmacy()"><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';renderPharmacy()" style="font-size:11px">Clear</button><select id="ph-sort" class="fin" onchange="renderPharmacy()" style="font-size:11px;padding:4px 8px"><option value="desc">Newest First</option><option value="asc">Oldest First</option></select>
       <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
@@ -2060,6 +2058,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -3882,7 +3881,7 @@ function rxInit(){
   var d=document.getElementById('rx-date');
   var di=document.getElementById('rx-date-inp');
   var today=new Date();
-  var todayStr=today.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var todayStr=today.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
   if(d)d.textContent=todayStr;
   if(di){
     var y=today.getFullYear(),mon=String(today.getMonth()+1).padStart(2,'0'),dy=String(today.getDate()).padStart(2,'0');
@@ -4176,7 +4175,7 @@ function rxSave(){
   var rxDateVal=rxDateInp&&rxDateInp.value?rxDateInp.value:'';
   var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var rxDateStr=rxDateVal?(function(){var p=rxDateVal.split('-');return p[2]+' '+mo[parseInt(p[1])-1]+' '+p[0];}()):
-    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    (function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
 
   var CS=window.CLINIC_SETTINGS||{};
   var rx={
@@ -4402,7 +4401,7 @@ try{
   var pdx=(document.getElementById('rx-pat-dx')||{}).value||'';
   var rxno=(document.getElementById('rx-number')||{}).textContent||'Rx';
   var rdate=(document.getElementById('rx-date')||{}).textContent||
-    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    (function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
 
   if(!pname){
     toast('Please fill Patient Name first','error');
@@ -4744,22 +4743,36 @@ function renderPharmacy(){
   tbody.innerHTML='';
   if(!window.BILLING_DB)window.BILLING_DB=[];
 
-  var q=((document.getElementById('ph-search')||{}).value||'').toLowerCase();
   var phFrom=(document.getElementById('ph-date-from')||{}).value||'';
   var phTo=(document.getElementById('ph-date-to')||{}).value||'';
+  var sortDir=(document.getElementById('ph-sort')||{value:'desc'}).value||'desc';
 
   var data=window.BILLING_DB.filter(function(inv){
     if(!inv||!inv.id)return false;
     if(phFrom||phTo){
       var d=new Date(inv.dateRaw||inv.date||'');
-      if(phFrom&&d<new Date(phFrom))return false;
-      if(phTo&&d>new Date(phTo))return false;
-    }
-    if(q){
-      var hay=((inv.patient||'')+(inv.mob||inv.mobile||'')+(inv.id||'')+(inv.rxno||'')).toLowerCase();
-      if(hay.indexOf(q)===-1)return false;
+      if(isNaN(d.getTime())){
+        // try parse "22 Jul 2026" or "22-07-2026"
+        var m={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+        var pts=(inv.date||'').split(/[\s\-\/]/);
+        if(pts.length===3){
+          var mn=m[pts[1]];
+          if(mn!==undefined)d=new Date(parseInt(pts[2]),mn,parseInt(pts[0]));
+          else d=new Date(parseInt(pts[2]),parseInt(pts[1])-1,parseInt(pts[0]));
+        }
+      }
+      if(!isNaN(d.getTime())){
+        if(phFrom&&d<new Date(phFrom))return false;
+        if(phTo&&d>new Date(phTo))return false;
+      }
     }
     return true;
+  });
+
+  // Sort
+  data=data.slice().sort(function(a,b){
+    var da=new Date(a.dateRaw||a.date||0),db=new Date(b.dateRaw||b.date||0);
+    return sortDir==='asc'?(da-db):(db-da);
   });
 
   var tot=0,totPaid=0,totDue=0;
@@ -4768,11 +4781,10 @@ function renderPharmacy(){
     var grand=parseFloat(inv.grandTotal||inv.amount||0);
     var balDue=parseFloat(inv.balanceDue||inv.balance||0);
     var paid=parseFloat(inv.paidAmount||inv.paidAmt||0);
-    tot+=grand; totPaid+=paid; totDue+=balDue;
+    tot+=grand;totPaid+=paid;totDue+=balDue;
 
     var stClass=inv.status==='Paid'?'p-g':inv.status==='Partial'?'p-b':'p-a';
     var iid=String(inv.id);
-
     var tr=document.createElement('tr');
 
     // td0: checkbox
@@ -4783,36 +4795,33 @@ function renderPharmacy(){
     cb.onchange=phUpdateBar;
     td0.appendChild(cb);
 
-    // td1: Name · Invoice — single line
+    // td1: Name · Invoice
     var td1=document.createElement('td');
     td1.style.cssText='overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    td1.innerHTML=
-      '<b style="font-size:12px">'+( inv.patient||'—')+'</b>'+
+    td1.innerHTML='<b style="font-size:12px">'+(inv.patient||'—')+'</b>'+
       '<span style="color:var(--ink3);font-size:10px"> \u00b7 '+iid+'</span>';
 
-    // td2: Date
+    // td2: Date — dd-mm-yyyy format
     var td2=document.createElement('td');
     td2.style.cssText='font-size:11px;color:var(--ink2);white-space:nowrap';
-    td2.textContent=inv.date||'—';
+    td2.textContent=typeof fmtDate==='function'?fmtDate(inv.date||inv.dateRaw||''):(inv.date||'—');
 
-    // td3: Description — single line truncated
+    // td3: Description
     var td3=document.createElement('td');
     td3.style.cssText='font-size:11px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0';
     var mN=(inv.meds||[]).map(function(m){return m.name||m;}).filter(Boolean).join(', ');
     var sN=(inv.svcs||[]).map(function(s){return s.name||s;}).filter(Boolean).join(', ');
     var desc=mN&&sN?mN+' \u00b7 '+sN:mN||sN||inv.desc||'—';
-    td3.title=desc;
-    td3.textContent=desc;
+    td3.title=desc;td3.textContent=desc;
 
-    // td4: Amount + due inline
+    // td4: Amount + due
     var td4=document.createElement('td');
     td4.style.cssText='text-align:right;white-space:nowrap';
     var amtStr='\u20b9'+grand.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
     if(inv.status==='Paid'){
       td4.innerHTML='<b style="color:#059669">'+amtStr+'</b>';
     } else if(balDue>0){
-      td4.innerHTML='<b>'+amtStr+'</b>'+
-        '<span style="color:#DC2626;font-size:10px;font-weight:600"> \u20b9'+balDue.toFixed(2)+' due</span>';
+      td4.innerHTML='<b>'+amtStr+'</b><span style="color:#DC2626;font-size:10px;font-weight:600"> \u20b9'+balDue.toFixed(2)+' due</span>';
     } else {
       td4.innerHTML='<b>'+amtStr+'</b>';
     }
@@ -4826,18 +4835,13 @@ function renderPharmacy(){
     td6.style.cssText='font-size:11px;color:var(--ink2);white-space:nowrap';
     td6.textContent=inv.paymode||'—';
 
-    // td7: Actions — compact single row
+    // td7: Actions
     var td7=document.createElement('td');
     var div=document.createElement('div');
     div.style.cssText='display:flex;gap:3px;align-items:center;flex-wrap:nowrap';
-
-    // Edit
-    var bEdit=document.createElement('button');bEdit.className='tb';
-    bEdit.style.fontSize='11px';bEdit.title='Edit';bEdit.innerHTML='\u270f\ufe0f';
+    var bEdit=document.createElement('button');bEdit.className='tb';bEdit.style.fontSize='11px';bEdit.title='Edit';bEdit.innerHTML='\u270f\ufe0f';
     bEdit.onclick=(function(id){return function(){editInvoice(id);};})(iid);
     div.appendChild(bEdit);
-
-    // Pay button (Pending=blue, Partial=amber)
     if(inv.status!=='Paid'){
       var bPay=document.createElement('button');bPay.className='tb';
       if(inv.status==='Partial'){
@@ -4850,25 +4854,15 @@ function renderPharmacy(){
       bPay.onclick=(function(id){return function(){openPayModal(id);};})(iid);
       div.appendChild(bPay);
     }
-
-    // PDF
-    var bPDF=document.createElement('button');bPDF.className='tb';
-    bPDF.style.fontSize='11px';bPDF.title='Invoice PDF';bPDF.textContent='PDF';
+    var bPDF=document.createElement('button');bPDF.className='tb';bPDF.style.fontSize='11px';bPDF.title='PDF';bPDF.textContent='PDF';
     bPDF.onclick=(function(id){return function(){downloadInvoicePDF(id);};})(iid);
     div.appendChild(bPDF);
-
-    // Lab
-    var bLab=document.createElement('button');bLab.className='tb';
-    bLab.style.fontSize='11px';bLab.title='Send to Lab';bLab.innerHTML='\ud83e\uddea';
+    var bLab=document.createElement('button');bLab.className='tb';bLab.style.fontSize='11px';bLab.title='Lab';bLab.innerHTML='\ud83e\uddea';
     bLab.onclick=(function(id){return function(){openLabFromBill(id);};})(iid);
     div.appendChild(bLab);
-
-    // Delete
-    var bDel=document.createElement('button');bDel.className='tb danger';
-    bDel.style.fontSize='11px';bDel.title='Delete';bDel.innerHTML='\ud83d\uddd1';
+    var bDel=document.createElement('button');bDel.className='tb danger';bDel.style.fontSize='11px';bDel.title='Delete';bDel.innerHTML='\ud83d\uddd1';
     bDel.onclick=(function(id){return function(){deleteInvoice(id);};})(iid);
     div.appendChild(bDel);
-
     td7.appendChild(div);
 
     tr.appendChild(td0);tr.appendChild(td1);tr.appendChild(td2);
@@ -4877,12 +4871,9 @@ function renderPharmacy(){
     tbody.appendChild(tr);
   });
 
-  // Footer totals
-  function setEl(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
   var fmt=function(n){return'\u20b9'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  setEl('ph-tot',fmt(tot));
-  setEl('ph-paid',fmt(totPaid));
-  setEl('ph-due',fmt(totDue));
+  function setEl(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  setEl('ph-tot',fmt(tot));setEl('ph-paid',fmt(totPaid));setEl('ph-due',fmt(totDue));
 }
 function filterPharma(q){var lq=(q||'').toLowerCase();[].slice.call(document.querySelectorAll('#ph-tbody tr')).forEach(function(tr){tr.style.display=(!lq||(tr.dataset.search||'').includes(lq))?'':'none';});}
 
@@ -5512,7 +5503,7 @@ function submitInvoice(){
   if(!patient){toast('Enter patient name','error');return;}
   var age   =(document.getElementById('inv-age')   ||{}).value||'';
   var mob   =(document.getElementById('inv-mob')   ||{}).value||'';
-  var date  =(document.getElementById('inv-date')  ||{}).value||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var date  =(document.getElementById('inv-date')  ||{}).value||(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
   var dx    =(document.getElementById('inv-dx')    ||{}).value||'';
   var status=(document.getElementById('inv-status')||{}).value||'Pending';
 
@@ -5552,7 +5543,7 @@ function submitInvoice(){
   var newId='INV-'+String(window.BILLING_DB.length+1).padStart(3,'0');
   window.BILLING_DB.unshift({
     id:newId,patient:patient,rxno:'',
-    date:date instanceof Date?date.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):date,
+    date:date instanceof Date?date.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-'):date,
     desc:desc,amount:total,status:status,paymode:'',
     age:age,mob:mob,dx:dx,meds:meds,svcs:svcs
   });
@@ -5792,7 +5783,7 @@ function routeToLab(inv){
     id:id,patient:inv.patient||'',pid:'',
     ageSex:inv.age||'',mob:inv.mob||'',
     tests:tests.join(', '),
-    date:inv.date||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+    date:inv.date||(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})(),
     invId:inv.id,status:'pending',
     resultFile:null,resultText:'',doneDate:''
   });
@@ -6111,7 +6102,7 @@ function billReaderLoad(inp){
 function billReaderImport(){
   var vendor=(document.getElementById('br-vendor')||{}).value||'Unknown Vendor';
   var invoice=(document.getElementById('br-invoice')||{}).value||'INV-'+Date.now();
-  var date=(document.getElementById('br-date')||{}).value||new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var date=(document.getElementById('br-date')||{}).value||(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
   var total=parseFloat((document.getElementById('br-total')||{}).value)||0;
   if(!window.VENDOR_BILLS)window.VENDOR_BILLS=[];
   window.VENDOR_BILLS.unshift({
@@ -6803,7 +6794,7 @@ function openAddVendorBill(){
     if(!vendor){toast('Enter vendor name','error');return;}
     var invoice=(document.getElementById('vb-invoice')||{}).value||'VB-'+Date.now();
     var dateVal=(document.getElementById('vb-date')||{}).value||'';
-    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-'):(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
     var total=parseFloat((document.getElementById('vb-total')||{}).value)||0;
     var paid=parseFloat((document.getElementById('vb-paid')||{}).value)||0;
     var mode=(document.getElementById('vb-mode')||{}).value||'Cash';
@@ -6852,7 +6843,7 @@ function openVendorEntry(){
     var narr=(document.getElementById('ve-narr')||{}).value||'';
     if(!narr){toast('Enter narration','error');return;}
     var dateVal=(document.getElementById('ve-date')||{}).value||'';
-    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-'):(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
     var dr=parseFloat((document.getElementById('ve-dr')||{}).value)||0;
     var cr=parseFloat((document.getElementById('ve-cr')||{}).value)||0;
     var ref=(document.getElementById('ve-ref')||{}).value||'—';
@@ -6901,7 +6892,7 @@ function payVendorBill(id){
     bill.paid+=amt;
     bill.status=bill.paid>=bill.total?'Paid':bill.paid>0?'Partial':'Pending';
     if(!window.VENDOR_LEDGER[bill.vendor])window.VENDOR_LEDGER[bill.vendor]=[];
-    var date=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    var date=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
     window.VENDOR_LEDGER[bill.vendor].push({date:date,narration:'Payment via '+mode,dr:0,cr:amt,ref:ref});
     ov.remove();renderPurchaseReport();
     var sel=document.getElementById('fin-vendor-select');
@@ -7149,7 +7140,7 @@ window.renderLabQueue=renderLabQueue;
 
 function labDone(id){
   var t=(window.LAB_DB||[]).find(function(x){return x.id===id;});
-  if(t){t.status='done';t.doneDate=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  if(t){t.status='done';t.doneDate=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
     renderLabQueue();
     // Switch to done tab
     labTab(document.querySelector('.stab:nth-child(3)'),'done');
@@ -7239,7 +7230,7 @@ function openNewLabTest(){
       ageSex:(document.getElementById('lab-age')||{}).value||'',
       mob:(document.getElementById('lab-mob')||{}).value||'',
       tests:tests,
-      date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+      date:(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})(),
       invId:(document.getElementById('lab-inv')||{}).value||'',
       status:'pending',resultFile:null,resultText:'',doneDate:''
     });
@@ -7580,7 +7571,7 @@ function handleRxLabUpload(inp){
   window._rxLabReports.push({
     type:'file', labId:'', name:file.name,
     text:'', url:url,
-    date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+    date:(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})(),
     fileRef:file
   });
   if(inp)inp.value='';
@@ -7612,8 +7603,8 @@ function addManualLabEntry(){
     if(!name){toast('Enter test name','error');return;}
     var text=(document.getElementById('mle-text')||{}).value||'';
     var dateVal=(document.getElementById('mle-date')||{}).value||'';
-    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):
-      new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    var date=dateVal?new Date(dateVal).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-'):
+      (function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
     if(!window._rxLabReports)window._rxLabReports=[];
     window._rxLabReports.push({type:'manual',labId:'',name:name,text:text,url:null,date:date});
     ov.remove();renderRxLabEntries();
@@ -9455,7 +9446,7 @@ function saveBill(){
   if(!amount&&!meds.length&&!svcs.length){if(typeof toast==='function')toast('Add at least one item','error');return;}
 
   var id='INV-'+String(Date.now()).slice(-6);
-  var today=dt?dt.value:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var today=dt?dt.value:(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
   if(!window.BILLING_DB)window.BILLING_DB=[];
   window.BILLING_DB.push({
     id:id,patient:patient,age:age?age.value:'',mob:mob?mob.value:'',
@@ -10001,7 +9992,7 @@ function openLabFromBill(invId){
       ageSex:(inv.age?inv.age+' / '+(inv.gender||'—'):'—'),
       mob:inv.mob||'',
       tests:testsStr,
-      date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+      date:(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})(),
       invId:String(invId),
       status:'pending',
       resultFile:null,resultText:'',doneDate:''
@@ -11418,11 +11409,11 @@ window.cpStartSync=cpStartSync;
 window.cpStartSync=cpStartSync;
 
 window._apptDateFilter='';window._labDateFilter='';
-function filterApptsByDate(val){window._apptDateFilter=val||'';var lbl=document.getElementById('appt-filter-label');if(lbl){if(val){var d=new Date(val+'T00:00:00');lbl.textContent='Showing: '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}else lbl.textContent='';}if(typeof renderApptPanes==='function')renderApptPanes();}
+function filterApptsByDate(val){window._apptDateFilter=val||'';var lbl=document.getElementById('appt-filter-label');if(lbl){if(val){var d=new Date(val+'T00:00:00');lbl.textContent='Showing: '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');}else lbl.textContent='';}if(typeof renderApptPanes==='function')renderApptPanes();}
 window.filterApptsByDate=filterApptsByDate;
 function clearApptDateFilter(){window._apptDateFilter='';var i=document.getElementById('appt-date-filter');if(i)i.value='';var lbl=document.getElementById('appt-filter-label');if(lbl)lbl.textContent='';if(typeof renderApptPanes==='function')renderApptPanes();}
 window.clearApptDateFilter=clearApptDateFilter;
-function filterLabByDate(val){window._labDateFilter=val||'';var lbl=document.getElementById('lab-filter-label');if(lbl){if(val){var d=new Date(val+'T00:00:00');lbl.textContent='Showing: '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}else lbl.textContent='';}if(typeof renderLabQueue==='function')renderLabQueue();}
+function filterLabByDate(val){window._labDateFilter=val||'';var lbl=document.getElementById('lab-filter-label');if(lbl){if(val){var d=new Date(val+'T00:00:00');lbl.textContent='Showing: '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');}else lbl.textContent='';}if(typeof renderLabQueue==='function')renderLabQueue();}
 window.filterLabByDate=filterLabByDate;
 function clearLabDateFilter(){window._labDateFilter='';var i=document.getElementById('lab-date-filter');if(i)i.value='';var lbl=document.getElementById('lab-filter-label');if(lbl)lbl.textContent='';if(typeof renderLabQueue==='function')renderLabQueue();}
 window.clearLabDateFilter=clearLabDateFilter;
@@ -11910,26 +11901,28 @@ function crSearch(){
   var prev=document.getElementById('cr-preview');
   var dlBtn=document.getElementById('cr-dl-btn');
   if(!res||!prev)return;
-  if(q.length<2){res.style.display='none';prev.style.display='none';if(dlBtn)dlBtn.style.display='none';return;}
-  // Get unique patient names matching query
+  // Build unique patient list from BOTH PAT_DB and BILLING_DB
   var names={};
-  (window.BILLING_DB||[]).forEach(function(inv){
-    var n=inv.patient||'';
-    if(n.toLowerCase().indexOf(q.toLowerCase())!==-1)names[n.toLowerCase()]=(names[n.toLowerCase()]||0)+1;
+  (window.PAT_DB||[]).forEach(function(p){if(p.name)names[p.name.toLowerCase()]=p.name;});
+  (window.BILLING_DB||[]).forEach(function(b){if(b.patient)names[b.patient.toLowerCase()]=b.patient;});
+  var list=Object.values(names).filter(function(n){
+    return !q||n.toLowerCase().indexOf(q.toLowerCase())!==-1;
   });
-  var list=Object.keys(names);
   if(!list.length){
     res.style.display='block';
     res.innerHTML='<div style="padding:10px 14px;color:var(--ink3);font-size:11px">No patient found</div>';
-    prev.style.display='none';if(dlBtn)dlBtn.style.display='none';
-    return;
+    prev.style.display='none';if(dlBtn)dlBtn.style.display='none';return;
   }
   res.style.display='block';
   res.innerHTML=list.map(function(n){
-    var display=(window.BILLING_DB.find(function(b){return(b.patient||'').toLowerCase()===n;})||{}).patient||n;
-    return '<div onclick="crSelect(\''+display.replace(/'/g,"\\'")+'\')" style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--sl2);font-weight:600" '+
-      'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'+
-      display+'</div>';
+    var safe=n.replace(/'/g,"\\'");
+    // Get invoice count
+    var cnt=(window.BILLING_DB||[]).filter(function(b){return(b.patient||'').toLowerCase()===n.toLowerCase();}).length;
+    return '<div onclick="crSelect(\''+safe+'\')" '
+      +'style="padding:9px 14px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--sl2)" '
+      +'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'
+      +'<b>'+n+'</b><span style="color:var(--ink3);font-size:10px"> \u00b7 '+cnt+' invoice'+(cnt===1?'':'s')+'</span>'
+      +'</div>';
   }).join('');
 }
 
@@ -11986,7 +11979,7 @@ function downloadLedgerPDF(){
 
   var CS=window.CLINIC_SETTINGS||{};
   var fmt=function(n){return'\u20b9'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  var today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
 
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ledger - '+name+'</title>'+
     '<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px;color:#111}'+
@@ -12044,18 +12037,24 @@ function billPatSearch(q){
   var drop=document.getElementById('bill-pat-drop');
   if(!drop)return;
   if(!q||q.length<1){drop.style.display='none';return;}
-  // Get unique patient names from DB + PAT_DB
   var names={};
-  (window.BILLING_DB||[]).forEach(function(b){if(b.patient)names[b.patient.toLowerCase()]=b.patient;});
-  (window.PAT_DB||[]).forEach(function(p){if(p.name)names[p.name.toLowerCase()]=p.name;});
+  (window.PAT_DB||[]).forEach(function(p){if(p.name)names[p.name.toLowerCase()]={name:p.name,age:p.age||'',mob:p.mob||p.phone||''};});
+  (window.BILLING_DB||[]).forEach(function(b){
+    if(b.patient&&!names[b.patient.toLowerCase()])
+      names[b.patient.toLowerCase()]={name:b.patient,age:b.age||'',mob:b.mob||b.mobile||''};
+  });
   var matches=Object.values(names).filter(function(n){
-    return n.toLowerCase().indexOf(q.toLowerCase())!==-1;
+    return n.name.toLowerCase().indexOf(q.toLowerCase())!==-1;
   }).slice(0,8);
   if(!matches.length){drop.style.display='none';return;}
   drop.innerHTML=matches.map(function(n){
-    return '<div onclick="billPatPick(\''+n.replace(/'/g,"\\'")+'\')" '
-      +'style="padding:8px 12px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:0.5px solid var(--sl2)" '
-      +'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'+n+'</div>';
+    var safe=n.name.replace(/'/g,"\\'");
+    var age=n.age?'<span style="color:var(--ink3);font-size:10px"> \u00b7 '+n.age+'</span>':'';
+    var mob=n.mob?'<span style="color:var(--ink3);font-size:10px"> \u00b7 '+n.mob+'</span>':'';
+    return '<div onclick="billPatPick(\''+safe+'\')" '+
+      'style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--sl2)" '+
+      'onmouseover="this.style.background=\'var(--sl)\'" onmouseout="this.style.background=\'\'">'+
+      '<b>'+n.name+'</b>'+age+mob+'</div>';
   }).join('');
   drop.style.display='block';
 }
@@ -12077,6 +12076,27 @@ document.addEventListener('click',function(e){
     var d=document.getElementById('bill-pat-drop');if(d)d.style.display='none';
   }
 });
+
+
+function fmtDate(dateStr){
+  if(!dateStr)return '—';
+  // Try parsing various formats
+  var d=new Date(dateStr);
+  // If already in "22 Jul 2026" format, parse manually
+  if(isNaN(d.getTime())){
+    var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    var parts=dateStr.split(' ');
+    if(parts.length===3&&months[parts[1]]!==undefined){
+      d=new Date(parseInt(parts[2]),months[parts[1]],parseInt(parts[0]));
+    }
+  }
+  if(isNaN(d.getTime()))return dateStr; // fallback
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mm=String(d.getMonth()+1).padStart(2,'0');
+  var yyyy=d.getFullYear();
+  return dd+'-'+mm+'-'+yyyy;
+}
+window.fmtDate=fmtDate;
 
 </script>
 </body>
