@@ -891,7 +891,7 @@ html,body{height:100%;overflow:hidden}
 <div class="page" id="page-pharmacy">
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
-    <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">From</span><input type="date" id="ph-date-from" class="fin" onchange="renderPharmacy()" style="font-size:11px;padding:4px 8px;width:130px"><span style="font-size:11px;color:var(--ink2);font-weight:500;white-space:nowrap">To</span><input type="date" id="ph-date-to" class="fin" onchange="renderPharmacy()" style="font-size:11px;padding:4px 8px;width:130px"><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';renderPharmacy()" style="font-size:11px">Clear</button>
+    <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-from-lbl" style="min-width:90px">From date</span><input type="date" id="ph-date-from" onchange="phSetDateLbl('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><span style="font-size:13px;color:var(--ink3);font-weight:300">→</span><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-to-lbl" style="min-width:90px">To date</span><input type="date" id="ph-date-to" onchange="phSetDateLbl('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';document.getElementById('ph-from-lbl').textContent='From date';document.getElementById('ph-to-lbl').textContent='To date';renderPharmacy()" style="font-size:11px">Clear</button>
       <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
@@ -2196,6 +2196,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12320,16 +12321,7 @@ window.fmtDate=fmtDate;
 
 
 
-function phDateLabel(inputId, labelId){
-  var val=document.getElementById(inputId).value;
-  var lbl=document.getElementById(labelId);
-  if(!lbl)return;
-  if(!val){lbl.textContent='Pick date';return;}
-  var d=new Date(val);
-  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var dd=String(d.getDate()).padStart(2,'0');
-  lbl.textContent=dd+' '+months[d.getMonth()]+' '+d.getFullYear();
-}
+
 window.phDateLabel=phDateLabel;
 
 
@@ -12511,6 +12503,18 @@ function saveDataSettings(){
 }
 window.saveDataSettings=saveDataSettings;
 window.loadDataSettings=loadDataSettings;
+
+
+function phSetDateLbl(inputId, lblId){
+  var val=document.getElementById(inputId).value;
+  var lbl=document.getElementById(lblId);
+  if(!lbl)return;
+  if(!val){lbl.textContent=inputId==='ph-date-from'?'From date':'To date';return;}
+  var d=new Date(val);
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  lbl.textContent=d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
+}
+window.phSetDateLbl=phSetDateLbl;
 
 </script>
 </body>
