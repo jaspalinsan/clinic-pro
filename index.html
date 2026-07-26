@@ -36,7 +36,7 @@ html,body{height:100%;overflow:hidden}
 .logo{display:flex;align-items:center;gap:7px;text-decoration:none;font-weight:800;font-size:15px;color:var(--ink);flex-shrink:0;margin-right:4px}
 .lmark{width:30px;height:30px;border-radius:8px;background:var(--acc);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
 .nlinks{display:flex;gap:2px;flex:1;overflow:hidden;align-items:stretch}
-.nl{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:60px;padding:2px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:linear-gradient(180deg,#fff,#E8E8E8);cursor:pointer;color:#1A3A8C;white-space:nowrap;flex:1;min-width:56px;transition:all .12s;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(0,0,0,.12)}
+.nl{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:60px;padding:2px 2px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:linear-gradient(180deg,#fff,#E8E8E8);cursor:pointer;color:#1A3A8C;white-space:nowrap;flex:1;min-width:0;transition:all .12s;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(0,0,0,.12)}
 .nl-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;line-height:1;color:inherit}
 .nl i{font-size:13px;flex-shrink:0}
 .nl:hover{background:linear-gradient(180deg,#fff,#D0D8FF);border-color:#7B9FE8;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 3px rgba(26,58,140,.2)}
@@ -101,8 +101,8 @@ html,body{height:100%;overflow:hidden}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* Font category overrides via CSS vars */
-.nl i{font-size:22px !important;color:#1A3A8C}
-.nl .nl-lbl{font-size:9px !important;font-weight:700;color:#1A3A8C;text-transform:uppercase;letter-spacing:.3px;line-height:1}
+.nl i{font-size:33px !important;color:#1A3A8C}
+.nl .nl-lbl{font-size:11px !important;font-weight:900;color:#1A3A8C;text-transform:uppercase;letter-spacing:.5px;line-height:1}
 .bp,.bs{font-size:var(--fs-btn) !important}
 .tb{font-size:var(--fs-btn) !important}
 .tbl td{font-size:var(--fs-data) !important}
@@ -125,6 +125,8 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
+#page-settings{padding:0!important}
+#page-settings.on{display:block!important}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -296,8 +298,10 @@ html,body{height:100%;overflow:hidden}
   #appt-tab-new i,#appt-tab-process i,#appt-tab-done i{font-size:14px !important}
 
   /* Settings sidebar + content */
-  
-  #sp-nav{flex-direction:column !important;flex-wrap:nowrap !important;width:200px !important}
+  #page-settings > div{flex-direction:column !important}
+  #sp-nav{flex-direction:row !important;flex-wrap:wrap;width:100% !important;
+    border-right:none !important;border-bottom:1px solid var(--sl2);
+    padding:8px !important}
   #sp-nav button{padding:8px 12px !important;font-size:12px !important;
     border-radius:8px !important}
 
@@ -330,16 +334,6 @@ html,body{height:100%;overflow:hidden}
     font-size:12px
   }
 }
-
-/* Settings page layout */
-#page-settings{padding:0!important;overflow:hidden}
-#page-settings.on{display:flex!important;height:calc(100vh - 72px)}
-#page-settings .page-inner{display:flex;height:100%;width:100%}
-
-/* Force settings layout */
-#page-settings.on{display:flex !important;flex-direction:row !important;height:calc(100vh - 72px) !important;padding:0 !important;overflow:hidden !important}
-#page-settings .page-inner{display:flex !important;flex-direction:row !important;height:100% !important;width:100% !important;overflow:hidden !important}
-#page-settings #sp-nav{flex-direction:column !important;flex-wrap:nowrap !important;width:200px !important;min-width:200px !important;overflow-y:auto !important;overflow-x:hidden !important}
 </style>
 </head>
 <body>
@@ -356,7 +350,7 @@ html,body{height:100%;overflow:hidden}
   </a>
 
   <!-- Silver metallic strip matching the image -->
-  <div class="nlinks" id="nav-strip" style="display:flex;flex:1;gap:3px;padding:4px 4px;background:linear-gradient(180deg,#C8C8C8,#E8E8E8,#C0C0C0);border-radius:10px;border:2px solid #B0B0B0;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 4px rgba(0,0,0,.15);overflow-x:auto;overflow-y:hidden;scrollbar-width:none">
+  <div class="nlinks" id="nav-strip" style="display:flex;flex:1;gap:3px;padding:4px 4px;background:linear-gradient(180deg,#C8C8C8,#E8E8E8,#C0C0C0);border-radius:10px;border:2px solid #B0B0B0;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 4px rgba(0,0,0,.15)">
     <button class="nl on" id="nl-dashboard"    id="nav-dashboard" onclick="nav('dashboard')"    title="Dashboard">    <i class="ti ti-layout-dashboard"        ></i><span class="nl-lbl">Dashboard</span></button>
     <button class="nl"    id="nl-appointments"  id="nav-appointments" onclick="nav('appointments')" title="Appointments"> <i class="ti ti-calendar-event"           ></i><span class="nl-lbl">Appointments</span></button>
     <button class="nl"    id="nl-rx"            id="nav-rx" onclick="nav('rx')"           title="Rx">           <i class="ti ti-file-description"         ></i><span class="nl-lbl">Prescription</span></button>
@@ -365,7 +359,6 @@ html,body{height:100%;overflow:hidden}
     <button class="nl"    id="nl-lab"           id="nav-lab" onclick="nav('lab')"          title="Lab">          <i class="ti ti-microscope"               ></i><span class="nl-lbl">Laboratory</span></button>
     <button class="nl"    id="nl-vendor"        id="nav-vendor" onclick="nav('vendor')"       title="Vendor">       <i class="ti ti-truck"                    ></i><span class="nl-lbl">Vendor</span></button>
     <button class="nl"    id="nl-finance"       id="nav-finance" onclick="nav('finance')"      title="Finance">      <i class="ti ti-report-money"             ></i><span class="nl-lbl">Finance</span></button>
-    
 
   </div>
 
@@ -377,7 +370,7 @@ html,body{height:100%;overflow:hidden}
       <div id="user-menu" style="display:none;position:absolute;right:0;top:40px;background:#fff;
         border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;z-index:9999;overflow:hidden">
         <div style="padding:12px 16px;border-bottom:1px solid #F3F4F6;background:#F0FDF9">
-          <div id="um-name" style="font-size:13px;font-weight:800;color:#1a1a2e"></div>
+          <div id="um-name" style="font-size:13px;font-weight:800;color:#1a1a2e">Dr. Rajan Kumar</div>
           <div id="um-role" style="font-size:11px;color:#12AA7C;font-weight:600;margin-top:2px">
             <i class="ti ti-shield-check" style="margin-right:3px"></i>Admin Account</div>
           <div id="sync-status" style="font-size:10px;color:#12AA7C;margin-top:4px"></div>
@@ -1058,18 +1051,8 @@ html,body{height:100%;overflow:hidden}
       </div>
       <button class="tb" onclick="renderFinance()" style="font-size:11px"><i class="ti ti-refresh"></i>Refresh</button>
     </div>
-  
   </div>
 
-<div style="display:flex;gap:0;border-bottom:1.5px solid var(--sl2);background:var(--bg);overflow-x:auto;flex-wrap:nowrap">
-    <button id="ftab-revenue"  onclick="finTab('revenue')"  class="ftab ftab-on" style="padding:10px 18px;border:none;border-bottom:2.5px solid #1A3A8C;font-size:12px;font-weight:700;color:#1A3A8C;background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-chart-bar" style="margin-right:5px"></i>Revenue</button>
-    <button id="ftab-pl"       onclick="finTab('pl')"       class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-file-analytics" style="margin-right:5px"></i>P&amp;L Account</button>
-    <button id="ftab-bs"       onclick="finTab('bs')"       class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-scale" style="margin-right:5px"></i>Balance Sheet</button>
-    <button id="ftab-ledger"   onclick="finTab('ledger')"   class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-notebook" style="margin-right:5px"></i>Ledger Accounts</button>
-    <button id="ftab-purchase" onclick="finTab('purchase')" class="ftab" style="padding:10px 18px;border:none;border-bottom:2.5px solid transparent;font-size:12px;font-weight:600;color:var(--ink3);background:transparent;cursor:pointer;white-space:nowrap"><i class="ti ti-shopping-cart" style="margin-right:5px"></i>Purchase</button>
-  </div>
-
-  <div id="fsec-revenue">
   <div class="card" id="fin-cat-card">
     <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
       <span class="ct"><i class="ti ti-chart-bar" style="color:#1A3A8C;margin-right:6px"></i>Revenue by Category</span>
@@ -1090,9 +1073,6 @@ html,body{height:100%;overflow:hidden}
     </table></div>
   </div>
 
-  </div><!-- end fsec-revenue -->
-
-  <div id="fsec-purchase" style="display:none">
   <div class="card" id="fin-purchase-card" style="margin-top:12px">
     <div class="ch"><span class="ct"><i class="ti ti-truck" style="color:var(--gold);margin-right:6px"></i>Purchase / Expenses</span></div>
     <div style="overflow-x:auto"><table class="tbl">
@@ -1108,9 +1088,6 @@ html,body{height:100%;overflow:hidden}
     </table></div>
   </div>
 
-  </div><!-- end fsec-purchase -->
-
-  <div id="fsec-plbs" style="display:none">
   <div class="card" id="fin-ledger-card" style="margin-top:12px">
     <div class="ch" style="display:flex;align-items:center;justify-content:space-between">
       <span class="ct"><i class="ti ti-book" style="color:var(--rose);margin-right:6px"></i>Vendor Ledger — <span id="fin-ledger-vendor">select a vendor</span></span>
@@ -1129,118 +1106,33 @@ html,body{height:100%;overflow:hidden}
 <!-- end page-settings -->
 </main>
 </div>
+<div class="page" id="page-settings" style="padding:0;background:#F1F5F9">
 
-<div id="fsec-pl" style="display:none;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-size:14px;font-weight:700">📋 Profit &amp; Loss Account</div>
-      <div style="display:flex;gap:8px">
-        <span id="pl-period" style="font-size:11px;color:var(--ink3)"></span>
-        <button class="tb" onclick="printPL()" style="font-size:11px"><i class="ti ti-printer"></i> Print</button>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <!-- INCOME -->
-      <div style="border:1px solid #BBF7D0;border-radius:10px;overflow:hidden">
-        <div style="background:#059669;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">INCOME (Cr)</div>
-        <div id="pl-income-rows"></div>
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#F0FDF4;border-top:1.5px solid #BBF7D0;font-weight:700;font-size:13px">
-          <span>Total Income</span><span id="pl-income-total" style="color:#059669">₹0.00</span>
-        </div>
-      </div>
-      <!-- EXPENSES -->
-      <div style="border:1px solid #FECDD3;border-radius:10px;overflow:hidden">
-        <div style="background:#DC2626;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">EXPENSES (Dr)</div>
-        <div id="pl-expense-rows"></div>
-        <div style="display:flex;justify-content:space-between;padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
-          <button onclick="addExpense()" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Expense</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#FFF1F2;border-top:1.5px solid #FECDD3;font-weight:700;font-size:13px">
-          <span>Total Expenses</span><span id="pl-expense-total" style="color:#DC2626">₹0.00</span>
-        </div>
-      </div>
-    </div>
-    <!-- NET PROFIT -->
-    <div id="pl-net-box" style="margin-top:14px;padding:14px 20px;background:#F0FDF4;border:2px solid #059669;border-radius:10px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#065F46;margin-bottom:3px">NET PROFIT / LOSS</div>
-        <div style="font-size:11px;color:#065F46">Income − Expenses</div>
-      </div>
-      <span id="pl-net" style="font-size:22px;font-weight:900;color:#059669">₹0.00</span>
-    </div>
-  </div>
-
-<div id="fsec-bs" style="display:none;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-size:14px;font-weight:700">⚖️ Balance Sheet</div>
-      <button class="tb" onclick="printBS()" style="font-size:11px"><i class="ti ti-printer"></i> Print</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <!-- LIABILITIES -->
-      <div style="border:1px solid #BFDBFE;border-radius:10px;overflow:hidden">
-        <div style="background:#185FA5;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">LIABILITIES (Cr)</div>
-        <div id="bs-liab-rows"></div>
-        <div style="padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
-          <button onclick="addBSEntry('liab')" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Liability</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#EFF6FF;border-top:1.5px solid #BFDBFE;font-weight:700;font-size:13px">
-          <span>Total Liabilities</span><span id="bs-liab-total" style="color:#185FA5">₹0.00</span>
-        </div>
-      </div>
-      <!-- ASSETS -->
-      <div style="border:1px solid #E9D5FF;border-radius:10px;overflow:hidden">
-        <div style="background:#7C3AED;color:#fff;padding:10px 14px;font-size:12px;font-weight:700">ASSETS (Dr)</div>
-        <div id="bs-asset-rows"></div>
-        <div style="padding:9px 14px;background:var(--sl);border-top:0.5px solid var(--sl2)">
-          <button onclick="addBSEntry('asset')" style="border:none;background:none;color:var(--acc);cursor:pointer;font-size:11px;font-weight:600"><i class="ti ti-plus"></i> Add Asset</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#FAF5FF;border-top:1.5px solid #E9D5FF;font-weight:700;font-size:13px">
-          <span>Total Assets</span><span id="bs-asset-total" style="color:#7C3AED">₹0.00</span>
-        </div>
-      </div>
-    </div>
-    <!-- BALANCE CHECK -->
-    <div id="bs-check-box" style="margin-top:14px;padding:12px 20px;border-radius:10px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;font-weight:700">Difference (Liabilities − Assets)</span>
-      <span id="bs-diff" style="font-size:18px;font-weight:900">₹0.00</span>
-    </div>
-  </div>
-
-<div id="fsec-ledger" style="display:none;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-size:14px;font-weight:700">📒 Chart of Accounts</div>
-      <button class="bp" onclick="addLedgerAccount()" style="font-size:11px"><i class="ti ti-plus"></i> New Account</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="ledger-account-grid"></div>
-  </div>
-
-
-
-</div><!-- end page-finance -->
-
-<div class="page" id="page-settings" style="padding:0;background:#F1F5F9;height:100%">
-
-<div class="page-inner" style="display:flex;height:100%;min-height:0;overflow:hidden">
+<div style="display:flex;height:calc(100vh - 72px)">
 
   <!-- LEFT SIDEBAR -->
-  <div style="width:200px;min-width:200px;background:#1e293b;display:flex;flex-direction:column;border-right:1px solid #0f172a;height:100%">
-<div style="padding:12px 14px 8px;font-size:9px;font-weight:800;color:#475569;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid #334155">SETTINGS</div>
-<div id="sp-nav" style="flex:1;overflow-y:auto;padding:4px 0">
-<button onclick="spTab('clinic')" id="spt-clinic" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-building-hospital" style="font-size:14px;width:16px;flex-shrink:0"></i>Clinic Info</button>
-<button onclick="spTab('users')" id="spt-users" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-users" style="font-size:14px;width:16px;flex-shrink:0"></i>User Accounts</button>
-<button onclick="spTab('services')" id="spt-services" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-stethoscope" style="font-size:14px;width:16px;flex-shrink:0"></i>Services / Lab</button>
-<button onclick="spTab('vendors')" id="spt-vendors" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-truck-delivery" style="font-size:14px;width:16px;flex-shrink:0"></i>Vendors</button>
-<button onclick="spTab('appearance')" id="spt-appearance" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-palette" style="font-size:14px;width:16px;flex-shrink:0"></i>Appearance</button>
-<button onclick="spTab('rxtpl')" id="spt-rxtpl" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-notebook" style="font-size:14px;width:16px;flex-shrink:0"></i>Rx Templates</button>
-<button onclick="spTab('backup')" id="spt-backup" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-database" style="font-size:14px;width:16px;flex-shrink:0"></i>Backup / Export</button>
-<hr style="border:none;border-top:1px solid #334155;margin:6px 0">
-<p style="padding:2px 14px 4px;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1px;margin:0">App Controls</p>
-<button onclick="spTab('billing')" id="spt-billing" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-receipt-2" style="font-size:14px;width:16px;flex-shrink:0"></i>Billing</button>
-<button onclick="spTab('rxset')" id="spt-rxset" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-pill" style="font-size:14px;width:16px;flex-shrink:0"></i>Rx Settings</button>
-<button onclick="spTab('phset')" id="spt-phset" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-building-store" style="font-size:14px;width:16px;flex-shrink:0"></i>Pharmacy / Stock</button>
-<button onclick="spTab('access')" id="spt-access" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-shield-lock" style="font-size:14px;width:16px;flex-shrink:0"></i>Access Control</button>
-<button onclick="spTab('datactl')" id="spt-datactl" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 14px;border:none;border-radius:0;background:none;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:left;white-space:nowrap"><i class="ti ti-settings" style="font-size:14px;width:16px;flex-shrink:0"></i>Data Controls</button>
-</div>
-</div>
+  <div style="width:200px;flex-shrink:0;background:#1e293b;height:100%;display:flex;flex-direction:column">
+    <div style="padding:16px 16px 8px;font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid #334155">SETTINGS</div>
+    <div id="sp-nav" style="flex:1;padding:10px 0">
+      <button onclick="spTab('clinic')"     id="spt-clinic"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:#3b82f6;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-align:left"><i class="ti ti-building-hospital" style="font-size:16px;flex-shrink:0;width:18px"></i>Clinic Info</button>
+      <button onclick="spTab('users')"      id="spt-users"      style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-users" style="font-size:16px;flex-shrink:0;width:18px"></i>User Accounts</button>
+      <button onclick="spTab('services')"   id="spt-services"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-activity" style="font-size:16px;flex-shrink:0;width:18px"></i>Services / Lab</button>
+      <button onclick="spTab('vendors')"    id="spt-vendors"    style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-truck" style="font-size:16px;flex-shrink:0;width:18px"></i>Vendors</button>
+      <button onclick="spTab('appearance')" id="spt-appearance" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-palette" style="font-size:16px;flex-shrink:0;width:18px"></i>Appearance</button>
+      <button onclick="spTab('rxtpl')" id="spt-rxtpl"
+        style="display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;border-radius:9px;background:none;color:#94a3b8;font-size:12.5px;cursor:pointer;text-align:left;margin-bottom:2px">
+        <div style="width:26px;height:26px;background:#1e293b;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-template" style="font-size:14px"></i></div>
+        <div><div style="font-size:12.5px">Rx Templates</div><div style="font-size:9px;opacity:.7">Custom prescriptions</div></div>
+      </button>
+
+      <button onclick="spTab('backup')"     id="spt-backup"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-database" style="font-size:16px;flex-shrink:0;width:18px"></i>Backup / Export</button>
+      <button onclick="spTab('billing')"   id="spt-billing"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-receipt-2" style="font-size:16px;flex-shrink:0;width:18px"></i>Billing</button>
+      <button onclick="spTab('rxset')"     id="spt-rxset"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-prescription" style="font-size:16px;flex-shrink:0;width:18px"></i>Rx Settings</button>
+      <button onclick="spTab('phset')"     id="spt-phset"     style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-pill" style="font-size:16px;flex-shrink:0;width:18px"></i>Pharmacy/Stock</button>
+      <button onclick="spTab('access')"    id="spt-access"    style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-shield-lock" style="font-size:16px;flex-shrink:0;width:18px"></i>Access Control</button>
+      <button onclick="spTab('datactl')"   id="spt-datactl"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-database-cog" style="font-size:16px;flex-shrink:0;width:18px"></i>Data Controls</button>
+    </div>
+  </div>
 
   <!-- RIGHT CONTENT -->
   <div style="flex:1;overflow-y:auto;background:#fff">
@@ -1256,7 +1148,7 @@ html,body{height:100%;overflow:hidden}
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Doctor Name <span style="color:#ef4444">*</span></label>
-          <input class="fin" id="set-dname" placeholder="Dr. Name" style="width:100%">
+          <input class="fin" id="set-dname" placeholder="Dr. Rajan Kumar" style="width:100%">
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">Qualification</label>
@@ -1769,7 +1661,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <!-- BILLING SETTINGS -->
-<div id="spc-billing" style="display:none;padding:24px;max-width:680px">
+<div id="sp-billing" class="sp" style="display:none;padding:24px;max-width:680px">
   <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4B0; Billing Controls</h2>
   <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Default values for new invoices and Rx.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -1793,7 +1685,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
 <!-- RX SETTINGS -->
-<div id="spc-rxset" style="display:none;padding:24px;max-width:680px">
+<div id="sp-rxset" class="sp" style="display:none;padding:24px;max-width:680px">
   <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F48A; Rx / Prescription</h2>
   <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Prescription defaults and PDF output controls.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -1823,7 +1715,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
 <!-- PHARMACY SETTINGS -->
-<div id="spc-phset" style="display:none;padding:24px;max-width:680px">
+<div id="sp-phset" class="sp" style="display:none;padding:24px;max-width:680px">
   <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F3EA; Pharmacy / Stock</h2>
   <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Stock alerts and default pricing.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -1845,7 +1737,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
 <!-- ACCESS CONTROL -->
-<div id="spc-access" style="display:none;padding:24px;max-width:720px">
+<div id="sp-access" class="sp" style="display:none;padding:24px;max-width:720px">
   <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F510; Access Control</h2>
   <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Which pages each role can access. Takes effect on next login.</p>
   <div style="overflow-x:auto">
@@ -1868,7 +1760,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
 <!-- DATA CONTROLS -->
-<div id="spc-datactl" style="display:none;padding:24px;max-width:680px">
+<div id="sp-datactl" class="sp" style="display:none;padding:24px;max-width:680px">
   <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4BE; Data Controls</h2>
   <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Sync, timeout and display settings.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -2286,7 +2178,7 @@ html,body{height:100%;overflow:hidden}
     <button class="mob-menu-item" onclick="nav('lab');toggleMobMenu()"><i class="ti ti-microscope"></i>Laboratory</button>
     <button class="mob-menu-item" onclick="nav('vendor');toggleMobMenu()"><i class="ti ti-truck"></i>Vendor</button>
     <button class="mob-menu-item" onclick="nav('finance');toggleMobMenu()"><i class="ti ti-cash"></i>Finance</button>
-    
+    <button class="mob-menu-item" onclick="nav('settings');toggleMobMenu()"><i class="ti ti-settings"></i>Setup</button>
     <div style="border-top:0.5px solid #E5E7EB;margin:4px 0"></div>
     <button class="mob-menu-item" onclick="toggleMobMenu()" style="color:#A32D2D">
       <i class="ti ti-x" style="color:#A32D2D;font-size:20px;width:24px"></i>Close Menu
@@ -2296,39 +2188,6 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2400,23 +2259,6 @@ window.sepEl=sepEl;
 // ═══ USERS ════════════════════════════════════════════════
 
 // ═══ DEFAULT USERS (overridden by database/localStorage) ══
-// Clear stale user cache if settings page not in pages list
-(function(){
-  try{
-    var raw=localStorage.getItem('cp_users_v1');
-    if(raw){
-      var u=JSON.parse(raw);
-      var needsUpdate=false;
-      Object.values(u).forEach(function(usr){
-        if(usr.pages&&usr.pages.indexOf('settings')===-1){
-          usr.pages.push('settings');needsUpdate=true;
-        }
-      });
-      if(needsUpdate)localStorage.setItem('cp_users_v1',JSON.stringify(u));
-    }
-  }catch(e){localStorage.removeItem('cp_users_v1');}
-})();
-
 var CP_USERS_DEFAULT={
   'admin':        {pass:'2024admin',        name:'Admin',         role:'Admin',
     pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
@@ -2561,22 +2403,13 @@ window.unlockApp=unlockApp;
 
 function cpApplyAccess(user){
   var allPages=['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings'];
-  // Always ensure settings is accessible
   var allowed=user.pages||allPages;
-  if(user.role==='Admin'&&allowed.indexOf('settings')===-1)allowed.push('settings');
-  // Clear any stale data-blocked on settings
-  var _spg=document.getElementById('page-settings');
-  if(_spg)_spg.removeAttribute('data-blocked');
-
   allPages.forEach(function(p){
     var show=allowed.indexOf(p)!==-1;
     var nl=document.getElementById('nl-'+p);  if(nl)nl.style.display=show?'':'none';
     var nv=document.getElementById('nav-'+p); if(nv)nv.style.display=show?'':'none';
     var pg=document.getElementById('page-'+p);
-    if(pg){
-      if(show||p==='settings')pg.removeAttribute('data-blocked');
-      else pg.setAttribute('data-blocked','1');
-    }
+    if(pg){if(show)pg.removeAttribute('data-blocked');else pg.setAttribute('data-blocked','1');}
   });
   var ut=document.getElementById('spt-users');
   if(ut)ut.style.display=(user.role==='Admin')?'':'none';
@@ -2605,7 +2438,6 @@ function cpSaveData(){
   // Save to localStorage as backup
   try{
     localStorage.setItem('clinicpro_v1',JSON.stringify({
-      CLINIC_SETTINGS:window.CLINIC_SETTINGS||{},
       PAT_DB:window.PAT_DB||[],
       _apptData:window._apptData||[],
       BILLING_DB:window.BILLING_DB||[],
@@ -2733,7 +2565,16 @@ window.addEventListener('beforeunload',function(){if(window.CURRENT_USER)cpSaveD
 
 if(!window._svcList||!window._svcList.length){
   // Always include Consultancy Fee as first item
-  if(!window._svcList)window._svcList=[]
+  window._svcList=[
+    {name:'Consultancy Fee',price:150,disc:0},
+    {name:'CBC Blood Test',price:300,disc:0},{name:'Urine Routine',price:150,disc:0},
+    {name:'Blood Sugar (Fasting)',price:80,disc:0},{name:'Blood Sugar (PP)',price:80,disc:0},
+    {name:'Lipid Profile',price:400,disc:0},{name:'Thyroid (TSH)',price:350,disc:0},
+    {name:'ECG',price:200,disc:0},{name:'X-Ray Chest',price:300,disc:0},{name:'USG Abdomen',price:500,disc:0},
+    {name:'Physiotherapy Session',price:400,disc:0},{name:'Dressing',price:150,disc:0},
+    {name:'Injection Administration',price:100,disc:0},{name:'BP Check',price:50,disc:0},
+    {name:'Eye Test',price:200,disc:0}
+  ];
 }
 var DB=[]
 
@@ -2741,7 +2582,7 @@ window.INV_DB=DB; // expose inventory for H1 report
 
 var _apptData = [];
 
-if(!window.BILLING_DB)window.BILLING_DB=[]
+window.BILLING_DB=[];
 let _nextId=1,_editId=null, _csvRows = [], _vendorRows = [];
 let _rc, _dc, _pc, _mc;
 
@@ -2750,7 +2591,7 @@ const PAGES = ['dashboard','appointments','rx','pharmacy','inventory','vendor','
 function nav(p) {
   window._currentPage=p;
   var _pg=document.getElementById('page-'+p);
-  if(_pg&&_pg.getAttribute('data-blocked')==='1'&&p!=='settings'){
+  if(_pg&&_pg.getAttribute('data-blocked')==='1'){
     if(window.CURRENT_USER&&typeof toast==='function')toast('Access denied','error');
     return;
   }
@@ -2789,20 +2630,7 @@ function nav(p) {
     setTimeout(function(){if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();},200);
   }
   if (p === 'settings') {
-    // Force settings page layout via JS — CSS specificity bypass
-    var _sp=document.getElementById('page-settings');
-    if(_sp){
-      _sp.style.cssText='display:flex !important;flex-direction:row !important;'
-        +'height:calc(100vh - 72px) !important;padding:0 !important;'
-        +'overflow:hidden !important;background:#F1F5F9';
-    }
-    var _pi=_sp?_sp.querySelector('.page-inner'):null;
-    if(_pi)_pi.style.cssText='display:flex;flex-direction:row;height:100%;width:100%;overflow:hidden';
-    var _sn=document.getElementById('sp-nav');
-    if(_sn)_sn.style.cssText='display:flex !important;flex-direction:column !important;'
-      +'width:200px !important;min-width:200px !important;'
-      +'overflow-y:auto !important;height:100% !important;'
-      +'background:#1e293b !important;padding:4px 0';
+    // Load saved clinic settings into fields
     setTimeout(function(){
       var CS=window.CLINIC_SETTINGS||{};
       var map={cname:'name',dname:'doctor',qual:'qual',reg:'reg',phone:'phone',email:'email',address:'address',city:'city',lic:'lic',pin:'pin',tagline:'tagline',footer:'footer'};
@@ -2810,12 +2638,8 @@ function nav(p) {
         var el=document.getElementById('set-'+fid);
         if(el&&CS[map[fid]])el.value=CS[map[fid]];
       });
-      if(typeof loadBillingSettings==='function')loadBillingSettings();
-      if(typeof loadRxSettings==='function')loadRxSettings();
-      if(typeof loadPharmacySettings==='function')loadPharmacySettings();
-      if(typeof loadDataSettings==='function')loadDataSettings();
       spTab('clinic');
-    },50);
+    },30);
   }
 }
 
@@ -2925,7 +2749,7 @@ function submitAddPatient() {
     '</div></td>';
 
   // Push to PAT_DB for autocomplete
-  if(!window.PAT_DB)if(!window.PAT_DB)if(!window.PAT_DB)if(!window.PAT_DB)window.PAT_DB=[]
+  if(!window.PAT_DB)window.PAT_DB=[];
   var _np={id:code,name:name.trim(),age:age,gender:gen,mob:mobile,city:city,blood:'',status:'Active'};
   window.PAT_DB.unshift(_np);
   if(typeof dbSavePatient==='function')dbSavePatient({id:code,name:name.trim(),age:age,gender:gen,mobile:mobile,city:city,blood:'',status:'Active'});
@@ -2971,9 +2795,19 @@ function parseCSV(fileOrInput) {
   rd.readAsText(file);
   if (fileOrInput.value !== undefined) fileOrInput.value = '';
 }
-function loadSampleCSV(){
-  _csvRows=[];
-  renderCSVPreview();
+function loadSampleCSV() {
+  _csvRows = [
+    {'Full Name':'Kavita Devi','Age':'45','Gender':'Female','Mobile':'99001-12345','City':'Ludhiana'},
+    {'Full Name':'Harbhajan Singh','Age':'62','Gender':'Male','Mobile':'88002-23456','City':'Amritsar'},
+    {'Full Name':'Sneha Patel','Age':'31','Gender':'Female','Mobile':'77003-34567','City':'Chandigarh'},
+  ];
+  const keys = Object.keys(_csvRows[0]);
+  document.getElementById('csv-thead').innerHTML = '<tr>' + keys.map(k => `<th>${k}</th>`).join('') + '</tr>';
+  document.getElementById('csv-tbody').innerHTML = _csvRows.map(r => '<tr>' + keys.map(k => `<td>${r[k]||'—'}</td>`).join('') + '</tr>').join('');
+  document.getElementById('csv-count').textContent = _csvRows.length;
+  document.getElementById('csv-preview').style.display = 'block';
+  const btn = document.getElementById('csv-import-btn'); btn.disabled = false; btn.style.opacity = '1';
+  toast('Sample data loaded — 3 patients', 'info');
 }
 function importCSV() {
   if (!_csvRows.length) { toast('No data to import', 'error'); return; }
@@ -3072,7 +2906,11 @@ function showInvoice(inv, pat, amt) {
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px">
       <thead><tr style="background:var(--sl)"><th style="padding:6px 10px;text-align:left;font-size:9.5px;color:var(--ink3)">ITEM</th><th style="padding:6px 10px;text-align:right;font-size:9.5px;color:var(--ink3)">QTY</th><th style="padding:6px 10px;text-align:right;font-size:9.5px;color:var(--ink3)">AMT</th></tr></thead>
-      <tbody></tbody>
+      <tbody>
+        <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(0,0,0,.05)">AMPICILLIN 500 MG</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05)">30</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05);font-weight:600">₹144</td></tr>
+        <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(0,0,0,.05)">CARDIO-F TABLETS</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05)">60</td><td style="padding:7px 10px;text-align:right;border-bottom:1px solid rgba(0,0,0,.05);font-weight:600">₹720</td></tr>
+        <tr><td style="padding:7px 10px">Consultation Fee</td><td style="padding:7px 10px;text-align:right">1</td><td style="padding:7px 10px;text-align:right;font-weight:600">₹500</td></tr>
+      </tbody>
     </table>
     <div style="border-top:2px solid var(--ink);padding-top:8px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:12px"><span>Total</span><span>${amt}</span></div>
     <div style="background:var(--m);border-radius:7px;padding:9px;text-align:center;font-size:12px;font-weight:600;color:var(--m4);margin-bottom:12px">✓ PAID — Cash</div>
@@ -3311,7 +3149,7 @@ function submitAddItem(){
     status:qty>0?'In Stock':'Out of Stock'
   };
   if(typeof DB!=='undefined')DB.unshift(newItem);
-  if(!window.INV_DB)if(!window.INV_DB)window.INV_DB=[]
+  if(!window.INV_DB)window.INV_DB=[];
   window.INV_DB.unshift(newItem);
   if(typeof syncInvDB==='function')syncInvDB();
   if(typeof renderInventory==='function')renderInventory();
@@ -3603,8 +3441,12 @@ function clearVdImg(){
 }
 
 function loadVendorSample(){
-  // No sample data — add your own vendor items
-  fillVendorTable([],'');
+  var sample=[
+    {name:'TAB AMPICILLIN 500MG',company:'Ranbaxy',desc:'Tablet',batch:'B2401',expiry:'06/27',qty:'100',rate:'3.20',sale:'4.80'},
+    {name:'CAP OMEPRAZOLE 20MG',company:'Cipla',desc:'Capsule',batch:'OM2405',expiry:'09/27',qty:'120',rate:'3.80',sale:'5.50'},
+    {name:'SYR AMOXICILLIN 250MG',company:'GSK',desc:'Syrup',batch:'AM241',expiry:'06/27',qty:'30',rate:'45.00',sale:'65.00'},
+  ];
+  fillVendorTable(sample,'Sample Data');
 }
 
 // ── VENDOR REVIEW TABLE ──────────────────────────────────────
@@ -4854,7 +4696,7 @@ function downloadInvoicePDF(id){
   var CS=window.CLINIC_SETTINGS||{};
   var cName=CS.name||'Sach Medicose';
   var cDoctor=CS.doctor||'Dr. Cadium Healthcare';
-  var cQual=CS.qual||'';
+  var cQual=CS.qual||'MBBS, MD';
   var cReg=CS.reg||'MCI-12345';
   var cPhone=CS.phone||'98765-00000';
   var cCity=CS.city||'Barnala, Punjab';
@@ -6078,7 +5920,7 @@ function routeToLab(inv){
     return (typeof s==='object'?s.name:s)||'';
   }).filter(function(n){return n&&!skip.test(n);});
   if(!tests.length)return;
-  if(!window.LAB_DB)if(!window.LAB_DB)window.LAB_DB=[]
+  if(!window.LAB_DB)window.LAB_DB=[];
   if(window.LAB_DB.some(function(x){return x.invId===inv.id;}))return;
   var id='LAB-'+String(window.LAB_DB.length+1).padStart(3,'0');
   window.LAB_DB.push({
@@ -8100,8 +7942,8 @@ function reuseRx(rx){
 function viewSavedRx(rx){
   var CS=window.CLINIC_SETTINGS||{};
   var cName=CS.name||'Cadium Healthcare';
-  var cDoc=CS.doctor||'';
-  var cQual=CS.qual||'';
+  var cDoc=CS.doctor||'Dr. Rajan Kumar';
+  var cQual=CS.qual||'MBBS, MD';
   var cReg=CS.reg||'MCI-12345';
   var cPhone=CS.phone||'98765-00000';
   var cCity=CS.city||'Barnala, Punjab';
@@ -8511,10 +8353,7 @@ function spTab(name){
         if(icon&&!iconBox)icon.style.color=on?'#fff':'#94a3b8';
       }catch(e){}
     }
-    if(panel){
-      panel.style.cssText=panel.style.cssText.replace(/display:[^;]+;?/g,'');
-      panel.style.display=on?'block':'none';
-    }
+    if(panel)panel.style.display=on?'block':'none';
   });
   // Tab-specific init
   if(name==='services'&&typeof renderSetupServices==='function')renderSetupServices();
@@ -9103,7 +8942,67 @@ function fmt2(v){return v>0?('\u20b9'+v.toLocaleString('en-IN',{minimumFractionD
 
 if(!window.BILLING_DB||!window.BILLING_DB.length){
   var _td=new Date().toISOString().slice(0,10);
-  if(!window.BILLING_DB)window.BILLING_DB=[]
+  window.BILLING_DB=[
+    {id:'INV-001',date:_td,patient:'Rajan Kumar',    paymode:'Cash', status:'Paid',   paid:850,  amount:850,
+     meds:[{name:'Paracetamol',qty:2,sale:50,disc:0,amt:100},{name:'Amoxicillin',qty:1,sale:250,disc:0,amt:250},{name:'Pantoprazole',qty:1,sale:120,disc:0,amt:120}],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-002',date:_td,patient:'Sunita Devi',    paymode:'Cash', status:'Paid',   paid:300,  amount:300,
+     meds:[],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-003',date:_td,patient:'Harjinder Singh',paymode:'UPI',  status:'Partial',paid:1000, amount:1200,
+     meds:[{name:'Azithromycin',qty:1,sale:400,disc:0,amt:400},{name:'Pantoprazole',qty:2,sale:100,disc:0,amt:200}],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300},{name:'CBC Blood Test',price:300,disc:0,net:300}]},
+
+    {id:'INV-004',date:_td,patient:'Priya Sharma',   paymode:'Cash', status:'Paid',   paid:350,  amount:350,
+     meds:[],
+     svcs:[{name:'CBC Blood Test',price:200,disc:0,net:200},{name:'Blood Sugar',price:150,disc:0,net:150}]},
+
+    {id:'INV-005',date:_td,patient:'Gurpreet Kaur',  paymode:'',     status:'Pending',paid:0,    amount:300,
+     meds:[],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-006',date:_td,patient:'Mohit Verma',    paymode:'Cash', status:'Paid',   paid:650,  amount:650,
+     meds:[{name:'Metformin',qty:3,sale:80,disc:0,amt:240},{name:'Vitamin D',qty:1,sale:200,disc:0,amt:200}],
+     svcs:[{name:'Consultation Fee',price:210,disc:0,net:210}]},
+
+    {id:'INV-007',date:_td,patient:'Anjali Singh',   paymode:'Card', status:'Paid',   paid:500,  amount:500,
+     meds:[],
+     svcs:[{name:'Thyroid TSH',price:350,disc:0,net:350},{name:'Blood Sugar Fasting',price:150,disc:0,net:150}]},
+
+    {id:'INV-008',date:_td,patient:'Sukhdev Rao',    paymode:'Cash', status:'Paid',   paid:400,  amount:400,
+     meds:[],
+     svcs:[{name:'Physiotherapy Session',price:400,disc:0,net:400}]},
+
+    {id:'INV-009',date:_td,patient:'Kavita Mehta',   paymode:'UPI',  status:'Paid',   paid:980,  amount:980,
+     meds:[{name:'Cetirizine',qty:2,sale:40,disc:0,amt:80},{name:'Montelukast',qty:2,sale:120,disc:0,amt:240}],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300},{name:'CBC Blood Test',price:360,disc:10,net:324}]},
+
+    {id:'INV-010',date:_td,patient:'Balwinder Singh',paymode:'Cash', status:'Paid',   paid:300,  amount:300,
+     meds:[],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-011',date:_td,patient:'Neha Gupta',     paymode:'',     status:'Pending',paid:0,    amount:200,
+     meds:[],
+     svcs:[{name:'Urine Routine',price:200,disc:0,net:200}]},
+
+    {id:'INV-012',date:_td,patient:'Ramesh Kumar',   paymode:'Cash', status:'Paid',   paid:760,  amount:760,
+     meds:[{name:'Atorvastatin',qty:1,sale:180,disc:0,amt:180},{name:'Telmisartan',qty:2,sale:140,disc:0,amt:280}],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-013',date:_td,patient:'Deepika Arora',  paymode:'UPI',  status:'Paid',   paid:400,  amount:400,
+     meds:[],
+     svcs:[{name:'Physiotherapy Session',price:400,disc:0,net:400}]},
+
+    {id:'INV-014',date:_td,patient:'Vikram Joshi',   paymode:'Cash', status:'Paid',   paid:300,  amount:300,
+     meds:[],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]},
+
+    {id:'INV-015',date:_td,patient:'Manpreet Kaur',  paymode:'Card', status:'Partial',paid:800,  amount:1100,
+     meds:[{name:'Insulin Glargine',qty:1,sale:800,disc:0,amt:800}],
+     svcs:[{name:'Consultation Fee',price:300,disc:0,net:300}]}
+  ];
 }
 
 function showSvcSaved(){
@@ -11543,10 +11442,6 @@ function cpLoadData(){
     if(resp.rx_saved&&resp.rx_saved.length)   window._rxSaved=resp.rx_saved;
     if(resp.rx_templates&&resp.rx_templates.length) window.MY_RX_TEMPLATES=resp.rx_templates;
 
-    // Restore CLINIC_SETTINGS from server store
-    if(resp.clinic_settings){
-      try{window.CLINIC_SETTINGS=JSON.parse(resp.clinic_settings);}catch(ex){}
-    }
     // Render current visible page
     setTimeout(function(){cpRenderCurrentPage();},300);
     if(el){el.textContent='\u2022 Live '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
@@ -11563,7 +11458,6 @@ function cpLoadData(){
         try{if(typeof DB!=='undefined'){DB.length=0;snap.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
       }
       if(snap._rxSaved)   window._rxSaved=snap._rxSaved;
-      if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
       setTimeout(function(){cpRenderCurrentPage();},300);
     }catch(ex2){}
     if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
@@ -12388,7 +12282,14 @@ function billPatPick(name){
     var mob=document.getElementById('bill-mob');if(mob&&pat.mob)mob.value=pat.mob;
   }
 }
-// bill-patient uses patAutoInput - no separate search function needed
+window.billPatSearch=billPatSearch;
+window.billPatPick=billPatPick;
+// Close dropdown on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest||(!e.target.closest('#bill-pat-drop')&&e.target.id!=='bill-patient')){
+    var d=document.getElementById('bill-pat-drop');if(d)d.style.display='none';
+  }
+});
 
 
 function fmtDate(dateStr){
@@ -12416,6 +12317,7 @@ window.fmtDate=fmtDate;
 
 
 
+window.phDateLabel=phDateLabel;
 
 
 function billFillPatient(pat){
@@ -12615,542 +12517,6 @@ function phSetDateLbl(inputId, lblId){
 }
 window.phSetDateLbl=phSetDateLbl;
 window.phSetDateLbl=phSetDateLbl;
-
-
-
-
-
-
-
-
-
-// ── Finance Tab System ─────────────────────────────────────────
-function finTab(name){
-  var tabs=['revenue','pl','bs','ledger','purchase'];
-  tabs.forEach(function(t){
-    var btn=document.getElementById('ftab-'+t);
-    if(btn){
-      if(t===name){
-        btn.style.borderBottomColor='#1A3A8C';
-        btn.style.color='#1A3A8C';
-        btn.style.fontWeight='700';
-      } else {
-        btn.style.borderBottomColor='transparent';
-        btn.style.color='var(--ink3)';
-        btn.style.fontWeight='600';
-      }
-    }
-    var sec=document.getElementById('fsec-'+t);
-    if(sec)sec.style.display=t===name?'':'none';
-  });
-  if(name==='pl')renderPL();
-  if(name==='bs')renderBS();
-  if(name==='ledger')renderLedgerAccounts();
-}
-window.finTab=finTab;
-
-// ── P&L Render ────────────────────────────────────────────────
-function renderPL(){
-  var CS=window.CLINIC_SETTINGS||{};
-  var DB=window.BILLING_DB||[];
-
-  // Auto-calculate income from billing
-  var income={};
-  DB.forEach(function(inv){
-    // Services
-    (inv.svcs||[]).forEach(function(s){
-      var name=s.name||'Service';
-      if(!income[name])income[name]=0;
-      income[name]+=(s.net||s.price||0);
-    });
-    // Medicine sales
-    var medAmt=parseFloat(inv.medTotal||0);
-    if(medAmt>0){
-      if(!income['Medicine Sales'])income['Medicine Sales']=0;
-      income['Medicine Sales']+=medAmt;
-    }
-  });
-
-  var totalIncome=Object.values(income).reduce(function(a,b){return a+b;},0);
-
-  // Render income rows
-  var incomeEl=document.getElementById('pl-income-rows');
-  if(incomeEl){
-    var html='';
-    Object.keys(income).forEach(function(k){
-      var v=income[k];
-      html+='<div style="display:flex;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
-        +'<span style="color:var(--ink2)">'+k+'</span>'
-        +'<span style="font-weight:600;color:#059669">₹'+v.toFixed(2)+'</span></div>';
-    });
-    if(!html)html='<div style="padding:16px 14px;color:var(--ink3);font-size:11px;text-align:center">No billing data — add invoices from Rx or Pharmacy</div>';
-    incomeEl.innerHTML=html;
-  }
-
-  // Render expense rows from CLINIC_SETTINGS.expenses
-  var expenses=CS.expenses||[];
-  var totalExpense=expenses.reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
-  var expEl=document.getElementById('pl-expense-rows');
-  if(expEl){
-    var html2='';
-    expenses.forEach(function(e,i){
-      html2+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
-        +'<div><div style="font-weight:600">'+e.name+'</div>'
-        +'<div style="font-size:10px;color:var(--ink3)">'+e.date+(e.note?' · '+e.note:'')+'</div></div>'
-        +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="font-weight:600;color:#DC2626">₹'+parseFloat(e.amount||0).toFixed(2)+'</span>'
-        +'<button onclick="deleteExpense('+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:0">×</button>'
-        +'</div></div>';
-    });
-    if(!html2)html2='<div style="padding:16px 14px;color:var(--ink3);font-size:11px;text-align:center">No expenses added — click + Add Expense</div>';
-    expEl.innerHTML=html2;
-  }
-
-  var fmt=function(n){return'₹'+Math.abs(n).toFixed(2);};
-  var incEl=document.getElementById('pl-income-total');
-  if(incEl)incEl.textContent='₹'+totalIncome.toFixed(2);
-  var exEl=document.getElementById('pl-expense-total');
-  if(exEl)exEl.textContent='₹'+totalExpense.toFixed(2);
-
-  var net=totalIncome-totalExpense;
-  var netEl=document.getElementById('pl-net');
-  if(netEl){netEl.textContent=fmt(net);netEl.style.color=net>=0?'#059669':'#DC2626';}
-  var netBox=document.getElementById('pl-net-box');
-  if(netBox){
-    netBox.style.background=net>=0?'#F0FDF4':'#FFF1F2';
-    netBox.style.borderColor=net>=0?'#059669':'#DC2626';
-    var lbl=netBox.querySelector('div>div:first-child');
-    if(lbl)lbl.style.color=net>=0?'#065F46':'#9F1239';
-  }
-}
-window.renderPL=renderPL;
-
-// ── Add Expense ───────────────────────────────────────────────
-function addExpense(){
-  var old=document.getElementById('m-expense');if(old)old.remove();
-  var ov=document.createElement('div');ov.id='m-expense';ov.className='overlay open';
-  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return d.getFullYear()+'-'+mm+'-'+dd;})();
-  ov.innerHTML='<div class="modal" style="max-width:440px">'
-    +'<div class="mh"><h2><i class="ti ti-minus-vertical" style="color:#DC2626;margin-right:6px"></i>Add Expense</h2>'
-    +'<button class="mclose" onclick="document.getElementById(\'m-expense\').remove()"><i class="ti ti-x"></i></button></div>'
-    +'<div class="mbody"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Expense Head *</div>'
-    +'<input class="fin" id="exp-name" placeholder="e.g. Staff Salary, Rent, Electricity" style="width:100%"></div>'
-    +'<div><div class="flbl" style="margin-bottom:4px">Amount ₹ *</div>'
-    +'<input class="fin" id="exp-amount" type="number" min="0" placeholder="0.00" style="width:100%"></div>'
-    +'<div><div class="flbl" style="margin-bottom:4px">Date</div>'
-    +'<input class="fin" id="exp-date" type="date" value="'+today+'" style="width:100%"></div>'
-    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Note (optional)</div>'
-    +'<input class="fin" id="exp-note" placeholder="Description..." style="width:100%"></div>'
-    +'</div></div>'
-    +'<div class="mfooter"><button class="bs" onclick="document.getElementById(\'m-expense\').remove()">Cancel</button>'
-    +'<button class="bp" onclick="saveExpense()"><i class="ti ti-check"></i> Save Expense</button></div></div>';
-  document.body.appendChild(ov);
-  setTimeout(function(){var el=document.getElementById('exp-name');if(el)el.focus();},100);
-}
-window.addExpense=addExpense;
-
-function saveExpense(){
-  var name=(document.getElementById('exp-name')||{}).value||'';
-  var amount=parseFloat((document.getElementById('exp-amount')||{}).value)||0;
-  var date=(document.getElementById('exp-date')||{}).value||'';
-  var note=(document.getElementById('exp-note')||{}).value||'';
-  if(!name){toast('Enter expense name','error');return;}
-  if(amount<=0){toast('Enter amount','error');return;}
-  // Format date
-  var d=date?new Date(date):new Date();
-  var dd=String(d.getDate()).padStart(2,'0');
-  var mm=String(d.getMonth()+1).padStart(2,'0');
-  var dateStr=dd+'-'+mm+'-'+d.getFullYear();
-  var CS=window.CLINIC_SETTINGS||{};
-  if(!CS.expenses)CS.expenses=[];
-  CS.expenses.push({name:name,amount:amount,date:dateStr,note:note});
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  var old=document.getElementById('m-expense');if(old)old.remove();
-  toast('Expense saved \u2713','success');
-  renderPL();
-}
-window.saveExpense=saveExpense;
-
-function deleteExpense(idx){
-  var CS=window.CLINIC_SETTINGS||{};
-  if(CS.expenses)CS.expenses.splice(idx,1);
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  renderPL();
-}
-window.deleteExpense=deleteExpense;
-
-// ── Balance Sheet ─────────────────────────────────────────────
-function renderBS(){
-  var CS=window.CLINIC_SETTINGS||{};
-  var liabs=CS.bsLiabilities||[];
-  var assets=CS.bsAssets||[];
-
-  // Auto-add: patient debtors from BILLING_DB
-  var debtors=(window.BILLING_DB||[]).reduce(function(a,b){return a+parseFloat(b.balanceDue||0);},0);
-  // Auto-add: net profit from P&L
-  var DB=window.BILLING_DB||[];
-  var totalIncome=0;
-  DB.forEach(function(inv){
-    totalIncome+=parseFloat(inv.grandTotal||inv.amount||0);
-  });
-  var totalExpense=(CS.expenses||[]).reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
-  var netProfit=totalIncome-totalExpense;
-
-  function renderGroup(el_id, items, color, type){
-    var el=document.getElementById(el_id);if(!el)return;
-    var html='';
-    if(type==='liab'&&netProfit!==0){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px;background:var(--sl)">'
-        +'<div><div style="font-weight:600">Net '+(netProfit>=0?'Profit':'Loss')+'</div>'
-        +'<div style="font-size:10px;color:var(--ink3)">Auto from P&amp;L</div></div>'
-        +'<span style="font-weight:600;color:'+(netProfit>=0?'#059669':'#DC2626')+'">₹'+Math.abs(netProfit).toFixed(2)+'</span></div>';
-    }
-    if(type==='asset'&&debtors>0){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px;background:var(--sl)">'
-        +'<div><div style="font-weight:600">Patient Debtors</div>'
-        +'<div style="font-size:10px;color:var(--ink3)">Auto from billing</div></div>'
-        +'<span style="font-weight:600;color:#DC2626">₹'+debtors.toFixed(2)+'</span></div>';
-    }
-    items.forEach(function(item,i){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--sl2);font-size:12px">'
-        +'<div><div style="font-weight:600">'+item.name+'</div>'
-        +(item.note?'<div style="font-size:10px;color:var(--ink3)">'+item.note+'</div>':'')+'</div>'
-        +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="font-weight:600;color:'+color+'">₹'+parseFloat(item.amount||0).toFixed(2)+'</span>'
-        +'<button onclick="deleteBSEntry(\''+type+'\','+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:0">×</button>'
-        +'</div></div>';
-    });
-    if(!html)html='<div style="padding:14px;color:var(--ink3);font-size:11px;text-align:center">Click + Add to get started</div>';
-    el.innerHTML=html;
-  }
-
-  renderGroup('bs-liab-rows',liabs,'#185FA5','liab');
-  renderGroup('bs-asset-rows',assets,'#7C3AED','asset');
-
-  var totalLiab=liabs.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+(netProfit>0?netProfit:0);
-  var totalAsset=assets.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+debtors;
-
-  var el1=document.getElementById('bs-liab-total');if(el1)el1.textContent='₹'+totalLiab.toFixed(2);
-  var el2=document.getElementById('bs-asset-total');if(el2)el2.textContent='₹'+totalAsset.toFixed(2);
-
-  var diff=totalLiab-totalAsset;
-  var diffEl=document.getElementById('bs-diff');
-  var box=document.getElementById('bs-check-box');
-  if(diffEl)diffEl.textContent=(diff===0?'✓ Balanced':'₹'+Math.abs(diff).toFixed(2));
-  if(diffEl)diffEl.style.color=diff===0?'#059669':'#DC2626';
-  if(box)box.style.background=diff===0?'#F0FDF4':'#FFF1F2';
-}
-window.renderBS=renderBS;
-
-function addBSEntry(type){
-  var old=document.getElementById('m-bs');if(old)old.remove();
-  var label=type==='liab'?'Liability':'Asset';
-  var ov=document.createElement('div');ov.id='m-bs';ov.className='overlay open';
-  ov.innerHTML='<div class="modal" style="max-width:420px">'
-    +'<div class="mh"><h2>Add '+label+'</h2>'
-    +'<button class="mclose" onclick="document.getElementById(\'m-bs\').remove()"><i class="ti ti-x"></i></button></div>'
-    +'<div class="mbody"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +'<div style="grid-column:1/-1"><div class="flbl" style="margin-bottom:4px">Account Name *</div>'
-    +'<input class="fin" id="bs-name" placeholder="e.g. Capital, Cash in Hand, Bank..." style="width:100%"></div>'
-    +'<div><div class="flbl" style="margin-bottom:4px">Amount ₹ *</div>'
-    +'<input class="fin" id="bs-amount" type="number" min="0" style="width:100%"></div>'
-    +'<div><div class="flbl" style="margin-bottom:4px">Note</div>'
-    +'<input class="fin" id="bs-note" placeholder="Optional..." style="width:100%"></div>'
-    +'</div></div>'
-    +'<div class="mfooter"><button class="bs" onclick="document.getElementById(\'m-bs\').remove()">Cancel</button>'
-    +'<button class="bp" onclick="saveBSEntry(\''+type+'\')"><i class="ti ti-check"></i> Save</button></div></div>';
-  document.body.appendChild(ov);
-  setTimeout(function(){var el=document.getElementById('bs-name');if(el)el.focus();},100);
-}
-window.addBSEntry=addBSEntry;
-
-function saveBSEntry(type){
-  var name=(document.getElementById('bs-name')||{}).value||'';
-  var amount=parseFloat((document.getElementById('bs-amount')||{}).value)||0;
-  var note=(document.getElementById('bs-note')||{}).value||'';
-  if(!name||amount<=0){toast('Fill name and amount','error');return;}
-  var CS=window.CLINIC_SETTINGS||{};
-  var key=type==='liab'?'bsLiabilities':'bsAssets';
-  if(!CS[key])CS[key]=[];
-  CS[key].push({name:name,amount:amount,note:note});
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  var old=document.getElementById('m-bs');if(old)old.remove();
-  toast('Saved \u2713','success');
-  renderBS();
-}
-window.saveBSEntry=saveBSEntry;
-
-function deleteBSEntry(type,idx){
-  var CS=window.CLINIC_SETTINGS||{};
-  var key=type==='liab'?'bsLiabilities':'bsAssets';
-  if(CS[key])CS[key].splice(idx,1);
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  renderBS();
-}
-window.deleteBSEntry=deleteBSEntry;
-
-// ── Ledger Accounts ───────────────────────────────────────────
-var LEDGER_GROUPS=[
-  {id:'income',  label:'Income Accounts',   color:'#059669',bg:'#F0FDF4',border:'#BBF7D0',
-   defaults:['Consultation Fees','Medicine Sales','Lab Revenue','Procedure Fees','Other Income']},
-  {id:'expense', label:'Expense Accounts',  color:'#DC2626',bg:'#FFF1F2',border:'#FECDD3',
-   defaults:['Medicine Purchase','Staff Salary','Rent','Electricity','Lab Consumables','Miscellaneous']},
-  {id:'bs',      label:'Balance Sheet A/c', color:'#7C3AED',bg:'#FAF5FF',border:'#E9D5FF',
-   defaults:['Capital Account','Cash in Hand','Bank Account','Stock / Medicine','Equipment','Creditors (Vendors)']}
-];
-
-function renderLedgerAccounts(){
-  var grid=document.getElementById('ledger-account-grid');if(!grid)return;
-  var CS=window.CLINIC_SETTINGS||{};
-  var ledger=CS.ledgerAccounts||{};
-  var html='';
-  LEDGER_GROUPS.forEach(function(grp){
-    var accounts=ledger[grp.id]||grp.defaults;
-    html+='<div style="border:1px solid '+grp.border+';border-radius:10px;overflow:hidden">'
-      +'<div style="background:'+grp.color+';color:#fff;padding:9px 14px;font-size:11px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'
-      +'<span>'+grp.label+'</span>'
-      +'<button onclick="addLedgerItem(\''+grp.id+'\')" style="border:none;background:rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700">+ Add</button>'
-      +'</div>';
-    accounts.forEach(function(acc,i){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:0.5px solid '+grp.border+';font-size:11px">'
-        +'<span>'+acc+'</span>'
-        +'<button onclick="deleteLedgerItem(\''+grp.id+'\','+i+')" style="border:none;background:none;color:var(--ink3);cursor:pointer;font-size:13px">×</button>'
-        +'</div>';
-    });
-    html+='</div>';
-  });
-  grid.innerHTML=html;
-}
-window.renderLedgerAccounts=renderLedgerAccounts;
-
-function addLedgerItem(groupId){
-  var name=prompt('New account name:');
-  if(!name||!name.trim())return;
-  var CS=window.CLINIC_SETTINGS||{};
-  if(!CS.ledgerAccounts)CS.ledgerAccounts={};
-  var grp=LEDGER_GROUPS.find(function(g){return g.id===groupId;});
-  if(!CS.ledgerAccounts[groupId])CS.ledgerAccounts[groupId]=grp?grp.defaults.slice():[];
-  CS.ledgerAccounts[groupId].push(name.trim());
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  renderLedgerAccounts();
-}
-window.addLedgerItem=addLedgerItem;
-
-function deleteLedgerItem(groupId,idx){
-  var CS=window.CLINIC_SETTINGS||{};
-  if(!CS.ledgerAccounts)CS.ledgerAccounts={};
-  var grp=LEDGER_GROUPS.find(function(g){return g.id===groupId;});
-  if(!CS.ledgerAccounts[groupId])CS.ledgerAccounts[groupId]=grp?grp.defaults.slice():[];
-  CS.ledgerAccounts[groupId].splice(idx,1);
-  window.CLINIC_SETTINGS=CS;
-  if(typeof cpSaveData==='function')cpSaveData();
-  renderLedgerAccounts();
-}
-window.deleteLedgerItem=deleteLedgerItem;
-
-function addLedgerAccount(){addLedgerItem('income');}
-window.addLedgerAccount=addLedgerAccount;
-
-// ── Print P&L ─────────────────────────────────────────────────
-function printPL(){
-  var CS=window.CLINIC_SETTINGS||{};
-  var cn=CS.name||'Clinic';
-  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
-  var DB=window.BILLING_DB||[];
-  var income={};
-  DB.forEach(function(inv){
-    (inv.svcs||[]).forEach(function(s){var n=s.name||'Service';if(!income[n])income[n]=0;income[n]+=(s.net||s.price||0);});
-    var m=parseFloat(inv.medTotal||0);if(m>0){if(!income['Medicine Sales'])income['Medicine Sales']=0;income['Medicine Sales']+=m;}
-  });
-  var totalIncome=Object.values(income).reduce(function(a,b){return a+b;},0);
-  var expenses=CS.expenses||[];
-  var totalExpense=expenses.reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
-  var net=totalIncome-totalExpense;
-  var fmt=function(n){return'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-
-  var incRows=Object.keys(income).map(function(k){return'<tr><td style="padding:7px 10px">'+k+'</td><td style="padding:7px 10px;text-align:right;color:#059669">'+fmt(income[k])+'</td></tr>';}).join('');
-  var expRows=expenses.map(function(e){return'<tr><td style="padding:7px 10px">'+e.name+(e.note?' ('+e.note+')':'')+'</td><td style="padding:7px 10px;text-align:right;color:#DC2626">'+fmt(parseFloat(e.amount||0))+'</td></tr>';}).join('');
-
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>P&L - '+cn+'</title>'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px}'
-    +'table{width:100%;border-collapse:collapse}th{background:#1A3A8C;color:#fff;padding:8px 10px;font-size:10px;text-transform:uppercase}'
-    +'td{border-bottom:0.5px solid #e5e7eb}.total{font-weight:700;background:#F3F4F6}</style></head><body>'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #059669;padding-bottom:10px;margin-bottom:16px">'
-    +'<div><div style="font-size:20px;font-weight:900;color:#059669">'+cn+'</div>'
-    +'<div style="font-size:10px;color:#666">'+(CS.doctor||'')+(CS.phone?' · Ph: '+CS.phone:'')+'</div></div>'
-    +'<div style="text-align:right"><div style="font-size:14px;font-weight:700">PROFIT &amp; LOSS ACCOUNT</div>'
-    +'<div style="font-size:10px;color:#666">As on '+today+'</div></div></div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
-    +'<div><table><thead><tr><th colspan="2">INCOME (Cr)</th></tr></thead><tbody>'+incRows
-    +'<tr class="total"><td style="padding:8px 10px">Total Income</td><td style="padding:8px 10px;text-align:right;color:#059669">'+fmt(totalIncome)+'</td></tr></tbody></table></div>'
-    +'<div><table><thead><tr><th colspan="2">EXPENSES (Dr)</th></tr></thead><tbody>'+expRows
-    +'<tr class="total"><td style="padding:8px 10px">Total Expenses</td><td style="padding:8px 10px;text-align:right;color:#DC2626">'+fmt(totalExpense)+'</td></tr></tbody></table></div>'
-    +'</div><div style="margin-top:16px;padding:12px 16px;background:'+(net>=0?'#F0FDF4':'#FFF1F2')+';border:2px solid '+(net>=0?'#059669':'#DC2626')+';border-radius:8px;display:flex;justify-content:space-between">'
-    +'<div style="font-size:14px;font-weight:700">NET '+(net>=0?'PROFIT':'LOSS')+'</div>'
-    +'<div style="font-size:18px;font-weight:900;color:'+(net>=0?'#059669':'#DC2626')+'">'+fmt(Math.abs(net))+'</div></div>'
-    +'<div style="margin-top:24px;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF"><span>'+cn+'</span><span>'+today+'</span></div>'
-    +'</body></html>';
-  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
-}
-window.printPL=printPL;
-
-function printBS(){
-  var CS=window.CLINIC_SETTINGS||{};
-  var cn=CS.name||'Clinic';
-  var today=(function(){var d=new Date();var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');return dd+'-'+mm+'-'+d.getFullYear();})();
-  var liabs=CS.bsLiabilities||[];
-  var assets=CS.bsAssets||[];
-  var debtors=(window.BILLING_DB||[]).reduce(function(a,b){return a+parseFloat(b.balanceDue||0);},0);
-  var DB=window.BILLING_DB||[];
-  var ti=DB.reduce(function(a,b){return a+parseFloat(b.grandTotal||b.amount||0);},0);
-  var te=(CS.expenses||[]).reduce(function(a,e){return a+parseFloat(e.amount||0);},0);
-  var np=ti-te;
-  var fmt=function(n){return'₹'+parseFloat(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  var liabRows=(np!==0?'<tr><td style="padding:7px 10px">Net '+(np>=0?'Profit':'Loss')+'</td><td style="padding:7px 10px;text-align:right;color:'+(np>=0?'#059669':'#DC2626')+'">'+fmt(Math.abs(np))+'</td></tr>':'')
-    +liabs.map(function(l){return'<tr><td style="padding:7px 10px">'+l.name+'</td><td style="padding:7px 10px;text-align:right">'+fmt(l.amount)+'</td></tr>';}).join('');
-  var totalLiab=liabs.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+(np>0?np:0);
-  var assetRows=(debtors>0?'<tr><td style="padding:7px 10px">Patient Debtors</td><td style="padding:7px 10px;text-align:right;color:#DC2626">'+fmt(debtors)+'</td></tr>':'')
-    +assets.map(function(a){return'<tr><td style="padding:7px 10px">'+a.name+'</td><td style="padding:7px 10px;text-align:right">'+fmt(a.amount)+'</td></tr>';}).join('');
-  var totalAsset=assets.reduce(function(a,b){return a+parseFloat(b.amount||0);},0)+debtors;
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balance Sheet - '+cn+'</title>'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{padding:20px;font-size:12px}'
-    +'table{width:100%;border-collapse:collapse}th{padding:8px 10px;font-size:10px;text-transform:uppercase;color:#fff}'
-    +'td{border-bottom:0.5px solid #e5e7eb}.total{font-weight:700;background:#F3F4F6}</style></head><body>'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #185FA5;padding-bottom:10px;margin-bottom:16px">'
-    +'<div><div style="font-size:20px;font-weight:900;color:#185FA5">'+cn+'</div>'
-    +'<div style="font-size:10px;color:#666">'+(CS.doctor||'')+(CS.phone?' · Ph: '+CS.phone:'')+'</div></div>'
-    +'<div style="text-align:right"><div style="font-size:14px;font-weight:700">BALANCE SHEET</div>'
-    +'<div style="font-size:10px;color:#666">As on '+today+'</div></div></div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
-    +'<div><table><thead><tr style="background:#185FA5"><th colspan="2">LIABILITIES (Cr)</th></tr></thead><tbody>'+liabRows
-    +'<tr class="total"><td style="padding:8px 10px">Total Liabilities</td><td style="padding:8px 10px;text-align:right;color:#185FA5">'+fmt(totalLiab)+'</td></tr></tbody></table></div>'
-    +'<div><table><thead><tr style="background:#7C3AED"><th colspan="2">ASSETS (Dr)</th></tr></thead><tbody>'+assetRows
-    +'<tr class="total"><td style="padding:8px 10px">Total Assets</td><td style="padding:8px 10px;text-align:right;color:#7C3AED">'+fmt(totalAsset)+'</td></tr></tbody></table></div>'
-    +'</div><div style="margin-top:14px;padding:10px 16px;background:'+(totalLiab===totalAsset?'#F0FDF4':'#FFF1F2')+';border-radius:8px;display:flex;justify-content:space-between">'
-    +'<span style="font-weight:700">Difference</span>'
-    +'<span style="font-weight:700;color:'+(totalLiab===totalAsset?'#059669':'#DC2626')+'">'+(totalLiab===totalAsset?'✓ Balanced ₹0.00':fmt(Math.abs(totalLiab-totalAsset)))+'</span></div>'
-    +'<div style="margin-top:24px;display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF"><span>'+cn+'</span><span>'+today+'</span></div>'
-    +'</body></html>';
-  var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
-}
-window.printBS=printBS;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ── Load CLINIC_SETTINGS from localStorage on startup ─────────
-(function(){
-  try{
-    var snap=JSON.parse(localStorage.getItem('clinicpro_v1')||'{}');
-    if(snap.CLINIC_SETTINGS&&Object.keys(snap.CLINIC_SETTINGS).length>0){
-      window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
-    }
-  }catch(ex){}
-  if(!window.CLINIC_SETTINGS)window.CLINIC_SETTINGS={};
-})();
-
-// ── Sample Data ───────────────────────────────────────────────
-(function initSampleData(){
-  // Only add if empty (fresh install)
-  if(!window.PAT_DB)window.PAT_DB=[];
-  if(!window.BILLING_DB)window.BILLING_DB=[];
-  if(!window.LAB_DB)window.LAB_DB=[];
-  if(!window._apptData)window._apptData=[];
-  if(!window.INV_DB)window.INV_DB=[];
-  if(!window._svcList)window._svcList=[];
-
-  if(window.PAT_DB.length===0){
-    window.PAT_DB=[
-      {id:'P001',name:'Raman Singh',age:'45 M',mob:'98765-00001',city:'Moga',blood:'B+'},
-      {id:'P002',name:'Priya Sharma',age:'32 F',mob:'98765-00002',city:'Ludhiana',blood:'O+'},
-      {id:'P003',name:'Harbhajan Singh',age:'62 M',mob:'98765-00003',city:'Amritsar',blood:'A+'},
-      {id:'P004',name:'Sunita Devi',age:'28 F',mob:'98765-00004',city:'Moga',blood:'AB+'},
-      {id:'P005',name:'Gurpreet Kaur',age:'55 F',mob:'98765-00005',city:'Faridkot',blood:'B-'}
-    ];
-  }
-  if(window._svcList.length===0){
-    window._svcList=[
-      {name:'Consultancy Fee',price:150,cat:'fee'},
-      {name:'Follow-up',price:100,cat:'fee'},
-      {name:'CBC Blood Test',price:200,cat:'lab'},
-      {name:'Urine Routine',price:100,cat:'lab'},
-      {name:'ECG',price:250,cat:'procedure'},
-      {name:'Dressing',price:150,cat:'procedure'}
-    ];
-  }
-  if(window._apptData.length===0){
-    var today=new Date();
-    var dd=String(today.getDate()).padStart(2,'0');
-    var mm=String(today.getMonth()+1).padStart(2,'0');
-    var yyyy=today.getFullYear();
-    var todayStr=yyyy+'-'+mm+'-'+dd;
-    window._apptData=[
-      {id:'A001',name:'Raman Singh',age:'45 M',mob:'98765-00001',date:todayStr,time:'09:00',token:'T01',status:'Waiting',complaint:'Fever'},
-      {id:'A002',name:'Priya Sharma',age:'32 F',mob:'98765-00002',date:todayStr,time:'09:30',token:'T02',status:'Waiting',complaint:'BP checkup'},
-      {id:'A003',name:'Gurpreet Kaur',age:'55 F',mob:'98765-00005',date:todayStr,time:'10:00',token:'T03',status:'Done',complaint:'Diabetes follow-up'}
-    ];
-  }
-  if(window.BILLING_DB.length===0){
-    window.BILLING_DB=[
-      {id:'INV-001',patient:'Raman Singh',age:'45 M',mob:'98765-00001',
-       date:'22-07-2026',dateRaw:'2026-07-22',
-       svcs:[{name:'Consultancy Fee',net:150}],
-       meds:[{name:'Paracetamol 500mg',qty:10,rate:2,net:20}],
-       grandTotal:170,paidAmount:170,balanceDue:0,
-       paymode:'Cash',status:'Paid'},
-      {id:'INV-002',patient:'Priya Sharma',age:'32 F',mob:'98765-00002',
-       date:'24-07-2026',dateRaw:'2026-07-24',
-       svcs:[{name:'Consultancy Fee',net:150},{name:'ECG',net:250}],
-       meds:[],
-       grandTotal:400,paidAmount:300,balanceDue:100,
-       paymode:'UPI',status:'Partial'},
-      {id:'INV-003',patient:'Harbhajan Singh',age:'62 M',mob:'98765-00003',
-       date:'25-07-2026',dateRaw:'2026-07-25',
-       svcs:[{name:'Follow-up',net:100}],
-       meds:[{name:'Metformin 500mg',qty:30,rate:1.5,net:45}],
-       grandTotal:145,paidAmount:0,balanceDue:145,
-       paymode:'Cash',status:'Pending'}
-    ];
-  }
-  if(window.INV_DB.length===0){
-    window.INV_DB=[
-      {id:1,name:'Paracetamol 500mg',batch:'B001',expiry:'2027-06',qty:100,unit:'Tabs',rate:2,mrp:3,supplier:'MedCo'},
-      {id:2,name:'Metformin 500mg',batch:'B002',expiry:'2027-03',qty:60,unit:'Tabs',rate:1.5,mrp:2.5,supplier:'PharmaCo'},
-      {id:3,name:'Azithromycin 500mg',batch:'B003',expiry:'2026-12',qty:20,unit:'Tabs',rate:12,mrp:18,supplier:'MedCo'},
-      {id:4,name:'Omeprazole 20mg',batch:'B004',expiry:'2027-09',qty:50,unit:'Caps',rate:3,mrp:5,supplier:'GenPharma'}
-    ];
-    if(typeof DB!=='undefined'){DB.length=0;window.INV_DB.forEach(function(x){DB.push(x);});}
-  }
-})();
-
-
-
 
 
 
