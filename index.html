@@ -430,7 +430,7 @@ html,body{height:100%;overflow:hidden}
       <thead><tr>
         <th style="width:32px"><input type="checkbox" id="pat-check-all" onchange="patCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th>
         <th style="width:90px">ID</th><th style="width:20%">Client Name</th>
-        <th style="width:80px">Age Sex</th><th style="width:15%">City</th>
+        <th style="width:80px">Age</th><th style="width:15%">City</th>
         <th style="width:120px">Mobile</th><th style="width:18%">Actions</th>
       </tr></thead>
       <tbody id="pat-tbody">
@@ -607,7 +607,7 @@ html,body{height:100%;overflow:hidden}
   <select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:8px 12px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:13px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select>
 </div>
 <div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();if(typeof rxLoadPrevBalance==='function')rxLoadPrevBalance(this.value);"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
-      <div><div class="flbl" style="margin-bottom:3px">Age Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
+      <div><div class="flbl" style="margin-bottom:3px">Age</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
     </div>
@@ -2401,6 +2401,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2838,7 +2840,9 @@ function openModal(id){
         o.value=p.name;
         o.dataset.age=p.age||'';
         o.dataset.mob=p.mob||'';
-        o.textContent=p.name+(p.age?' — '+p.age:'')+(p.mob?' | '+p.mob:'');
+        var _ag=(p.age||'').replace(/\s*[MmFf]$/,'').trim();
+        var _sx=p.gender||((p.age||'').match(/[MmFf]$/)?p.age.trim().slice(-1).toUpperCase():'');
+        o.textContent=p.name+(_ag?' | Age:'+_ag:'')+(_sx?' '+_sx:'')+( p.mob?' | '+p.mob:'');
         bpSel.appendChild(o);
       });
     }
@@ -2914,18 +2918,21 @@ function submitAddPatient() {
   if(!tbody){toast('Patient table not found','error');return;}
   const tr = document.createElement('tr');
 
-  // Correct columns: ☐ | ID | Name | Age Sex | City | Mobile | Actions
+  // Correct columns: ☐ | ID | Name | Age | Sex | City | Mobile | Actions
+  var _sexBadge=gen==='F'||gen==='f'?'<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#FCE7F3;color:#9D174D">F</span>':(gen?'<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#DBEAFE;color:#1E40AF">M</span>':'—');
   tr.innerHTML =
     '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
-    '<td style="font-size:11.5px;color:var(--lav);font-weight:700">'+code+'</td>'+
+    '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
     '<td><b>'+name+'</b></td>'+
-    '<td>'+ageSex+'</td>'+
+    '<td style="font-size:12px">'+age+'</td>'+
+    '<td>'+_sexBadge+'</td>'+
     '<td>'+city+'</td>'+
     '<td>'+mobile+'</td>'+
     '<td><div style="display:flex;gap:4px">'+
       '<button class="tb" onclick="editPatient(\''+name+'\',\''+code+'\',\''+age+'\',\''+gen+'\',\'—\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
       '<button class="tb" onclick="openRxForPatient(\''+name+'\',\''+code+'\',\''+age+'\',\''+gen+'\',\''+mobile+'\',\'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
       '<button class="tb" onclick="bookApptDirect(\''+name+'\',\''+code+'\',\''+age+'\',\''+gen+'\',\''+mobile+'\',\'\')" style="font-size:11px"><i class="ti ti-calendar-event"></i>Appt</button>'+
+    '<button class="tb" onclick="openInvoiceForPatient(\''+name+'\',\''+age+' '+gen+'\',\''+mobile+'\')" style="font-size:11px;background:#FAF5FF;color:#7C3AED;border-color:#7C3AED"><i class="ti ti-receipt"></i>Invoice</button>'+
     '</div></td>';
 
   // Push to PAT_DB for autocomplete
@@ -13483,7 +13490,9 @@ function bgPopulatePatients(){
     while(el.options.length>(el===sel?1:0))el.remove(el===sel?1:0);
     pats.forEach(function(p){
       var o=document.createElement('option');
-      o.value=p.name;o.textContent=p.name+(p.age?' — '+p.age:'')+(p.mob?' | '+p.mob:'');
+      var _ag2=(p.age||'').replace(/\s*[MmFf]$/,'').trim();
+      var _sx2=p.gender||((p.age||'').match(/[MmFf]$/)?p.age.trim().slice(-1).toUpperCase():'');
+      o.value=p.name;o.textContent=p.name+(_ag2?' | Age:'+_ag2:'')+(_sx2?' '+_sx2:'')+( p.mob?' | '+p.mob:'');
       el.appendChild(o);
     });
     if(cur)el.value=cur;
@@ -13510,6 +13519,24 @@ window.billSelectPatient=billSelectPatient;
 
 
 
+
+
+
+function openInvoiceForPatient(name,age,mob){
+  openModal('m-invoice');
+  setTimeout(function(){
+    var pSel=document.getElementById('bill-patient-sel');
+    if(pSel){
+      for(var i=0;i<pSel.options.length;i++){
+        if(pSel.options[i].value===name){pSel.selectedIndex=i;billSelectPatient(pSel);break;}
+      }
+    }
+    var p=document.getElementById('bill-patient');if(p&&!p.value)p.value=name;
+    var a=document.getElementById('bill-age');if(a&&!a.value)a.value=age;
+    var m=document.getElementById('bill-mob');if(m&&!m.value)m.value=mob;
+  },200);
+}
+window.openInvoiceForPatient=openInvoiceForPatient;
 
 
 </script>
