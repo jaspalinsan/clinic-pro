@@ -2378,6 +2378,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2572,7 +2573,10 @@ function cpApplyAccess(user){
     var nl=document.getElementById('nl-'+p);  if(nl)nl.style.display=show?'':'none';
     var nv=document.getElementById('nav-'+p); if(nv)nv.style.display=show?'':'none';
     var pg=document.getElementById('page-'+p);
-    if(pg){if(show)pg.removeAttribute('data-blocked');else pg.setAttribute('data-blocked','1');}
+    if(pg){
+      if(show||p==='settings')pg.removeAttribute('data-blocked');
+      else pg.setAttribute('data-blocked','1');
+    }
   });
   var ut=document.getElementById('spt-users');
   if(ut)ut.style.display=(user.role==='Admin')?'':'none';
@@ -2746,7 +2750,7 @@ const PAGES = ['dashboard','appointments','rx','pharmacy','inventory','vendor','
 function nav(p) {
   window._currentPage=p;
   var _pg=document.getElementById('page-'+p);
-  if(_pg&&_pg.getAttribute('data-blocked')==='1'){
+  if(_pg&&_pg.getAttribute('data-blocked')==='1'&&p!=='settings'){
     if(window.CURRENT_USER&&typeof toast==='function')toast('Access denied','error');
     return;
   }
@@ -13144,6 +13148,7 @@ window.printBS=printBS;
     if(typeof DB!=='undefined'){DB.length=0;window.INV_DB.forEach(function(x){DB.push(x);});}
   }
 })();
+
 
 
 
