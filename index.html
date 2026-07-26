@@ -2376,6 +2376,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2760,6 +2761,20 @@ function nav(p) {
     setTimeout(function(){if(typeof rxLoadTodayAppts==='function')rxLoadTodayAppts();},200);
   }
   if (p === 'settings') {
+    // Force settings page layout via JS — CSS specificity bypass
+    var _sp=document.getElementById('page-settings');
+    if(_sp){
+      _sp.style.cssText='display:flex !important;flex-direction:row !important;'
+        +'height:calc(100vh - 72px) !important;padding:0 !important;'
+        +'overflow:hidden !important;background:#F1F5F9';
+    }
+    var _pi=_sp?_sp.querySelector('.page-inner'):null;
+    if(_pi)_pi.style.cssText='display:flex;flex-direction:row;height:100%;width:100%;overflow:hidden';
+    var _sn=document.getElementById('sp-nav');
+    if(_sn)_sn.style.cssText='display:flex !important;flex-direction:column !important;'
+      +'width:200px !important;min-width:200px !important;'
+      +'overflow-y:auto !important;height:100% !important;'
+      +'background:#1e293b !important;padding:4px 0';
     setTimeout(function(){
       var CS=window.CLINIC_SETTINGS||{};
       var map={cname:'name',dname:'doctor',qual:'qual',reg:'reg',phone:'phone',email:'email',address:'address',city:'city',lic:'lic',pin:'pin',tagline:'tagline',footer:'footer'};
@@ -2772,7 +2787,7 @@ function nav(p) {
       if(typeof loadPharmacySettings==='function')loadPharmacySettings();
       if(typeof loadDataSettings==='function')loadDataSettings();
       spTab('clinic');
-    },30);
+    },50);
   }
 }
 
@@ -13105,6 +13120,7 @@ window.printBS=printBS;
     if(typeof DB!=='undefined'){DB.length=0;window.INV_DB.forEach(function(x){DB.push(x);});}
   }
 })();
+
 
 
 
