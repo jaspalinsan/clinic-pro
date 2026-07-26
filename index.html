@@ -1227,7 +1227,7 @@ html,body{height:100%;overflow:hidden}
     <button onclick="spTab('rxtpl')" id="spt-rxtpl" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;color:#94a3b8;font-size:12.5px;font-weight:400;cursor:pointer;text-align:left;transition:all .15s"><i class="ti ti-template" style="font-size:15px;flex-shrink:0;width:18px"></i>Rx Templates</button>
     <button onclick="spTab('backup')" id="spt-backup" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;color:#94a3b8;font-size:12.5px;font-weight:400;cursor:pointer;text-align:left;transition:all .15s"><i class="ti ti-database" style="font-size:15px;flex-shrink:0;width:18px"></i>Backup / Export</button>
     <div style="height:0.5px;background:#334155;margin:8px 0"></div>
-    <div style="padding:3px 16px;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1px">App Controls</div>
+    <div style="padding:3px 16px 4px;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1px">App Controls</div>
     <button onclick="spTab('billing')" id="spt-billing" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;color:#94a3b8;font-size:12.5px;font-weight:400;cursor:pointer;text-align:left;transition:all .15s"><i class="ti ti-receipt-2" style="font-size:15px;flex-shrink:0;width:18px"></i>Billing</button>
     <button onclick="spTab('rxset')" id="spt-rxset" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;color:#94a3b8;font-size:12.5px;font-weight:400;cursor:pointer;text-align:left;transition:all .15s"><i class="ti ti-prescription" style="font-size:15px;flex-shrink:0;width:18px"></i>Rx Settings</button>
     <button onclick="spTab('phset')" id="spt-phset" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;color:#94a3b8;font-size:12.5px;font-weight:400;cursor:pointer;text-align:left;transition:all .15s"><i class="ti ti-pill" style="font-size:15px;flex-shrink:0;width:18px"></i>Pharmacy / Stock</button>
@@ -2290,6 +2290,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12972,6 +12973,7 @@ function printBS(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
 }
 window.printBS=printBS;
+
 
 
 
