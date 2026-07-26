@@ -892,7 +892,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-from-lbl" style="min-width:90px">From date</span><input type="date" id="ph-date-from" onchange="phSetDateLbl('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><span style="font-size:13px;color:var(--ink3);font-weight:300">→</span><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-to-lbl" style="min-width:90px">To date</span><input type="date" id="ph-date-to" onchange="phSetDateLbl('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';document.getElementById('ph-from-lbl').textContent='From date';document.getElementById('ph-to-lbl').textContent='To date';renderPharmacy()" style="font-size:11px">Clear</button>
-      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
+      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <button class="tb" onclick="openBulkGen()" style="font-size:11px;background:#FAF5FF;color:#7C3AED;border-color:#7C3AED;font-weight:700"><i class="ti ti-wand"></i> Bulk Generate</button> <button class="bp" onclick="openModal('m-invoice')"><i class="ti ti-plus"></i>New Invoice</button>
     </div>
   </div>
   <div id="ph-bulk-bar" style="display:none;align-items:center;gap:10px;padding:9px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;margin-bottom:10px">
@@ -1193,6 +1193,97 @@ html,body{height:100%;overflow:hidden}
 
 
 <!-- end page-settings -->
+
+<!-- BULK INVOICE GENERATOR MODAL -->
+<div id="m-bulk-gen" class="overlay" style="display:none">
+<div class="modal" style="max-width:760px;max-height:94vh;overflow-y:auto">
+  <div class="mh">
+    <h2><i class="ti ti-wand" style="color:#7C3AED;margin-right:8px"></i>Bulk Invoice Generator</h2>
+    <button class="mclose" onclick="closeModal('m-bulk-gen')"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="mbody">
+    <div style="padding:8px 12px;background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:7px;font-size:11px;color:#185FA5;margin-bottom:14px">
+      Generates invoices using random data from your Patient List, Services and Stock.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Number of Invoices</div>
+        <input class="fin" id="bg-count" type="number" value="10" min="1" max="500" style="width:100%">
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">1 to 500</div>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Amount Range ₹ Min</div>
+        <input class="fin" id="bg-min" type="number" value="150" min="50" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Amount Range ₹ Max</div>
+        <input class="fin" id="bg-max" type="number" value="2000" min="100" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Date From</div>
+        <input class="fin" id="bg-from" type="date" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Date To</div>
+        <input class="fin" id="bg-to" type="date" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Total Target ₹ (optional)</div>
+        <input class="fin" id="bg-target" type="number" placeholder="e.g. 50000" style="width:100%">
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">Leave blank = use count</div>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Payment Status</div>
+        <select class="fin" id="bg-status" style="width:100%">
+          <option value="random">Random (Paid/Partial/Pending)</option>
+          <option value="Paid">All Paid</option>
+          <option value="Pending">All Pending</option>
+          <option value="mix">Mix Paid + Pending</option>
+        </select>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Include Medicines</div>
+        <select class="fin" id="bg-meds" style="width:100%">
+          <option value="yes">Yes — from stock</option>
+          <option value="no">No — services only</option>
+        </select>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Include Services</div>
+        <select class="fin" id="bg-svcs" style="width:100%">
+          <option value="yes">Yes — from service list</option>
+          <option value="no">No — medicines only</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="previewBulkGen()" class="bs" style="margin-bottom:12px;font-size:11px"><i class="ti ti-eye"></i> Preview</button>
+    <div id="bg-preview" style="display:none;border:0.5px solid var(--sl2);border-radius:8px;overflow:hidden;margin-bottom:4px">
+      <div style="padding:6px 12px;background:var(--sl);font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;border-bottom:0.5px solid var(--sl2)" id="bg-preview-hdr">Preview</div>
+      <div style="overflow-x:auto">
+      <table class="tbl" id="bg-preview-table">
+        <thead><tr>
+          <th>#</th><th>Patient</th><th>Date</th><th>Items</th><th style="text-align:right">Amount</th><th>Paid</th><th>Status</th>
+        </tr></thead>
+        <tbody id="bg-preview-body"></tbody>
+        <tfoot><tr>
+          <td colspan="4" style="font-weight:700;padding:7px 10px">Total</td>
+          <td id="bg-preview-total" style="text-align:right;font-weight:700;padding:7px 10px"></td>
+          <td id="bg-preview-paid" style="text-align:right;font-weight:700;padding:7px 10px"></td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+      </div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-bulk-gen')">Cancel</button>
+    <button class="bp" id="bg-save-btn" onclick="saveBulkGen()" style="display:none;background:#7C3AED;border-color:#7C3AED">
+      <i class="ti ti-wand"></i> Generate &amp; Save All
+    </button>
+  </div>
+</div>
+</div>
+
 </main>
 </div>
 <div class="page" id="page-settings" style="padding:0;background:#F1F5F9">
@@ -2410,6 +2501,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -13061,6 +13153,193 @@ function printBS(){
 }
 window.printBS=printBS;
 
+
+
+// ── Bulk Invoice Generator ─────────────────────────────────────
+var _bgInvoices=[];
+
+function openBulkGen(){
+  // Set default dates
+  var d=new Date();
+  var today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var sixMonthsAgo=new Date(d);sixMonthsAgo.setMonth(sixMonthsAgo.getMonth()-6);
+  var fromDate=sixMonthsAgo.getFullYear()+'-'+String(sixMonthsAgo.getMonth()+1).padStart(2,'0')+'-'+String(sixMonthsAgo.getDate()).padStart(2,'0');
+  var fd=document.getElementById('bg-from');var td=document.getElementById('bg-to');
+  if(fd&&!fd.value)fd.value=fromDate;
+  if(td&&!td.value)td.value=today;
+  document.getElementById('bg-preview').style.display='none';
+  document.getElementById('bg-save-btn').style.display='none';
+  _bgInvoices=[];
+  var ov=document.getElementById('m-bulk-gen');
+  if(ov){ov.style.display='flex';ov.classList.add('open');}
+}
+window.openBulkGen=openBulkGen;
+
+function _bgRandInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function _bgRandDate(fromStr,toStr){
+  var from=new Date(fromStr).getTime();
+  var to=new Date(toStr).getTime();
+  var ts=from+Math.random()*(to-from);
+  var d=new Date(ts);
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mm=String(d.getMonth()+1).padStart(2,'0');
+  return {display:dd+'-'+mm+'-'+d.getFullYear(),raw:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+dd};
+}
+
+function _bgPickStatus(mode){
+  if(mode==='Paid')return'Paid';
+  if(mode==='Pending')return'Pending';
+  if(mode==='mix'){return Math.random()>0.4?'Paid':'Pending';}
+  var r=Math.random();return r<0.55?'Paid':r<0.75?'Partial':'Pending';
+}
+
+function _bgGenOne(opts){
+  var pats=window.PAT_DB||[];
+  var svcs=window._svcList||[];
+  var inv=window.INV_DB||[];
+
+  // Pick patient
+  var pat=pats.length?pats[_bgRandInt(0,pats.length-1)]:{name:'Patient',age:'',mob:''};
+
+  // Pick date
+  var dt=_bgRandDate(opts.from,opts.to);
+
+  // Build items
+  var items=[];var total=0;
+
+  // Add 1-2 services
+  if(opts.svcs&&svcs.length){
+    var numSvc=_bgRandInt(1,2);
+    var picked=[];
+    for(var i=0;i<numSvc;i++){
+      var s=svcs[_bgRandInt(0,svcs.length-1)];
+      if(picked.indexOf(s.name)===-1){picked.push(s.name);items.push({type:'svc',name:s.name,net:parseFloat(s.price||150)});total+=parseFloat(s.price||150);}
+    }
+  }
+
+  // Add 0-2 medicines
+  if(opts.meds&&inv.length){
+    var numMed=_bgRandInt(0,2);
+    for(var j=0;j<numMed;j++){
+      var m=inv[_bgRandInt(0,inv.length-1)];
+      var qty=_bgRandInt(1,10);
+      var rate=parseFloat(m.mrp||m.rate||5);
+      var net=qty*rate;
+      items.push({type:'med',name:m.name,qty:qty,rate:rate,net:net});
+      total+=net;
+    }
+  }
+
+  // Scale to target amount if needed
+  if(opts.targetAmt){
+    // just keep items as-is, total will be whatever
+  } else {
+    // Scale total to fit within min-max
+    var targetTotal=_bgRandInt(opts.min,opts.max);
+    if(total<opts.min||total>opts.max){
+      var scale=targetTotal/Math.max(total,1);
+      items.forEach(function(it){it.net=parseFloat((it.net*scale).toFixed(2));});
+      total=targetTotal;
+    }
+  }
+  total=parseFloat(total.toFixed(2));
+
+  // Status
+  var status=_bgPickStatus(opts.status);
+  var paidAmt=status==='Paid'?total:status==='Partial'?parseFloat((total*(_bgRandInt(30,80)/100)).toFixed(2)):0;
+  var balDue=parseFloat((total-paidAmt).toFixed(2));
+
+  var svcsItems=items.filter(function(x){return x.type==='svc';});
+  var medsItems=items.filter(function(x){return x.type==='med';});
+
+  return {
+    patient:pat.name,age:pat.age||'',mob:pat.mob||'',
+    date:dt.display,dateRaw:dt.raw,
+    svcs:svcsItems,meds:medsItems,
+    grandTotal:total,paidAmount:paidAmt,balanceDue:balDue,
+    paymode:['Cash','UPI','Card'][_bgRandInt(0,2)],
+    status:status
+  };
+}
+
+function previewBulkGen(){
+  var count=parseInt((document.getElementById('bg-count')||{}).value)||10;
+  var min=parseInt((document.getElementById('bg-min')||{}).value)||150;
+  var max=parseInt((document.getElementById('bg-max')||{}).value)||2000;
+  var from=(document.getElementById('bg-from')||{}).value||'';
+  var to=(document.getElementById('bg-to')||{}).value||'';
+  var target=parseFloat((document.getElementById('bg-target')||{}).value)||0;
+  var statusMode=(document.getElementById('bg-status')||{}).value||'random';
+  var incMeds=(document.getElementById('bg-meds')||{}).value==='yes';
+  var incSvcs=(document.getElementById('bg-svcs')||{}).value==='yes';
+
+  if(!from||!to){toast('Select date range','error');return;}
+  if(min>=max){toast('Min must be less than Max','error');return;}
+  if(!incMeds&&!incSvcs){toast('Enable at least medicines or services','error');return;}
+
+  var opts={min:min,max:max,from:from,to:to,status:statusMode,meds:incMeds,svcs:incSvcs,targetAmt:target};
+
+  _bgInvoices=[];
+  if(target>0){
+    var runTotal=0;var attempts=0;
+    while(runTotal<target&&attempts<2000){
+      var inv=_bgGenOne(opts);_bgInvoices.push(inv);runTotal+=inv.grandTotal;attempts++;
+    }
+    count=_bgInvoices.length;
+  } else {
+    for(var i=0;i<count;i++)_bgInvoices.push(_bgGenOne(opts));
+  }
+
+  // Render preview (first 5)
+  var tbody=document.getElementById('bg-preview-body');
+  if(!tbody)return;
+  var stClass={'Paid':'p-g','Partial':'p-b','Pending':'p-a'};
+  var preview=_bgInvoices.slice(0,5);
+  tbody.innerHTML=preview.map(function(inv,i){
+    var items=(inv.svcs||[]).concat(inv.meds||[]).map(function(x){return x.name;}).join(' · ')||'—';
+    return '<tr>'
+      +'<td style="font-size:10px;color:var(--ink3)">#'+(i+1)+'</td>'
+      +'<td><b>'+inv.patient+'</b></td>'
+      +'<td style="white-space:nowrap">'+inv.date+'</td>'
+      +'<td style="font-size:10px;color:var(--ink2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
+      +'<td style="text-align:right;font-weight:600">₹'+inv.grandTotal.toFixed(2)+'</td>'
+      +'<td style="text-align:right;color:#059669">₹'+inv.paidAmount.toFixed(2)+'</td>'
+      +'<td><span class="pill '+stClass[inv.status]+'">'+inv.status+'</span></td>'
+      +'</tr>';
+  }).join('');
+
+  var totGrand=_bgInvoices.reduce(function(a,b){return a+b.grandTotal;},0);
+  var totPaid=_bgInvoices.reduce(function(a,b){return a+b.paidAmount;},0);
+  var tg=document.getElementById('bg-preview-total');if(tg)tg.textContent='₹'+totGrand.toFixed(2);
+  var tp=document.getElementById('bg-preview-paid');if(tp)tp.textContent='₹'+totPaid.toFixed(2);
+
+  var hdr=document.getElementById('bg-preview-hdr');
+  if(hdr)hdr.textContent='Preview — first '+Math.min(5,count)+' of '+count+' invoices  |  Total: ₹'+totGrand.toFixed(2);
+
+  document.getElementById('bg-preview').style.display='block';
+  document.getElementById('bg-save-btn').style.display='';
+  document.getElementById('bg-save-btn').textContent='';
+  document.getElementById('bg-save-btn').innerHTML='<i class="ti ti-wand"></i> Generate & Save '+count+' Invoices';
+}
+window.previewBulkGen=previewBulkGen;
+
+function saveBulkGen(){
+  if(!_bgInvoices||!_bgInvoices.length){toast('Preview first','error');return;}
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+  var ts=Date.now();
+  _bgInvoices.forEach(function(inv,i){
+    var id='INV-'+String(ts+i).slice(-7);
+    window.BILLING_DB.unshift(Object.assign({id:id},inv));
+  });
+  if(typeof cpSaveData==='function')cpSaveData();
+  closeModal('m-bulk-gen');
+  renderPharmacy();
+  if(typeof updateDashStats==='function')updateDashStats();
+  toast('\u2713 '+_bgInvoices.length+' invoices generated and saved','success');
+  _bgInvoices=[];
+}
+window.saveBulkGen=saveBulkGen;
 
 </script>
 </body>
