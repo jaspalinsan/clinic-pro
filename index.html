@@ -2554,6 +2554,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -12598,7 +12599,6 @@ function billPatPick(name){
     var mob=document.getElementById('bill-mob');if(mob&&pat.mob)mob.value=pat.mob;
   }
 }
-window.billPatSearch=billPatSearch;
 window.billPatPick=billPatPick;
 // Close dropdown on outside click
 document.addEventListener('click',function(e){
@@ -12633,7 +12633,6 @@ window.fmtDate=fmtDate;
 
 
 
-window.phDateLabel=phDateLabel;
 
 
 function billFillPatient(pat){
@@ -13340,6 +13339,7 @@ function saveBulkGen(){
   _bgInvoices=[];
 }
 window.saveBulkGen=saveBulkGen;
+
 
 </script>
 </body>
