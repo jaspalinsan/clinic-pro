@@ -36,7 +36,7 @@ html,body{height:100%;overflow:hidden}
 .logo{display:flex;align-items:center;gap:7px;text-decoration:none;font-weight:800;font-size:15px;color:var(--ink);flex-shrink:0;margin-right:4px}
 .lmark{width:30px;height:30px;border-radius:8px;background:var(--acc);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
 .nlinks{display:flex;gap:2px;flex:1;overflow:hidden;align-items:stretch}
-.nl{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:60px;padding:2px 2px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:linear-gradient(180deg,#fff,#E8E8E8);cursor:pointer;color:#1A3A8C;white-space:nowrap;flex:1;min-width:0;transition:all .12s;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(0,0,0,.12)}
+.nl{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:60px;padding:2px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:linear-gradient(180deg,#fff,#E8E8E8);cursor:pointer;color:#1A3A8C;white-space:nowrap;flex:1;min-width:56px;transition:all .12s;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(0,0,0,.12)}
 .nl-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;line-height:1;color:inherit}
 .nl i{font-size:13px;flex-shrink:0}
 .nl:hover{background:linear-gradient(180deg,#fff,#D0D8FF);border-color:#7B9FE8;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 3px rgba(26,58,140,.2)}
@@ -101,8 +101,8 @@ html,body{height:100%;overflow:hidden}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* Font category overrides via CSS vars */
-.nl i{font-size:33px !important;color:#1A3A8C}
-.nl .nl-lbl{font-size:11px !important;font-weight:900;color:#1A3A8C;text-transform:uppercase;letter-spacing:.5px;line-height:1}
+.nl i{font-size:22px !important;color:#1A3A8C}
+.nl .nl-lbl{font-size:9px !important;font-weight:700;color:#1A3A8C;text-transform:uppercase;letter-spacing:.3px;line-height:1}
 .bp,.bs{font-size:var(--fs-btn) !important}
 .tb{font-size:var(--fs-btn) !important}
 .tbl td{font-size:var(--fs-data) !important}
@@ -350,7 +350,7 @@ html,body{height:100%;overflow:hidden}
   </a>
 
   <!-- Silver metallic strip matching the image -->
-  <div class="nlinks" id="nav-strip" style="display:flex;flex:1;gap:3px;padding:4px 4px;background:linear-gradient(180deg,#C8C8C8,#E8E8E8,#C0C0C0);border-radius:10px;border:2px solid #B0B0B0;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 4px rgba(0,0,0,.15)">
+  <div class="nlinks" id="nav-strip" style="display:flex;flex:1;gap:3px;padding:4px 4px;background:linear-gradient(180deg,#C8C8C8,#E8E8E8,#C0C0C0);border-radius:10px;border:2px solid #B0B0B0;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 4px rgba(0,0,0,.15);overflow-x:auto;overflow-y:hidden;scrollbar-width:none">
     <button class="nl on" id="nl-dashboard"    id="nav-dashboard" onclick="nav('dashboard')"    title="Dashboard">    <i class="ti ti-layout-dashboard"        ></i><span class="nl-lbl">Dashboard</span></button>
     <button class="nl"    id="nl-appointments"  id="nav-appointments" onclick="nav('appointments')" title="Appointments"> <i class="ti ti-calendar-event"           ></i><span class="nl-lbl">Appointments</span></button>
     <button class="nl"    id="nl-rx"            id="nav-rx" onclick="nav('rx')"           title="Rx">           <i class="ti ti-file-description"         ></i><span class="nl-lbl">Prescription</span></button>
@@ -2290,6 +2290,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12979,6 +12980,7 @@ function printBS(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
 }
 window.printBS=printBS;
+
 
 
 
