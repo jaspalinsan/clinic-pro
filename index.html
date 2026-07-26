@@ -430,7 +430,7 @@ html,body{height:100%;overflow:hidden}
       <thead><tr>
         <th style="width:32px"><input type="checkbox" id="pat-check-all" onchange="patCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th>
         <th style="width:90px">ID</th><th style="width:20%">Client Name</th>
-        <th style="width:80px">Age/Sex</th><th style="width:15%">City</th>
+        <th style="width:80px">Age Sex</th><th style="width:15%">City</th>
         <th style="width:120px">Mobile</th><th style="width:18%">Actions</th>
       </tr></thead>
       <tbody id="pat-tbody">
@@ -607,7 +607,7 @@ html,body{height:100%;overflow:hidden}
   <select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:8px 12px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:13px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select>
 </div>
 <div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();if(typeof rxLoadPrevBalance==='function')rxLoadPrevBalance(this.value);"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
-      <div><div class="flbl" style="margin-bottom:3px">Age / Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
+      <div><div class="flbl" style="margin-bottom:3px">Age Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
     </div>
@@ -2397,6 +2397,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2910,7 +2911,7 @@ function submitAddPatient() {
   if(!tbody){toast('Patient table not found','error');return;}
   const tr = document.createElement('tr');
 
-  // Correct columns: ☐ | ID | Name | Age/Sex | City | Mobile | Actions
+  // Correct columns: ☐ | ID | Name | Age Sex | City | Mobile | Actions
   tr.innerHTML =
     '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
     '<td style="font-size:11.5px;color:var(--lav);font-weight:700">'+code+'</td>'+
@@ -4634,7 +4635,7 @@ function rxPrint(){
   '</div>'+
   '<div class="pgrid">'+
   '<div><div class="lbl">Patient</div><div class="val">'+pname+'</div></div>'+
-  '<div><div class="lbl">Age / Sex</div><div class="val">'+age+'</div></div>'+
+  '<div><div class="lbl">Age Sex</div><div class="val">'+age+'</div></div>'+
   '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
   '<div><div class="lbl">City</div><div class="val">'+city+'</div></div>'+
   '<div><div class="lbl">Mode</div><div class="val">'+mode+'</div></div>'+
@@ -5578,7 +5579,7 @@ function editInvoice(invId){
   patRow.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px';
   patRow.innerHTML=
     '<div><div class="flbl" style="margin-bottom:4px">Patient</div><input class="fin" id="ei-patient" value="'+(inv.patient||'')+'"></div>'+
-    '<div><div class="flbl" style="margin-bottom:4px">Age/Sex</div><input class="fin" id="ei-age" value="'+(inv.age||'')+'"></div>'+
+    '<div><div class="flbl" style="margin-bottom:4px">Age Sex</div><input class="fin" id="ei-age" value="'+(inv.age||'')+'"></div>'+
     '<div><div class="flbl" style="margin-bottom:4px">Date</div><input class="fin" id="ei-date" value="'+(inv.date||'')+'"></div>'+
     '<div><div class="flbl" style="margin-bottom:4px">Status</div><select class="fin" id="ei-status">'+
       '<option'+(inv.status==='Pending'?' selected':'')+'>Pending</option>'+
@@ -7509,7 +7510,7 @@ function openNewLabTest(){
       '<div><div class="flbl">Patient ID</div><input class="fin" id="lab-pid" placeholder="CAD-XXXX"></div>'+
     '</div>'+
     '<div class="frow">'+
-      '<div><div class="flbl">Age / Sex</div><input class="fin" id="lab-age" placeholder="45 / F"></div>'+
+      '<div><div class="flbl">Age Sex</div><input class="fin" id="lab-age" placeholder="45 / F"></div>'+
       '<div><div class="flbl">Mobile</div><input class="fin" id="lab-mob" placeholder="98765-00000"></div>'+
     '</div>'+
     '<div style="margin-bottom:10px">'+
@@ -7669,7 +7670,7 @@ function viewLabResult(id){
     '<div class="hdr"><h1>Lab Report &mdash; '+id+'</h1><div class="sub">Dr. Cadium Healthcare &bull; Barnala, Punjab</div></div>'+
     '<div class="info">'+
       '<div class="f"><div class="lb">Patient</div><div class="vl">'+t.patient+'</div></div>'+
-      '<div class="f"><div class="lb">Age/Sex</div><div class="vl">'+t.ageSex+'</div></div>'+
+      '<div class="f"><div class="lb">Age Sex</div><div class="vl">'+t.ageSex+'</div></div>'+
       '<div class="f"><div class="lb">Date</div><div class="vl">'+t.date+'</div></div>'+
       '<div class="f"><div class="lb">Status</div><div class="vl" style="color:#10B981">\u2714 Done</div></div>'+
     '</div>'+
@@ -7795,7 +7796,7 @@ function viewRxLabReport(r){
     '<div class="sub">Dr. Cadium Healthcare \u00b7 Barnala, Punjab</div></div>'+
     '<div class="info">'+
       '<div class="f"><div class="lb">Patient</div><div class="vl">'+(r.patient||r.name||'')+'</div></div>'+
-      '<div class="f"><div class="lb">Age / Sex</div><div class="vl">'+(r.ageSex||r.age||'')+'</div></div>'+
+      '<div class="f"><div class="lb">Age Sex</div><div class="vl">'+(r.ageSex||r.age||'')+'</div></div>'+
       '<div class="f"><div class="lb">Date</div><div class="vl">'+(r.date||'')+'</div></div>'+
       '<div class="f"><div class="lb">Ref</div><div class="vl">'+(r.invId||r.labId||'')+'</div></div>'+
     '</div>'+
@@ -8234,7 +8235,7 @@ function viewSavedRx(rx){
       '<div style="font-size:13px;font-weight:700">'+rx.patient+'</div>'+
     '</div>'+
     '<div style="padding:7px 12px;border-right:1px solid #E5E7EB">'+
-      '<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:2px;letter-spacing:.5px">Age / Sex</div>'+
+      '<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:2px;letter-spacing:.5px">Age Sex</div>'+
       '<div style="font-size:13px;font-weight:700">'+rx.age+'</div>'+
     '</div>'+
     '<div style="padding:7px 12px;border-right:1px solid #E5E7EB">'+
@@ -12024,7 +12025,7 @@ function printInvoice(){
   '</div>'+
   '<div class="pgrid">'+
   '<div><div class="lbl">Patient</div><div class="val">'+pname+'</div></div>'+
-  '<div><div class="lbl">Age / Sex</div><div class="val">'+age+'</div></div>'+
+  '<div><div class="lbl">Age Sex</div><div class="val">'+age+'</div></div>'+
   '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
   '</div>'+
   (svcRows?'<div class="sec">Services</div>'+
@@ -13503,6 +13504,7 @@ function billSelectPatient(sel){
   if(mob)mob.value=opt.dataset.mob||'';
 }
 window.billSelectPatient=billSelectPatient;
+
 
 </script>
 <div class="overlay" id="m-invoice" style="display:none">
