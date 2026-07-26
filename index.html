@@ -2391,6 +2391,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -13009,6 +13010,10 @@ function openBulkGen(){
   document.getElementById('bg-preview').style.display='none';
   document.getElementById('bg-save-btn').style.display='none';
   _bgInvoices=[];
+  bgPopulatePatients();
+  bgUpdateEndNum();
+  document.getElementById('bg-pat-mode').value='random';
+  bgTogglePatMode();
   var ov=document.getElementById('m-bulk-gen');
   if(ov){
     if(ov.parentNode!==document.body)document.body.appendChild(ov);
@@ -13042,7 +13047,16 @@ function _bgGenOne(opts){
   var inv=window.INV_DB||[];
 
   // Pick patient
-  var pat=pats.length?pats[_bgRandInt(0,pats.length-1)]:{name:'Patient',age:'',mob:''};
+  var pat;
+  var _mode=window._bgPatMode||'random';
+  if(_mode==='specific'&&window._bgSpecPat){
+    pat=pats.find(function(p){return p.name===window._bgSpecPat;})||pats[0]||{name:window._bgSpecPat,age:'',mob:''};
+  } else if(_mode==='select'&&window._bgMultiPats&&window._bgMultiPats.length){
+    var nm=window._bgMultiPats[_bgRandInt(0,window._bgMultiPats.length-1)];
+    pat=pats.find(function(p){return p.name===nm;})||{name:nm,age:'',mob:''};
+  } else {
+    pat=pats.length?pats[_bgRandInt(0,pats.length-1)]:{name:'Patient',age:'',mob:''};
+  }
 
   // Pick date
   var dt=_bgRandDate(opts.from,opts.to);
@@ -13124,6 +13138,12 @@ function previewBulkGen(){
 
   var prefix=(document.getElementById('bg-prefix')||{}).value||'INV-';
   var startNum=parseInt((document.getElementById('bg-start-num')||{}).value)||1;
+  var patMode=(document.getElementById('bg-pat-mode')||{}).value||'random';
+  var specPat=(document.getElementById('bg-pat-specific')||{}).value||'';
+  var multiSel=document.getElementById('bg-pat-multi');
+  var multiPats=[];
+  if(multiSel){Array.from(multiSel.selectedOptions).forEach(function(o){multiPats.push(o.value);});}
+  window._bgPatMode=patMode;window._bgSpecPat=specPat;window._bgMultiPats=multiPats;
   _bgInvoices=[];
   if(target>0){
     var runTotal=0;var attempts=0;
@@ -13294,6 +13314,34 @@ function downloadBulkPDF(){
 }
 window.downloadBulkPDF=downloadBulkPDF;
 
+
+function bgTogglePatMode(){
+  var mode=(document.getElementById('bg-pat-mode')||{}).value||'random';
+  var spec=document.getElementById('bg-pat-specific-wrap');
+  var multi=document.getElementById('bg-pat-multi-wrap');
+  if(spec)spec.style.display=mode==='specific'?'':'none';
+  if(multi)multi.style.display=mode==='select'?'':'none';
+}
+window.bgTogglePatMode=bgTogglePatMode;
+
+function bgPopulatePatients(){
+  var pats=window.PAT_DB||[];
+  var sel=document.getElementById('bg-pat-specific');
+  var mul=document.getElementById('bg-pat-multi');
+  [sel,mul].forEach(function(el){
+    if(!el)return;
+    var cur=el.value;
+    while(el.options.length>(el===sel?1:0))el.remove(el===sel?1:0);
+    pats.forEach(function(p){
+      var o=document.createElement('option');
+      o.value=p.name;o.textContent=p.name+(p.age?' ('+p.age+')':'');
+      el.appendChild(o);
+    });
+    if(cur)el.value=cur;
+  });
+}
+window.bgPopulatePatients=bgPopulatePatients;
+
 </script>
 <div class="overlay" id="m-invoice" style="display:none">
 <div class="modal" style="max-width:780px;max-height:94vh;overflow-y:auto">
@@ -13378,6 +13426,30 @@ window.downloadBulkPDF=downloadBulkPDF;
         <div><div class="flbl" style="margin-bottom:4px">End Number (auto)</div><input class="fin" id="bg-end-num" readonly style="width:100%;background:var(--sl);color:var(--ink3)"></div>
       </div>
       <div id="bg-range-preview" style="font-size:10px;color:#185FA5;margin-top:5px"></div>
+    </div>
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 14px;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px"><i class="ti ti-users"></i> Patient Selection</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="flbl" style="margin-bottom:4px">Mode</div>
+          <select class="fin" id="bg-pat-mode" onchange="bgTogglePatMode()" style="width:100%">
+            <option value="random">Random from all patients</option>
+            <option value="specific">Specific patient only</option>
+            <option value="select">Pick multiple patients</option>
+          </select>
+        </div>
+        <div id="bg-pat-specific-wrap" style="display:none">
+          <div class="flbl" style="margin-bottom:4px">Select Patient</div>
+          <select class="fin" id="bg-pat-specific" style="width:100%">
+            <option value="">— Select patient —</option>
+          </select>
+        </div>
+        <div id="bg-pat-multi-wrap" style="display:none;grid-column:span 1">
+          <div class="flbl" style="margin-bottom:4px">Select Patients (multi)</div>
+          <select class="fin" id="bg-pat-multi" multiple style="width:100%;height:80px"></select>
+          <div style="font-size:10px;color:var(--ink3);margin-top:2px">Hold Ctrl to select multiple</div>
+        </div>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div><div class="flbl" style="margin-bottom:4px">Payment Status</div>
