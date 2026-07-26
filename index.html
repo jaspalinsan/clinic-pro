@@ -2398,6 +2398,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -5283,7 +5284,7 @@ function renderApptPanes(){
         '<div style="width:34px;height:34px;border-radius:50%;background:'+C[i%C.length]+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">'+init+'</div>'+
         '<div style="flex:1;min-width:0">'+
           '<div style="font-size:13px;font-weight:600">'+a.name+'</div>'+
-          '<div style="font-size:11px;color:var(--ink3)">'+(a.pid||'')+(a.diag?' &middot; '+a.diag:'')+(a.age?' &middot; '+a.age+(a.sex?'/'+a.sex:''):'')+'</div>'+
+          '<div style="font-size:11px;color:var(--ink3)">'+(a.pid||'')+(a.diag?' &middot; '+a.diag:'')+(a.age?' &middot; '+a.age:'')+'</div>'+
         '</div>'+
         '<div style="display:flex;gap:4px;flex-shrink:0">'+btns+'</div></div>';
     }).join('');
@@ -12499,7 +12500,7 @@ function billFillPatient(pat){
   if(!pat)return;
   var age=document.getElementById('bill-age');
   var mob=document.getElementById('bill-mob');
-  if(age&&pat.age)age.value=pat.age+(pat.gender?' '+pat.gender:'');
+  if(age&&pat.age)age.value=pat.age;
   if(mob&&pat.mob)mob.value=pat.mob;
 }
 window.billFillPatient=billFillPatient;
@@ -13504,6 +13505,7 @@ function billSelectPatient(sel){
   if(mob)mob.value=opt.dataset.mob||'';
 }
 window.billSelectPatient=billSelectPatient;
+
 
 
 </script>
