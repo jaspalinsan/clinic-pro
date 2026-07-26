@@ -2396,6 +2396,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2824,6 +2825,19 @@ function openModal(id){
   if(id==='m-invoice'){
     // Reset bill form
     ['bill-patient','bill-age','bill-mob'].forEach(function(fid){var e=document.getElementById(fid);if(e)e.value='';});
+    // Populate patient select from PAT_DB
+    var bpSel=document.getElementById('bill-patient-sel');
+    if(bpSel){
+      while(bpSel.options.length>1)bpSel.remove(1);
+      (window.PAT_DB||[]).forEach(function(p){
+        var o=document.createElement('option');
+        o.value=p.name;
+        o.dataset.age=p.age||'';
+        o.dataset.mob=p.mob||'';
+        o.textContent=p.name+(p.age?' — '+p.age:'')+(p.mob?' | '+p.mob:'');
+        bpSel.appendChild(o);
+      });
+    }
     var bd=document.getElementById('bill-date');
     if(bd){var now=new Date();bd.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');}
     var mt=document.getElementById('bill-med-tbody');if(mt)mt.innerHTML='';
@@ -13477,6 +13491,19 @@ window.bgPopulatePatients=bgPopulatePatients;
 
 
 
+
+function billSelectPatient(sel){
+  var opt=sel.options[sel.selectedIndex];
+  if(!opt||!opt.value)return;
+  var inp=document.getElementById('bill-patient');
+  if(inp)inp.value=opt.value;
+  var age=document.getElementById('bill-age');
+  if(age)age.value=opt.dataset.age||'';
+  var mob=document.getElementById('bill-mob');
+  if(mob)mob.value=opt.dataset.mob||'';
+}
+window.billSelectPatient=billSelectPatient;
+
 </script>
 <div class="overlay" id="m-invoice" style="display:none">
 <div class="modal" style="max-width:780px;max-height:94vh;overflow-y:auto">
@@ -13487,7 +13514,7 @@ window.bgPopulatePatients=bgPopulatePatients;
   <div class="mbody" style="padding:16px 20px">
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px">
       <div><div class="flbl" style="margin-bottom:4px">Patient Name *</div>
-        <div style="position:relative"><input class="fin" id="bill-patient" placeholder="Search patient..." autocomplete="off" oninput="patAutoInput(this,'billFillPatient')" style="width:100%"><div id="drop-bill-patient" class="pat-drop" style="display:none"></div></div>
+        <div style="display:flex;gap:6px"><select class="fin" id="bill-patient-sel" onchange="billSelectPatient(this)" style="width:100%;flex:1"><option value="">— Select patient —</option></select><input class="fin" id="bill-patient" placeholder="or type name" autocomplete="off" oninput="patAutoInput(this,'billFillPatient')" style="width:45%;flex:1"><div id="drop-bill-patient" class="pat-drop" style="display:none"></div></div>
       </div>
       <div><div class="flbl" style="margin-bottom:4px">Age / Sex</div><input class="fin" id="bill-age" placeholder="45 M" style="width:100%"></div>
       <div><div class="flbl" style="margin-bottom:4px">Mobile</div><input class="fin" id="bill-mob" placeholder="98765-00000" style="width:100%"></div>
