@@ -125,8 +125,6 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
-#page-settings{padding:0!important;height:calc(100vh - 72px)!important;display:flex!important;flex-direction:column!important}
-#page-settings.on{display:flex!important;flex-direction:column}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -298,7 +296,7 @@ html,body{height:100%;overflow:hidden}
   #appt-tab-new i,#appt-tab-process i,#appt-tab-done i{font-size:14px !important}
 
   /* Settings sidebar + content */
-  #page-settings > div{flex-direction:row !important}
+  
   #sp-nav{flex-direction:row !important;flex-wrap:wrap;width:100% !important;
     border-right:none !important;border-bottom:1px solid var(--sl2);
     padding:8px !important}
@@ -334,6 +332,11 @@ html,body{height:100%;overflow:hidden}
     font-size:12px
   }
 }
+
+/* Settings page layout */
+#page-settings{padding:0!important;overflow:hidden}
+#page-settings.on{display:flex!important;height:calc(100vh - 72px)}
+#page-settings .page-inner{display:flex;height:100%;width:100%}
 </style>
 </head>
 <body>
@@ -1213,7 +1216,7 @@ html,body{height:100%;overflow:hidden}
 
 <div class="page" id="page-settings" style="padding:0;background:#F1F5F9;height:100%">
 
-<div style="display:flex;height:100%;min-height:0">
+<div class="page-inner" style="display:flex;height:100%;min-height:0;overflow:hidden">
 
   <!-- LEFT SIDEBAR -->
   <div style="width:200px;min-width:200px;background:#1e293b;display:flex;flex-direction:column;border-right:1px solid #0f172a;height:100%">
