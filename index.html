@@ -1881,7 +1881,140 @@ html,body{height:100%;overflow:hidden}
   <button class="bp" onclick="saveDataSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
 </div>
 
-  </div><!-- end right content -->
+  
+<!-- BILLING SETTINGS -->
+<div id="spc-billing" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--ink)">&#x1F4B0; Billing Controls</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Default values applied when creating new invoices and Rx.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Default Consultancy Fee &#8377;</div>
+    <input class="fin" id="set-consult-fee" type="number" value="150" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Rx Days</div>
+    <input class="fin" id="set-rx-days" type="number" value="5" min="1" max="90" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Payment Mode</div>
+    <select class="fin" id="set-pay-mode" style="width:100%">
+      <option value="Cash">Cash</option><option value="UPI">UPI</option>
+      <option value="Card">Card</option><option value="Online">Online</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Invoice Prefix</div>
+    <input class="fin" id="set-inv-prefix" value="INV-" placeholder="INV- / OHC-" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">GST / Tax %</div>
+    <input class="fin" id="set-gst" type="number" value="0" min="0" max="28" step="0.5" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Discount %</div>
+    <input class="fin" id="set-disc" type="number" value="0" min="0" max="100" style="width:100%"></div>
+  </div>
+  <button class="bp" onclick="saveBillingSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save Billing Settings</button>
+</div>
+
+<!-- RX SETTINGS -->
+<div id="spc-rxset" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--ink)">&#x1F48A; Rx / Prescription</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Prescription defaults and PDF output controls.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Default Visit Mode</div>
+    <select class="fin" id="set-visit-mode" style="width:100%">
+      <option value="OPD">OPD</option><option value="Online">Online</option>
+      <option value="Tele">Tele</option><option value="IPD">IPD</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Rx Number Prefix</div>
+    <input class="fin" id="set-rx-prefix" value="CD-RX-" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Rx Start Number</div>
+    <input class="fin" id="set-rx-start" type="number" value="1" min="1" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show Vitals in Rx PDF</div>
+    <select class="fin" id="set-vitals-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show Diagnosis in PDF</div>
+    <select class="fin" id="set-dx-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Show History in PDF</div>
+    <select class="fin" id="set-hist-pdf" style="width:100%">
+      <option value="yes">Yes</option><option value="no">No</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="saveRxSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save Rx Settings</button>
+</div>
+
+<!-- PHARMACY SETTINGS -->
+<div id="spc-phset" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--ink)">&#x1F3EA; Pharmacy / Stock</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Stock alerts and default pricing controls.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Low Stock Alert (qty)</div>
+    <input class="fin" id="set-low-stock" type="number" value="10" min="0" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Expiry Alert (days before)</div>
+    <input class="fin" id="set-exp-alert" type="number" value="90" min="7" style="width:100%"></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Sale Margin %</div>
+    <input class="fin" id="set-margin" type="number" value="20" min="0" max="500" style="width:100%">
+    <div style="font-size:10px;color:var(--ink3);margin-top:3px">Sale = Purchase x (1 + margin%)</div></div>
+    <div><div class="flbl" style="margin-bottom:5px">Default Stock Unit</div>
+    <select class="fin" id="set-stock-unit" style="width:100%">
+      <option value="Tabs">Tablets</option><option value="Caps">Capsules</option>
+      <option value="Strips">Strips</option><option value="Bottles">Bottles</option>
+      <option value="Vials">Vials</option><option value="Units">Units</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="savePharmacySettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save Pharmacy Settings</button>
+</div>
+
+<!-- ACCESS CONTROL -->
+<div id="spc-access" style="display:none;padding:24px;max-width:720px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--ink)">&#x1F510; Access Control</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Which pages each role can access. Takes effect on next login.</p>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:11px">
+    <thead><tr style="background:var(--sl)">
+      <th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--sl2)">Page</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Admin</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Doctor</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Pharmacist</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Lab</th>
+      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Receptionist</th>
+    </tr></thead>
+    <tbody id="access-tbody"></tbody>
+  </table>
+  </div>
+  <div style="margin-top:12px;padding:10px 14px;background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;font-size:11px;color:#92400E">
+    Admin always has full access and cannot be restricted.
+  </div>
+  <button class="bp" onclick="saveAccessSettings()" style="margin-top:14px"><i class="ti ti-device-floppy"></i> Save Access Settings</button>
+</div>
+
+<!-- DATA CONTROLS -->
+<div id="spc-datactl" style="display:none;padding:24px;max-width:680px">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--ink)">&#x1F4BE; Data Controls</h2>
+  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Sync, timeout and display settings.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div><div class="flbl" style="margin-bottom:5px">Auto-sync Interval</div>
+    <select class="fin" id="set-sync-interval" style="width:100%">
+      <option value="15">Every 15 seconds</option>
+      <option value="30">Every 30 seconds</option>
+      <option value="60">Every 60 seconds</option>
+      <option value="0">Manual only</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Session Timeout</div>
+    <select class="fin" id="set-timeout" style="width:100%">
+      <option value="0">Never</option>
+      <option value="15">15 minutes</option>
+      <option value="30">30 minutes</option>
+      <option value="60">60 minutes</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Display Mode</div>
+    <select class="fin" id="set-compact" style="width:100%">
+      <option value="no">Spacious (default)</option>
+      <option value="yes">Compact (desktop)</option>
+    </select></div>
+    <div><div class="flbl" style="margin-bottom:5px">Date Format</div>
+    <select class="fin" id="set-date-fmt" style="width:100%">
+      <option value="dd-mm-yyyy">25-07-2026</option>
+      <option value="dd Mon yyyy">25 Jul 2026</option>
+    </select></div>
+  </div>
+  <button class="bp" onclick="saveDataSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save Data Settings</button>
+</div>
+
+</div><!-- end right content -->
 </div><!-- end flex -->
 
 <!-- ── NEW INVOICE MODAL ── -->
@@ -2277,6 +2410,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12926,6 +13060,7 @@ function printBS(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
 }
 window.printBS=printBS;
+
 
 </script>
 </body>
