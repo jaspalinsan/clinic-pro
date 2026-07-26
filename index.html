@@ -2404,6 +2404,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4259,8 +4260,8 @@ window.rxInit=rxInit;
 
 function rxNewBlank(){
   window._currentInvId=null; // clear session invoice
-  // Clear all patient fields
-  ['rx-pat-name','rx-pat-age','rx-pat-mob','rx-pat-city',
+  // Clear all patient fields (city kept if pending patient)
+  ['rx-pat-name','rx-pat-age','rx-pat-mob',
    'rx-pat-cc','rx-pat-dx','rx-old-history','rx-sym-input'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.value='';
   });
@@ -5407,9 +5408,10 @@ function openRxForPatient(name,pid,age,sex,mob,diag){
   nav('rx');
   // Fill immediately
   _fillRxPatient();
-  // Also fill after 100ms and 400ms to survive any async resets
+  // Fill at multiple intervals to survive any async resets
   setTimeout(_fillRxPatient,100);
   setTimeout(_fillRxPatient,400);
+  setTimeout(_fillRxPatient,700);
 }
 
 function _fillRxPatient(){
@@ -13540,6 +13542,7 @@ function openInvoiceForPatient(name,age,mob){
   },200);
 }
 window.openInvoiceForPatient=openInvoiceForPatient;
+
 
 
 
