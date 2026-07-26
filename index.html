@@ -2393,6 +2393,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -13110,8 +13111,14 @@ function _bgGenOne(opts){
   var svcsItems=items.filter(function(x){return x.type==='svc';});
   var medsItems=items.filter(function(x){return x.type==='med';});
 
+  var DX_LIST=['Fever / Pyrexia','Hypertension','Diabetes Mellitus','Upper Respiratory Tract Infection',
+    'Gastritis / Acidity','Headache / Migraine','Back Pain / Lumbar Pain','Viral Fever',
+    'Cough & Cold','Urinary Tract Infection','Anemia','Skin Allergy / Dermatitis',
+    'Arthritis / Joint Pain','Thyroid Disorder','Anxiety / Stress','Diarrhea / Loose Motion',
+    'Eye Infection / Conjunctivitis','Dental Pain','Chest Pain / Angina','Asthma / COPD'];
+  var dx=DX_LIST[_bgRandInt(0,DX_LIST.length-1)];
   return {
-    patient:pat.name,age:pat.age||'',mob:pat.mob||'',
+    patient:pat.name,age:pat.age||'',mob:pat.mob||'',dx:dx,
     date:dt.display,dateRaw:dt.raw,
     svcs:svcsItems,meds:medsItems,
     grandTotal:total,paidAmount:paidAmt,balanceDue:balDue,
@@ -13342,7 +13349,7 @@ function downloadBulkPDF(){
         +'<div style="padding:8px 14px;text-align:right">'
           +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;color:#9CA3AF;margin-bottom:3px;letter-spacing:.5px">Pay Mode</div>'
           +'<div style="font-size:12px;font-weight:700;color:#1A3A8C">'+(inv.paymode||'Cash')+'</div>'
-          +'<div style="font-size:10px;color:#555;margin-top:2px">Diagnosis: —</div>'
+          +'<div style="font-size:10px;color:#555;margin-top:2px">Dx: '+(inv.dx||'—')+'</div>'
         +'</div>'
       +'</div>'
       // ── ITEMS TABLE ──
@@ -13452,13 +13459,14 @@ function bgPopulatePatients(){
     while(el.options.length>(el===sel?1:0))el.remove(el===sel?1:0);
     pats.forEach(function(p){
       var o=document.createElement('option');
-      o.value=p.name;o.textContent=p.name+(p.age?' ('+p.age+')':'');
+      o.value=p.name;o.textContent=p.name+(p.age?' — '+p.age:'')+(p.mob?' | '+p.mob:'');
       el.appendChild(o);
     });
     if(cur)el.value=cur;
   });
 }
 window.bgPopulatePatients=bgPopulatePatients;
+
 
 
 </script>
