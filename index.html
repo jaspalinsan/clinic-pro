@@ -2406,6 +2406,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2915,14 +2917,14 @@ function submitAddPatient() {
   const gen  = ((document.getElementById('ap-gender')||{}).value||'?').charAt(0).toUpperCase();
   const city = (document.getElementById('ap-city')  ||{}).value||'—';
   const code = 'CAD-' + String(Math.floor(150 + Math.random()*800)).padStart(4,'0');
-  const ageSex = age;
+  const ageSex = (age&&gen&&gen!=='?')?age+' '+gen:age;
 
   const tbody = document.getElementById('pat-tbody');
   if(!tbody){toast('Patient table not found','error');return;}
   const tr = document.createElement('tr');
 
   // Correct columns: ☐ | ID | Name | Age Sex | City | Mobile | Actions
-  var _ageSex=(age&&gen)?age+' '+gen:(age||gen||'—');
+  var _ageSex=(age&&gen&&gen!=='?'&&gen!=='—')?age+' '+gen:(age||gen||'—');
   tr.innerHTML =
     '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
     '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
@@ -2939,7 +2941,8 @@ function submitAddPatient() {
 
   // Push to PAT_DB for autocomplete
   if(!window.PAT_DB)window.PAT_DB=[];
-  var _np={id:code,name:name.trim(),age:age,gender:gen,mob:mobile,city:city,blood:'',status:'Active'};
+  var _ageSexStored=(age&&gen&&gen!=='?'&&gen!=='—')?age+' '+gen:age;
+var _np={id:code,name:name.trim(),age:_ageSexStored,gender:gen,mob:mobile,city:city,blood:'',status:'Active'};
   window.PAT_DB.unshift(_np);
   if(typeof dbSavePatient==='function')dbSavePatient({id:code,name:name.trim(),age:age,gender:gen,mobile:mobile,city:city,blood:'',status:'Active'});
   // PAT_DB already updated — re-render full list from PAT_DB
@@ -13545,6 +13548,8 @@ function openInvoiceForPatient(name,age,mob){
   },200);
 }
 window.openInvoiceForPatient=openInvoiceForPatient;
+
+
 
 
 
