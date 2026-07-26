@@ -297,9 +297,7 @@ html,body{height:100%;overflow:hidden}
 
   /* Settings sidebar + content */
   
-  #sp-nav{flex-direction:row !important;flex-wrap:wrap;width:100% !important;
-    border-right:none !important;border-bottom:1px solid var(--sl2);
-    padding:8px !important}
+  #sp-nav{flex-direction:column !important;flex-wrap:nowrap !important;width:200px !important}
   #sp-nav button{padding:8px 12px !important;font-size:12px !important;
     border-radius:8px !important}
 
@@ -337,6 +335,11 @@ html,body{height:100%;overflow:hidden}
 #page-settings{padding:0!important;overflow:hidden}
 #page-settings.on{display:flex!important;height:calc(100vh - 72px)}
 #page-settings .page-inner{display:flex;height:100%;width:100%}
+
+/* Force settings layout */
+#page-settings.on{display:flex !important;flex-direction:row !important;height:calc(100vh - 72px) !important;padding:0 !important;overflow:hidden !important}
+#page-settings .page-inner{display:flex !important;flex-direction:row !important;height:100% !important;width:100% !important;overflow:hidden !important}
+#page-settings #sp-nav{flex-direction:column !important;flex-wrap:nowrap !important;width:200px !important;min-width:200px !important;overflow-y:auto !important;overflow-x:hidden !important}
 </style>
 </head>
 <body>
