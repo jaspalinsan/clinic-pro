@@ -2369,6 +2369,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2569,6 +2571,7 @@ function cpSaveData(){
   // Save to localStorage as backup
   try{
     localStorage.setItem('clinicpro_v1',JSON.stringify({
+      CLINIC_SETTINGS:window.CLINIC_SETTINGS||{},
       PAT_DB:window.PAT_DB||[],
       _apptData:window._apptData||[],
       BILLING_DB:window.BILLING_DB||[],
@@ -11492,6 +11495,10 @@ function cpLoadData(){
     if(resp.rx_saved&&resp.rx_saved.length)   window._rxSaved=resp.rx_saved;
     if(resp.rx_templates&&resp.rx_templates.length) window.MY_RX_TEMPLATES=resp.rx_templates;
 
+    // Restore CLINIC_SETTINGS from server store
+    if(resp.clinic_settings){
+      try{window.CLINIC_SETTINGS=JSON.parse(resp.clinic_settings);}catch(ex){}
+    }
     // Render current visible page
     setTimeout(function(){cpRenderCurrentPage();},300);
     if(el){el.textContent='\u2022 Live '+new Date().toLocaleTimeString();el.style.color='#12AA7C';}
@@ -11508,6 +11515,7 @@ function cpLoadData(){
         try{if(typeof DB!=='undefined'){DB.length=0;snap.INV_DB.forEach(function(x){DB.push(x);});}}catch(ex){}
       }
       if(snap._rxSaved)   window._rxSaved=snap._rxSaved;
+      if(snap.CLINIC_SETTINGS) window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
       setTimeout(function(){cpRenderCurrentPage();},300);
     }catch(ex2){}
     if(el){el.textContent='\u26a0 Offline';el.style.color='#854F0B';}
@@ -13004,6 +13012,94 @@ window.printBS=printBS;
 
 
 
+
+
+
+
+// ── Load CLINIC_SETTINGS from localStorage on startup ─────────
+(function(){
+  try{
+    var snap=JSON.parse(localStorage.getItem('clinicpro_v1')||'{}');
+    if(snap.CLINIC_SETTINGS&&Object.keys(snap.CLINIC_SETTINGS).length>0){
+      window.CLINIC_SETTINGS=snap.CLINIC_SETTINGS;
+    }
+  }catch(ex){}
+  if(!window.CLINIC_SETTINGS)window.CLINIC_SETTINGS={};
+})();
+
+// ── Sample Data ───────────────────────────────────────────────
+(function initSampleData(){
+  // Only add if empty (fresh install)
+  if(!window.PAT_DB)window.PAT_DB=[];
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+  if(!window.LAB_DB)window.LAB_DB=[];
+  if(!window._apptData)window._apptData=[];
+  if(!window.INV_DB)window.INV_DB=[];
+  if(!window._svcList)window._svcList=[];
+
+  if(window.PAT_DB.length===0){
+    window.PAT_DB=[
+      {id:'P001',name:'Raman Singh',age:'45 M',mob:'98765-00001',city:'Moga',blood:'B+'},
+      {id:'P002',name:'Priya Sharma',age:'32 F',mob:'98765-00002',city:'Ludhiana',blood:'O+'},
+      {id:'P003',name:'Harbhajan Singh',age:'62 M',mob:'98765-00003',city:'Amritsar',blood:'A+'},
+      {id:'P004',name:'Sunita Devi',age:'28 F',mob:'98765-00004',city:'Moga',blood:'AB+'},
+      {id:'P005',name:'Gurpreet Kaur',age:'55 F',mob:'98765-00005',city:'Faridkot',blood:'B-'}
+    ];
+  }
+  if(window._svcList.length===0){
+    window._svcList=[
+      {name:'Consultancy Fee',price:150,cat:'fee'},
+      {name:'Follow-up',price:100,cat:'fee'},
+      {name:'CBC Blood Test',price:200,cat:'lab'},
+      {name:'Urine Routine',price:100,cat:'lab'},
+      {name:'ECG',price:250,cat:'procedure'},
+      {name:'Dressing',price:150,cat:'procedure'}
+    ];
+  }
+  if(window._apptData.length===0){
+    var today=new Date();
+    var dd=String(today.getDate()).padStart(2,'0');
+    var mm=String(today.getMonth()+1).padStart(2,'0');
+    var yyyy=today.getFullYear();
+    var todayStr=yyyy+'-'+mm+'-'+dd;
+    window._apptData=[
+      {id:'A001',name:'Raman Singh',age:'45 M',mob:'98765-00001',date:todayStr,time:'09:00',token:'T01',status:'Waiting',complaint:'Fever'},
+      {id:'A002',name:'Priya Sharma',age:'32 F',mob:'98765-00002',date:todayStr,time:'09:30',token:'T02',status:'Waiting',complaint:'BP checkup'},
+      {id:'A003',name:'Gurpreet Kaur',age:'55 F',mob:'98765-00005',date:todayStr,time:'10:00',token:'T03',status:'Done',complaint:'Diabetes follow-up'}
+    ];
+  }
+  if(window.BILLING_DB.length===0){
+    window.BILLING_DB=[
+      {id:'INV-001',patient:'Raman Singh',age:'45 M',mob:'98765-00001',
+       date:'22-07-2026',dateRaw:'2026-07-22',
+       svcs:[{name:'Consultancy Fee',net:150}],
+       meds:[{name:'Paracetamol 500mg',qty:10,rate:2,net:20}],
+       grandTotal:170,paidAmount:170,balanceDue:0,
+       paymode:'Cash',status:'Paid'},
+      {id:'INV-002',patient:'Priya Sharma',age:'32 F',mob:'98765-00002',
+       date:'24-07-2026',dateRaw:'2026-07-24',
+       svcs:[{name:'Consultancy Fee',net:150},{name:'ECG',net:250}],
+       meds:[],
+       grandTotal:400,paidAmount:300,balanceDue:100,
+       paymode:'UPI',status:'Partial'},
+      {id:'INV-003',patient:'Harbhajan Singh',age:'62 M',mob:'98765-00003',
+       date:'25-07-2026',dateRaw:'2026-07-25',
+       svcs:[{name:'Follow-up',net:100}],
+       meds:[{name:'Metformin 500mg',qty:30,rate:1.5,net:45}],
+       grandTotal:145,paidAmount:0,balanceDue:145,
+       paymode:'Cash',status:'Pending'}
+    ];
+  }
+  if(window.INV_DB.length===0){
+    window.INV_DB=[
+      {id:1,name:'Paracetamol 500mg',batch:'B001',expiry:'2027-06',qty:100,unit:'Tabs',rate:2,mrp:3,supplier:'MedCo'},
+      {id:2,name:'Metformin 500mg',batch:'B002',expiry:'2027-03',qty:60,unit:'Tabs',rate:1.5,mrp:2.5,supplier:'PharmaCo'},
+      {id:3,name:'Azithromycin 500mg',batch:'B003',expiry:'2026-12',qty:20,unit:'Tabs',rate:12,mrp:18,supplier:'MedCo'},
+      {id:4,name:'Omeprazole 20mg',batch:'B004',expiry:'2027-09',qty:50,unit:'Caps',rate:3,mrp:5,supplier:'GenPharma'}
+    ];
+    if(typeof DB!=='undefined'){DB.length=0;window.INV_DB.forEach(function(x){DB.push(x);});}
+  }
+})();
 
 
 </script>
