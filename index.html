@@ -2408,6 +2408,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -5408,7 +5409,10 @@ function openRxForPatient(name,pid,age,sex,mob,diag){
   window._rxCurrentPatient=(arguments[0]||'').trim().toLowerCase();
 
   // Store in global so we can fill after any async operations
-  var _ageSex=(age&&sex)?age+' '+sex:age||sex||'';
+  // age may already contain sex e.g. '22 F' — don't double-append
+  var _ageSex=age&&sex&&age.trim().slice(-1).toUpperCase()===sex.trim().charAt(0).toUpperCase()
+    ?age
+    :(age&&sex)?age+' '+sex:age||sex||'';
   window._rxPending={name:name,pid:pid,age:_ageSex,sex:sex,mob:mob,diag:diag,city:_city};
   nav('rx');
   // Fill immediately
@@ -13548,6 +13552,7 @@ function openInvoiceForPatient(name,age,mob){
   },200);
 }
 window.openInvoiceForPatient=openInvoiceForPatient;
+
 
 
 
