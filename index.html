@@ -267,10 +267,9 @@ html,body{height:100%;overflow:hidden}
   .mob-nav{padding-bottom:env(safe-area-inset-bottom,8px)}
 
   /* Modal full screen on mobile */
-  .overlay{align-items:flex-end !important}
+  .overlay{align-items:center}
   .modal{
-    max-width:100% !important;width:100% !important;
-    border-radius:20px 20px 0 0 !important;
+    border-radius:20px 20px 0 0;
     max-height:92vh;overflow-y:auto;
   }
 
@@ -334,6 +333,11 @@ html,body{height:100%;overflow:hidden}
     font-size:12px
   }
 }
+
+/* Force invoice modals to center properly */
+#m-invoice, #m-bulk-gen {display:none;align-items:center;justify-content:center}
+#m-invoice.open, #m-bulk-gen.open {display:flex !important;align-items:center !important;justify-content:center !important}
+#m-invoice .modal, #m-bulk-gen .modal {max-width:780px !important;width:92% !important;border-radius:16px !important;max-height:90vh !important}
 </style>
 </head>
 <body>
@@ -2111,7 +2115,7 @@ html,body{height:100%;overflow:hidden}
 <!-- ── NEW INVOICE MODAL ── -->
 
 
-<div class="overlay" id="m-invoice">
+<div class="overlay" id="m-invoice" style="display:none">
 <div class="modal" style="max-width:780px;max-height:94vh;overflow-y:auto">
   <div class="mh">
     <h2><i class="ti ti-receipt" style="color:var(--acc);margin-right:8px"></i>New Invoice / Bill</h2>
