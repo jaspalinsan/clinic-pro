@@ -2377,6 +2377,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2398,6 +2399,23 @@ window.sepEl=sepEl;
 // ═══ USERS ════════════════════════════════════════════════
 
 // ═══ DEFAULT USERS (overridden by database/localStorage) ══
+// Clear stale user cache if settings page not in pages list
+(function(){
+  try{
+    var raw=localStorage.getItem('cp_users_v1');
+    if(raw){
+      var u=JSON.parse(raw);
+      var needsUpdate=false;
+      Object.values(u).forEach(function(usr){
+        if(usr.pages&&usr.pages.indexOf('settings')===-1){
+          usr.pages.push('settings');needsUpdate=true;
+        }
+      });
+      if(needsUpdate)localStorage.setItem('cp_users_v1',JSON.stringify(u));
+    }
+  }catch(e){localStorage.removeItem('cp_users_v1');}
+})();
+
 var CP_USERS_DEFAULT={
   'admin':        {pass:'2024admin',        name:'Admin',         role:'Admin',
     pages:['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings']},
@@ -2542,7 +2560,13 @@ window.unlockApp=unlockApp;
 
 function cpApplyAccess(user){
   var allPages=['dashboard','appointments','rx','pharmacy','inventory','vendor','lab','finance','settings'];
+  // Always ensure settings is accessible
   var allowed=user.pages||allPages;
+  if(user.role==='Admin'&&allowed.indexOf('settings')===-1)allowed.push('settings');
+  // Clear any stale data-blocked on settings
+  var _spg=document.getElementById('page-settings');
+  if(_spg)_spg.removeAttribute('data-blocked');
+
   allPages.forEach(function(p){
     var show=allowed.indexOf(p)!==-1;
     var nl=document.getElementById('nl-'+p);  if(nl)nl.style.display=show?'':'none';
@@ -13120,6 +13144,7 @@ window.printBS=printBS;
     if(typeof DB!=='undefined'){DB.length=0;window.INV_DB.forEach(function(x){DB.push(x);});}
   }
 })();
+
 
 
 
