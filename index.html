@@ -126,7 +126,7 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
 #page-settings{padding:0!important;height:calc(100vh - 72px)!important;display:flex!important;flex-direction:column!important}
-#page-settings.on{display:block!important}
+#page-settings.on{display:flex!important;flex-direction:column}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -298,7 +298,7 @@ html,body{height:100%;overflow:hidden}
   #appt-tab-new i,#appt-tab-process i,#appt-tab-done i{font-size:14px !important}
 
   /* Settings sidebar + content */
-  #page-settings > div{flex-direction:column !important}
+  #page-settings > div{flex-direction:row !important}
   #sp-nav{flex-direction:row !important;flex-wrap:wrap;width:100% !important;
     border-right:none !important;border-bottom:1px solid var(--sl2);
     padding:8px !important}
@@ -359,6 +359,7 @@ html,body{height:100%;overflow:hidden}
     <button class="nl"    id="nl-lab"           id="nav-lab" onclick="nav('lab')"          title="Lab">          <i class="ti ti-microscope"               ></i><span class="nl-lbl">Laboratory</span></button>
     <button class="nl"    id="nl-vendor"        id="nav-vendor" onclick="nav('vendor')"       title="Vendor">       <i class="ti ti-truck"                    ></i><span class="nl-lbl">Vendor</span></button>
     <button class="nl"    id="nl-finance"       id="nav-finance" onclick="nav('finance')"      title="Finance">      <i class="ti ti-report-money"             ></i><span class="nl-lbl">Finance</span></button>
+    <button class="nl"    id="nl-settings"      id="nav-settings" onclick="nav('settings')"     title="Settings">     <i class="ti ti-settings"                ></i><span class="nl-lbl">Settings</span></button>
 
   </div>
 
@@ -2289,6 +2290,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -12977,6 +12979,7 @@ function printBS(){
   var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},300);}
 }
 window.printBS=printBS;
+
 
 
 
