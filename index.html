@@ -430,7 +430,7 @@ html,body{height:100%;overflow:hidden}
       <thead><tr>
         <th style="width:32px"><input type="checkbox" id="pat-check-all" onchange="patCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th>
         <th style="width:90px">ID</th><th style="width:20%">Client Name</th>
-        <th style="width:80px">Age</th><th style="width:15%">City</th>
+        <th style="width:80px">Age Sex</th><th style="width:15%">City</th>
         <th style="width:120px">Mobile</th><th style="width:18%">Actions</th>
       </tr></thead>
       <tbody id="pat-tbody">
@@ -607,7 +607,7 @@ html,body{height:100%;overflow:hidden}
   <select id="rx-today-appts" onchange="rxPickTodayAppt(this)" style="width:100%;padding:8px 12px;border:1.5px solid #B5D4F4;border-radius:8px;font-size:13px;background:var(--bg);color:var(--ink);cursor:pointer;outline:none"><option value="">— Select from today's appointments —</option></select>
 </div>
 <div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="rx-pat-name" placeholder="Patient name" oninput="patAutoInput(this,'rxFillPatient');window._rxCurrentPatient=this.value.trim().toLowerCase();renderSavedRx('');if(typeof renderRxLabReports==='function')renderRxLabReports();if(typeof rxLoadPrevBalance==='function')rxLoadPrevBalance(this.value);"><div id="drop-rx-pat-name" class="pat-drop" style="display:none"></div></div></div>
-      <div><div class="flbl" style="margin-bottom:3px">Age</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
+      <div><div class="flbl" style="margin-bottom:3px">Age Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
     </div>
@@ -2044,7 +2044,7 @@ html,body{height:100%;overflow:hidden}
         <div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="appt-name" placeholder="Full name" style="width:100%" oninput="patAutoInput(this,'apptFillPatient')" autocomplete="off"><div id="drop-appt-name" class="pat-drop" style="display:none"></div></div>
       </div>
       <div>
-        <div class="flbl" style="margin-bottom:4px">Age</div>
+        <div class="flbl" style="margin-bottom:4px">Age Sex</div>
         <input class="fin" id="appt-age" placeholder="Age" type="number" style="width:100%">
       </div>
       <div>
@@ -2107,7 +2107,7 @@ html,body{height:100%;overflow:hidden}
         <div class="pat-drop-wrap" style="position:relative;width:100%"><input class="fin" id="ap-name" placeholder="Full name" style="width:100%" oninput="patAutoInput(this,'')" autocomplete="off"><div id="drop-ap-name" class="pat-drop" style="display:none"></div></div>
       </div>
       <div>
-        <div class="flbl" style="margin-bottom:4px">Age</div>
+        <div class="flbl" style="margin-bottom:4px">Age Sex</div>
         <input class="fin" id="ap-age" type="number" placeholder="35" style="width:100%">
       </div>
       <div>
@@ -2329,6 +2329,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -2918,14 +2919,13 @@ function submitAddPatient() {
   if(!tbody){toast('Patient table not found','error');return;}
   const tr = document.createElement('tr');
 
-  // Correct columns: ☐ | ID | Name | Age | Sex | City | Mobile | Actions
-  var _sexBadge=gen==='F'||gen==='f'?'<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#FCE7F3;color:#9D174D">F</span>':(gen?'<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#DBEAFE;color:#1E40AF">M</span>':'—');
+  // Correct columns: ☐ | ID | Name | Age Sex | City | Mobile | Actions
+  var _ageSex=(age&&gen)?age+' '+gen:(age||gen||'—');
   tr.innerHTML =
     '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
     '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
     '<td><b>'+name+'</b></td>'+
-    '<td style="font-size:12px">'+age+'</td>'+
-    '<td>'+_sexBadge+'</td>'+
+    '<td style="font-size:12px;white-space:nowrap">'+_ageSex+'</td>'+
     '<td>'+city+'</td>'+
     '<td>'+mobile+'</td>'+
     '<td><div style="display:flex;gap:4px">'+
@@ -5397,10 +5397,13 @@ window.bookApptDirect=bookApptDirect;
 
 // ── openRxForPatient ─────────────────────────────────────────
 function openRxForPatient(name,pid,age,sex,mob,diag){
+  // Look up city from PAT_DB
+  var _pat=(window.PAT_DB||[]).find(function(p){return p.name===name||p.id===pid;});
+  var _city=_pat?(_pat.city||_pat.address||''):'';
   window._rxCurrentPatient=(arguments[0]||'').trim().toLowerCase();
 
   // Store in global so we can fill after any async operations
-  window._rxPending={name:name,pid:pid,age:age,sex:sex,mob:mob,diag:diag};
+  window._rxPending={name:name,pid:pid,age:age,sex:sex,mob:mob,diag:diag,city:_city};
   nav('rx');
   // Fill immediately
   _fillRxPatient();
@@ -13537,6 +13540,7 @@ function openInvoiceForPatient(name,age,mob){
   },200);
 }
 window.openInvoiceForPatient=openInvoiceForPatient;
+
 
 
 </script>
