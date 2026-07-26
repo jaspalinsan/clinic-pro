@@ -2409,6 +2409,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -13560,7 +13561,178 @@ window.openInvoiceForPatient=openInvoiceForPatient;
 
 
 
+
+// ── Excel / CSV Patient Import ──────────────────────────────────
+var _xlsRows=[];
+
+function xlsDownloadTemplate(){
+  var csv='Name,Age,Sex,Mobile,City\n'
+    +'Raman Singh,45,M,98765-00001,Moga\n'
+    +'Priya Sharma,32,F,98765-00002,Ludhiana\n'
+    +'Harbhajan Singh,62,M,98765-00003,Amritsar\n';
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='patient_import_template.csv';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  toast('Template downloaded — fill and upload','success');
+}
+window.xlsDownloadTemplate=xlsDownloadTemplate;
+
+function xlsHandleFile(file){
+  if(!file)return;
+  var ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){
+    var reader=new FileReader();
+    reader.onload=function(e){xlsParseCSV(e.target.result);};
+    reader.readAsText(file);
+  } else if(ext==='xlsx'){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(e.target.result,{type:'binary'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var data=XLSX.utils.sheet_to_csv(ws);
+        xlsParseCSV(data);
+      }catch(err){
+        toast('Could not read xlsx — try saving as CSV','error');
+      }
+    };
+    reader.readAsBinaryString(file);
+  } else {
+    toast('Please upload .xlsx or .csv only','error');
+  }
+}
+window.xlsHandleFile=xlsHandleFile;
+
+function xlsParseCSV(text){
+  var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  if(!lines.length){toast('File is empty','error');return;}
+  // Detect header row
+  var start=0;
+  var first=lines[0].toLowerCase();
+  if(first.indexOf('name')!==-1||first.indexOf('age')!==-1)start=1;
+  _xlsRows=[];
+  var existing=(window.PAT_DB||[]).map(function(p){return (p.name||'').trim().toLowerCase();});
+  lines.slice(start).forEach(function(line,i){
+    var cols=line.split(',').map(function(c){return c.replace(/^"|"$/g,'').trim();});
+    var name=cols[0]||'';
+    var age=cols[1]||'';
+    var sex=(cols[2]||'').toUpperCase().charAt(0);
+    if(sex!=='M'&&sex!=='F'&&sex!=='O')sex='';
+    var mob=cols[3]||'';
+    var city=cols[4]||'';
+    if(!name)return;
+    var ageSex=(age&&sex)?age+' '+sex:age||sex||'';
+    var isDup=existing.indexOf(name.trim().toLowerCase())!==-1;
+    _xlsRows.push({name:name,age:age,sex:sex,ageSex:ageSex,mob:mob,city:city,dup:isDup,row:i+start+2});
+  });
+  xlsRenderPreview();
+}
+window.xlsParseCSV=xlsParseCSV;
+
+function xlsRenderPreview(){
+  var prev=document.getElementById('xls-preview');
+  var tbody=document.getElementById('xls-preview-body');
+  var hdr=document.getElementById('xls-preview-hdr');
+  var summ=document.getElementById('xls-summary');
+  var btn=document.getElementById('xls-import-btn');
+  if(!prev||!tbody)return;
+  if(!_xlsRows.length){toast('No valid rows found','error');return;}
+  var dups=_xlsRows.filter(function(r){return r.dup;}).length;
+  var good=_xlsRows.length-dups;
+  if(hdr)hdr.textContent='Preview — '+_xlsRows.length+' patients found';
+  tbody.innerHTML=_xlsRows.slice(0,8).map(function(r,i){
+    var bg=r.dup?'background:#FFF1F2':'';
+    return '<tr style="'+bg+'">'
+      +'<td style="color:var(--ink3);font-size:10px">'+r.row+'</td>'
+      +'<td><b>'+r.name+'</b></td>'
+      +'<td style="white-space:nowrap">'+r.ageSex+'</td>'
+      +'<td>'+r.mob+'</td>'
+      +'<td>'+r.city+'</td>'
+      +'<td>'+(r.dup?'<span style="font-size:10px;font-weight:700;color:#DC2626">Duplicate</span>':'<span style="font-size:10px;font-weight:700;color:#059669">New</span>')+'</td>'
+      +'</tr>';
+  }).join('');
+  if(summ)summ.innerHTML='<b>'+good+'</b> new &nbsp;|&nbsp; <b style="color:#DC2626">'+dups+'</b> duplicate (will be skipped) &nbsp;|&nbsp; Total: '+_xlsRows.length
+    +(btn?'':'')+(_xlsRows.length>8?'<span style="color:var(--ink3)"> &nbsp;(showing first 8)</span>':'');
+  prev.style.display='';
+  if(btn){btn.style.display=good>0?'':'none';btn.innerHTML='<i class="ti ti-check"></i> Import '+good+' New Patients';}
+}
+window.xlsRenderPreview=xlsRenderPreview;
+
+function xlsImportAll(){
+  if(!_xlsRows.length)return;
+  if(!window.PAT_DB)window.PAT_DB=[];
+  var existing=window.PAT_DB.map(function(p){return (p.name||'').trim().toLowerCase();});
+  var count=0;
+  _xlsRows.forEach(function(r){
+    if(r.dup)return;
+    if(existing.indexOf(r.name.trim().toLowerCase())!==-1)return;
+    var id='CAD-'+String(Date.now()+count).slice(-4);
+    window.PAT_DB.unshift({id:id,name:r.name,age:r.ageSex,gender:r.sex,mob:r.mob,city:r.city,blood:'',status:'Active'});
+    existing.push(r.name.trim().toLowerCase());
+    count++;
+  });
+  if(typeof cpSaveData==='function')cpSaveData();
+  if(typeof renderDashPatients==='function')renderDashPatients();
+  if(typeof updateDashStats==='function')updateDashStats();
+  closeModal('m-xls');
+  _xlsRows=[];
+  toast('\u2713 '+count+' patients imported successfully','success');
+}
+window.xlsImportAll=xlsImportAll;
+
 </script>
+
+<div class="overlay" id="m-xls" style="display:none">
+<div class="modal" style="max-width:640px;max-height:94vh;overflow-y:auto">
+  <div class="mh">
+    <h2><i class="ti ti-file-spreadsheet" style="color:#059669;margin-right:8px"></i>Import Patients from Excel / CSV</h2>
+    <button class="mclose" onclick="closeModal('m-xls')"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="mbody" style="padding:16px 20px">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="tb" onclick="xlsDownloadTemplate()" style="font-size:11px;color:#059669;border-color:#059669">
+        <i class="ti ti-download"></i> Download Template
+      </button>
+      <div style="font-size:11px;color:var(--ink3);display:flex;align-items:center">
+        ← Fill this template then upload below
+      </div>
+    </div>
+    <div style="border:2px dashed var(--sl2);border-radius:10px;padding:20px;text-align:center;margin-bottom:14px;cursor:pointer;background:var(--sl)"
+         onclick="document.getElementById('xls-file-input').click()"
+         ondragover="event.preventDefault();this.style.borderColor='#185FA5'"
+         ondragleave="this.style.borderColor=''"
+         ondrop="event.preventDefault();this.style.borderColor='';xlsHandleFile(event.dataTransfer.files[0])">
+      <i class="ti ti-upload" style="font-size:28px;color:var(--ink3);display:block;margin-bottom:8px"></i>
+      <div style="font-size:13px;font-weight:600;color:var(--ink2)">Click or drag .xlsx / .csv file here</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:4px">Columns: Name · Age · Sex · Mobile · City</div>
+      <input type="file" id="xls-file-input" accept=".xlsx,.csv" style="display:none" onchange="xlsHandleFile(this.files[0])">
+    </div>
+    <div id="xls-preview" style="display:none">
+      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px" id="xls-preview-hdr">Preview</div>
+      <div style="overflow-x:auto;border:0.5px solid var(--sl2);border-radius:8px;overflow:hidden">
+        <table class="tbl" id="xls-preview-table">
+          <thead><tr>
+            <th>#</th><th>Name</th><th>Age Sex</th><th>Mobile</th><th>City</th><th>Status</th>
+          </tr></thead>
+          <tbody id="xls-preview-body"></tbody>
+        </table>
+      </div>
+      <div id="xls-summary" style="margin-top:8px;font-size:11px;color:var(--ink3)"></div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-xls')">Cancel</button>
+    <button class="bp" id="xls-import-btn" onclick="xlsImportAll()" style="display:none">
+      <i class="ti ti-check"></i> Import All Patients
+    </button>
+  </div>
+</div>
+</div>
+
+
 <div class="overlay" id="m-invoice" style="display:none">
 <div class="modal" style="max-width:780px;max-height:94vh;overflow-y:auto">
   <div class="mh">
