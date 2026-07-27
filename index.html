@@ -2136,42 +2136,7 @@ html,body{height:100%;overflow:hidden}
 </div>
 
 <!-- ═══ UPLOAD XLS MODAL ═══ -->
-<div class="overlay" id="m-xls">
-<div class="modal" style="max-width:480px">
-  <div class="mh">
-    <h2><i class="ti ti-file-spreadsheet" style="color:#10b981;margin-right:8px"></i>Upload Patient List (XLS)</h2>
-    <button class="mclose" onclick="closeModal('m-xls')"><i class="ti ti-x"></i></button>
-  </div>
-  <div class="mbody" style="padding:18px 22px">
-    <div style="background:#f0fdf4;border:1.5px dashed #10b981;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;cursor:pointer"
-      onclick="document.getElementById('xls-file-input').click()">
-      <i class="ti ti-file-spreadsheet" style="font-size:32px;color:#10b981;display:block;margin-bottom:8px"></i>
-      <div style="font-size:14px;font-weight:600;color:#065f46;margin-bottom:4px">Click to select XLS / CSV file</div>
-      <div style="font-size:12px;color:#6b7280">Supports .xlsx, .xls, .csv files</div>
-    </div>
-    <input type="file" id="xls-file-input" accept=".xlsx,.xls,.csv"
-      style="display:none" onchange="handleXLSUpload(this)">
 
-    <div id="xls-preview" style="display:none">
-      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px" id="xls-filename"></div>
-      <div style="font-size:11px;color:#64748b;margin-bottom:10px">Expected columns: Name, Age, Gender, Mobile, Complaint, Status</div>
-      <div id="xls-preview-table" style="overflow-x:auto;max-height:200px;border:1px solid #e2e8f0;border-radius:8px"></div>
-      <div style="font-size:12px;color:#10b981;font-weight:600;margin-top:10px" id="xls-count"></div>
-    </div>
-
-    <div style="background:#fef3c7;border-radius:8px;padding:10px 14px;font-size:11.5px;color:#92400e;margin-top:12px">
-      <i class="ti ti-info-circle" style="margin-right:6px"></i>
-      <strong>Format:</strong> Row 1 = headers. Columns: Name | Age | Gender | Mobile | Complaint | Status
-    </div>
-  </div>
-  <div class="mfooter">
-    <button class="bs" onclick="closeModal('m-xls')">Cancel</button>
-    <button class="bp" id="xls-import-btn" onclick="doXLSImport()" style="display:none">
-      <i class="ti ti-check"></i> Import Patients
-    </button>
-  </div>
-</div>
-</div>
 
 
 
@@ -2317,6 +2282,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -13679,6 +13645,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
 
 
 
