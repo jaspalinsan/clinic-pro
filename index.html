@@ -431,7 +431,7 @@ html,body{height:100%;overflow:hidden}
         <th style="width:32px"><input type="checkbox" id="pat-check-all" onchange="patCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th>
         <th style="width:90px">ID</th><th style="width:20%">Client Name</th>
         <th style="width:80px">Age Sex</th><th style="width:15%">City</th>
-        <th style="width:120px">Mobile</th><th style="width:18%">Actions</th>
+        <th style="width:120px">Mobile</th><th style="width:120px">History</th><th style="width:18%">Actions</th>
       </tr></thead>
       <tbody id="pat-tbody">
         <tr><td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td><td style="font-size:11.5px;color:var(--lav);font-weight:700">CAD-0012</td><td><b>Veerpal Kaur</b></td><td>45 / F</td><td style="color:var(--ink3)">Barnala</td><td>98765-43210</td><td><div style="display:flex;gap:4px"><button class="tb" onclick="editPatient('Veerpal Kaur','CAD-0012','45','F','Fever','Active')" style="font-size:11px"><i class="ti ti-edit"></i></button><button class="tb" onclick="openRxForPatient('Veerpal Kaur','CAD-0012','45','F','98765-43210','Fever')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button><button class="tb" onclick="bookApptDirect('Veerpal Kaur','CAD-0012','45','F','98765-43210','Fever')" style="font-size:11px"><i class="ti ti-calendar-plus"></i>Appt</button></div></td></tr>
@@ -2126,6 +2126,10 @@ html,body{height:100%;overflow:hidden}
         <div class="flbl" style="margin-bottom:4px">City</div>
         <input class="fin" id="ap-city" placeholder="Village / City" style="width:100%">
       </div>
+      <div style="grid-column:span 2">
+        <div class="flbl" style="margin-bottom:4px">History</div>
+        <input class="fin" id="ap-history" placeholder="Diabetes, Hypertension, Surgery..." style="width:100%">
+      </div>
     </div>
   </div>
   <div class="mfooter">
@@ -2282,6 +2286,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -2877,6 +2883,7 @@ function submitAddPatient(){
   var gen=((document.getElementById('ap-gender')||{}).value||'M').toUpperCase().charAt(0);
   var mobile=(document.getElementById('ap-mobile')||{}).value||'';
   var city=(document.getElementById('ap-city')||{}).value||'';
+  var history=(document.getElementById('ap-history')||{}).value||'';
 
   if(!name.trim()){toast('Enter patient name','error');return;}
   if(!age){toast('Enter age','error');return;}
@@ -2886,7 +2893,7 @@ function submitAddPatient(){
 
   // Add to PAT_DB
   if(!window.PAT_DB)window.PAT_DB=[];
-  var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,blood:'',status:'Active'};
+  var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active'};
   window.PAT_DB.unshift(pat);
   if(typeof cpSaveData==='function')cpSaveData();
 
@@ -2901,6 +2908,7 @@ function submitAddPatient(){
       '<td style="white-space:nowrap">'+ageSex+'</td>'+
       '<td>'+city+'</td>'+
       '<td>'+mobile+'</td>'+
+      '<td style="font-size:11px;color:var(--ink2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+history+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
         '<button class="tb" onclick="editPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\'—\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
         '<button class="tb" onclick="openRxForPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mobile+'\',\'\',\''+city+'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
@@ -2911,7 +2919,7 @@ function submitAddPatient(){
   }
 
   // Clear form and close
-  ['ap-name','ap-age','ap-mobile','ap-city'].forEach(function(id){
+  ['ap-name','ap-age','ap-mobile','ap-city','ap-history'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.value='';
   });
   var gsel=document.getElementById('ap-gender');if(gsel)gsel.selectedIndex=0;
@@ -11450,6 +11458,7 @@ function renderDashPatients(){
       '<td style="white-space:nowrap">'+ageSex+'</td>'+
       '<td>'+city+'</td>'+
       '<td>'+mob+'</td>'+
+      '<td style="font-size:11px;color:var(--ink2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(p.history||p.complaint||'')+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
         '<button class="tb" onclick="editPatient(\''+name.replace(/'/g,"\\'")+'\''+',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\'—\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
         '<button class="tb" onclick="openRxForPatient(\''+name.replace(/'/g,"\\'")+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mob+'\',\'\',\''+city+'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
@@ -13528,7 +13537,7 @@ window.openInvoiceForPatient=openInvoiceForPatient;
 var _xlsRows=[];
 
 function xlsDownloadTemplate(){
-  var csv='Name,Age,Sex,Mobile,City\n'
+  var csv='Name,Age,Sex,Mobile,City,History\n'
     +'Raman Singh,45,M,98765-00001,Moga\n'
     +'Priya Sharma,32,F,98765-00002,Ludhiana\n'
     +'Harbhajan Singh,62,M,98765-00003,Amritsar\n';
@@ -13585,10 +13594,11 @@ function xlsParseCSV(text){
     if(sex!=='M'&&sex!=='F'&&sex!=='O')sex='';
     var mob=cols[3]||'';
     var city=cols[4]||'';
+    var hist=cols[5]||'';
     if(!name)return;
     var ageSex=(age&&sex)?age+' '+sex:age||sex||'';
     var isDup=existing.indexOf(name.trim().toLowerCase())!==-1;
-    _xlsRows.push({name:name,age:age,sex:sex,ageSex:ageSex,mob:mob,city:city,dup:isDup,row:i+start+2});
+    _xlsRows.push({name:name,age:age,sex:sex,ageSex:ageSex,mob:mob,city:city,history:hist,dup:isDup,row:i+start+2});
   });
   xlsRenderPreview();
 }
@@ -13633,7 +13643,7 @@ function xlsImportAll(){
     if(existing.indexOf(r.name.trim().toLowerCase())!==-1)return;
     var id='CAD-'+String(Date.now()+count).slice(-4);
     var _xs=r.ageSex||(r.age&&r.sex?r.age+' '+r.sex:r.age||'');
-window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.city,blood:'',status:'Active'});
+window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.city,history:r.history||'',blood:'',status:'Active'});
     existing.push(r.name.trim().toLowerCase());
     count++;
   });
@@ -13645,6 +13655,8 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
+
 
 
 
