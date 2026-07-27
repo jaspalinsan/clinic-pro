@@ -925,7 +925,7 @@ html,body{height:100%;overflow:hidden}
     <button class="bs" onclick="invClearSel()" style="font-size:12px">Clear</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:52px;text-align:center">Dose</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:84px">Purchase &#8377;</th><th style="width:74px">Sale &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
+    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:84px">Purchase &#8377;</th><th style="width:74px">Sale &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
     <tbody id="inv-tbody"></tbody>
   </table></div></div>
 </div>
@@ -942,7 +942,7 @@ html,body{height:100%;overflow:hidden}
   <div class="card">
     <div class="ch"><span class="ct">Vendor Bill Items</span></div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:50px;text-align:center">Dose</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
       <tbody id="vd-tbody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to auto-fill</td></tr></tbody>
     </table></div>
     <div style="padding:10px 16px;text-align:right"><b>Total: </b><span id="vd-total">&#8377;0.00</span></div>
@@ -2379,6 +2379,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3111,7 +3112,6 @@ function renderInventory(){
     var pur=parseFloat(m.purchase)||0;
     var sal=parseFloat(m.sale)||0;
     var amt=qty*pur;
-    var dose=m.dose||m.cat||'—';
     var qtyColor=qty<=0?'var(--rose)':qty<=20?'var(--gold)':'var(--acc)';
     var stPill=qty<=0?'p-r':qty<=20?'p-a':'p-g';
     var stLbl=qty<=0?'Out of Stock':qty<=20?'Low Stock':'In Stock';
@@ -3127,11 +3127,6 @@ function renderInventory(){
         '<div style="font-size:10.5px;color:var(--ink3);margin-top:1px">'+
           (m.type||'')+(m.company?' &bull; '+m.company:'')+
         '</div>'+
-      '</td>'+
-
-      // Dose — vacant (editable)
-      '<td style="text-align:center">'+
-        (dose?'<span class="pill p-lav" style="font-size:10px;font-weight:700">'+dose+'</span>':'<span style="color:var(--ink3);font-size:11px">&mdash;</span>')+
       '</td>'+
 
       // Schedule — vacant (editable)
@@ -13660,6 +13655,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
 
 
 
