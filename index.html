@@ -610,6 +610,7 @@ html,body{height:100%;overflow:hidden}
       <div><div class="flbl" style="margin-bottom:3px">Age Sex</div><input class="fin" id="rx-pat-age" placeholder="45 / F"></div>
       <div><div class="flbl" style="margin-bottom:3px">Mobile</div><input class="fin" id="rx-pat-mob" placeholder="98765-00000"></div>
       <div><div class="flbl" style="margin-bottom:3px">City</div><input class="fin" id="rx-pat-city" placeholder="City"></div>
+      <div style="grid-column:span 2"><div class="flbl" style="margin-bottom:3px">History</div><input class="fin" id="rx-pat-history" placeholder="Diabetes, Hypertension..." style="width:100%"></div>
     </div>
     <div style="padding:8px 18px;border-bottom:0.5px solid var(--sl2);background:var(--sl)">
       <div class="flbl" style="margin-bottom:4px;display:flex;align-items:center;gap:5px">
@@ -2286,6 +2287,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -4548,6 +4550,7 @@ function rxPrint(){
   var gv=function(id){return(document.getElementById(id)||{}).value||'';};
   var pname=gv('rx-pat-name')||'Patient';
   var age=gv('rx-pat-age');var mob=gv('rx-pat-mob');var city=gv('rx-pat-city');
+  var phistory=gv('rx-pat-history')||'';
   var bp=gv('rx-bp');var pulse=gv('rx-pulse');var temp=gv('rx-temp');
   var spo2=gv('rx-spo2');var wt=gv('rx-weight');var ht=gv('rx-height');
   var bmi=g('rx-bmi');
@@ -4622,6 +4625,7 @@ function rxPrint(){
   '<div><div class="lbl">Age Sex</div><div class="val">'+age+'</div></div>'+
   '<div><div class="lbl">Mobile</div><div class="val">'+mob+'</div></div>'+
   '<div><div class="lbl">City</div><div class="val">'+city+'</div></div>'+
+  '<div><div class="lbl">History</div><div class="val">'+phistory+'</div></div>'+
   '<div><div class="lbl">Mode</div><div class="val">'+mode+'</div></div>'+
   '<div><div class="lbl">Next Visit</div><div class="val">'+nxt+'</div></div>'+
   '</div>'+
@@ -5398,6 +5402,7 @@ function _fillRxPatient(){
   set('rx-pat-age',  (p.age||''));
   set('rx-pat-mob',  p.mob||'');
   set('rx-pat-city', p.city||p.address||'');
+  set('rx-pat-history', p.history||p.complaint||'');
   set('rx-pat-dx',   p.diag||'');
   var sub=document.getElementById('rx-sub');
   if(sub)sub.textContent='Patient: '+(p.name||'');
@@ -13655,6 +13660,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
 
 
 
