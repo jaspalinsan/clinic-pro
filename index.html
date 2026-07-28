@@ -2380,6 +2380,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -6972,7 +6973,40 @@ function filterPatients(q){var lq=(q||'').toLowerCase();[].slice.call(document.q
 function patCheckAll(cb){document.querySelectorAll('.pat-cb').forEach(function(c){c.checked=cb.checked;});updatePatBulkBar();}
 function updatePatBulkBar(){var n=document.querySelectorAll('.pat-cb:checked').length;var tot=document.querySelectorAll('.pat-cb').length;var bar=document.getElementById('pat-bulk-bar');var cnt=document.getElementById('pat-bulk-count');var all=document.getElementById('pat-check-all');if(bar)bar.style.display=n>0?'flex':'none';if(cnt)cnt.textContent=n+' of '+tot+' selected';if(all){all.checked=n===tot&&tot>0;all.indeterminate=n>0&&n<tot;}}
 function clearPatSelection(){document.querySelectorAll('.pat-cb').forEach(function(c){c.checked=false;});var all=document.getElementById('pat-check-all');if(all){all.checked=false;all.indeterminate=false;}var bar=document.getElementById('pat-bulk-bar');if(bar)bar.style.display='none';}
-function bulkDeletePatients(){var c=[].slice.call(document.querySelectorAll('.pat-cb:checked'));if(!c.length){toast('Select patients first','error');return;}if(!confirm('Delete '+c.length+' patient(s)?'))return;c.forEach(function(cb){var tr=cb.closest('tr');if(tr)tr.remove();});clearPatSelection();toast(c.length+' patient(s) deleted','success');}
+function bulkDeletePatients(){
+  var checked=[].slice.call(document.querySelectorAll('.pat-cb:checked'));
+  if(!checked.length){toast('Select patients first','error');return;}
+  if(!confirm('Delete '+checked.length+' patient(s)? This cannot be undone.'))return;
+
+  // Collect IDs/names to remove from PAT_DB
+  var toDelete=[];
+  checked.forEach(function(cb){
+    var tr=cb.closest('tr');
+    if(!tr)return;
+    // ID is in 2nd td (index 1)
+    var tds=tr.querySelectorAll('td');
+    var id=tds[1]?tds[1].textContent.trim():'';
+    var name=tds[2]?tds[2].textContent.trim():'';
+    toDelete.push({id:id,name:name});
+    tr.remove();
+  });
+
+  // Remove from PAT_DB
+  if(window.PAT_DB){
+    window.PAT_DB=window.PAT_DB.filter(function(p){
+      return !toDelete.some(function(d){
+        return (d.id&&p.id===d.id)||(d.name&&p.name===d.name);
+      });
+    });
+  }
+
+  if(typeof cpSaveData==='function')cpSaveData();
+  if(typeof updatePatBulkBar==='function')updatePatBulkBar();
+  if(typeof updateDashStats==='function')updateDashStats();
+  clearPatSelection();
+  toast(checked.length+' patient(s) deleted','success');
+}
+window.bulkDeletePatients=bulkDeletePatients;
 function updateDashStats(){var p=document.querySelectorAll('#pat-tbody tr').length;var s=document.getElementById('stat-patients');if(s)s.textContent=p;var inv=(typeof DB!=='undefined')?DB.length:0;var s2=document.getElementById('stat-inv');if(s2)s2.textContent=inv;var ap=(typeof _apptData!=='undefined')?_apptData.length:0;var s3=document.getElementById('stat-appts');if(s3)s3.textContent=ap;}
 window.filterPatients=filterPatients;window.patCheckAll=patCheckAll;window.updatePatBulkBar=updatePatBulkBar;window.clearPatSelection=clearPatSelection;window.bulkDeletePatients=bulkDeletePatients;window.updateDashStats=updateDashStats;
 window._fillRxPatient=_fillRxPatient;
@@ -13655,6 +13689,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
 
 
 
