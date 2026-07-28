@@ -2381,6 +2381,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2905,6 +2906,8 @@ function submitAddPatient(){
   var tbody=document.getElementById('pat-tbody');
   if(tbody){
     var tr=document.createElement('tr');
+    tr.setAttribute('data-id', code);
+    tr.setAttribute('data-name', name.trim());
     tr.innerHTML=
       '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
       '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
@@ -6978,15 +6981,19 @@ function bulkDeletePatients(){
   if(!checked.length){toast('Select patients first','error');return;}
   if(!confirm('Delete '+checked.length+' patient(s)? This cannot be undone.'))return;
 
-  // Collect IDs/names to remove from PAT_DB
+  // Collect IDs/names from data attributes
   var toDelete=[];
   checked.forEach(function(cb){
     var tr=cb.closest('tr');
     if(!tr)return;
-    // ID is in 2nd td (index 1)
-    var tds=tr.querySelectorAll('td');
-    var id=tds[1]?tds[1].textContent.trim():'';
-    var name=tds[2]?tds[2].textContent.trim():'';
+    var id=tr.getAttribute('data-id')||'';
+    var name=tr.getAttribute('data-name')||'';
+    if(!id&&!name){
+      // fallback: read from td text
+      var tds=tr.querySelectorAll('td');
+      id=tds[1]?tds[1].textContent.trim():'';
+      name=tds[2]?tds[2].textContent.trim():'';
+    }
     toDelete.push({id:id,name:name});
     tr.remove();
   });
@@ -11485,7 +11492,7 @@ function renderDashPatients(){
     var city=p.city||'';
     var mob=p.mob||'';
     html+=
-      '<tr>'+
+      '<tr data-id="'+code+'" data-name="'+name.replace(/"/g,'&quot;')+'">'+
       '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
       '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
       '<td><b>'+name+'</b></td>'+
@@ -13689,6 +13696,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   toast('\u2713 '+count+' patients imported successfully','success');
 }
 window.xlsImportAll=xlsImportAll;
+
 
 
 
