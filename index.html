@@ -2390,6 +2390,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -6858,6 +6859,8 @@ window.rxMedPick=rxMedPick;
 // Central inventory sync — call after any DB change
 function syncInvDB(){
   window.INV_DB=DB;
+  // Save immediately to server so sync poll doesn't overwrite
+  if(typeof cpSaveData==='function')cpSaveData();
   // Also refresh Rx medicine selects if Rx page is visible
   var rxPage=document.getElementById('page-rx');
   if(rxPage&&rxPage.classList.contains('on')){
@@ -13754,6 +13757,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 </script>
