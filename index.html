@@ -2389,6 +2389,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -7014,6 +7015,14 @@ function bulkDeletePatients(){
     });
   }
 
+  // Delete from server
+  var ids=toDelete.filter(function(d){return d.id;}).map(function(d){return d.id;});
+  var names=toDelete.filter(function(d){return !d.id&&d.name;}).map(function(d){return d.name;});
+  if(ids.length||names.length){
+    fetch('data.php?action=delete_patients_bulk',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ids:ids,names:names})}).catch(function(){});
+  }
   if(typeof cpSaveData==='function')cpSaveData();
   if(typeof updatePatBulkBar==='function')updatePatBulkBar();
   if(typeof updateDashStats==='function')updateDashStats();
@@ -13720,55 +13729,32 @@ window.xlsImportAll=xlsImportAll;
 
 
 function resetAllData(){
-  if(!confirm('WARNING: This will permanently delete ALL data from the server and browser.\n\nPatients, invoices, appointments, Rx — everything.\n\nAre you absolutely sure?'))return;
+  if(!confirm('WARNING: This will permanently delete ALL data from the server and browser.\n\nPatients, invoices, appointments, Rx, Stock — everything.\n\nAre you absolutely sure?'))return;
   if(!confirm('FINAL WARNING: Cannot be undone. Click OK to proceed.'))return;
 
-  // 1. Clear localStorage
+  // Clear localStorage
   localStorage.removeItem('clinicpro_v1');
   localStorage.removeItem('cp_users_v1');
 
-  // 2. Clear all in-memory data
-  window.PAT_DB=[];
-  window.BILLING_DB=[];
-  window._apptData=[];
-  window.LAB_DB=[];
-  window.INV_DB=[];
-  window._svcList=[];
-  window.CLINIC_SETTINGS={};
+  // Clear in-memory data
+  window.PAT_DB=[];window.BILLING_DB=[];window._apptData=[];
+  window.LAB_DB=[];window.INV_DB=[];window._svcList=[];
+  window.CLINIC_SETTINGS={};window._rxSaved=[];window.MY_RX_TEMPLATES=[];
 
-  // 3. Send reset to server
-  var resets=[
-    {action:'store_set',key:'pat_db',value:'[]'},
-    {action:'store_set',key:'billing_db',value:'[]'},
-    {action:'store_set',key:'appt_data',value:'[]'},
-    {action:'store_set',key:'lab_db',value:'[]'},
-    {action:'store_set',key:'inv_db',value:'[]'},
-    {action:'store_set',key:'svc_list',value:'[]'},
-    {action:'save_billing',data:'[]'}
-  ];
+  var done=0;var total=2;
+  function checkDone(){done++;if(done>=total){toast('All data reset. Reloading...','success');setTimeout(function(){location.reload();},1500);}}
 
-  var done=0;
-  resets.forEach(function(r){
-    fetch('data.php?action='+r.action,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(r)
-    }).then(function(){
-      done++;
-      if(done===resets.length){
-        toast('All data reset. Reloading...','success');
-        setTimeout(function(){location.reload();},1500);
-      }
-    }).catch(function(){
-      done++;
-      if(done===resets.length){
-        toast('All data reset. Reloading...','success');
-        setTimeout(function(){location.reload();},1500);
-      }
-    });
-  });
+  // Reset data.php (MySQL tables)
+  fetch('data.php?action=reset_all',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(function(){checkDone();}).catch(function(){checkDone();});
+
+  // Reset api.php (clinic_data table)
+  fetch('api.php?action=reset_all',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(function(){checkDone();}).catch(function(){checkDone();});
 }
 window.resetAllData=resetAllData;
+window.resetAllData=resetAllData;
+
 
 </script>
 
