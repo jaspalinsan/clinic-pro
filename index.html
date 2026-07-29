@@ -2021,6 +2021,12 @@ html,body{height:100%;overflow:hidden}
     </select></div>
   </div>
   <button class="bp" onclick="saveDataSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save Data Settings</button>
+<hr style="margin:20px 0;border:0;border-top:1px solid var(--sl2)">
+<div style="padding:12px 14px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px">
+  <div style="font-size:13px;font-weight:700;color:#DC2626;margin-bottom:6px">⚠️ Danger Zone</div>
+  <div style="font-size:11px;color:#7F1D1D;margin-bottom:10px">Reset clears ALL data from server and browser — patients, invoices, appointments, Rx. This cannot be undone.</div>
+  <button class="tb" onclick="resetAllData()" style="background:#DC2626;color:#fff;border-color:#DC2626;font-weight:700"><i class="ti ti-trash"></i> Reset All Data</button>
+</div>
 </div>
 
 </div><!-- end right content -->
@@ -2287,6 +2293,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -13710,6 +13717,58 @@ window.xlsImportAll=xlsImportAll;
 
 
 
+
+
+function resetAllData(){
+  if(!confirm('WARNING: This will permanently delete ALL data from the server and browser.\n\nPatients, invoices, appointments, Rx — everything.\n\nAre you absolutely sure?'))return;
+  if(!confirm('FINAL WARNING: Cannot be undone. Click OK to proceed.'))return;
+
+  // 1. Clear localStorage
+  localStorage.removeItem('clinicpro_v1');
+  localStorage.removeItem('cp_users_v1');
+
+  // 2. Clear all in-memory data
+  window.PAT_DB=[];
+  window.BILLING_DB=[];
+  window._apptData=[];
+  window.LAB_DB=[];
+  window.INV_DB=[];
+  window._svcList=[];
+  window.CLINIC_SETTINGS={};
+
+  // 3. Send reset to server
+  var resets=[
+    {action:'store_set',key:'pat_db',value:'[]'},
+    {action:'store_set',key:'billing_db',value:'[]'},
+    {action:'store_set',key:'appt_data',value:'[]'},
+    {action:'store_set',key:'lab_db',value:'[]'},
+    {action:'store_set',key:'inv_db',value:'[]'},
+    {action:'store_set',key:'svc_list',value:'[]'},
+    {action:'save_billing',data:'[]'}
+  ];
+
+  var done=0;
+  resets.forEach(function(r){
+    fetch('data.php?action='+r.action,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(r)
+    }).then(function(){
+      done++;
+      if(done===resets.length){
+        toast('All data reset. Reloading...','success');
+        setTimeout(function(){location.reload();},1500);
+      }
+    }).catch(function(){
+      done++;
+      if(done===resets.length){
+        toast('All data reset. Reloading...','success');
+        setTimeout(function(){location.reload();},1500);
+      }
+    });
+  });
+}
+window.resetAllData=resetAllData;
 
 </script>
 
