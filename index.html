@@ -2393,6 +2393,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -13716,14 +13717,24 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
     count++;
   });
   // Batch save to data.php in chunks of 500
+  var MAX_IMPORT=6000;
+  if(count>MAX_IMPORT){
+    toast('Max 6000 patients per import. First 6000 imported.','error');
+    count=MAX_IMPORT;
+  }
   var newPats=window.PAT_DB.slice(0,count);
-  var CHUNK=500;
+  var CHUNK=200;
   function saveBatch(i){
     if(i>=newPats.length){
       if(typeof cpSaveData==='function')cpSaveData();
+      if(typeof renderDashPatients==='function')renderDashPatients();
+      toast('\u2713 All '+newPats.length+' patients saved successfully','success');
       return;
     }
     var batch=newPats.slice(i,i+CHUNK);
+    var batchNum=Math.floor(i/CHUNK)+1;
+    var totalBatches=Math.ceil(newPats.length/CHUNK);
+    if(typeof toast==='function')toast('Saving batch '+batchNum+' of '+totalBatches+'...','success');
     fetch('data.php?action=save_patients_bulk',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({patients:batch.map(function(p){
@@ -13740,8 +13751,7 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   if(typeof updateDashStats==='function')updateDashStats();
   closeModal('m-xls');
   _xlsRows=[];
-  var msg=count+' patients imported'+(count>500?' (saving in batches...)':'');
-  toast('\u2713 '+msg,'success');
+  toast('\u2713 Importing '+count+' patients in batches — please wait...','success');
 }
 window.xlsImportAll=xlsImportAll;
 
@@ -13786,6 +13796,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 
