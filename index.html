@@ -2392,6 +2392,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -13714,20 +13715,33 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
     existing.push(r.name.trim().toLowerCase());
     count++;
   });
-  // Save each patient to data.php patients table
-  window.PAT_DB.forEach(function(p){
-    fetch('data.php?action=save_patient',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id:p.id,name:p.name,age:p.age,gender:p.gender,
-        mobile:p.mob||'',city:p.city||'',history:p.history||'',
-        notes:'',blood:'',status:'Active'})}).catch(function(){});
-  });
+  // Batch save to data.php in chunks of 500
+  var newPats=window.PAT_DB.slice(0,count);
+  var CHUNK=500;
+  function saveBatch(i){
+    if(i>=newPats.length){
+      if(typeof cpSaveData==='function')cpSaveData();
+      return;
+    }
+    var batch=newPats.slice(i,i+CHUNK);
+    fetch('data.php?action=save_patients_bulk',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({patients:batch.map(function(p){
+        return{id:p.id,name:p.name,age:p.age,gender:p.gender,
+          mobile:p.mob||'',city:p.city||'',history:p.history||'',
+          notes:'',blood:'',status:'Active'};
+      })})
+    }).then(function(){saveBatch(i+CHUNK);})
+     .catch(function(){saveBatch(i+CHUNK);});
+  }
+  saveBatch(0);
   if(typeof cpSaveData==='function')cpSaveData();
   if(typeof renderDashPatients==='function')renderDashPatients();
   if(typeof updateDashStats==='function')updateDashStats();
   closeModal('m-xls');
   _xlsRows=[];
-  toast('\u2713 '+count+' patients imported successfully','success');
+  var msg=count+' patients imported'+(count>500?' (saving in batches...)':'');
+  toast('\u2713 '+msg,'success');
 }
 window.xlsImportAll=xlsImportAll;
 
@@ -13772,6 +13786,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 
