@@ -2391,6 +2391,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2909,6 +2910,11 @@ function submitAddPatient(){
   if(!window.PAT_DB)window.PAT_DB=[];
   var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active'};
   window.PAT_DB.unshift(pat);
+  fetch('data.php?action=save_patient',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:code,name:name.trim(),age:ageSex,gender:gen,
+      mobile:mobile,city:city,history:history,notes:'',blood:'',status:'Active'})}
+  ).catch(function(){});
   if(typeof cpSaveData==='function')cpSaveData();
 
   // Add row to table
@@ -11622,7 +11628,8 @@ function cpLoadData(){
     if(resp.patients){
       window.PAT_DB=(resp.patients||[]).map(function(p){
         return{id:p.id,name:p.name,age:p.age,gender:p.gender,
-               mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
+               mob:p.mobile,city:p.city,history:p.history||'',
+               blood:p.blood,status:p.status};
       });
     }
 
@@ -13707,6 +13714,14 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
     existing.push(r.name.trim().toLowerCase());
     count++;
   });
+  // Save each patient to data.php patients table
+  window.PAT_DB.forEach(function(p){
+    fetch('data.php?action=save_patient',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:p.id,name:p.name,age:p.age,gender:p.gender,
+        mobile:p.mob||'',city:p.city||'',history:p.history||'',
+        notes:'',blood:'',status:'Active'})}).catch(function(){});
+  });
   if(typeof cpSaveData==='function')cpSaveData();
   if(typeof renderDashPatients==='function')renderDashPatients();
   if(typeof updateDashStats==='function')updateDashStats();
@@ -13757,6 +13772,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 
