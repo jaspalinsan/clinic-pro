@@ -2395,6 +2395,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -11735,8 +11736,8 @@ function cpStartSync(){
       if(!resp.ok)return;
       var changed=[];
 
-      // Patients
-      if(resp.patients){
+      // Patients — skip overwrite if import in progress
+      if(resp.patients&&!window._importingPatients){
         var np=(resp.patients||[]).map(function(p){
           return{id:p.id,name:p.name,age:p.age,gender:p.gender,mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
         });
@@ -13707,56 +13708,71 @@ window.xlsRenderPreview=xlsRenderPreview;
 function xlsImportAll(){
   if(!_xlsRows.length)return;
   if(!window.PAT_DB)window.PAT_DB=[];
+
+  // 1. Build new patient objects (don't add to PAT_DB yet)
   var existing=window.PAT_DB.map(function(p){return (p.name||'').trim().toLowerCase();});
-  var count=0;
+  var newPats=[];
   _xlsRows.forEach(function(r){
     if(r.dup)return;
     if(existing.indexOf(r.name.trim().toLowerCase())!==-1)return;
-    var id='CAD-'+String(Date.now()+count).slice(-4);
-    var _xs=r.ageSex||(r.age&&r.sex?r.age+' '+r.sex:r.age||'');
-window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.city,history:r.history||'',blood:'',status:'Active'});
-    existing.push(r.name.trim().toLowerCase());
-    count++;
+    var id='CAD-'+String(Date.now()+newPats.length).slice(-6);
+    newPats.push({id:id,name:r.name,age:r.ageSex,gender:r.sex,
+      mob:r.mob||'',mobile:r.mob||'',city:r.city||'',
+      history:r.history||'',notes:'',blood:'',status:'Active'});
   });
-  // Batch save to data.php in chunks of 500
-  var MAX_IMPORT=6000;
-  if(count>MAX_IMPORT){
-    toast('Max 6000 patients per import. First 6000 imported.','error');
-    count=MAX_IMPORT;
-  }
-  var newPats=window.PAT_DB.slice(0,count);
+
+  if(!newPats.length){toast('No new patients to import','error');return;}
+
+  // 2. PAUSE sync so it doesn't overwrite during save
+  window._importingPatients=true;
+  var btn=document.getElementById('xls-import-btn');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Saving...';}
+
+  // 3. Save ALL to server first in chunks, THEN update memory
   var CHUNK=200;
+  var total=newPats.length;
+  var saved=0;
+  var errors=0;
+
   function saveBatch(i){
     if(i>=newPats.length){
+      // ALL batches done — NOW update PAT_DB
+      newPats.forEach(function(p){window.PAT_DB.unshift(p);});
       window._importingPatients=false;
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Import '+total+' Patients';}
       if(typeof cpSaveData==='function')cpSaveData();
       if(typeof renderDashPatients==='function')renderDashPatients();
       if(typeof updateDashStats==='function')updateDashStats();
-      toast('\u2713 All '+newPats.length+' patients saved to server','success');
+      closeModal('m-xls');
+      _xlsRows=[];
+      toast('\u2713 '+saved+' patients saved to server'+(errors?' ('+errors+' errors)':''),'success');
       return;
     }
     var batch=newPats.slice(i,i+CHUNK);
-    var batchNum=Math.floor(i/CHUNK)+1;
-    var totalBatches=Math.ceil(newPats.length/CHUNK);
-    if(typeof toast==='function')toast('Saving batch '+batchNum+' of '+totalBatches+'...','success');
+    var bNum=Math.floor(i/CHUNK)+1;
+    var tBatch=Math.ceil(newPats.length/CHUNK);
+    var el=document.getElementById('sync-status');
+    if(el)el.textContent='\u21bb Saving '+bNum+'/'+tBatch+'...';
+
     fetch('data.php?action=save_patients_bulk',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({patients:batch.map(function(p){
-        return{id:p.id,name:p.name,age:p.age,gender:p.gender,
-          mobile:p.mob||'',city:p.city||'',history:p.history||'',
-          notes:'',blood:'',status:'Active'};
-      })})
-    }).then(function(){saveBatch(i+CHUNK);})
-     .catch(function(){saveBatch(i+CHUNK);});
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({patients:batch})
+    }).then(function(r){return r.json();})
+    .then(function(resp){
+      if(resp.ok)saved+=resp.saved||batch.length;
+      else errors+=batch.length;
+      saveBatch(i+CHUNK);
+    }).catch(function(){
+      errors+=batch.length;
+      saveBatch(i+CHUNK);
+    });
   }
+
+  toast('Saving '+total+' patients to server...','success');
   saveBatch(0);
-  if(typeof cpSaveData==='function')cpSaveData();
-  if(typeof renderDashPatients==='function')renderDashPatients();
-  if(typeof updateDashStats==='function')updateDashStats();
-  closeModal('m-xls');
-  _xlsRows=[];
-  toast('\u2713 Importing '+count+' patients in batches — please wait...','success');
 }
+window.xlsImportAll=xlsImportAll;
 window.xlsImportAll=xlsImportAll;
 
 
@@ -13800,6 +13816,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 
