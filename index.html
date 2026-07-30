@@ -2394,6 +2394,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -11627,7 +11628,8 @@ function cpLoadData(){
     if(!resp.ok)throw new Error('get_all failed');
 
     // Patients from proper MySQL table
-    if(resp.patients){
+    // Skip if import is in progress — don't overwrite in-memory data
+    if(resp.patients&&!window._importingPatients){
       window.PAT_DB=(resp.patients||[]).map(function(p){
         return{id:p.id,name:p.name,age:p.age,gender:p.gender,
                mob:p.mobile,city:p.city,history:p.history||'',
@@ -13726,9 +13728,11 @@ window.PAT_DB.unshift({id:id,name:r.name,age:_xs,gender:r.sex,mob:r.mob,city:r.c
   var CHUNK=200;
   function saveBatch(i){
     if(i>=newPats.length){
+      window._importingPatients=false;
       if(typeof cpSaveData==='function')cpSaveData();
       if(typeof renderDashPatients==='function')renderDashPatients();
-      toast('\u2713 All '+newPats.length+' patients saved successfully','success');
+      if(typeof updateDashStats==='function')updateDashStats();
+      toast('\u2713 All '+newPats.length+' patients saved to server','success');
       return;
     }
     var batch=newPats.slice(i,i+CHUNK);
@@ -13796,6 +13800,7 @@ function resetAllData(){
 }
 window.resetAllData=resetAllData;
 window.resetAllData=resetAllData;
+
 
 
 
