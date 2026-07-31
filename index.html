@@ -125,8 +125,8 @@ html,body{height:100%;overflow:hidden}
 .smenu-btn.on{background:linear-gradient(90deg,#EEF2FF,#E0E7FF);color:#4338CA;font-weight:700;border-left-color:#4338CA}
 .smenu-btn i{font-size:16px;width:18px;flex-shrink:0}
 .page.on{display:block;animation:fadeUp .15s ease}
-#page-settings{padding:0!important;height:calc(100vh - 72px);overflow:hidden}
-#page-settings.on{display:flex!important;flex-direction:column}
+#page-settings{padding:0!important}
+#page-settings.on{display:flex!important;flex-direction:row!important;height:calc(100vh - 72px)!important;overflow:hidden!important;max-width:100%!important}
 
 /* ── MODAL SYSTEM ─────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
@@ -2282,6 +2282,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2647,7 +2649,7 @@ function nav(p) {
   var target = document.getElementById('page-' + p);
   if (target){
     target.classList.add('on');
-    if(p==='settings'){target.style.display='flex';}
+    if(p==='settings'){target.style.display='flex';target.style.flexDirection='row';target.style.height='calc(100vh - 72px)';target.style.overflow='hidden';target.style.padding='0';}
   }
 
   // Update nav buttons
@@ -6757,7 +6759,10 @@ window.rxMedPick=rxMedPick;
 // Central inventory sync — call after any DB change
 function syncInvDB(){
   window.INV_DB=DB;
-  // Save immediately to server so sync poll doesn't overwrite
+  // Save to BOTH tables so sync poll reads consistent data
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'inventory',value:window.INV_DB||[]})}).catch(function(){});
   if(typeof cpSaveData==='function')cpSaveData();
   // Also refresh Rx medicine selects if Rx page is visible
   var rxPage=document.getElementById('page-rx');
@@ -6916,15 +6921,15 @@ function bulkDeletePatients(){
     });
   }
 
-  // Delete from server
+  window._deletingPatients=true;
   var ids=toDelete.filter(function(d){return d.id;}).map(function(d){return d.id;});
   var names=toDelete.filter(function(d){return !d.id&&d.name;}).map(function(d){return d.name;});
-  if(ids.length||names.length){
-    fetch('data.php?action=delete_patients_bulk',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ids:ids,names:names})}).catch(function(){});
-  }
   if(typeof cpSaveData==='function')cpSaveData();
+  fetch('data.php?action=delete_patients_bulk',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ids:ids,names:names})})
+  .then(function(){window._deletingPatients=false;})
+  .catch(function(){window._deletingPatients=false;});
   if(typeof updatePatBulkBar==='function')updatePatBulkBar();
   if(typeof updateDashStats==='function')updateDashStats();
   clearPatSelection();
@@ -11625,9 +11630,9 @@ function cpStartSync(){
       var changed=[];
 
       // Patients — skip overwrite if import in progress
-      if(resp.patients&&!window._importingPatients){
+      if(resp.patients&&!window._importingPatients&&!window._deletingPatients){
         var np=(resp.patients||[]).map(function(p){
-          return{id:p.id,name:p.name,age:p.age,gender:p.gender,mob:p.mobile,city:p.city,blood:p.blood,status:p.status};
+          return{id:p.id,name:p.name,age:p.age,gender:p.gender,mob:p.mobile,city:p.city,history:p.history||'',blood:p.blood,status:p.status};
         });
         if(JSON.stringify(np)!==JSON.stringify(window.PAT_DB||[])){
           window.PAT_DB=np; changed.push('Patients');
@@ -13764,6 +13769,8 @@ function confirmVendorImport(){
   closeModal('m-vendorConfirm');
 }
 window.confirmVendorImport=confirmVendorImport;
+
+
 
 
 </script>
