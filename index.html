@@ -882,7 +882,7 @@ html,body{height:100%;overflow:hidden}
         </button>
       </div>
     </div>
-    <div id="rx-lab-list" style="padding:0">
+    <div id="rx-lab-list-2" style="padding:0">
       <div id="rx-lab-empty" style="padding:16px 20px;text-align:center;color:var(--ink3);font-size:12.5px">
         <i class="ti ti-file-text" style="font-size:20px;display:block;margin-bottom:4px;color:var(--sl3)"></i>
         No lab reports attached. Click <b>Attach Report</b> to link from Lab or upload PDF.
@@ -1596,11 +1596,11 @@ html,body{height:100%;overflow:hidden}
   <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;margin-top:8px">Font Size</div>
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;max-width:500px">
     <span style="font-size:11px;color:#64748b;flex-shrink:0">A</span>
-    <input type="range" id="font-size-range" min="13" max="18" value="13" step="1"
+    <input type="range" id="font-size-range-2" min="13" max="18" value="13" step="1"
       oninput="applyFontSize(this.value)"
       style="flex:1;accent-color:#3b82f6;cursor:pointer">
     <span style="font-size:18px;color:#64748b;flex-shrink:0">A</span>
-    <span id="font-size-display" style="font-size:13px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:4px 12px;border-radius:6px;min-width:48px;text-align:center">13px</span>
+    <span id="font-size-display-2" style="font-size:13px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:4px 12px;border-radius:6px;min-width:48px;text-align:center">13px</span>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap">
     <button onclick="applyFontSize(13)" style="padding:7px 16px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:12px;cursor:pointer;color:#374151">Small (13)</button>
@@ -1630,7 +1630,7 @@ html,body{height:100%;overflow:hidden}
     </div>
   </div>
 
-  <div id="set-appearance-saved" style="display:none;color:#16a34a;font-size:13px;font-weight:600;margin-top:8px">
+  <div id="set-appearance-saved-2" style="display:none;color:#16a34a;font-size:13px;font-weight:600;margin-top:8px">
     <i class="ti ti-check" style="margin-right:5px"></i>Settings saved
   </div>
 
@@ -1759,136 +1759,19 @@ html,body{height:100%;overflow:hidden}
 
 
 <!-- BILLING SETTINGS -->
-<div id="sp-billing" class="sp" style="display:none;padding:24px;max-width:680px">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4B0; Billing Controls</h2>
-  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Default values for new invoices and Rx.</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><div class="flbl" style="margin-bottom:5px">Default Consultancy Fee &#8377;</div>
-    <input class="fin" id="set-consult-fee" type="number" value="150" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Default Rx Days</div>
-    <input class="fin" id="set-rx-days" type="number" value="5" min="1" max="90" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Default Payment Mode</div>
-    <select class="fin" id="set-pay-mode" style="width:100%">
-      <option value="Cash">Cash</option><option value="UPI">UPI</option>
-      <option value="Card">Card</option><option value="Online">Online</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Invoice Prefix</div>
-    <input class="fin" id="set-inv-prefix" value="INV-" placeholder="INV- / OHC-" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">GST / Tax %</div>
-    <input class="fin" id="set-gst" type="number" value="0" min="0" max="28" step="0.5" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Default Discount %</div>
-    <input class="fin" id="set-disc" type="number" value="0" min="0" max="100" style="width:100%"></div>
-  </div>
-  <button class="bp" onclick="saveBillingSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
-</div>
+
 
 <!-- RX SETTINGS -->
-<div id="sp-rxset" class="sp" style="display:none;padding:24px;max-width:680px">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F48A; Rx / Prescription</h2>
-  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Prescription defaults and PDF output controls.</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><div class="flbl" style="margin-bottom:5px">Default Visit Mode</div>
-    <select class="fin" id="set-visit-mode" style="width:100%">
-      <option value="OPD">OPD</option><option value="Online">Online</option>
-      <option value="Tele">Tele</option><option value="IPD">IPD</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Rx Number Prefix</div>
-    <input class="fin" id="set-rx-prefix" value="CD-RX-" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Rx Start Number</div>
-    <input class="fin" id="set-rx-start" type="number" value="1" min="1" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Show Vitals in Rx PDF</div>
-    <select class="fin" id="set-vitals-pdf" style="width:100%">
-      <option value="yes">Yes</option><option value="no">No</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Show Diagnosis in PDF</div>
-    <select class="fin" id="set-dx-pdf" style="width:100%">
-      <option value="yes">Yes</option><option value="no">No</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Show History in PDF</div>
-    <select class="fin" id="set-hist-pdf" style="width:100%">
-      <option value="yes">Yes</option><option value="no">No</option>
-    </select></div>
-  </div>
-  <button class="bp" onclick="saveRxSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
-</div>
+
 
 <!-- PHARMACY SETTINGS -->
-<div id="sp-phset" class="sp" style="display:none;padding:24px;max-width:680px">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F3EA; Pharmacy / Stock</h2>
-  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Stock alerts and default pricing.</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><div class="flbl" style="margin-bottom:5px">Low Stock Alert (qty)</div>
-    <input class="fin" id="set-low-stock" type="number" value="10" min="0" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Expiry Alert (days before)</div>
-    <input class="fin" id="set-exp-alert" type="number" value="90" min="7" style="width:100%"></div>
-    <div><div class="flbl" style="margin-bottom:5px">Default Sale Margin %</div>
-    <input class="fin" id="set-margin" type="number" value="20" min="0" max="500" style="width:100%">
-    <div style="font-size:10px;color:var(--ink3);margin-top:3px">Sale = Purchase x (1 + margin%)</div></div>
-    <div><div class="flbl" style="margin-bottom:5px">Default Stock Unit</div>
-    <select class="fin" id="set-stock-unit" style="width:100%">
-      <option value="Tabs">Tablets</option><option value="Caps">Capsules</option>
-      <option value="Strips">Strips</option><option value="Bottles">Bottles</option>
-      <option value="Vials">Vials</option><option value="Units">Units</option>
-    </select></div>
-  </div>
-  <button class="bp" onclick="savePharmacySettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
-</div>
+
 
 <!-- ACCESS CONTROL -->
-<div id="sp-access" class="sp" style="display:none;padding:24px;max-width:720px">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F510; Access Control</h2>
-  <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Which pages each role can access. Takes effect on next login.</p>
-  <div style="overflow-x:auto">
-  <table style="width:100%;border-collapse:collapse;font-size:11px">
-    <thead><tr style="background:var(--sl)">
-      <th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--sl2)">Page</th>
-      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Admin</th>
-      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Doctor</th>
-      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Pharmacist</th>
-      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Lab</th>
-      <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Receptionist</th>
-    </tr></thead>
-    <tbody id="access-tbody"></tbody>
-  </table>
-  </div>
-  <div style="margin-top:12px;padding:10px 14px;background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;font-size:11px;color:#92400E">
-    Admin always has full access and cannot be restricted.
-  </div>
-  <button class="bp" onclick="saveAccessSettings()" style="margin-top:14px"><i class="ti ti-device-floppy"></i> Save Access Settings</button>
-</div>
+
 
 <!-- DATA CONTROLS -->
-<div id="sp-datactl" class="sp" style="display:none;padding:24px;max-width:680px">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">&#x1F4BE; Data Controls</h2>
-  <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Sync, timeout and display settings.</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div><div class="flbl" style="margin-bottom:5px">Auto-sync Interval</div>
-    <select class="fin" id="set-sync-interval" style="width:100%">
-      <option value="15">Every 15 seconds</option>
-      <option value="30">Every 30 seconds</option>
-      <option value="60">Every 60 seconds</option>
-      <option value="0">Manual only</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Session Timeout</div>
-    <select class="fin" id="set-timeout" style="width:100%">
-      <option value="0">Never</option>
-      <option value="15">15 minutes</option>
-      <option value="30">30 minutes</option>
-      <option value="60">60 minutes</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Display Mode</div>
-    <select class="fin" id="set-compact" style="width:100%">
-      <option value="no">Spacious (default)</option>
-      <option value="yes">Compact (desktop)</option>
-    </select></div>
-    <div><div class="flbl" style="margin-bottom:5px">Date Format</div>
-    <select class="fin" id="set-date-fmt" style="width:100%">
-      <option value="dd-mm-yyyy">25-07-2026</option>
-      <option value="dd Mon yyyy">25 Jul 2026</option>
-    </select></div>
-  </div>
-  <button class="bp" onclick="saveDataSettings()" style="margin-top:18px"><i class="ti ti-device-floppy"></i> Save</button>
-</div>
+
 
   
 <!-- BILLING SETTINGS -->
@@ -1981,7 +1864,7 @@ html,body{height:100%;overflow:hidden}
       <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Lab</th>
       <th style="padding:8px 8px;text-align:center;border-bottom:1px solid var(--sl2)">Receptionist</th>
     </tr></thead>
-    <tbody id="access-tbody"></tbody>
+    <tbody id="access-tbody-2"></tbody>
   </table>
   </div>
   <div style="margin-top:12px;padding:10px 14px;background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;font-size:11px;color:#92400E">
@@ -2396,6 +2279,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2458,7 +2343,6 @@ window.cpSaveUsers=cpSaveUsers;
 window.cpSaveUsers=cpSaveUsers;
 
 var CP_USERS=cpGetUsers();
-window.CP_USERS=CP_USERS;
 window.cpGetUsers=cpGetUsers;
 window.cpSaveUsers=cpSaveUsers;
 
@@ -13824,7 +13708,118 @@ window.resetAllData=resetAllData;
 
 
 
+
+
+// Stub functions for modals
+function submitEditItem(){
+  var name=(document.getElementById('ei-name')||{}).value||'';
+  if(!name){toast('Enter item name','error');return;}
+  // Find in DB and update
+  if(typeof DB!=='undefined'){
+    var item=DB.find(function(x){return x.id===window._editItemId;});
+    if(item){
+      item.name=name;
+      item.batch=(document.getElementById('ei-batch')||{}).value||item.batch;
+      item.expiry=(document.getElementById('ei-expiry')||{}).value||item.expiry;
+      item.qty=parseFloat((document.getElementById('ei-stock')||{}).value)||item.qty;
+      item.pur=parseFloat((document.getElementById('ei-purchase')||{}).value)||item.pur;
+      item.sale=parseFloat((document.getElementById('ei-sale')||{}).value)||item.sale;
+      item.mfr=(document.getElementById('ei-company')||{}).value||item.mfr;
+      if(typeof syncInvDB==='function')syncInvDB();
+      if(typeof renderInventory==='function')renderInventory();
+    }
+  }
+  closeModal('m-editItem');
+  toast('Item updated','success');
+}
+window.submitEditItem=submitEditItem;
+
+function saveLabTest(){
+  var name=(document.getElementById('lab-pat-name')||{}).value||'';
+  var tests=(document.getElementById('lab-tests')||{}).value||'';
+  var date=(document.getElementById('lab-date')||{}).value||'';
+  var status=(document.getElementById('lab-status')||{}).value||'pending';
+  if(!name||!tests){toast('Enter patient and tests','error');return;}
+  if(!window.LAB_DB)window.LAB_DB=[];
+  var id='LAB-'+String(Date.now()).slice(-6);
+  var d=date?new Date(date):new Date();
+  var ds=String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+  window.LAB_DB.unshift({id:id,patient:name,tests:tests,date:ds,status:status,submitted:false});
+  fetch('data.php?action=save_lab',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:id,patient:name,tests:tests,date:ds,status:status,submitted:0})
+  }).catch(function(){});
+  if(typeof cpSaveData==='function')cpSaveData();
+  if(typeof renderLabQueue==='function')renderLabQueue();
+  closeModal('m-lab');
+  toast('Lab test added','success');
+}
+window.saveLabTest=saveLabTest;
+
+function confirmVendorImport(){
+  if(typeof doVendorImport==='function')doVendorImport();
+  closeModal('m-vendorConfirm');
+}
+window.confirmVendorImport=confirmVendorImport;
+
 </script>
+<div class="overlay" id="m-editItem" style="display:none">
+<div class="modal" style="max-width:520px">
+  <div class="mh"><h2>Edit Stock Item</h2><button class="mclose" onclick="closeModal('m-editItem')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody" style="padding:18px 22px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="grid-column:span 2"><div class="flbl" style="margin-bottom:4px">Item Name</div><input class="fin" id="ei-name" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Batch</div><input class="fin" id="ei-batch" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Expiry</div><input class="fin" id="ei-expiry" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Qty</div><input class="fin" id="ei-stock" type="number" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Purchase ₹</div><input class="fin" id="ei-purchase" type="number" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">Sale ₹</div><input class="fin" id="ei-sale" type="number" style="width:100%"></div>
+      <div><div class="flbl" style="margin-bottom:4px">MFR</div><input class="fin" id="ei-company" style="width:100%"></div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-editItem')">Cancel</button>
+    <button class="bp" onclick="submitEditItem()"><i class="ti ti-device-floppy"></i> Save Changes</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="m-lab" style="display:none">
+<div class="modal" style="max-width:500px">
+  <div class="mh"><h2><i class="ti ti-microscope" style="color:#06B6D4;margin-right:8px"></i>New Lab Test</h2><button class="mclose" onclick="closeModal('m-lab')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody" style="padding:18px 22px">
+    <div style="display:grid;gap:12px">
+      <div><div class="flbl" style="margin-bottom:4px">Patient Name</div>
+        <div class="pat-drop-wrap" style="position:relative"><input class="fin" id="lab-pat-name" placeholder="Search patient..." oninput="patAutoInput(this,'labFillPatient')" style="width:100%"><div id="drop-lab-pat-name" class="pat-drop" style="display:none"></div></div>
+      </div>
+      <div><div class="flbl" style="margin-bottom:4px">Tests Ordered</div><input class="fin" id="lab-tests" placeholder="CBC, LFT, RFT..." style="width:100%"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="flbl" style="margin-bottom:4px">Date</div><input class="fin" id="lab-date" type="date" style="width:100%"></div>
+        <div><div class="flbl" style="margin-bottom:4px">Status</div>
+          <select class="fin" id="lab-status" style="width:100%"><option value="pending">Pending</option><option value="processing">In Process</option><option value="done">Done</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-lab')">Cancel</button>
+    <button class="bp" onclick="saveLabTest()"><i class="ti ti-plus"></i> Add Test</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="m-vendorConfirm" style="display:none">
+<div class="modal" style="max-width:420px">
+  <div class="mh"><h2><i class="ti ti-truck" style="color:#F97316;margin-right:8px"></i>Confirm Import</h2><button class="mclose" onclick="closeModal('m-vendorConfirm')"><i class="ti ti-x"></i></button></div>
+  <div class="mbody" style="padding:18px 22px">
+    <div id="vendor-confirm-body" style="font-size:13px;color:var(--ink2)">Confirm importing these items to stock?</div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-vendorConfirm')">Cancel</button>
+    <button class="bp" onclick="confirmVendorImport()"><i class="ti ti-check"></i> Confirm Import</button>
+  </div>
+</div>
+</div>
+
 
 <div class="overlay" id="m-xls" style="display:none">
 <div class="modal" style="max-width:640px;max-height:94vh;overflow-y:auto">
