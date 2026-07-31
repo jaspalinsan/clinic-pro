@@ -1996,9 +1996,10 @@ html,body{height:100%;overflow:hidden}
 <div class="overlay" id="m-addPat" style="display:none">
 <div class="modal" style="max-width:460px">
   <div class="mh">
-    <h2><i class="ti ti-user-plus" style="color:var(--acc);margin-right:8px"></i>Add New Patient</h2>
+    <h2 id="ap-modal-title"><i class="ti ti-user-plus" style="color:var(--acc);margin-right:8px"></i>Add New Patient</h2>
     <button class="mclose" onclick="closeModal('m-addPat')"><i class="ti ti-x"></i></button>
   </div>
+  <input type="hidden" id="ap-edit-id" value="">
   <div class="mbody" style="padding:18px 22px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div style="grid-column:span 2">
@@ -2033,7 +2034,7 @@ html,body{height:100%;overflow:hidden}
   </div>
   <div class="mfooter">
     <button class="bs" onclick="closeModal('m-addPat')">Cancel</button>
-    <button class="bp" onclick="submitAddPatient()"><i class="ti ti-user-plus"></i> Add Patient</button>
+    <button class="bp" id="ap-submit-btn" onclick="submitAddPatient()"><i class="ti ti-user-plus"></i> Add Patient</button>
   </div>
 </div>
 </div>
@@ -2185,6 +2186,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -2809,56 +2811,87 @@ function submitAddPatient(){
   var mobile=(document.getElementById('ap-mobile')||{}).value||'';
   var city=(document.getElementById('ap-city')||{}).value||'';
   var history=(document.getElementById('ap-history')||{}).value||'';
+  var editId=(document.getElementById('ap-edit-id')||{}).value||'';
 
   if(!name.trim()){toast('Enter patient name','error');return;}
   if(!age){toast('Enter age','error');return;}
 
-  var ageSex=age+' '+gen;  // always "32 M"
-  var code='CAD-'+String(Math.floor(1000+Math.random()*8999));
+  var ageSex=age.trim()+' '+gen;
 
-  // Add to PAT_DB
-  if(!window.PAT_DB)window.PAT_DB=[];
-  var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active'};
-  window.PAT_DB.unshift(pat);
-  fetch('data.php?action=save_patient',{method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({id:code,name:name.trim(),age:ageSex,gender:gen,
-      mobile:mobile,city:city,history:history,notes:'',blood:'',status:'Active'})}
-  ).catch(function(){});
-  if(typeof cpSaveData==='function')cpSaveData();
-
-  // Add row to table
-  var tbody=document.getElementById('pat-tbody');
-  if(tbody){
-    var tr=document.createElement('tr');
-    tr.setAttribute('data-id', code);
-    tr.setAttribute('data-name', name.trim());
-    tr.innerHTML=
-      '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
-      '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
-      '<td><b>'+name.trim()+'</b></td>'+
-      '<td style="white-space:nowrap">'+ageSex+'</td>'+
-      '<td>'+city+'</td>'+
-      '<td>'+mobile+'</td>'+
-      '<td style="font-size:11px;color:var(--ink2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+history+'</td>'+
-      '<td><div style="display:flex;gap:4px">'+
-        '<button class="tb" onclick="editPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\'—\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
-        '<button class="tb" onclick="openRxForPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mobile+'\',\'\',\''+city+'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
-        '<button class="tb" onclick="bookApptDirect(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mobile+'\',\'\')" style="font-size:11px"><i class="ti ti-calendar-event"></i>Appt</button>'+
-        '<button class="tb" onclick="openInvoiceForPatient(\''+name.trim()+'\',\''+ageSex+'\',\''+mobile+'\')" style="font-size:11px;background:#FAF5FF;color:#7C3AED;border-color:#7C3AED"><i class="ti ti-receipt"></i>Invoice</button>'+
-      '</div></td>';
-    tbody.insertBefore(tr, tbody.firstChild);
+  if(editId){
+    // ── EDIT MODE — update existing patient ──
+    if(!window.PAT_DB)window.PAT_DB=[];
+    var idx=-1;
+    window.PAT_DB.forEach(function(p,i){
+      if(p.id===editId||p.name===editId)idx=i;
+    });
+    if(idx!==-1){
+      var oldPat=window.PAT_DB[idx];
+      var id=oldPat.id;
+      window.PAT_DB[idx]={id:id,name:name.trim(),age:ageSex,gender:gen,
+        mob:mobile,city:city,history:history,blood:oldPat.blood||'',status:oldPat.status||'Active'};
+      // Save to server
+      fetch('data.php?action=save_patient',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id:id,name:name.trim(),age:ageSex,gender:gen,
+          mobile:mobile,city:city,history:history,notes:'',blood:oldPat.blood||'',status:'Active'})
+      }).catch(function(){});
+    } else {
+      toast('Patient not found in DB','error');
+    }
+    if(typeof cpSaveData==='function')cpSaveData();
+    if(typeof renderDashPatients==='function')renderDashPatients();
+    toast('\u2713 Patient updated: '+name.trim(),'success');
+  } else {
+    // ── ADD MODE — create new patient ──
+    var code='CAD-'+String(Math.floor(1000+Math.random()*8999));
+    if(!window.PAT_DB)window.PAT_DB=[];
+    var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active'};
+    window.PAT_DB.unshift(pat);
+    fetch('data.php?action=save_patient',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:code,name:name.trim(),age:ageSex,gender:gen,
+        mobile:mobile,city:city,history:history,notes:'',blood:'',status:'Active'})
+    }).catch(function(){});
+    if(typeof cpSaveData==='function')cpSaveData();
+    var tbody=document.getElementById('pat-tbody');
+    if(tbody){
+      var tr=document.createElement('tr');
+      tr.setAttribute('data-id',code);
+      tr.setAttribute('data-name',name.trim());
+      tr.innerHTML=
+        '<td><input type="checkbox" class="pat-cb" onchange="updatePatBulkBar()" style="cursor:pointer;width:15px;height:15px"></td>'+
+        '<td style="font-size:11px;color:#185FA5;font-weight:700">'+code+'</td>'+
+        '<td><b>'+name.trim()+'</b></td>'+
+        '<td style="white-space:nowrap">'+ageSex+'</td>'+
+        '<td>'+city+'</td>'+
+        '<td>'+mobile+'</td>'+
+        '<td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+history+'</td>'+
+        '<td><div style="display:flex;gap:4px">'+
+          '<button class="tb" onclick="editPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\'—\',\'Active\')" style="font-size:11px"><i class="ti ti-edit"></i>Edit</button>'+
+          '<button class="tb" onclick="openRxForPatient(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mobile+'\',\'\',\''+city+'\')" style="font-size:11px"><i class="ti ti-file-description"></i>Rx</button>'+
+          '<button class="tb" onclick="bookApptDirect(\''+name.trim()+'\',\''+code+'\',\''+ageSex+'\',\''+gen+'\',\''+mobile+'\',\'\')" style="font-size:11px"><i class="ti ti-calendar-event"></i>Appt</button>'+
+          '<button class="tb" onclick="openInvoiceForPatient(\''+name.trim()+'\',\''+ageSex+'\',\''+mobile+'\')" style="font-size:11px;background:#FAF5FF;color:#7C3AED;border-color:#7C3AED"><i class="ti ti-receipt"></i>Invoice</button>'+
+        '</div></td>';
+      tbody.insertBefore(tr,tbody.firstChild);
+    }
+    if(typeof updateDashStats==='function')updateDashStats();
+    toast('\u2713 Patient '+name.trim()+' added','success');
   }
 
-  // Clear form and close
+  // Reset form and modal
   ['ap-name','ap-age','ap-mobile','ap-city','ap-history'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.value='';
   });
   var gsel=document.getElementById('ap-gender');if(gsel)gsel.selectedIndex=0;
+  var eid=document.getElementById('ap-edit-id');if(eid)eid.value='';
+  var title=document.getElementById('ap-modal-title');
+  if(title)title.innerHTML='<i class="ti ti-user-plus" style="color:var(--acc);margin-right:8px"></i>Add New Patient';
+  var btn=document.getElementById('ap-submit-btn');
+  if(btn)btn.innerHTML='<i class="ti ti-user-plus"></i> Add Patient';
   closeModal('m-addPat');
-  if(typeof updateDashStats==='function')updateDashStats();
-  toast('\u2713 Patient '+name.trim()+' added','success');
 }
+window.submitAddPatient=submitAddPatient;
 window.submitAddPatient=submitAddPatient;
 
 // ── CSV UPLOAD ──────────────────────────────────────────────────
@@ -5429,13 +5462,46 @@ function setRole(r){
   var pi=document.getElementById('l-pass');  if(pi)pi.value='ClinicPro@123';
 }
 
-function editPatient(name,pid,age,sex,dx,st){
-  var el=document.getElementById('ap-name'); if(el)el.value=name||'';
-  var a=document.getElementById('ap-age');   if(a)a.value=age||'';
-  var g=document.getElementById('ap-gender');if(g)g.value=sex||'';
+function editPatient(name,pid,age,sex,mob,st){
+  // Find patient in PAT_DB for full data
+  var pat=null;
+  if(window.PAT_DB){
+    pat=(window.PAT_DB||[]).find(function(p){
+      return p.id===pid||(p.name||'').trim()===name.trim();
+    });
+  }
+  // Fill all fields from PAT_DB (best) or passed params
+  var n=pat?pat.name:name;
+  var a=pat?(pat.age||'').replace(/\s*[MFOmfo]$/,'').trim():(age||'').replace(/\s*[MFOmfo]$/,'').trim();
+  var g=pat?pat.gender||((pat.age||'').match(/[MFO]$/i)?pat.age.trim().slice(-1).toUpperCase():''):sex||'';
+  var m=pat?pat.mob||'':mob||'';
+  var c=pat?pat.city||'':'';
+  var h=pat?pat.history||pat.complaint||'':'';
+
+  // Set hidden edit mode
+  var eid=document.getElementById('ap-edit-id');
+  if(eid)eid.value=pid||n;
+
+  // Fill form fields
+  var el=document.getElementById('ap-name');if(el)el.value=n;
+  var aa=document.getElementById('ap-age');if(aa)aa.value=a;
+  var gg=document.getElementById('ap-gender');if(gg){
+    gg.value=g;
+    if(!gg.value&&g)gg.value=g;
+  }
+  var mm=document.getElementById('ap-mobile');if(mm)mm.value=m;
+  var cc=document.getElementById('ap-city');if(cc)cc.value=c;
+  var hh=document.getElementById('ap-history');if(hh)hh.value=h;
+
+  // Update modal to edit mode
+  var title=document.getElementById('ap-modal-title');
+  if(title)title.innerHTML='<i class="ti ti-edit" style="color:var(--acc);margin-right:8px"></i>Edit Patient';
+  var btn=document.getElementById('ap-submit-btn');
+  if(btn)btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';
+
   openModal('m-addPat');
-  toast('Editing: '+name,'info');
 }
+window.editPatient=editPatient;
 
 function vdBulkDelete(){
   var cbs=[].slice.call(document.querySelectorAll('.vd-cb:checked'));
@@ -13785,6 +13851,7 @@ function confirmVendorImport(){
   closeModal('m-vendorConfirm');
 }
 window.confirmVendorImport=confirmVendorImport;
+
 
 
 
