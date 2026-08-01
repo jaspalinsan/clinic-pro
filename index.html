@@ -954,7 +954,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-from-lbl" style="min-width:90px">From date</span><input type="date" id="ph-date-from" onchange="phSetDateLbl('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><span style="font-size:13px;color:var(--ink3);font-weight:300">→</span><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-to-lbl" style="min-width:90px">To date</span><input type="date" id="ph-date-to" onchange="phSetDateLbl('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';document.getElementById('ph-from-lbl').textContent='From date';document.getElementById('ph-to-lbl').textContent='To date';renderPharmacy()" style="font-size:11px">Clear</button>
-      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <div style="display:inline-flex;border-radius:7px;overflow:visible;position:relative"><button class="bp" onclick="openModal('m-invoice')" style="border-radius:7px 0 0 7px;border-right:1px solid rgba(255,255,255,.3);padding-left:12px;padding-right:12px"><i class="ti ti-plus"></i> New Invoice</button><button class="bp" id="inv-split-btn" onclick="toggleInvMenu()" style="border-radius:0 7px 7px 0;padding:0 10px;font-size:14px">&#9660;</button><div id="inv-split-menu" style="display:none;position:fixed;background:#fff;border:1.5px solid #185FA5;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:180px;z-index:99999;overflow:hidden"><button onclick="openModal('m-invoice');toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#185FA5;cursor:pointer;border-bottom:0.5px solid #e5e7eb"><i class="ti ti-plus" style="font-size:14px"></i> New Invoice</button><button onclick="openBulkGen();toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#7C3AED;cursor:pointer"><i class="ti ti-wand" style="font-size:14px"></i> Bulk Generate</button></div></div>
+      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <div style="display:inline-flex;border-radius:7px;overflow:visible;position:relative"><button class="bp" onclick="openModal('m-invoice')" style="border-radius:7px 0 0 7px;border-right:1px solid rgba(255,255,255,.3);padding-left:12px;padding-right:12px"><i class="ti ti-plus"></i> New Invoice</button><button class="tb" onclick="openModal('m-multiInv')" style="margin-left:4px;color:#7C3AED;border-color:#7C3AED"><i class="ti ti-receipt-2"></i> Multi Invoice</button><button class="bp" id="inv-split-btn" onclick="toggleInvMenu()" style="border-radius:0 7px 7px 0;padding:0 10px;font-size:14px">&#9660;</button><div id="inv-split-menu" style="display:none;position:fixed;background:#fff;border:1.5px solid #185FA5;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:180px;z-index:99999;overflow:hidden"><button onclick="openModal('m-invoice');toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#185FA5;cursor:pointer;border-bottom:0.5px solid #e5e7eb"><i class="ti ti-plus" style="font-size:14px"></i> New Invoice</button><button onclick="openBulkGen();toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#7C3AED;cursor:pointer"><i class="ti ti-wand" style="font-size:14px"></i> Bulk Generate</button></div></div>
     </div>
   </div>
   <div id="ph-bulk-bar" style="display:none;align-items:center;gap:10px;padding:9px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;margin-bottom:10px">
@@ -982,7 +982,7 @@ html,body{height:100%;overflow:hidden}
     <button class="bs" onclick="invClearSel()" style="font-size:12px">Clear</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:84px">Purchase &#8377;</th><th style="width:74px">Sale &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
+    <thead><tr><th style="width:28px"><input type="checkbox" id="inv-hdr-cb" onchange="invCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th style="width:88px">Item Name</th><th style="width:62px;text-align:center">Schedule</th><th style="width:77px">MFR</th><th style="width:74px">Batch</th><th style="width:57px">Expiry</th><th style="width:74px;text-align:right">P/Stock</th><th style="width:57px;text-align:right">+ New</th><th style="width:67px;text-align:right">= Total</th><th style="width:74px;text-align:right">&#8722; Consumed</th><th style="width:72px;text-align:right">= Balance</th><th style="width:74px">Sale &#8377;</th><th style="width:82px">Status</th><th style="width:77px">Actions</th></tr></thead>
     <tbody id="inv-tbody"></tbody>
   </table></div></div>
 </div>
@@ -993,6 +993,8 @@ html,body{height:100%;overflow:hidden}
       <input type="file" id="vendor-img-input" accept="image/*,.pdf" style="display:none" onchange="parseVendorImage(this)">
       <button class="bs" onclick="openBillReader()"><i class="ti ti-camera"></i>Scan Bill</button>
       <button class="bs" onclick="document.getElementById('vendor-img-input').click()" style="margin-left:4px"><i class="ti ti-upload"></i>Upload Bill</button>
+      <button class="bs" onclick="document.getElementById('vendor-xls-input').click()" style="margin-left:4px;color:#059669;border-color:#059669"><i class="ti ti-file-spreadsheet"></i>Upload Excel</button>
+      <input type="file" id="vendor-xls-input" accept=".xlsx,.csv" style="display:none" onchange="vendorXlsImport(this.files[0])">
       <button class="bp" onclick="doVendorImport()"><i class="ti ti-check"></i>Confirm Import</button>
     </div>
   </div>
@@ -2134,10 +2136,6 @@ html,body{height:100%;overflow:hidden}
         <input class="fin" id="ai-stock" type="number" placeholder="0" style="width:100%">
       </div>
       <div>
-        <div class="flbl" style="margin-bottom:4px">Purchase &#8377;</div>
-        <input class="fin" id="ai-purchase" type="number" placeholder="0.00" style="width:100%">
-      </div>
-      <div>
         <div class="flbl" style="margin-bottom:4px">Sale Price &#8377; <span style="color:#ef4444">*</span></div>
         <input class="fin" id="ai-sale" type="number" placeholder="0.00" style="width:100%">
       </div>
@@ -2234,6 +2232,9 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
+
 
 
 
@@ -3209,11 +3210,7 @@ function renderInventory(){
       })()+
 
       // Purchase ₹ (editable — same as before)
-      '<td>'+
-        '<input class="edit-in" type="number" value="'+pur.toFixed(2)+'" '+
-        'style="width:72px;text-align:right;font-weight:600" '+
-        'onchange="(function(el,id){var x=(window.INV_DB||DB).find(function(d){return d.id===id;});if(x){x.purchase=parseFloat(el.value)||0;renderInventory();}})(this,'+m.id+')">'+
-      '</td>'+
+      
 
       // Sale ₹ (editable — same as before)
       '<td>'+
@@ -14194,7 +14191,244 @@ window.dashOosPDF=dashOosPDF;
 
 
 
+
+
+// ── Vendor Excel Import ──────────────────────────────
+function vendorXlsImport(file){
+  if(!file)return;
+  var ext=file.name.split('.').pop().toLowerCase();
+  function parseAndLoad(csvText){
+    var lines=csvText.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    if(!lines.length){toast('Empty file','error');return;}
+    var start=0;
+    var first=lines[0].toLowerCase();
+    if(first.indexOf('name')!==-1||first.indexOf('item')!==-1)start=1;
+    var items=[];
+    lines.slice(start).forEach(function(line){
+      var cols=line.split(',').map(function(c){return c.replace(/^"|"$/g,'').trim();});
+      var name=cols[0]||'';
+      if(!name)return;
+      items.push({
+        id:'V'+Date.now()+Math.random().toString(36).slice(2,6),
+        name:name,batch:cols[1]||'',expiry:cols[2]||'',
+        qty:parseFloat(cols[3]||0),sale:parseFloat(cols[4]||0),
+        mfr:cols[5]||'',mrp:parseFloat(cols[4]||0),
+        stock:parseFloat(cols[3]||0),purchase:0,
+        status:'active'
+      });
+    });
+    if(!items.length){toast('No valid rows found','error');return;}
+    // Add to INV_DB
+    if(!window.INV_DB)window.INV_DB=[];
+    if(typeof DB==='undefined')window.DB=window.INV_DB;
+    items.forEach(function(item){window.INV_DB.push(item);if(window.DB!==window.INV_DB)window.DB.push(item);});
+    if(typeof syncInvDB==='function')syncInvDB();
+    if(typeof renderInventory==='function')renderInventory();
+    toast('\u2713 '+items.length+' items imported from Excel','success');
+  }
+  if(ext==='csv'){
+    var r=new FileReader();r.onload=function(e){parseAndLoad(e.target.result);};r.readAsText(file);
+  } else if(ext==='xlsx'){
+    var r2=new FileReader();
+    r2.onload=function(e){
+      try{
+        var wb=XLSX.read(e.target.result,{type:'binary'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        parseAndLoad(XLSX.utils.sheet_to_csv(ws));
+      }catch(err){toast('Could not read xlsx','error');}
+    };
+    r2.readAsBinaryString(file);
+  } else {toast('Use .xlsx or .csv only','error');}
+}
+window.vendorXlsImport=vendorXlsImport;
+
+// ── Multi Invoice Generator ───────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  var miPat=document.getElementById('mi-patient');
+  if(miPat)miPat.addEventListener('change',function(){
+    var wrap=document.getElementById('mi-pat-wrap');
+    if(wrap)wrap.style.display=this.value==='specific'?'':'none';
+    miUpdatePreview();
+  });
+  ['mi-count','mi-items','mi-start','mi-end'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.addEventListener('input',miUpdatePreview);
+  });
+});
+
+function miUpdatePreview(){
+  var count=parseInt((document.getElementById('mi-count')||{}).value)||0;
+  var items=(document.getElementById('mi-items')||{}).value||'random';
+  var start=(document.getElementById('mi-start')||{}).value||'';
+  var end=(document.getElementById('mi-end')||{}).value||'';
+  var prev=document.getElementById('mi-preview');
+  if(!prev)return;
+  if(!count||!start||!end){prev.textContent='Fill all fields to preview';return;}
+  var itemTxt=items==='random'?'3–7 random items':items+' items';
+  prev.innerHTML='<b style="color:#7C3AED">'+count+'</b> invoices will be created<br>'
+    +'Each with <b>'+itemTxt+'</b> from stock<br>'
+    +'Dates spread between <b>'+start+'</b> and <b>'+end+'</b>';
+}
+window.miUpdatePreview=miUpdatePreview;
+
+function openModal_miPatPop(){
+  var sel=document.getElementById('mi-pat-sel');
+  if(!sel)return;
+  while(sel.options.length>1)sel.remove(1);
+  (window.PAT_DB||[]).forEach(function(p){
+    var o=document.createElement('option');
+    o.value=p.name;o.textContent=p.name+(p.age?' — '+p.age:'');
+    sel.appendChild(o);
+  });
+}
+
+function generateMultiInvoices(){
+  var count=parseInt((document.getElementById('mi-count')||{}).value)||0;
+  var itemMode=(document.getElementById('mi-items')||{}).value||'random';
+  var startD=(document.getElementById('mi-start')||{}).value||'';
+  var endD=(document.getElementById('mi-end')||{}).value||'';
+  var patMode=(document.getElementById('mi-patient')||{}).value||'random';
+  var patSel=(document.getElementById('mi-pat-sel')||{}).value||'';
+
+  if(!count||count<1){toast('Enter number of invoices','error');return;}
+  if(!startD||!endD){toast('Pick start and end date','error');return;}
+
+  var inv=window.INV_DB||window.DB||[];
+  if(!inv.length){toast('No stock items found','error');return;}
+
+  var pats=window.PAT_DB||[];
+  var startTs=new Date(startD).getTime();
+  var endTs=new Date(endD).getTime();
+  if(endTs<startTs){toast('End date must be after start','error');return;}
+
+  if(!window.BILLING_DB)window.BILLING_DB=[];
+
+  var created=0;
+  for(var i=0;i<count;i++){
+    // Random date in range
+    var randTs=startTs+Math.random()*(endTs-startTs);
+    var d=new Date(randTs);
+    var dateStr=String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+
+    // Number of items
+    var nItems;
+    if(itemMode==='random')nItems=3+Math.floor(Math.random()*5); // 3-7
+    else nItems=parseInt(itemMode)||3;
+
+    // Pick patient
+    var pat;
+    if(patMode==='specific'&&patSel){pat={name:patSel};}
+    else if(pats.length){pat=pats[Math.floor(Math.random()*pats.length)];}
+    else{pat={name:'Patient '+(i+1)};}
+
+    // Pick items
+    var meds=[];var total=0;
+    var shuffled=inv.slice().sort(function(){return Math.random()-.5;});
+    shuffled.slice(0,nItems).forEach(function(m){
+      var qty=1+Math.floor(Math.random()*5);
+      var rate=parseFloat(m.sale||m.mrp||10);
+      var amt=qty*rate;
+      meds.push({name:m.name,qty:qty,rate:rate,net:amt,batch:m.batch||'',exp:m.expiry||m.exp||''});
+      total+=amt;
+    });
+
+    var bill={
+      id:'INV-'+String(Date.now()+i).slice(-8),
+      patient:pat.name||'',
+      date:dateStr,
+      meds:meds,amount:parseFloat(total.toFixed(2)),
+      status:'Paid',paymode:'Cash',
+      desc:meds.map(function(m){return m.name;}).join(', ')
+    };
+    window.BILLING_DB.unshift(bill);
+    // Save to server
+    fetch('data.php?action=save_billing',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:bill.id,patient:bill.patient,date:bill.date,
+        amount:bill.amount,status:bill.status,paymode:bill.paymode,
+        desc:bill.desc,meds:meds})
+    }).catch(function(){});
+    created++;
+  }
+  if(typeof cpSaveData==='function')cpSaveData();
+  if(typeof renderPhBills==='function')renderPhBills();
+  closeModal('m-multiInv');
+  toast('\u2713 '+created+' invoices generated and saved','success');
+}
+window.generateMultiInvoices=generateMultiInvoices;
+
+// Populate patient select when modal opens
+var _origOpenModal=window.openModal;
+window.openModal=function(id){
+  if(id==='m-multiInv'){
+    openModal_miPatPop();
+    var t=new Date();
+    var td=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+    var si=document.getElementById('mi-start');if(si&&!si.value)si.value=td;
+    var ei=document.getElementById('mi-end');if(ei&&!ei.value)ei.value=td;
+    miUpdatePreview();
+  }
+  if(_origOpenModal)_origOpenModal(id);
+};
+
+
 </script>
+<div class="overlay" id="m-multiInv" style="display:none">
+<div class="modal" style="max-width:520px">
+  <div class="mh">
+    <h2><i class="ti ti-receipt-2" style="color:#7C3AED;margin-right:8px"></i>Multi Invoice Generator</h2>
+    <button class="mclose" onclick="closeModal('m-multiInv')"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="mbody" style="padding:18px 22px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+      <div>
+        <div class="flbl" style="margin-bottom:4px">No. of Invoices</div>
+        <input class="fin" id="mi-count" type="number" min="1" max="500" placeholder="e.g. 20" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Items per Invoice</div>
+        <select class="fin" id="mi-items" style="width:100%">
+          <option value="random">3–7 Random</option>
+          <option value="3">3 Fixed</option>
+          <option value="4">4 Fixed</option>
+          <option value="5">5 Fixed</option>
+          <option value="6">6 Fixed</option>
+          <option value="7">7 Fixed</option>
+        </select>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Patient</div>
+        <select class="fin" id="mi-patient" style="width:100%">
+          <option value="random">Random from list</option>
+          <option value="specific">Specific patient</option>
+        </select>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">Start Date</div>
+        <input class="fin" id="mi-start" type="date" style="width:100%">
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:4px">End Date</div>
+        <input class="fin" id="mi-end" type="date" style="width:100%">
+      </div>
+      <div id="mi-pat-wrap" style="display:none">
+        <div class="flbl" style="margin-bottom:4px">Select Patient</div>
+        <select class="fin" id="mi-pat-sel" style="width:100%"><option value="">— Select —</option></select>
+      </div>
+    </div>
+    <div id="mi-preview" style="font-size:11px;color:var(--ink3);padding:8px 10px;background:var(--sl);border-radius:7px">
+      Fill fields above → preview will show here
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="bs" onclick="closeModal('m-multiInv')">Cancel</button>
+    <button class="bp" onclick="generateMultiInvoices()" style="background:#7C3AED;border-color:#7C3AED">
+      <i class="ti ti-wand"></i> Generate Invoices
+    </button>
+  </div>
+</div>
+</div>
+
 <div class="overlay" id="m-editItem" style="display:none">
 <div class="modal" style="max-width:520px">
   <div class="mh"><h2>Edit Stock Item</h2><button class="mclose" onclick="closeModal('m-editItem')"><i class="ti ti-x"></i></button></div>
