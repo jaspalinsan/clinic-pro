@@ -418,69 +418,7 @@ html,body{height:100%;overflow:hidden}
       <button class="bp" onclick="nav('rx')"><i class="ti ti-plus"></i>New Rx</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px">
-
-    <!-- Total Patients -->
-    <div onclick="nav('dashboard')" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #DBEAFE;border-top:3px solid #185FA5;cursor:default;box-shadow:0 1px 4px rgba(24,95,165,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#EFF6FF;display:flex;align-items:center;justify-content:center"><i class="ti ti-users" style="font-size:16px;color:#185FA5"></i></div>
-        <i class="ti ti-arrow-up-right" style="font-size:13px;color:#94a3b8"></i>
-      </div>
-      <div id="stat-patients" style="font-size:24px;font-weight:800;color:#185FA5;line-height:1">0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Total Patients</div>
-    </div>
-
-    <!-- Today Appointments -->
-    <div onclick="nav('appointments')" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #D1FAE5;border-top:3px solid #059669;cursor:pointer;box-shadow:0 1px 4px rgba(5,150,105,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#F0FDF4;display:flex;align-items:center;justify-content:center"><i class="ti ti-calendar-check" style="font-size:16px;color:#059669"></i></div>
-        <i class="ti ti-arrow-up-right" style="font-size:13px;color:#94a3b8"></i>
-      </div>
-      <div id="stat-appts" style="font-size:24px;font-weight:800;color:#059669;line-height:1">0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Appointments</div>
-    </div>
-
-    <!-- Revenue -->
-    <div onclick="nav('finance')" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #FEF9C3;border-top:3px solid #CA8A04;cursor:pointer;box-shadow:0 1px 4px rgba(202,138,4,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#FEFCE8;display:flex;align-items:center;justify-content:center"><i class="ti ti-currency-rupee" style="font-size:16px;color:#CA8A04"></i></div>
-        <i class="ti ti-arrow-up-right" style="font-size:13px;color:#94a3b8"></i>
-      </div>
-      <div id="stat-revenue" style="font-size:22px;font-weight:800;color:#CA8A04;line-height:1">₹0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Revenue</div>
-    </div>
-
-    <!-- Stock Items -->
-    <div onclick="nav('inventory')" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #E9D5FF;border-top:3px solid #7C3AED;cursor:pointer;box-shadow:0 1px 4px rgba(124,58,237,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#FAF5FF;display:flex;align-items:center;justify-content:center"><i class="ti ti-box" style="font-size:16px;color:#7C3AED"></i></div>
-        <i class="ti ti-arrow-up-right" style="font-size:13px;color:#94a3b8"></i>
-      </div>
-      <div id="stat-inv" style="font-size:24px;font-weight:800;color:#7C3AED;line-height:1">0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Stock Items</div>
-    </div>
-
-    <!-- Near Expiry -->
-    <div onclick="dashExpiryPDF()" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #FED7AA;border-top:3px solid #EA580C;cursor:pointer;box-shadow:0 1px 4px rgba(234,88,12,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#FFF7ED;display:flex;align-items:center;justify-content:center"><i class="ti ti-clock-exclamation" style="font-size:16px;color:#EA580C"></i></div>
-        <i class="ti ti-file-download" style="font-size:13px;color:#EA580C"></i>
-      </div>
-      <div id="stat-expiry" style="font-size:24px;font-weight:800;color:#EA580C;line-height:1">0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Near Expiry</div>
-    </div>
-
-    <!-- Out of Stock -->
-    <div onclick="dashOosPDF()" style="background:#fff;border-radius:12px;padding:14px 12px;border:0.5px solid #FECDD3;border-top:3px solid #DC2626;cursor:pointer;box-shadow:0 1px 4px rgba(220,38,38,.08)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="width:34px;height:34px;border-radius:9px;background:#FFF1F2;display:flex;align-items:center;justify-content:center"><i class="ti ti-package-off" style="font-size:16px;color:#DC2626"></i></div>
-        <i class="ti ti-file-download" style="font-size:13px;color:#DC2626"></i>
-      </div>
-      <div id="stat-oos" style="font-size:24px;font-weight:800;color:#DC2626;line-height:1">0</div>
-      <div style="font-size:10px;font-weight:600;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:.5px">Out of Stock</div>
-    </div>
-
-  </div>
+  
   <div id="pat-bulk-bar" style="display:none;align-items:center;gap:10px;padding:9px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;margin-bottom:10px">
     <i class="ti ti-check-box" style="color:#92400E"></i>
     <span id="pat-bulk-count" style="font-size:13px;font-weight:600;color:#92400E;flex:1">0 selected</span>
@@ -2296,6 +2234,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -14209,6 +14148,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
