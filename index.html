@@ -2355,6 +2355,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -14046,11 +14047,13 @@ function parseExpDate(s){
   s=s.trim();
   var parts=s.split(/[-\/]/);
   if(parts.length===2){
-    // Could be MM-YYYY or YYYY-MM
     var a=parseInt(parts[0]),b=parseInt(parts[1]);
-    if(b>100)return new Date(b,a-1,1); // MM-YYYY
-    if(a>100)return new Date(a,b-1,1); // YYYY-MM
-    return new Date(2000+b,a-1,1);
+    if(b>100)return new Date(b,a-1,1);      // MM-YYYY e.g. 06-2027
+    if(a>100)return new Date(a,b-1,1);      // YYYY-MM e.g. 2027-06
+    // MM/YY or MM-YY e.g. 09/26 or 09-26
+    if(a>=1&&a<=12&&b>=0&&b<=99)
+      return new Date(2000+b,a-1,1);        // MM/YY e.g. 09/26 → Sep 2026
+    return null;
   }
   if(parts.length===3){
     var p0=parseInt(parts[0]),p1=parseInt(parts[1]),p2=parseInt(parts[2]);
@@ -14172,6 +14175,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
