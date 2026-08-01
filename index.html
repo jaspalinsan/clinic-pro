@@ -376,7 +376,7 @@ html,body{height:100%;overflow:hidden}
   </div>
 
   <div class="nright" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding-left:8px">
-    <div id="live-date" style="background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:2px solid #b0b0b0;border-radius:12px;padding:5px 12px;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9),inset 0 -2px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:66px;height:66px;justify-content:center"><span id="live-day" style="font-size:13px;font-weight:800;color:#1A3A8C;letter-spacing:1.5px;text-transform:uppercase;line-height:1">Mon</span><span id="live-daynum" style="font-size:13px;font-weight:900;color:#1A3A8C;line-height:1">02 Jun</span><span id="live-year" style="font-size:13px;font-weight:700;color:#CC2222;letter-spacing:1px;line-height:1">2026</span></div>
+    <div id="live-date" style="background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:2px solid #b0b0b0;border-radius:12px;padding:5px 12px;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9),inset 0 -2px 0 rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:66px;height:66px;justify-content:center"><span id="live-day" style="font-size:13px;font-weight:800;color:#1A3A8C;letter-spacing:1.5px;text-transform:uppercase;line-height:1">Mon</span><span id="live-daynum" style="font-size:11px;font-weight:900;color:#1A3A8C;line-height:1;letter-spacing:0.5px">01-08-2026</span><span id="live-year" style="font-size:13px;font-weight:700;color:#CC2222;letter-spacing:1px;line-height:1">2026</span></div>
     <div style="position:relative">
       <div            <div id="user-avatar" onclick="toggleUserMenu()" title="User menu"
         style="width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#fff 0%,#e0e0e0 40%,#c8c8c8 60%,#e8e8e8 100%);border:3px solid #CC2222;box-shadow:0 4px 8px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#1A3A8C;cursor:pointer" id="user-role-badge">DR</div>
@@ -2354,6 +2354,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4163,7 +4164,7 @@ window.bulkDeleteItems=bulkDeleteItems;
 document.addEventListener('DOMContentLoaded', function() {
   try{var n=new Date(),dd=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mm=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];var days2=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var eld=document.getElementById('live-day');if(eld)eld.textContent=days2[n.getDay()];
-var eln=document.getElementById('live-daynum');if(eln)eln.textContent=String(n.getDate()).padStart(2,'0')+' '+mm[n.getMonth()];
+var eln=document.getElementById('live-daynum');if(eln)eln.textContent=String(n.getDate()).padStart(2,'0')+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+n.getFullYear();
 var ely=document.getElementById('live-year');if(ely)ely.textContent=n.getFullYear();}catch(e){}
   try{renderInventory();}catch(e){}
   try{renderApptPanes();}catch(e){}
@@ -14013,10 +14014,11 @@ function dashLoadExpiry(){
   var warn=new Date(today);warn.setDate(warn.getDate()+90);
   var inv=window.INV_DB||window.DB||[];
   var near=inv.filter(function(m){
-    if(!m.expiry&&!m.exp)return false;
-    var es=m.expiry||m.exp||'';
+    var es=m.expiry||m.exp||m.expiry_date||m.expiryDate||'';
+    if(!es)return false;
     var d=parseExpDate(es);
-    return d&&d>today&&d<=warn&&parseFloat(m.qty||m.stock||0)>0;
+    var qty=parseFloat(m.qty||m.stock||m.quantity||m.balance||0);
+    return d&&d>today&&d<=warn&&qty>0;
   }).sort(function(a,b){
     return parseExpDate(a.expiry||a.exp)-parseExpDate(b.expiry||b.exp);
   });
@@ -14032,7 +14034,7 @@ function dashLoadExpiry(){
     var color=daysLeft<=30?'#DC2626':daysLeft<=60?'#D97706':'#059669';
     return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
       +'<div><div style="font-size:12px;font-weight:600">'+(m.name||'—')+'</div>'
-      +'<div style="font-size:10px;color:var(--ink3)">Exp: '+exp+' · Qty: '+(m.qty||m.stock||0)+'</div></div>'
+      +'<div style="font-size:10px;color:var(--ink3)">Exp: '+exp+' · Qty: '+(m.qty||m.stock||m.quantity||0)+'</div></div>'
       +'<span style="font-size:10px;font-weight:700;color:'+color+'">'+daysLeft+'d</span>'
       +'</div>';
   }).join('');
@@ -14040,14 +14042,22 @@ function dashLoadExpiry(){
 window.dashLoadExpiry=dashLoadExpiry;
 
 function parseExpDate(s){
-  if(!s)return null;
+  if(!s||typeof s!=='string')return null;
+  s=s.trim();
   var parts=s.split(/[-\/]/);
-  if(parts.length===2){// MM-YYYY or MM/YYYY
-    return new Date(parseInt(parts[1]),parseInt(parts[0])-1,1);
+  if(parts.length===2){
+    // Could be MM-YYYY or YYYY-MM
+    var a=parseInt(parts[0]),b=parseInt(parts[1]);
+    if(b>100)return new Date(b,a-1,1); // MM-YYYY
+    if(a>100)return new Date(a,b-1,1); // YYYY-MM
+    return new Date(2000+b,a-1,1);
   }
   if(parts.length===3){
-    if(parts[0].length===4)return new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
-    return new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+    var p0=parseInt(parts[0]),p1=parseInt(parts[1]),p2=parseInt(parts[2]);
+    if(p0>1000)return new Date(p0,p1-1,p2); // YYYY-MM-DD
+    if(p2>1000)return new Date(p2,p1-1,p0); // DD-MM-YYYY
+    if(p2>100)return new Date(2000+p2,p1-1,p0); // DD-MM-YY
+    return null;
   }
   return null;
 }
@@ -14100,17 +14110,28 @@ window.dashExpiryPDF=dashExpiryPDF;
 // ── Out of Stock ──
 function dashLoadOos(){
   var inv=window.INV_DB||window.DB||[];
-  var oos=inv.filter(function(m){return parseFloat(m.qty||m.stock||0)<=0;});
+  var oos=inv.filter(function(m){
+    var qty=parseFloat(m.qty||m.stock||m.quantity||m.balance||0);
+    return qty<=0;
+  });
+  var lowQty=inv.filter(function(m){
+    var qty=parseFloat(m.qty||m.stock||m.quantity||m.balance||0);
+    return qty>0&&qty<=5;
+  });
   var el=document.getElementById('dash-oos-list');
   var ct=document.getElementById('dash-oos-count');
   if(ct)ct.textContent=oos.length;
   if(!el)return;
-  if(!oos.length){el.innerHTML='<div style="color:var(--ink3);font-size:11px;padding:10px 0;text-align:center">All items in stock ✓</div>';return;}
-  el.innerHTML=oos.map(function(m){
-    return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
-      +'<div><div style="font-size:12px;font-weight:600">'+(m.name||'—')+'</div>'
-      +'<div style="font-size:10px;color:var(--ink3)">'+(m.mfr||m.supplier||'—')+' · Batch: '+(m.batch||'—')+'</div></div>'
-      +'<span style="font-size:10px;font-weight:700;color:#DC2626;background:#FFF1F2;padding:2px 6px;border-radius:8px">OUT</span>'
+  if(!oos.length&&!lowQty.length){el.innerHTML='<div style="color:var(--ink3);font-size:11px;padding:10px 0;text-align:center">All items in stock ✓</div>';return;}
+  if(ct)ct.textContent=(oos.length+lowQty.length);
+  var allItems=oos.map(function(m){return{m:m,out:true};}).concat(lowQty.map(function(m){return{m:m,out:false};}));
+  el.innerHTML=allItems.map(function(item){
+    var m=item.m,qty=parseFloat(m.qty||m.stock||m.quantity||0);
+    return '<div style="padding:4px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:11px;font-weight:600">'+(m.name||'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--ink3)">'+(m.mfr||m.supplier||'—')+'</div></div>'
+      +(item.out?'<span style="font-size:10px;font-weight:700;color:#DC2626;background:#FFF1F2;padding:1px 6px;border-radius:8px">OUT</span>'
+               :'<span style="font-size:10px;font-weight:700;color:#D97706;background:#FEF3C7;padding:1px 6px;border-radius:8px">LOW:'+qty+'</span>')
       +'</div>';
   }).join('');
 }
@@ -14151,6 +14172,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
