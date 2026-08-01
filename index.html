@@ -2357,6 +2357,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -6607,7 +6608,7 @@ function renderH1Report(){
     var stPill=bal<=0?'p-r':bal<=10?'p-a':bal<=20?'p-b':'p-g';
     tr.innerHTML=
       '<td style="text-align:center;font-size:12px;color:var(--ink3)">'+row.sr+'</td>'+
-      '<td style="font-size:12px;color:var(--ink2)">'+row.date+'</td>'+
+      '<td style="font-size:12px;color:var(--ink2);white-space:nowrap;min-width:90px">'+row.date+'</td>'+
       '<td style="font-size:12px;font-weight:600;color:#1A3A8C">'+row.doctor+'</td>'+
       '<td style="font-size:12px;font-weight:600">'+row.patient+'</td>'+
       '<td style="font-size:12px;font-weight:700;color:#1A3A8C">'+row.drug+'</td>'+
@@ -14176,6 +14177,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
