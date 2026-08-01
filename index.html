@@ -993,15 +993,19 @@ html,body{height:100%;overflow:hidden}
       <input type="file" id="vendor-img-input" accept="image/*,.pdf" style="display:none" onchange="parseVendorImage(this)">
       <button class="bs" onclick="openBillReader()"><i class="ti ti-camera"></i>Scan Bill</button>
       <button class="bs" onclick="document.getElementById('vendor-img-input').click()" style="margin-left:4px"><i class="ti ti-upload"></i>Upload Bill</button>
+      <button class="bs" onclick="vendorDownloadTemplate()" style="margin-left:4px;color:#059669;border-color:#059669"><i class="ti ti-download"></i>Template</button>
       <button class="bs" onclick="document.getElementById('vendor-xls-input').click()" style="margin-left:4px;color:#059669;border-color:#059669"><i class="ti ti-file-spreadsheet"></i>Upload Excel</button>
       <input type="file" id="vendor-xls-input" accept=".xlsx,.csv" style="display:none" onchange="vendorXlsImport(this.files[0])">
       <button class="bp" onclick="doVendorImport()"><i class="ti ti-check"></i>Confirm Import</button>
     </div>
   </div>
   <div class="card">
-    <div class="ch"><span class="ct">Vendor Bill Items</span></div>
+    <div class="ch" style="justify-content:space-between">
+  <span class="ct"><i class="ti ti-truck" style="color:#F97316;margin-right:5px"></i>Vendor Bill Items</span>
+  <button class="tb" onclick="vendorAddRow()" style="color:#F97316;border-color:#F97316;font-size:11px"><i class="ti ti-plus"></i> Add Row</button>
+</div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:58px;text-align:center">Expiry</th><th style="width:48px;text-align:center">Qty</th><th style="width:82px;text-align:right">Rate &#8377;</th><th style="width:75px;text-align:right">Sale &#8377;</th><th style="width:85px;text-align:right">Amount &#8377;</th><th style="width:70px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th style="width:28px"><input type="checkbox" onchange="vdCheckAll(this)" style="cursor:pointer;width:15px;height:15px"></th><th>Item Name</th><th style="width:80px">MFR</th><th style="width:72px">Batch</th><th style="width:70px;text-align:center">Expiry</th><th style="width:50px;text-align:center">Qty</th><th style="width:80px;text-align:right">Sale ₹</th><th style="width:90px;text-align:right">Amount ₹</th><th style="width:75px;text-align:center">Status</th><th style="width:28px"></th></tr></thead>
       <tbody id="vd-tbody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to auto-fill</td></tr></tbody>
     </table></div>
     <div style="padding:10px 16px;text-align:right"><b>Total: </b><span id="vd-total">&#8377;0.00</span></div>
@@ -2232,6 +2236,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -14194,52 +14199,82 @@ window.dashOosPDF=dashOosPDF;
 
 
 // ── Vendor Excel Import ──────────────────────────────
+function vendorDownloadTemplate(){
+  var csv='Item Name,MFR,Batch,Expiry,Qty,Sale Rs,Amount Rs,Status\n'
+    +'Paracetamol 500mg,MedCo Pharma,B2024-001,09/26,100,6.50,650.00,Active\n'
+    +'Amoxicillin 250mg,Cipla,B2024-002,06/27,50,12.00,600.00,Active\n'
+    +'Pantoprazole 40mg,Sun Pharma,B2024-003,03/27,80,8.00,640.00,Active\n';
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vendor_stock_template.csv';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  toast('Template downloaded — fill and upload','success');
+}
+window.vendorDownloadTemplate=vendorDownloadTemplate;
+
 function vendorXlsImport(file){
   if(!file)return;
   var ext=file.name.split('.').pop().toLowerCase();
-  function parseAndLoad(csvText){
+  function processCSV(csvText){
     var lines=csvText.split('\n').map(function(l){return l.trim();}).filter(Boolean);
     if(!lines.length){toast('Empty file','error');return;}
+    // Detect header
     var start=0;
     var first=lines[0].toLowerCase();
-    if(first.indexOf('name')!==-1||first.indexOf('item')!==-1)start=1;
-    var items=[];
-    lines.slice(start).forEach(function(line){
+    if(first.indexOf('item')!==-1||first.indexOf('name')!==-1)start=1;
+    var rows=[];var total=0;
+    lines.slice(start).forEach(function(line,i){
       var cols=line.split(',').map(function(c){return c.replace(/^"|"$/g,'').trim();});
-      var name=cols[0]||'';
-      if(!name)return;
-      items.push({
-        id:'V'+Date.now()+Math.random().toString(36).slice(2,6),
-        name:name,batch:cols[1]||'',expiry:cols[2]||'',
-        qty:parseFloat(cols[3]||0),sale:parseFloat(cols[4]||0),
-        mfr:cols[5]||'',mrp:parseFloat(cols[4]||0),
-        stock:parseFloat(cols[3]||0),purchase:0,
-        status:'active'
-      });
+      var name=cols[0]||'';if(!name)return;
+      var qty=parseFloat(cols[4]||0);
+      var sale=parseFloat(cols[5]||0);
+      var amt=parseFloat(cols[6]||0)||(qty*sale);
+      var status=cols[7]||'Active';
+      rows.push({name:name,mfr:cols[1]||'',batch:cols[2]||'',
+        expiry:cols[3]||'',qty:qty,sale:sale,amt:amt,status:status});
+      total+=amt;
     });
-    if(!items.length){toast('No valid rows found','error');return;}
-    // Add to INV_DB
-    if(!window.INV_DB)window.INV_DB=[];
-    if(typeof DB==='undefined')window.DB=window.INV_DB;
-    items.forEach(function(item){window.INV_DB.push(item);if(window.DB!==window.INV_DB)window.DB.push(item);});
-    if(typeof syncInvDB==='function')syncInvDB();
-    if(typeof renderInventory==='function')renderInventory();
-    toast('\u2713 '+items.length+' items imported from Excel','success');
+    if(!rows.length){toast('No valid rows found','error');return;}
+    // Render to vendor table
+    var tbody=document.getElementById('vd-tbody');
+    if(!tbody)return;
+    tbody.innerHTML='';
+    rows.forEach(function(r,i){
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td><input type="checkbox" class="vd-cb" style="cursor:pointer;width:14px;height:14px"></td>'+
+        '<td style="font-size:12px;font-weight:600">'+r.name+'</td>'+
+        '<td style="font-size:11px;color:var(--ink2)">'+r.mfr+'</td>'+
+        '<td style="font-size:11px">'+r.batch+'</td>'+
+        '<td style="text-align:center;font-size:11px;white-space:nowrap">'+r.expiry+'</td>'+
+        '<td style="text-align:center;font-size:12px;font-weight:600">'+r.qty+'</td>'+
+        '<td style="text-align:right;font-size:12px">\u20b9'+r.sale.toFixed(2)+'</td>'+
+        '<td style="text-align:right;font-size:12px;font-weight:700">\u20b9'+r.amt.toFixed(2)+'</td>'+
+        '<td style="text-align:center"><span class="pill '+(r.status.toLowerCase()==='active'?'p-g':'p-a')+'" style="font-size:10px">'+r.status+'</span></td>'+
+        '<td><button class="tb" onclick="this.closest(\'tr\').remove();vendorCalcTotal()" style="font-size:10px;padding:2px 6px;color:#DC2626;border-color:#DC2626"><i class="ti ti-x"></i></button></td>';
+      tbody.appendChild(tr);
+    });
+    // Update total
+    var tot=document.getElementById('vd-total');
+    if(tot)tot.textContent='\u20b9'+total.toFixed(2);
+    toast('\u2713 '+rows.length+' items loaded — click Confirm Import to add to stock','success');
   }
   if(ext==='csv'){
-    var r=new FileReader();r.onload=function(e){parseAndLoad(e.target.result);};r.readAsText(file);
+    var r=new FileReader();r.onload=function(e){processCSV(e.target.result);};r.readAsText(file);
   } else if(ext==='xlsx'){
     var r2=new FileReader();
     r2.onload=function(e){
       try{
         var wb=XLSX.read(e.target.result,{type:'binary'});
-        var ws=wb.Sheets[wb.SheetNames[0]];
-        parseAndLoad(XLSX.utils.sheet_to_csv(ws));
-      }catch(err){toast('Could not read xlsx','error');}
+        processCSV(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));
+      }catch(err){toast('Could not read xlsx — save as CSV and try again','error');}
     };
     r2.readAsBinaryString(file);
   } else {toast('Use .xlsx or .csv only','error');}
 }
+window.vendorXlsImport=vendorXlsImport;
 window.vendorXlsImport=vendorXlsImport;
 
 // ── Multi Invoice Generator ───────────────────────────
@@ -14371,6 +14406,54 @@ window.openModal=function(id){
   if(_origOpenModal)_origOpenModal(id);
 };
 
+
+
+function vendorAddRow(){
+  var tbody=document.getElementById('vd-tbody');
+  if(!tbody)return;
+  // Remove placeholder if present
+  if(tbody.rows.length===1&&tbody.rows[0].cells.length===1)tbody.innerHTML='';
+  var tr=document.createElement('tr');
+  tr.innerHTML=
+    '<td><input type="checkbox" class="vd-cb" style="cursor:pointer;width:14px;height:14px"></td>'+
+    '<td><input class="edit-in" placeholder="Item Name" style="width:140px;font-size:11px" onchange="vendorCalcTotal()"></td>'+
+    '<td><input class="edit-in" placeholder="MFR" style="width:70px;font-size:11px"></td>'+
+    '<td><input class="edit-in" placeholder="Batch" style="width:65px;font-size:11px"></td>'+
+    '<td><input class="edit-in" placeholder="09/26" style="width:55px;font-size:11px;text-align:center"></td>'+
+    '<td><input class="edit-in" type="number" placeholder="0" style="width:45px;font-size:11px;text-align:center" oninput="vendorCalcTotal()"></td>'+
+    '<td><input class="edit-in" type="number" placeholder="0.00" style="width:70px;font-size:11px;text-align:right" oninput="vendorCalcTotal()"></td>'+
+    '<td style="text-align:right;font-size:12px;font-weight:700;min-width:80px">\u20b90.00</td>'+
+    '<td style="text-align:center"><span class="pill p-g" style="font-size:10px">Active</span></td>'+
+    '<td><button class="tb" onclick="this.closest(\'tr\').remove();vendorCalcTotal()" style="font-size:10px;padding:2px 6px;color:#DC2626;border-color:#DC2626"><i class="ti ti-x"></i></button></td>';
+  // Calc amt on qty/sale change
+  var inputs=tr.querySelectorAll('.edit-in');
+  function calcAmt(){
+    var qty=parseFloat(inputs[4]?inputs[4].value:0)||0;
+    var sale=parseFloat(inputs[5]?inputs[5].value:0)||0;
+    var amtTd=tr.querySelectorAll('td')[7];
+    if(amtTd)amtTd.textContent='\u20b9'+(qty*sale).toFixed(2);
+    vendorCalcTotal();
+  }
+  if(inputs[4])inputs[4].addEventListener('input',calcAmt);
+  if(inputs[5])inputs[5].addEventListener('input',calcAmt);
+  tbody.appendChild(tr);
+}
+window.vendorAddRow=vendorAddRow;
+
+function vendorCalcTotal(){
+  var tbody=document.getElementById('vd-tbody');
+  var tot=document.getElementById('vd-total');
+  if(!tbody||!tot)return;
+  var total=0;
+  tbody.querySelectorAll('tr').forEach(function(tr){
+    var tds=tr.querySelectorAll('td');
+    if(tds.length<8)return;
+    var txt=tds[7].textContent.replace(/[^\d.]/g,'');
+    total+=parseFloat(txt)||0;
+  });
+  tot.textContent='\u20b9'+total.toFixed(2);
+}
+window.vendorCalcTotal=vendorCalcTotal;
 
 </script>
 <div class="overlay" id="m-multiInv" style="display:none">
