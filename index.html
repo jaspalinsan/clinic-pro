@@ -432,13 +432,13 @@ html,body{height:100%;overflow:hidden}
     <div class="card" style="border-top:3px solid #185FA5;padding-bottom:0">
       <div class="ch" style="justify-content:space-between;padding:8px 12px">
         <span class="ct" style="color:#185FA5"><i class="ti ti-calendar-check" style="margin-right:6px"></i>Appointments Today</span>
-        <span id="dash-appt-count" style="font-size:11px;font-weight:700;background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px">0</span>
+        <span id="dash-appt-count" style="font-size:12px;font-weight:800;background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-appt-list" style="max-height:28px;overflow-y:auto;padding:0 10px 2px">
+      <div id="dash-appt-list" style="max-height:20px;overflow-y:auto;padding:0 10px 0">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
-      <div style="padding:4px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashApptPDF()" style="width:100%;justify-content:center;font-size:11px;color:#185FA5;border-color:#185FA5">
+      <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashApptPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#185FA5;border-color:#185FA5">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -448,13 +448,13 @@ html,body{height:100%;overflow:hidden}
     <div class="card" style="border-top:3px solid #D97706;padding-bottom:0">
       <div class="ch" style="justify-content:space-between;padding:8px 12px">
         <span class="ct" style="color:#D97706"><i class="ti ti-clock-exclamation" style="margin-right:6px"></i>Near Expiry</span>
-        <span id="dash-expiry-count" style="font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px">0</span>
+        <span id="dash-expiry-count" style="font-size:12px;font-weight:800;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-expiry-list" style="max-height:28px;overflow-y:auto;padding:0 10px 2px">
+      <div id="dash-expiry-list" style="max-height:20px;overflow-y:auto;padding:0 10px 0">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
-      <div style="padding:4px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashExpiryPDF()" style="width:100%;justify-content:center;font-size:11px;color:#D97706;border-color:#D97706">
+      <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashExpiryPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#D97706;border-color:#D97706">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -464,13 +464,13 @@ html,body{height:100%;overflow:hidden}
     <div class="card" style="border-top:3px solid #DC2626;padding-bottom:0">
       <div class="ch" style="justify-content:space-between;padding:8px 12px">
         <span class="ct" style="color:#DC2626"><i class="ti ti-package-off" style="margin-right:6px"></i>Out of Stock</span>
-        <span id="dash-oos-count" style="font-size:11px;font-weight:700;background:#FFF1F2;color:#BE123C;padding:2px 8px;border-radius:20px">0</span>
+        <span id="dash-oos-count" style="font-size:12px;font-weight:800;background:#FFF1F2;color:#BE123C;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-oos-list" style="max-height:28px;overflow-y:auto;padding:0 10px 2px">
+      <div id="dash-oos-list" style="max-height:20px;overflow-y:auto;padding:0 10px 0">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
-      <div style="padding:4px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashOosPDF()" style="width:100%;justify-content:center;font-size:11px;color:#DC2626;border-color:#DC2626">
+      <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashOosPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#DC2626;border-color:#DC2626">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -2234,6 +2234,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -14150,6 +14151,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
