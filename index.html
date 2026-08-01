@@ -430,6 +430,59 @@ html,body{height:100%;overflow:hidden}
     <button class="bp" onclick="bulkDeletePatients()" style="background:#EF4444"><i class="ti ti-trash"></i>Delete Selected</button>
     <button class="bs" onclick="clearPatSelection()"><i class="ti ti-x"></i>Clear</button>
   </div>
+  <!-- ══ DASHBOARD QUICK PANELS ══ -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
+
+    <!-- Today Appointments -->
+    <div class="card" style="border-top:3px solid #185FA5">
+      <div class="ch" style="justify-content:space-between">
+        <span class="ct" style="color:#185FA5"><i class="ti ti-calendar-check" style="margin-right:6px"></i>Appointments Today</span>
+        <span id="dash-appt-count" style="font-size:11px;font-weight:700;background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px">0</span>
+      </div>
+      <div id="dash-appt-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+        <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
+      </div>
+      <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashApptPDF()" style="width:100%;justify-content:center;font-size:11px;color:#185FA5;border-color:#185FA5">
+          <i class="ti ti-file-download"></i> Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Near Expiry -->
+    <div class="card" style="border-top:3px solid #D97706">
+      <div class="ch" style="justify-content:space-between">
+        <span class="ct" style="color:#D97706"><i class="ti ti-clock-exclamation" style="margin-right:6px"></i>Near Expiry</span>
+        <span id="dash-expiry-count" style="font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px">0</span>
+      </div>
+      <div id="dash-expiry-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+        <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
+      </div>
+      <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashExpiryPDF()" style="width:100%;justify-content:center;font-size:11px;color:#D97706;border-color:#D97706">
+          <i class="ti ti-file-download"></i> Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Out of Stock -->
+    <div class="card" style="border-top:3px solid #DC2626">
+      <div class="ch" style="justify-content:space-between">
+        <span class="ct" style="color:#DC2626"><i class="ti ti-package-off" style="margin-right:6px"></i>Out of Stock</span>
+        <span id="dash-oos-count" style="font-size:11px;font-weight:700;background:#FFF1F2;color:#BE123C;padding:2px 8px;border-radius:20px">0</span>
+      </div>
+      <div id="dash-oos-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+        <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
+      </div>
+      <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
+        <button class="tb" onclick="dashOosPDF()" style="width:100%;justify-content:center;font-size:11px;color:#DC2626;border-color:#DC2626">
+          <i class="ti ti-file-download"></i> Download PDF
+        </button>
+      </div>
+    </div>
+
+  </div>
+
   <div class="card">
     <div class="ch">
       <span class="ct"><i class="ti ti-users" style="color:var(--acc);margin-right:6px"></i>Patient List</span>
@@ -2299,6 +2352,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2685,7 +2740,7 @@ function nav(p) {
   if (p === 'finance')      renderFinance();
   if (p === 'pharmacy')  { renderPharmacy(); if(!window.BILLING_DB||!window.BILLING_DB.length){cpLoadData();setTimeout(renderPharmacy,800);} }
   if (p === 'vendor')    { if(typeof loadVendorSample==='function')loadVendorSample(); }
-  if (p === 'dashboard')    updateDashStats();
+  if (p === 'dashboard')    updateDashStats();setTimeout(dashRefreshPanels,400);
   // rxInit not called here — called only by New Rx button
 
   if (p === 'appointments') renderApptPanes();
@@ -13858,6 +13913,233 @@ window.confirmVendorImport=confirmVendorImport;
 
 
 
+
+
+
+// ══════════════════════════════════════════════
+// DASHBOARD QUICK PANELS
+// ══════════════════════════════════════════════
+
+function dashRefreshPanels(){
+  dashLoadAppts();
+  dashLoadExpiry();
+  dashLoadOos();
+}
+window.dashRefreshPanels=dashRefreshPanels;
+
+// ── Appointments Today ──
+function dashLoadAppts(){
+  var today=new Date();
+  var dd=String(today.getDate()).padStart(2,'0');
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var yyyy=today.getFullYear();
+  // Match multiple date formats
+  var todayStrs=[
+    dd+'-'+mm+'-'+yyyy,
+    yyyy+'-'+mm+'-'+dd,
+    dd+'/'+mm+'/'+yyyy
+  ];
+  var appts=(window._apptData||[]).filter(function(a){
+    return todayStrs.some(function(d){return (a.date||'').indexOf(d)!==-1;});
+  });
+  var el=document.getElementById('dash-appt-list');
+  var ct=document.getElementById('dash-appt-count');
+  if(ct)ct.textContent=appts.length;
+  if(!el)return;
+  if(!appts.length){el.innerHTML='<div style="color:var(--ink3);font-size:11px;padding:10px 0;text-align:center">No appointments today</div>';return;}
+  el.innerHTML=appts.map(function(a,i){
+    return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px;font-weight:600">'+( a.name||a.patient_name||'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--ink3)">'+(a.time||'—')+' · Token '+(a.token||i+1)+'</div></div>'
+      +'<span style="font-size:10px;padding:2px 6px;border-radius:10px;background:#DBEAFE;color:#1E40AF;font-weight:600">'+(a.status||'new')+'</span>'
+      +'</div>';
+  }).join('');
+}
+window.dashLoadAppts=dashLoadAppts;
+
+function dashApptPDF(){
+  var today=new Date();
+  var dd=String(today.getDate()).padStart(2,'0');
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var yyyy=today.getFullYear();
+  var todayStr=dd+'-'+mm+'-'+yyyy;
+  var todayStrs=[todayStr,yyyy+'-'+mm+'-'+dd,dd+'/'+mm+'/'+yyyy];
+  var appts=(window._apptData||[]).filter(function(a){
+    return todayStrs.some(function(d){return (a.date||'').indexOf(d)!==-1;});
+  });
+  var rows=appts.map(function(a,i){
+    return '<tr style="border-bottom:0.5px solid #e2e8f0">'
+      +'<td style="padding:8px 10px;font-weight:600">'+(i+1)+'</td>'
+      +'<td style="padding:8px 10px">'+(a.name||a.patient_name||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(a.time||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(a.token||i+1)+'</td>'
+      +'<td style="padding:8px 10px">'+(a.complaint||'—')+'</td>'
+      +'<td style="padding:8px 10px"><span style="padding:2px 8px;border-radius:10px;background:#DBEAFE;color:#1E40AF;font-size:11px">'+(a.status||'new')+'</span></td>'
+      +'</tr>';
+  }).join('');
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Appointments '+todayStr+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px;color:#111}'
+    +'.hdr{border-bottom:2px solid #185FA5;padding-bottom:10px;margin-bottom:16px}'
+    +'h2{color:#185FA5;margin:0}table{width:100%;border-collapse:collapse}'
+    +'th{background:#185FA5;color:#fff;padding:8px 10px;text-align:left;font-size:11px}'
+    +'tr:nth-child(even){background:#F8FAFC}'
+    +'</style></head><body>'
+    +'<div class="hdr"><h2>📅 Appointments Today — '+todayStr+'</h2>'
+    +'<div style="font-size:11px;color:#555;margin-top:4px">Total: '+appts.length+' appointments</div></div>'
+    +'<table><thead><tr><th>#</th><th>Patient</th><th>Time</th><th>Token</th><th>Complaint</th><th>Status</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div style="margin-top:20px;font-size:10px;color:#999">Printed: '+new Date().toLocaleString()+'</div>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(function(){w.print();},500);
+}
+window.dashApptPDF=dashApptPDF;
+
+// ── Near Expiry (within 90 days) ──
+function dashLoadExpiry(){
+  var today=new Date();today.setHours(0,0,0,0);
+  var warn=new Date(today);warn.setDate(warn.getDate()+90);
+  var inv=window.INV_DB||window.DB||[];
+  var near=inv.filter(function(m){
+    if(!m.expiry&&!m.exp)return false;
+    var es=m.expiry||m.exp||'';
+    var d=parseExpDate(es);
+    return d&&d>today&&d<=warn&&parseFloat(m.qty||m.stock||0)>0;
+  }).sort(function(a,b){
+    return parseExpDate(a.expiry||a.exp)-parseExpDate(b.expiry||b.exp);
+  });
+  var el=document.getElementById('dash-expiry-list');
+  var ct=document.getElementById('dash-expiry-count');
+  if(ct)ct.textContent=near.length;
+  if(!el)return;
+  if(!near.length){el.innerHTML='<div style="color:var(--ink3);font-size:11px;padding:10px 0;text-align:center">No items expiring soon</div>';return;}
+  el.innerHTML=near.map(function(m){
+    var exp=m.expiry||m.exp||'—';
+    var d=parseExpDate(exp);
+    var daysLeft=d?Math.ceil((d-today)/(1000*60*60*24)):999;
+    var color=daysLeft<=30?'#DC2626':daysLeft<=60?'#D97706':'#059669';
+    return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px;font-weight:600">'+(m.name||'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--ink3)">Exp: '+exp+' · Qty: '+(m.qty||m.stock||0)+'</div></div>'
+      +'<span style="font-size:10px;font-weight:700;color:'+color+'">'+daysLeft+'d</span>'
+      +'</div>';
+  }).join('');
+}
+window.dashLoadExpiry=dashLoadExpiry;
+
+function parseExpDate(s){
+  if(!s)return null;
+  var parts=s.split(/[-\/]/);
+  if(parts.length===2){// MM-YYYY or MM/YYYY
+    return new Date(parseInt(parts[1]),parseInt(parts[0])-1,1);
+  }
+  if(parts.length===3){
+    if(parts[0].length===4)return new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+    return new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+  }
+  return null;
+}
+window.parseExpDate=parseExpDate;
+
+function dashExpiryPDF(){
+  var today=new Date();today.setHours(0,0,0,0);
+  var warn=new Date(today);warn.setDate(warn.getDate()+90);
+  var inv=window.INV_DB||window.DB||[];
+  var near=inv.filter(function(m){
+    var d=parseExpDate(m.expiry||m.exp||'');
+    return d&&d>today&&d<=warn&&parseFloat(m.qty||m.stock||0)>0;
+  }).sort(function(a,b){return parseExpDate(a.expiry||a.exp)-parseExpDate(b.expiry||b.exp);});
+  var rows=near.map(function(m,i){
+    var d=parseExpDate(m.expiry||m.exp||'');
+    var daysLeft=d?Math.ceil((d-today)/(1000*60*60*24)):999;
+    var color=daysLeft<=30?'#DC2626':daysLeft<=60?'#D97706':'#059669';
+    return '<tr style="border-bottom:0.5px solid #e2e8f0">'
+      +'<td style="padding:8px 10px">'+(i+1)+'</td>'
+      +'<td style="padding:8px 10px;font-weight:600">'+(m.name||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.mfr||m.supplier||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.batch||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.expiry||m.exp||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.qty||m.stock||0)+'</td>'
+      +'<td style="padding:8px 10px;font-weight:700;color:'+color+'">'+daysLeft+' days</td>'
+      +'</tr>';
+  }).join('');
+  var dd=String(today.getDate()).padStart(2,'0');
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var yyyy=today.getFullYear();
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Near Expiry Stock</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px;color:#111}'
+    +'.hdr{border-bottom:2px solid #D97706;padding-bottom:10px;margin-bottom:16px}'
+    +'h2{color:#D97706;margin:0}table{width:100%;border-collapse:collapse}'
+    +'th{background:#D97706;color:#fff;padding:8px 10px;text-align:left;font-size:11px}'
+    +'tr:nth-child(even){background:#FFFBEB}'
+    +'</style></head><body>'
+    +'<div class="hdr"><h2>⚠️ Near Expiry Stock — '+dd+'-'+mm+'-'+yyyy+'</h2>'
+    +'<div style="font-size:11px;color:#555;margin-top:4px">Items expiring within 90 days: '+near.length+'</div></div>'
+    +'<table><thead><tr><th>#</th><th>Medicine</th><th>Company</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Days Left</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div style="margin-top:20px;font-size:10px;color:#999">Printed: '+new Date().toLocaleString()+'</div>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(function(){w.print();},500);
+}
+window.dashExpiryPDF=dashExpiryPDF;
+
+// ── Out of Stock ──
+function dashLoadOos(){
+  var inv=window.INV_DB||window.DB||[];
+  var oos=inv.filter(function(m){return parseFloat(m.qty||m.stock||0)<=0;});
+  var el=document.getElementById('dash-oos-list');
+  var ct=document.getElementById('dash-oos-count');
+  if(ct)ct.textContent=oos.length;
+  if(!el)return;
+  if(!oos.length){el.innerHTML='<div style="color:var(--ink3);font-size:11px;padding:10px 0;text-align:center">All items in stock ✓</div>';return;}
+  el.innerHTML=oos.map(function(m){
+    return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:12px;font-weight:600">'+(m.name||'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--ink3)">'+(m.mfr||m.supplier||'—')+' · Batch: '+(m.batch||'—')+'</div></div>'
+      +'<span style="font-size:10px;font-weight:700;color:#DC2626;background:#FFF1F2;padding:2px 6px;border-radius:8px">OUT</span>'
+      +'</div>';
+  }).join('');
+}
+window.dashLoadOos=dashLoadOos;
+
+function dashOosPDF(){
+  var inv=window.INV_DB||window.DB||[];
+  var oos=inv.filter(function(m){return parseFloat(m.qty||m.stock||0)<=0;});
+  var today=new Date();
+  var dd=String(today.getDate()).padStart(2,'0');
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var yyyy=today.getFullYear();
+  var rows=oos.map(function(m,i){
+    return '<tr style="border-bottom:0.5px solid #e2e8f0">'
+      +'<td style="padding:8px 10px">'+(i+1)+'</td>'
+      +'<td style="padding:8px 10px;font-weight:600">'+(m.name||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.mfr||m.supplier||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.batch||'—')+'</td>'
+      +'<td style="padding:8px 10px">'+(m.expiry||m.exp||'—')+'</td>'
+      +'<td style="padding:8px 10px;color:#DC2626;font-weight:700">OUT OF STOCK</td>'
+      +'</tr>';
+  }).join('');
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Out of Stock</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px;color:#111}'
+    +'.hdr{border-bottom:2px solid #DC2626;padding-bottom:10px;margin-bottom:16px}'
+    +'h2{color:#DC2626;margin:0}table{width:100%;border-collapse:collapse}'
+    +'th{background:#DC2626;color:#fff;padding:8px 10px;text-align:left;font-size:11px}'
+    +'tr:nth-child(even){background:#FFF1F2}'
+    +'</style></head><body>'
+    +'<div class="hdr"><h2>🚫 Out of Stock — '+dd+'-'+mm+'-'+yyyy+'</h2>'
+    +'<div style="font-size:11px;color:#555;margin-top:4px">Total items out of stock: '+oos.length+'</div></div>'
+    +'<table><thead><tr><th>#</th><th>Medicine</th><th>Company</th><th>Batch</th><th>Last Expiry</th><th>Status</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div style="margin-top:20px;font-size:10px;color:#999">Printed: '+new Date().toLocaleString()+'</div>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(function(){w.print();},500);
+}
+window.dashOosPDF=dashOosPDF;
 
 
 </script>
