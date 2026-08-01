@@ -2083,25 +2083,6 @@ html,body{height:100%;overflow:hidden}
       <div style="grid-column:span 2">
         <div class="flbl" style="margin-bottom:4px">History</div>
         <input class="fin" id="ap-history" list="hist-list" placeholder="Type or select..." style="width:100%" autocomplete="off">
-        <datalist id="hist-list">
-          <option value="Diabetes Mellitus">
-          <option value="Hypertension">
-          <option value="Hypertension + Diabetes">
-          <option value="Asthma / COPD">
-          <option value="Thyroid Disorder">
-          <option value="Heart Disease / CAD">
-          <option value="Kidney Disease / CKD">
-          <option value="Arthritis / Joint Pain">
-          <option value="Epilepsy">
-          <option value="Tuberculosis">
-          <option value="Cancer">
-          <option value="Anaemia">
-          <option value="Liver Disease">
-          <option value="Anxiety / Depression">
-          <option value="No significant history">
-          <option value="Surgery (previous)">
-          <option value="Allergy">
-        </datalist>
       </div>
     </div>
   </div>
@@ -2255,6 +2236,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -3813,59 +3795,108 @@ function openVendorConfirm(){
 
 function doVendorImport(){
   var rows=[].slice.call(document.querySelectorAll('#vd-tbody tr'));
+  if(!rows.length){toast('No items to import','error');return;}
+
+  // Ensure INV_DB exists
+  if(!window.INV_DB)window.INV_DB=[];
+  if(typeof window.DB==='undefined')window.DB=window.INV_DB;
+  var invDB=window.INV_DB;
+
+  // Get next ID
+  var nextId=invDB.length>0?Math.max.apply(null,invDB.map(function(m){return parseInt(m.id)||0;}))+1:1;
+
   var added=0,restocked=0,skipped=0;
+
   rows.forEach(function(tr){
-    // Support both data-f attrs (scan bill) and plain td index (excel upload)
-    function val(f){
+    var tds=tr.querySelectorAll('td');
+    if(tds.length<3){skipped++;return;}
+
+    // Read from data-f (scan bill rows) OR td index (excel rows)
+    function df(f){
       var el=tr.querySelector('[data-f="'+f+'"]');
-      if(el)return el.value?el.value.trim():el.textContent.trim();
-      return '';
+      return el?(el.tagName==='INPUT'||el.tagName==='SELECT'?el.value.trim():el.textContent.trim()):'';
     }
-    function tdVal(i){
-      var tds=tr.querySelectorAll('td');
+    function td(i){
       if(!tds[i])return '';
-      var inp=tds[i].querySelector('input');
-      return inp?inp.value.trim():tds[i].textContent.trim().replace(/[₹,]/g,'');
+      var inp=tds[i].querySelector('input,select');
+      var raw=inp?inp.value.trim():tds[i].textContent.trim();
+      return raw.replace(/[₹\u20b9,]/g,'').trim();
     }
-    // Try data-f first, fall back to td position
-    var name=val('name')||tdVal(1);
-    var company=val('company')||val('mfr')||tdVal(2);
-    var batch=val('batch')||tdVal(3);
-    var expiry=val('expiry')||tdVal(4);
-    var qty=parseInt(val('qty')||tdVal(5))||0;
-    var sale=parseFloat(val('sale')||tdVal(6))||0;
-    var purchase=parseFloat(val('rate'))||0;
+
+    var name   = df('name')    || td(1);
+    var mfr    = df('company') || df('mfr') || td(2);
+    var batch  = df('batch')   || td(3);
+    var expiry = df('expiry')  || td(4);
+    var qty    = parseFloat(df('qty')  || td(5)) || 0;
+    var sale   = parseFloat(df('sale') || td(6)) || 0;
+    var purchase = parseFloat(df('rate')) || 0;
 
     if(!name){skipped++;return;}
-    if(!sale&&purchase>0)sale=parseFloat((purchase*1.45).toFixed(2));
-    var ex=DB.find(function(m){return m.name.toLowerCase()===name.toLowerCase();});
+    if(!sale && purchase>0) sale = parseFloat((purchase*1.2).toFixed(2));
+
+    // Check if item already exists
+    var ex = invDB.find(function(m){
+      return (m.name||'').toLowerCase().trim() === name.toLowerCase().trim();
+    });
+
     if(ex){
-      ex.stock+=qty;
-      if(purchase>0)ex.purchase=purchase;
-      if(sale>0)ex.sale=sale;
+      ex.stock  = (parseFloat(ex.stock||0))  + qty;
+      ex.qty    = (parseFloat(ex.qty||0))    + qty;
+      if(sale>0){ex.sale=sale;ex.mrp=sale;}
       if(batch)ex.batch=batch;
       if(expiry)ex.expiry=expiry;
-      if(company&&company!=='—')ex.company=company;
-      if(desc)ex.cat=desc;
+      if(mfr&&mfr!=='—')ex.mfr=mfr;
       restocked++;
     } else {
-      DB.push({id:_nextId++,name:name,cat:desc||'General',type:'Rx Only',
-        company:company||'—',batch:batch||'—',expiry:expiry||'—',
-        stock:qty,purchase:purchase,sale:sale});
+      invDB.push({
+        id:nextId++,
+        name:name,
+        mfr:mfr||'—',
+        supplier:mfr||'—',
+        batch:batch||'—',
+        expiry:expiry||'—',
+        stock:qty,
+        qty:qty,
+        purchase:purchase,
+        sale:sale,
+        mrp:sale,
+        cat:'General',
+        status:'active'
+      });
       added++;
     }
   });
-  closeModal('m-vendorConfirm');
-  clearVendorRows();
-  if(typeof clearVdImg==='function')clearVdImg();
+
+  // Sync to window.DB too
+  window.DB=window.INV_DB;
+
+  if(typeof syncInvDB==='function') syncInvDB();
+  if(typeof renderInventory==='function') renderInventory();
+  if(typeof cpSaveData==='function') cpSaveData();
+
+  // Save to server
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'inventory',value:window.INV_DB})
+  }).catch(function(){});
+
+  // Clear vendor table
+  var tbody=document.getElementById('vd-tbody');
+  if(tbody)tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--ink3)">Upload vendor bill to auto-fill</td></tr>';
+  var tot=document.getElementById('vd-total');
+  if(tot)tot.textContent='\u20b90.00';
+
   var parts=[];
-  if(added)parts.push(added+' item'+(added!==1?'s':'')+' added');
-  if(restocked)parts.push(restocked+' item'+(restocked!==1?'s':'')+' restocked');
+  if(added)parts.push(added+' item'+(added!==1?'s':'')+' added to stock');
+  if(restocked)parts.push(restocked+' restocked');
   if(skipped)parts.push(skipped+' skipped');
-  syncInvDB();
-  toast(parts.join(' · ')||'Nothing imported',added+restocked>0?'success':'error');
-  if(added+restocked>0){renderInventory();setTimeout(function(){nav('inventory');},400);}
+  toast(parts.join(' · ')||'Nothing imported', added+restocked>0?'success':'error');
+
+  if(added+restocked>0){
+    setTimeout(function(){nav('inventory');},600);
+  }
 }
+window.doVendorImport=doVendorImport;
 
 // ── OCR MODAL ─────────────────────────────────────────────────
 function openOCRModal(dataURL,fileName){
@@ -14491,7 +14522,30 @@ function vendorCalcTotal(){
 window.vendorCalcTotal=vendorCalcTotal;
 
 
-</script>
+
+</script><datalist id="hist-list">
+  <option value="Diabetes Mellitus">
+  <option value="Hypertension">
+  <option value="Hypertension + Diabetes">
+  <option value="Asthma / COPD">
+  <option value="Thyroid Disorder">
+  <option value="Heart Disease / CAD">
+  <option value="Kidney Disease / CKD">
+  <option value="Arthritis / Joint Pain">
+  <option value="Epilepsy">
+  <option value="Tuberculosis">
+  <option value="Cancer">
+  <option value="Anaemia">
+  <option value="Liver Disease">
+  <option value="Anxiety / Depression">
+  <option value="No significant history">
+  <option value="Surgery (previous)">
+  <option value="Allergy">
+  <option value="Fever (recurrent)">
+  <option value="Migraine">
+  <option value="PCOD / PCOS">
+</datalist>
+
 <div class="overlay" id="m-multiInv" style="display:none">
 <div class="modal" style="max-width:520px">
   <div class="mh">
