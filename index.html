@@ -434,7 +434,7 @@ html,body{height:100%;overflow:hidden}
         <span class="ct" style="color:#185FA5"><i class="ti ti-calendar-check" style="margin-right:6px"></i>Appointments Today</span>
         <span id="dash-appt-count" style="font-size:11px;font-weight:700;background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-appt-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+      <div id="dash-appt-list" style="max-height:70px;overflow-y:auto;padding:0 10px 4px">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
@@ -450,7 +450,7 @@ html,body{height:100%;overflow:hidden}
         <span class="ct" style="color:#D97706"><i class="ti ti-clock-exclamation" style="margin-right:6px"></i>Near Expiry</span>
         <span id="dash-expiry-count" style="font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-expiry-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+      <div id="dash-expiry-list" style="max-height:70px;overflow-y:auto;padding:0 10px 4px">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
@@ -466,7 +466,7 @@ html,body{height:100%;overflow:hidden}
         <span class="ct" style="color:#DC2626"><i class="ti ti-package-off" style="margin-right:6px"></i>Out of Stock</span>
         <span id="dash-oos-count" style="font-size:11px;font-weight:700;background:#FFF1F2;color:#BE123C;padding:2px 8px;border-radius:20px">0</span>
       </div>
-      <div id="dash-oos-list" style="max-height:200px;overflow-y:auto;padding:0 10px 8px">
+      <div id="dash-oos-list" style="max-height:70px;overflow-y:auto;padding:0 10px 4px">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:8px 10px;border-top:0.5px solid var(--sl2)">
@@ -2234,6 +2234,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -14148,6 +14149,7 @@ function dashOosPDF(){
   setTimeout(function(){w.print();},500);
 }
 window.dashOosPDF=dashOosPDF;
+
 
 
 
