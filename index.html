@@ -2371,6 +2371,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3798,10 +3799,10 @@ function doVendorImport(){
   var rows=[].slice.call(document.querySelectorAll('#vd-tbody tr'));
   if(!rows.length){toast('No items to import','error');return;}
 
-  // Ensure INV_DB exists
-  if(!window.INV_DB)window.INV_DB=[];
-  if(typeof window.DB==='undefined')window.DB=window.INV_DB;
-  var invDB=window.INV_DB;
+  // Use the master DB array directly (syncInvDB copies DB→INV_DB)
+  if(typeof DB==='undefined'||!DB)window.DB=[];
+  if(!window.INV_DB)window.INV_DB=DB;
+  var invDB=DB; // push to DB so syncInvDB picks it up
 
   // Get next ID
   var nextId=invDB.length>0?Math.max.apply(null,invDB.map(function(m){return parseInt(m.id)||0;}))+1:1;
@@ -3869,18 +3870,10 @@ function doVendorImport(){
     }
   });
 
-  // Sync to window.DB too
-  window.DB=window.INV_DB;
-
+  // syncInvDB sets window.INV_DB=DB and saves to server
   if(typeof syncInvDB==='function') syncInvDB();
   if(typeof renderInventory==='function') renderInventory();
   if(typeof cpSaveData==='function') cpSaveData();
-
-  // Save to server
-  fetch('data.php?action=store_set',{method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({key:'inventory',value:window.INV_DB})
-  }).catch(function(){});
 
   // Clear vendor table
   var tbody=document.getElementById('vd-tbody');
@@ -14522,6 +14515,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
