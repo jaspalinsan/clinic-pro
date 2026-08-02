@@ -2373,6 +2373,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3821,15 +3822,15 @@ function doVendorImport(){
         var name=df('name')||td(1);
         if(!name||name.length<1){skipped++;return;}
 
-        var mfr   =df('company')||df('mfr')||td(2)||'—';
-        var batch =df('batch')||td(3)||'—';
-        var expiry=df('expiry')||td(4)||'—';
-        var qty   =parseFloat(df('qty')||td(5))||0;
-        var sale  =parseFloat(df('sale')||td(6))||0;
-        var pur   =parseFloat(df('rate'))||0;
+        var mfr   =(df('company')||df('mfr')||td(2)||'—').trim();
+        var batch =(df('batch')||td(3)||'—').trim();
+        var expiry=(df('expiry')||td(4)||'—').trim();
+        var qty   =parseFloat(df('qty')||td(5)||0)||0;
+        var sale  =parseFloat(df('sale')||td(6)||0)||0;
+        var pur   =parseFloat(df('rate')||0)||0;
         if(!sale&&pur>0)sale=parseFloat((pur*1.2).toFixed(2));
 
-        // Push to DB (master array)
+        // Build item object
         var item={
           id:Date.now()+added,
           name:name,mfr:mfr,company:mfr,supplier:mfr,
@@ -14517,6 +14518,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
