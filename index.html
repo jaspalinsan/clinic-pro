@@ -2374,6 +2374,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3893,7 +3894,6 @@ function doVendorImport(){
     alert('Import error: '+e.message);
   }
 }
-window.doVendorImport=doVendorImport;
 window.doVendorImport=doVendorImport;
 
 // ── OCR MODAL ─────────────────────────────────────────────────
@@ -14518,6 +14518,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
