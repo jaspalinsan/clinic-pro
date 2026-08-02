@@ -2375,6 +2375,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3163,7 +3164,7 @@ function renderInventory(){
       '<td>'+
         '<div style="font-size:12.5px;font-weight:700;color:var(--ink)">'+m.name+'</div>'+
         '<div style="font-size:10.5px;color:var(--ink3);margin-top:1px">'+
-          (m.type||'')+(mfr&&mfr!=='—'?' &bull; '+mfr:'')+
+          (m.type||'')+(function(){var _m=m.mfr||m.company||m.supplier||'';return _m&&_m!=='—'?' &bull; '+_m:'';})()+
         '</div>'+
       '</td>'+
 
@@ -14518,6 +14519,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
