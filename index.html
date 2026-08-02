@@ -52,6 +52,9 @@ html,body{height:100%;overflow:hidden}
 .ch{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-wrap:wrap;gap:8px}
 .ct{font-size:13px;font-weight:700;color:var(--ink)}
 .bp{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.nlb{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:linear-gradient(180deg,#fff,#E8E8E8);cursor:pointer;color:#1A3A8C;font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
+.nlb i{font-size:16px}
+.nlb:hover{background:linear-gradient(180deg,#e8f0ff,#d0e0f8);}
 .bp:hover{background:var(--acc2)}
 .bs{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:1px solid var(--sl3);background:#fff;color:var(--ink2);font-size:12.5px;cursor:pointer;white-space:nowrap}
 .tb{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:6px;border:1px solid var(--sl3);background:#fff;color:var(--ink2);font-size:11.5px;cursor:pointer;white-space:nowrap}
@@ -954,7 +957,7 @@ html,body{height:100%;overflow:hidden}
   <div class="ph" style="flex-wrap:wrap;gap:8px">
     <div><div class="ptitle"><i class="ti ti-pill" style="color:#F59E0B;margin-right:6px"></i>Pharmacy &amp; Billing</div><div class="psub" id="ph-sub">Invoices</div></div>
     <div class="ha" style="flex-wrap:wrap;gap:6px;align-items:center"><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-from').showPicker?document.getElementById('ph-date-from').showPicker():document.getElementById('ph-date-from').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-from-lbl" style="min-width:90px">From date</span><input type="date" id="ph-date-from" onchange="phSetDateLbl('ph-date-from','ph-from-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><span style="font-size:13px;color:var(--ink3);font-weight:300">→</span><div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:0.5px solid var(--sl2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;color:var(--ink);white-space:nowrap;position:relative" onclick="document.getElementById('ph-date-to').showPicker?document.getElementById('ph-date-to').showPicker():document.getElementById('ph-date-to').focus()"><i class="ti ti-calendar" style="font-size:12px;color:var(--ink3)"></i><span id="ph-to-lbl" style="min-width:90px">To date</span><input type="date" id="ph-date-to" onchange="phSetDateLbl('ph-date-to','ph-to-lbl');renderPharmacy()" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"></div><button class="tb" onclick="document.getElementById('ph-date-from').value='';document.getElementById('ph-date-to').value='';document.getElementById('ph-from-lbl').textContent='From date';document.getElementById('ph-to-lbl').textContent='To date';renderPharmacy()" style="font-size:11px">Clear</button>
-      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <div style="display:inline-flex;border-radius:7px;overflow:visible;position:relative"><button class="bp" onclick="openModal('m-invoice')" style="border-radius:7px 0 0 7px;border-right:1px solid rgba(255,255,255,.3);padding-left:12px;padding-right:12px"><i class="ti ti-plus"></i> New Invoice</button><button class="tb" onclick="openModal('m-multiInv')" style="margin-left:4px;color:#7C3AED;border-color:#7C3AED"><i class="ti ti-receipt-2"></i> Multi Invoice</button><button class="bp" id="inv-split-btn" onclick="toggleInvMenu()" style="border-radius:0 7px 7px 0;padding:0 10px;font-size:14px">&#9660;</button><div id="inv-split-menu" style="display:none;position:fixed;background:#fff;border:1.5px solid #185FA5;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:180px;z-index:99999;overflow:hidden"><button onclick="openModal('m-invoice');toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#185FA5;cursor:pointer;border-bottom:0.5px solid #e5e7eb"><i class="ti ti-plus" style="font-size:14px"></i> New Invoice</button><button onclick="openBulkGen();toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#7C3AED;cursor:pointer"><i class="ti ti-wand" style="font-size:14px"></i> Bulk Generate</button></div></div>
+      <button class="tb" onclick="openClientReport()" style="display:flex;align-items:center;gap:4px;font-size:11px;background:#185FA5;color:#fff;border-color:#185FA5"><i class="ti ti-report-analytics"></i> Client Ledger</button> <div style="display:inline-flex;border-radius:7px;overflow:visible;position:relative"><button class="tb" onclick="openModal('m-invoice')" style="border-radius:7px 0 0 7px;border-right:1px solid rgba(255,255,255,.3);padding-left:12px;padding-right:12px;background:linear-gradient(180deg,#fff,#E8E8E8);color:#1A3A8C;border-color:#B0B0B0;font-weight:700"><i class="ti ti-plus"></i> New Invoice</button><button class="tb" onclick="openModal('m-multiInv')" style="margin-left:4px;background:linear-gradient(180deg,#fff,#E8E8E8);color:#1A3A8C;border-color:#B0B0B0;font-weight:700"><i class="ti ti-receipt-2"></i> Multi Invoice</button><button class="bp" id="inv-split-btn" onclick="toggleInvMenu()" style="border-radius:0 7px 7px 0;padding:0 10px;font-size:14px">&#9660;</button><div id="inv-split-menu" style="display:none;position:fixed;background:#fff;border:1.5px solid #185FA5;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:180px;z-index:99999;overflow:hidden"><button onclick="openModal('m-invoice');toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#185FA5;cursor:pointer;border-bottom:0.5px solid #e5e7eb"><i class="ti ti-plus" style="font-size:14px"></i> New Invoice</button><button onclick="openBulkGen();toggleInvMenu()" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;border:none;background:#fff;font-size:12px;font-weight:600;color:#7C3AED;cursor:pointer"><i class="ti ti-wand" style="font-size:14px"></i> Bulk Generate</button></div></div>
     </div>
   </div>
   <div id="ph-bulk-bar" style="display:none;align-items:center;gap:10px;padding:9px 14px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;margin-bottom:10px">
@@ -2236,6 +2239,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -5169,7 +5174,16 @@ function renderPharmacy(){
 
   // Sort
   data=data.slice().sort(function(a,b){
-    var da=new Date(a.dateRaw||a.date||0),db=new Date(b.dateRaw||b.date||0);
+    function parseD(s){
+      if(!s)return 0;
+      // Handle DD-MM-YYYY
+      var p=s.split('-');
+      if(p.length===3&&p[0].length<=2)return new Date(p[2],p[1]-1,p[0]).getTime();
+      return new Date(s).getTime()||0;
+    }
+    var da=parseD(a.dateRaw||a.date),db=parseD(b.dateRaw||b.date);
+    // Fall back to array index (newest pushed = highest index) if dates equal
+    if(da===db)return sortDir==='asc'?0:0;
     return sortDir==='asc'?(da-db):(db-da);
   });
 
@@ -14519,6 +14533,8 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
+
 
 
 
