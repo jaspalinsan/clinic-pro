@@ -2390,6 +2390,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -12707,21 +12708,36 @@ document.addEventListener('click',function(e){
 
 function fmtDate(dateStr){
   if(!dateStr)return '—';
-  // Try parsing various formats
-  var d=new Date(dateStr);
-  // If already in "22 Jul 2026" format, parse manually
-  if(isNaN(d.getTime())){
-    var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-    var parts=dateStr.split(' ');
-    if(parts.length===3&&months[parts[1]]!==undefined){
-      d=new Date(parseInt(parts[2]),months[parts[1]],parseInt(parts[0]));
-    }
+  // If already has time (DD-MM-YYYY HH.MM am), return as-is
+  if(/\d{2}-\d{2}-\d{4} \d{1,2}\.\d{2} [apm]/i.test(dateStr))return dateStr;
+  // Extract date and time parts
+  var parts=dateStr.split(' ');
+  var datePart=parts[0];
+  var timePart=parts.slice(1).join(' ')||'';
+  // Parse date
+  var d;
+  // YYYY-MM-DD (from HTML date input)
+  if(/^\d{4}-\d{2}-\d{2}$/.test(datePart)){
+    var dp=datePart.split('-');
+    d=new Date(parseInt(dp[0]),parseInt(dp[1])-1,parseInt(dp[2]));
   }
-  if(isNaN(d.getTime()))return dateStr; // fallback
+  // DD-MM-YYYY
+  else if(/^\d{2}-\d{2}-\d{4}$/.test(datePart)){
+    var dp=datePart.split('-');
+    d=new Date(parseInt(dp[2]),parseInt(dp[1])-1,parseInt(dp[0]));
+  }
+  else {
+    d=new Date(dateStr);
+  }
+  if(!d||isNaN(d.getTime()))return dateStr;
   var dd=String(d.getDate()).padStart(2,'0');
   var mm=String(d.getMonth()+1).padStart(2,'0');
   var yyyy=d.getFullYear();
-  return dd+'-'+mm+'-'+yyyy;
+  var base=dd+'-'+mm+'-'+yyyy;
+  // Append time if present in original
+  if(timePart)return base+' '+timePart;
+  // Add current time for new invoices (no time stored)
+  return base;
 }
 window.fmtDate=fmtDate;
 
@@ -14630,6 +14646,7 @@ function phSort(col){
   renderPharmacy();
 }
 window.phSort=phSort;
+
 
 
 
