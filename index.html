@@ -457,7 +457,7 @@ html,body{height:100%;overflow:hidden}
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashExpiryPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#D97706;border-color:#D97706">
+        <button class="tb" onclick="dashExpiryPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#374151;border-color:#94A3B8">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -473,7 +473,7 @@ html,body{height:100%;overflow:hidden}
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashOosPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#DC2626;border-color:#DC2626">
+        <button class="tb" onclick="dashOosPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#374151;border-color:#94A3B8">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -2383,6 +2383,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2901,6 +2902,10 @@ function submitAddPatient(){
   if(!age){toast('Enter age','error');return;}
 
   var ageSex=age.trim()+' '+gen;
+  var n=new Date();
+  var _dd=String(n.getDate()).padStart(2,'0'),_mm=String(n.getMonth()+1).padStart(2,'0');
+  var _hh=n.getHours(),_mn=n.getMinutes(),_ap=_hh>=12?'PM':'AM';_hh=_hh%12||12;
+  var savedAt=_dd+'-'+_mm+'-'+n.getFullYear()+' '+_hh+':'+String(_mn).padStart(2,'0')+_ap;
 
   if(editId){
     // ── EDIT MODE — update existing patient ──
@@ -2930,7 +2935,7 @@ function submitAddPatient(){
     // ── ADD MODE — create new patient ──
     var code='CAD-'+String(Math.floor(1000+Math.random()*8999));
     if(!window.PAT_DB)window.PAT_DB=[];
-    var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active'};
+    var pat={id:code,name:name.trim(),age:ageSex,gender:gen,mob:mobile,city:city,history:history,blood:'',status:'Active',savedAt:savedAt};
     window.PAT_DB.unshift(pat);
     fetch('data.php?action=save_patient',{method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -9961,7 +9966,10 @@ function saveBill(){
     var d=todayRaw?new Date(todayRaw):new Date();
     var dd=String(d.getDate()).padStart(2,'0');
     var mm=String(d.getMonth()+1).padStart(2,'0');
-    return dd+'-'+mm+'-'+d.getFullYear();
+    var hh=d.getHours(),mn=d.getMinutes(),ap=hh>=12?'PM':'AM';
+    hh=hh%12||12;
+    var ts=String(hh)+':'+String(mn).padStart(2,'0')+ap;
+    return dd+'-'+mm+'-'+d.getFullYear()+' '+ts;
   })();
   var paidAmt=stat&&stat.value==='Paid'?amount:0;
   var record={
@@ -10019,7 +10027,15 @@ function saveAppt(){
     time:g('appt-time'),
     token:g('appt-token'),
     complaint:g('appt-complaint'),
-    status:'new'
+    status:'new',
+    savedAt:(function(){
+      var n=new Date();
+      var dd=String(n.getDate()).padStart(2,'0');
+      var mm=String(n.getMonth()+1).padStart(2,'0');
+      var hh=n.getHours(),mn=n.getMinutes(),ap=hh>=12?'PM':'AM';
+      hh=hh%12||12;
+      return dd+'-'+mm+'-'+n.getFullYear()+' '+hh+':'+String(mn).padStart(2,'0')+ap;
+    })()
   };
   window._apptData.unshift(appt);
   if(typeof dbSaveAppointment==='function')dbSaveAppointment(appt);
@@ -14538,6 +14554,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
