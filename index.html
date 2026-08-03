@@ -2389,6 +2389,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -2909,8 +2910,8 @@ function submitAddPatient(){
   var ageSex=age.trim()+' '+gen;
   var n=new Date();
   var _dd=String(n.getDate()).padStart(2,'0'),_mm=String(n.getMonth()+1).padStart(2,'0');
-  var _hh=n.getHours(),_mn=n.getMinutes(),_ap=_hh>=12?'PM':'AM';_hh=_hh%12||12;
-  var savedAt=_dd+'-'+_mm+'-'+n.getFullYear()+' '+_hh+':'+String(_mn).padStart(2,'0')+_ap;
+  var _hh=n.getHours(),_mn=n.getMinutes(),_ap=_hh>=12?'pm':'am';_hh=_hh%12||12;
+  var savedAt=_dd+'-'+_mm+'-'+n.getFullYear()+' '+String(_hh).padStart(2,'0')+'.'+String(_mn).padStart(2,'0')+' '+_ap;
 
   if(editId){
     // ── EDIT MODE — update existing patient ──
@@ -5199,7 +5200,7 @@ function renderPharmacy(){
       if(parts[1]){
         var tm=parts[1].replace(/[APMapm]/g,'').split('.');
         var hh=parseInt(tm[0])||0,mn=parseInt(tm[1])||0;
-        if(parts[1].toUpperCase().indexOf('PM')!==-1&&hh!==12)hh+=12;
+        var _apu=parts[1].toUpperCase();if((_apu.indexOf('PM')!==-1||_apu.indexOf('pm')!==-1)&&hh!==12)hh+=12;
         base+=hh*3600000+mn*60000;
       }
       return base;
@@ -9993,9 +9994,9 @@ function saveBill(){
     var d=todayRaw?new Date(todayRaw):new Date();
     var dd=String(d.getDate()).padStart(2,'0');
     var mm=String(d.getMonth()+1).padStart(2,'0');
-    var hh=d.getHours(),mn=d.getMinutes(),ap=hh>=12?'PM':'AM';
+    var hh=d.getHours(),mn=d.getMinutes(),ap=hh>=12?'pm':'am';
     hh=hh%12||12;
-    var ts=String(hh).padStart(2,'0')+'.'+String(mn).padStart(2,'0')+ap;
+    var ts=String(hh).padStart(2,'0')+'.'+String(mn).padStart(2,'0')+' '+ap;
     return dd+'-'+mm+'-'+d.getFullYear()+' '+ts;
   })();
   var paidAmt=stat&&stat.value==='Paid'?amount:0;
@@ -10059,9 +10060,9 @@ function saveAppt(){
       var n=new Date();
       var dd=String(n.getDate()).padStart(2,'0');
       var mm=String(n.getMonth()+1).padStart(2,'0');
-      var hh=n.getHours(),mn=n.getMinutes(),ap=hh>=12?'PM':'AM';
+      var hh=n.getHours(),mn=n.getMinutes(),ap=hh>=12?'pm':'am';
       hh=hh%12||12;
-      return dd+'-'+mm+'-'+n.getFullYear()+' '+String(hh).padStart(2,'0')+'.'+String(mn).padStart(2,'0')+ap;
+      return dd+'-'+mm+'-'+n.getFullYear()+' '+String(hh).padStart(2,'0')+'.'+String(mn).padStart(2,'0')+' '+ap;
     })()
   };
   window._apptData.unshift(appt);
@@ -14629,6 +14630,7 @@ function phSort(col){
   renderPharmacy();
 }
 window.phSort=phSort;
+
 
 
 </script><datalist id="hist-list">
