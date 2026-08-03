@@ -2386,6 +2386,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -5200,8 +5201,10 @@ function renderPharmacy(){
       }
       return base;
     }
-    var da=parseD(a.dateRaw||a.date),db=parseD(b.dateRaw||b.date);
+    // Use date field (has time: 02-08-2026 09.15AM) for precise sort
+    var da=parseD(a.date||a.dateRaw),db=parseD(b.date||b.dateRaw);
     if(da!==db)return sortDir==='asc'?(da-db):(db-da);
+    // Same datetime: newest unshifted = lowest index = on top
     var ia=window.BILLING_DB.indexOf(a),ib=window.BILLING_DB.indexOf(b);
     return sortDir==='asc'?(ia-ib):(ib-ia);
   });
@@ -14572,6 +14575,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
