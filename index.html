@@ -967,7 +967,7 @@ html,body{height:100%;overflow:hidden}
     <button class="bs" onclick="phClearSel()"><i class="ti ti-x"></i>Clear</button>
   </div>
   <div class="card"><div class="tbl-wrap"><table class="tbl" style="table-layout:fixed;width:100%">
-    <thead><tr><th style="width:28px"><input type="checkbox" id="ph-check-all" onchange="phCheckAll(this)" style="cursor:pointer;width:13px;height:13px"></th><th style="width:20%">Name (Invoice)</th><th style="width:96px;white-space:nowrap">Date</th><th style="width:26%">Description</th><th style="width:14%;text-align:right">Amount</th><th style="width:8%">Status</th><th style="width:7%">Mode</th><th style="width:25%">Actions</th></tr></thead>
+    <thead id="ph-thead"><tr><th style="width:28px"><input type="checkbox" id="ph-check-all" onchange="phCheckAll(this)" style="cursor:pointer;width:13px;height:13px"></th><th style="width:20%;cursor:pointer;user-select:none" onclick="phSort('patient')" id="phth-patient">Name (Invoice) <span id="phi-patient">⇅</span></th><th style="width:96px;white-space:nowrap;cursor:pointer;user-select:none" onclick="phSort('date')" id="phth-date">Date <span id="phi-date">↓</span></th><th style="width:26%">Description</th><th style="width:14%;text-align:right;cursor:pointer;user-select:none" onclick="phSort('amount')" id="phth-amount">Amount <span id="phi-amount">⇅</span></th><th style="width:8%;cursor:pointer;user-select:none" onclick="phSort('status')" id="phth-status">Status <span id="phi-status">⇅</span></th><th style="width:7%;cursor:pointer;user-select:none" onclick="phSort('paymode')" id="phth-paymode">Mode <span id="phi-paymode">⇅</span></th><th style="width:25%">Actions</th></tr></thead>
     <tbody id="ph-tbody"></tbody>
   </table></div></div>
 <div style="padding:8px 14px;background:var(--sl);border-top:1px solid var(--sl2);display:flex;gap:16px;font-size:11px;color:var(--ink2)"><span>Total: <b id="ph-tot" style="color:var(--ink)">₹0.00</b></span><span>Paid: <b id="ph-paid" style="color:#059669">₹0.00</b></span><span>Balance Due: <b id="ph-due" style="color:#DC2626">₹0.00</b></span></div>
@@ -2239,6 +2239,8 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
 
 
 
@@ -5158,7 +5160,8 @@ function renderPharmacy(){
 
   var phFrom=(document.getElementById('ph-date-from')||{}).value||'';
   var phTo=(document.getElementById('ph-date-to')||{}).value||'';
-  var sortDir='desc'; // newest first always
+  var sortDir=window._phSortDir||'desc';
+  var sortCol=window._phSortCol||'date';
 
   var data=window.BILLING_DB.filter(function(inv){
     if(!inv||!inv.id)return false;
@@ -5201,12 +5204,15 @@ function renderPharmacy(){
       }
       return base;
     }
-    // Use date field (has time: 02-08-2026 09.15AM) for precise sort
+    var dir=sortDir==='asc'?1:-1;
+    if(sortCol==='patient')return dir*(a.patient||'').localeCompare(b.patient||'');
+    if(sortCol==='amount')return dir*(parseFloat(a.grandTotal||a.amount||0)-parseFloat(b.grandTotal||b.amount||0));
+    if(sortCol==='status')return dir*(a.status||'').localeCompare(b.status||'');
+    if(sortCol==='paymode')return dir*(a.paymode||'').localeCompare(b.paymode||'');
     var da=parseD(a.date||a.dateRaw),db=parseD(b.date||b.dateRaw);
-    if(da!==db)return sortDir==='asc'?(da-db):(db-da);
-    // Same datetime: newest unshifted = lowest index = on top
+    if(da!==db)return dir*(da-db);
     var ia=window.BILLING_DB.indexOf(a),ib=window.BILLING_DB.indexOf(b);
-    return sortDir==='asc'?(ia-ib):(ib-ia);
+    return dir*(ia-ib);
   });
 
   var tot=0,totPaid=0,totDue=0;
@@ -14592,6 +14598,37 @@ window.vendorCalcTotal=vendorCalcTotal;
 
 
 
+
+
+
+// ── Invoice Column Sort ──────────────────────────────
+window._phSortCol='date';
+window._phSortDir='desc';
+
+function phSort(col){
+  if(window._phSortCol===col){
+    window._phSortDir=window._phSortDir==='asc'?'desc':'asc';
+  } else {
+    window._phSortCol=col;
+    window._phSortDir=col==='date'?'desc':'asc';
+  }
+  // Update header indicators
+  var cols=['patient','date','amount','status','paymode'];
+  cols.forEach(function(c){
+    var el=document.getElementById('phi-'+c);
+    if(!el)return;
+    if(c===col){
+      el.textContent=window._phSortDir==='asc'?'↑':'↓';
+    } else {
+      el.style.opacity='0.35';
+      el.textContent='⇅';
+    }
+  });
+  var actEl=document.getElementById('phi-'+col);
+  if(actEl)actEl.style.opacity='1';
+  renderPharmacy();
+}
+window.phSort=phSort;
 
 
 </script><datalist id="hist-list">
