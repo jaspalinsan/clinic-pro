@@ -432,16 +432,16 @@ html,body{height:100%;overflow:hidden}
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
 
     <!-- Today Appointments -->
-    <div class="card" style="border-top:3px solid #185FA5;padding-bottom:0">
+    <div class="card" style="border-top:3px solid #64748B;padding-bottom:0">
       <div class="ch" style="justify-content:space-between;padding:8px 12px">
-        <span class="ct" style="color:#185FA5"><i class="ti ti-calendar-check" style="margin-right:6px"></i>Appointments Today</span>
-        <span id="dash-appt-count" style="font-size:12px;font-weight:800;background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px">0</span>
+        <span class="ct" style="color:#374151"><i class="ti ti-calendar-check" style="margin-right:6px;color:#64748B"></i>Appointments Today</span>
+        <span id="dash-appt-count" style="font-size:12px;font-weight:800;background:#F1F5F9;color:#374151;padding:2px 8px;border-radius:20px">0</span>
       </div>
       <div id="dash-appt-list" style="max-height:20px;overflow-y:auto;padding:0 10px 0">
         <div style="color:var(--ink3);font-size:11px;padding:10px 0">Loading...</div>
       </div>
       <div style="padding:3px 10px;border-top:0.5px solid var(--sl2)">
-        <button class="tb" onclick="dashApptPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#185FA5;border-color:#185FA5">
+        <button class="tb" onclick="dashApptPDF()" style="width:100%;justify-content:center;font-size:11px;font-weight:700;color:#374151;border-color:#94A3B8">
           <i class="ti ti-file-download"></i> Download PDF
         </button>
       </div>
@@ -2239,6 +2239,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -5177,15 +5178,18 @@ function renderPharmacy(){
   data=data.slice().sort(function(a,b){
     function parseD(s){
       if(!s)return 0;
-      // Handle DD-MM-YYYY
-      var p=s.split('-');
-      if(p.length===3&&p[0].length<=2)return new Date(p[2],p[1]-1,p[0]).getTime();
+      var p=s.split(/[-\/]/);
+      if(p.length===3){
+        if(p[0].length===4)return new Date(p[0],p[1]-1,p[2]).getTime();
+        return new Date(p[2],p[1]-1,p[0]).getTime();
+      }
       return new Date(s).getTime()||0;
     }
     var da=parseD(a.dateRaw||a.date),db=parseD(b.dateRaw||b.date);
-    // Fall back to array index (newest pushed = highest index) if dates equal
-    if(da===db)return sortDir==='asc'?0:0;
-    return sortDir==='asc'?(da-db):(db-da);
+    if(da!==db)return sortDir==='asc'?(da-db):(db-da);
+    // Same date: use array position (unshift = index 0 = newest)
+    var ia=window.BILLING_DB.indexOf(a),ib=window.BILLING_DB.indexOf(b);
+    return sortDir==='asc'?(ia-ib):(ib-ia);
   });
 
   var tot=0,totPaid=0,totDue=0;
@@ -14052,7 +14056,7 @@ function dashLoadAppts(){
     return '<div style="padding:6px 0;border-bottom:0.5px solid var(--sl2);display:flex;justify-content:space-between;align-items:center">'
       +'<div><div style="font-size:12px;font-weight:600">'+( a.name||a.patient_name||'—')+'</div>'
       +'<div style="font-size:10px;color:var(--ink3)">'+(a.time||'—')+' · Token '+(a.token||i+1)+'</div></div>'
-      +'<span style="font-size:10px;padding:2px 6px;border-radius:10px;background:#DBEAFE;color:#1E40AF;font-weight:600">'+(a.status||'new')+'</span>'
+      +'<span style="font-size:10px;padding:2px 6px;border-radius:10px;background:#F1F5F9;color:#374151;font-weight:600">'+(a.status||'new')+'</span>'
       +'</div>';
   }).join('');
 }
@@ -14534,6 +14538,7 @@ function vendorCalcTotal(){
   tot.textContent='\u20b9'+total.toFixed(2);
 }
 window.vendorCalcTotal=vendorCalcTotal;
+
 
 
 
