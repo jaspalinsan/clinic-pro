@@ -2575,6 +2575,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3334,17 +3336,53 @@ function renderInventory(){
   tbody.innerHTML='';
   var items=window.INV_DB||DB||[];
 
-  // Group items by name — collect all batches
-  var seen={}; // name -> first index
-  var grouped=[]; // [{main:item, batches:[item,...]}]
+  // Helper: balance of a single batch
+  function _bal(it){
+    var kw=(it.name||'').toLowerCase().split(' ')[0];
+    var used=0;
+    (window.BILLING_DB||[]).forEach(function(bill){
+      if(!bill.meds)return;
+      bill.meds.forEach(function(med){
+        if((med.name||'').toLowerCase().indexOf(kw)!==-1){
+          // Match batch if recorded, else count against this item
+          if(!med.batch||!it.batch||med.batch===it.batch)used+=parseInt(med.qty||0);
+        }
+      });
+    });
+    var ps=it.pstock!==undefined?parseInt(it.pstock):(parseInt(it.stock)||0);
+    var nw=parseInt(it.newIn||0);
+    return Math.max(0,(ps+nw)-used);
+  }
+
+  // Group by name, keep only batches with balance > 0
+  var seen={};
+  var grouped=[];
   items.forEach(function(m){
     var key=(m.name||'').toLowerCase();
     if(seen[key]===undefined){
       seen[key]=grouped.length;
-      grouped.push({main:m,batches:[]});
+      grouped.push({all:[m]});
     } else {
-      grouped[seen[key]].batches.push(m);
+      grouped[seen[key]].all.push(m);
     }
+  });
+
+  // For each group: split live vs empty batches
+  grouped=grouped.map(function(g){
+    var live=g.all.filter(function(it){return _bal(it)>0;});
+    var empty=g.all.filter(function(it){return _bal(it)<=0;});
+    if(live.length){
+      // Sort live batches FEFO — nearest expiry first
+      live.sort(function(a,b){
+        var da=typeof parseExpDate==='function'?parseExpDate(a.expiry||a.exp||''):null;
+        var db=typeof parseExpDate==='function'?parseExpDate(b.expiry||b.exp||''):null;
+        if(da&&db)return da-db;
+        return 0;
+      });
+      return {main:live[0],batches:live.slice(1),hidden:empty.length};
+    }
+    // All batches empty — show one row so item stays visible as Out of Stock
+    return {main:g.all[0],batches:[],hidden:g.all.length-1};
   });
 
   grouped.forEach(function(grp){
@@ -3367,7 +3405,7 @@ function renderInventory(){
       '<td>'+
         '<div style="font-size:12.5px;font-weight:700;color:var(--ink)">'+m.name+'</div>'+
         '<div style="font-size:10.5px;color:var(--ink3);margin-top:1px">'+
-          (m.type||'')+(function(){var _m=m.mfr||m.company||m.supplier||'';return _m&&_m!=='—'?' &bull; '+_m:'';})()+
+          (m.type||'')+(function(){var _m=m.mfr||m.company||m.supplier||'';return _m&&_m!=='—'?' &bull; '+_m:'';})()+(grp.hidden>0?' <span style="font-size:9px;color:var(--ink3);font-style:italic">('+grp.hidden+' empty batch'+(grp.hidden>1?'es':'')+' hidden)</span>':'')+
         '</div>'+
       '</td>'+
 
@@ -3462,7 +3500,9 @@ function renderInventory(){
       (window.BILLING_DB||[]).forEach(function(bill){
         if(!bill.meds)return;
         bill.meds.forEach(function(med){
-          if((med.name||'').toLowerCase().indexOf(bKw)!==-1)bConsumed+=parseInt(med.qty||0);
+          if((med.name||'').toLowerCase().indexOf(bKw)!==-1){
+            if(!med.batch||!b.batch||med.batch===b.batch)bConsumed+=parseInt(med.qty||0);
+          }
         });
       });
       var bPstock=b.pstock||bQty;
@@ -15083,6 +15123,8 @@ function layResetCols(){
   layRenderCols();
 }
 window.layResetCols=layResetCols;
+
+
 
 
 </script><datalist id="hist-list">
