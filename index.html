@@ -1851,6 +1851,28 @@ html,body{height:100%;overflow:hidden}
     <button class="tb" onclick="layPreset('large')" style="font-size:12px"><i class="ti ti-eye"></i> Large Text</button>
   </div>
 
+  <!-- PER-PAGE COLUMNS -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Column Widths by Page</div>
+  <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px">
+    <div style="flex:1;max-width:280px">
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:5px">Select Page</div>
+      <select class="fin" id="lay-page-sel" onchange="layRenderCols()" style="width:100%">
+        <option value="">— Choose a page —</option>
+        <option value="pat-tbody">Patients List</option>
+        <option value="ph-tbody">Pharmacy / Invoices</option>
+        <option value="inv-tbody">Stock / Inventory</option>
+        <option value="rx-med-tbody">Prescription Items</option>
+        <option value="vd-tbody">Vendor Bill Items</option>
+        <option value="fin-cat-tbody">Finance Categories</option>
+      </select>
+    </div>
+    <button class="bs" onclick="layResetCols()" style="font-size:12px"><i class="ti ti-rotate"></i> Reset This Page</button>
+  </div>
+
+  <div id="lay-cols-wrap" style="background:#F8FAFC;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:22px;min-height:60px">
+    <div style="font-size:12px;color:#94a3b8;text-align:center;padding:12px 0">Select a page above to adjust its column widths</div>
+  </div>
+
   <!-- SAVE -->
   <div style="display:flex;gap:10px;align-items:center;padding-top:16px;border-top:1px solid #e2e8f0">
     <button class="bp" onclick="laySave()"><i class="ti ti-device-floppy"></i> Save Layout</button>
@@ -2395,6 +2417,7 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
 
 
 
@@ -14913,21 +14936,24 @@ function layPreset(name){
 window.layPreset=layPreset;
 
 function laySave(){
+  var payload={sliders:layGet(),cols:window._colWidths||{}};
   try{
-    localStorage.setItem('cp_layout',JSON.stringify(layGet()));
+    localStorage.setItem('cp_layout',JSON.stringify(payload));
     var el=document.getElementById('lay-saved');
     if(el){el.style.display='';setTimeout(function(){el.style.display='none';},1800);}
   }catch(e){}
-  // Also save to server
   fetch('data.php?action=store_set',{method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({key:'layout_settings',value:layGet()})
+    body:JSON.stringify({key:'layout_settings',value:payload})
   }).catch(function(){});
 }
 window.laySave=laySave;
 
 function layReset(){
   laySet(window._layDefaults);
+  window._colWidths={};
+  layApplyCols();
+  layRenderCols();
   try{localStorage.removeItem('cp_layout');}catch(e){}
 }
 window.layReset=layReset;
@@ -14935,8 +14961,19 @@ window.layReset=layReset;
 function layLoad(){
   var saved=null;
   try{saved=JSON.parse(localStorage.getItem('cp_layout')||'null');}catch(e){}
-  if(saved)laySet(saved);
-  else layApply();
+  if(saved){
+    // New format {sliders,cols} or old flat format
+    if(saved.sliders){
+      laySet(saved.sliders);
+      window._colWidths=saved.cols||{};
+    } else {
+      laySet(saved);
+    }
+    layApplyCols();
+  } else {
+    layApply();
+  }
+  layRenderCols();
 }
 window.layLoad=layLoad;
 
@@ -14947,6 +14984,105 @@ if(document.readyState==='loading'){
   setTimeout(layLoad,200);
 }
 
+
+
+// ══════════════════════════════════════════════
+// PER-PAGE COLUMN WIDTHS
+// ══════════════════════════════════════════════
+window._colWidths=window._colWidths||{};
+
+function layGetCols(tbodyId){
+  var tb=document.getElementById(tbodyId);
+  if(!tb)return [];
+  var tbl=tb.closest('table');
+  if(!tbl)return [];
+  var ths=tbl.querySelectorAll('thead th');
+  var out=[];
+  ths.forEach(function(th,i){
+    var label=(th.textContent||'').replace(/[⇅↑↓]/g,'').trim();
+    if(!label)label='(checkbox)';
+    out.push({idx:i,label:label,el:th});
+  });
+  return out;
+}
+
+function layRenderCols(){
+  var sel=document.getElementById('lay-page-sel');
+  var wrap=document.getElementById('lay-cols-wrap');
+  if(!sel||!wrap)return;
+  var tbodyId=sel.value;
+  if(!tbodyId){
+    wrap.innerHTML='<div style="font-size:12px;color:#94a3b8;text-align:center;padding:12px 0">Select a page above to adjust its column widths</div>';
+    return;
+  }
+  var cols=layGetCols(tbodyId);
+  if(!cols.length){
+    wrap.innerHTML='<div style="font-size:12px;color:#DC2626;text-align:center;padding:12px 0">Open that page once first, then come back here</div>';
+    return;
+  }
+  var saved=window._colWidths[tbodyId]||{};
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px">';
+  cols.forEach(function(c){
+    var cur=saved[c.idx]!==undefined?saved[c.idx]:(parseInt(c.el.style.width)||100);
+    html+='<div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:11px;font-weight:600;color:#374151">'+c.label+'</span>'
+      +'<span id="colw-val-'+c.idx+'" style="font-size:11px;font-weight:700;color:#185FA5">'+cur+'px</span>'
+      +'</div>'
+      +'<input type="range" min="24" max="420" value="'+cur+'" style="width:100%;cursor:pointer" '
+      +'oninput="laySetCol(\''+tbodyId+'\','+c.idx+',this.value)">'
+      +'</div>';
+  });
+  html+='</div>';
+  wrap.innerHTML=html;
+}
+window.layRenderCols=layRenderCols;
+
+function laySetCol(tbodyId,idx,val){
+  if(!window._colWidths[tbodyId])window._colWidths[tbodyId]={};
+  window._colWidths[tbodyId][idx]=parseInt(val);
+  var lbl=document.getElementById('colw-val-'+idx);
+  if(lbl)lbl.textContent=val+'px';
+  layApplyCols();
+}
+window.laySetCol=laySetCol;
+
+function layApplyCols(){
+  var css='';
+  Object.keys(window._colWidths).forEach(function(tbodyId){
+    var tb=document.getElementById(tbodyId);
+    if(!tb)return;
+    var tbl=tb.closest('table');
+    if(!tbl)return;
+    // Give table a unique marker class
+    var mark='cw-'+tbodyId;
+    tbl.classList.add(mark);
+    var widths=window._colWidths[tbodyId];
+    Object.keys(widths).forEach(function(idx){
+      var n=parseInt(idx)+1;
+      css+='.'+mark+' thead th:nth-child('+n+'),'
+         +'.'+mark+' tbody td:nth-child('+n+')'
+         +'{width:'+widths[idx]+'px!important;max-width:'+widths[idx]+'px!important}';
+    });
+  });
+  var st=document.getElementById('lay-cols-style');
+  if(!st){
+    st=document.createElement('style');
+    st.id='lay-cols-style';
+    document.head.appendChild(st);
+  }
+  st.textContent=css;
+}
+window.layApplyCols=layApplyCols;
+
+function layResetCols(){
+  var sel=document.getElementById('lay-page-sel');
+  if(!sel||!sel.value)return;
+  delete window._colWidths[sel.value];
+  layApplyCols();
+  layRenderCols();
+}
+window.layResetCols=layResetCols;
 
 </script><datalist id="hist-list">
   <option value="Diabetes Mellitus">
