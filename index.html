@@ -1283,6 +1283,7 @@ html,body{height:100%;overflow:hidden}
       <button onclick="spTab('services')"   id="spt-services"   style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-activity" style="font-size:16px;flex-shrink:0;width:18px"></i>Services / Lab</button>
       <button onclick="spTab('vendors')"    id="spt-vendors"    style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-truck" style="font-size:16px;flex-shrink:0;width:18px"></i>Vendors</button>
       <button onclick="spTab('appearance')" id="spt-appearance" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-palette" style="font-size:16px;flex-shrink:0;width:18px"></i>Appearance</button>
+      <button onclick="spTab('layout')" id="spt-layout" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border:none;background:none;color:#94a3b8;font-size:13px;font-weight:400;cursor:pointer;text-align:left"><i class="ti ti-layout-columns" style="font-size:16px;flex-shrink:0;width:18px"></i>Layout / Spacing</button>
       <button onclick="spTab('rxtpl')" id="spt-rxtpl"
         style="display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;border-radius:9px;background:none;color:#94a3b8;font-size:12.5px;cursor:pointer;text-align:left;margin-bottom:2px">
         <div style="width:26px;height:26px;background:#1e293b;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-template" style="font-size:14px"></i></div>
@@ -1703,7 +1704,162 @@ html,body{height:100%;overflow:hidden}
 </div>
 
     <!-- BACKUP -->
-    <div id="spc-rxtpl" style="display:none;flex:1;overflow-y:auto;padding:26px 30px">
+    <div id="spc-layout" style="display:none;padding:24px 28px;max-width:820px">
+  <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:4px">
+    <i class="ti ti-layout-columns" style="color:#185FA5;margin-right:8px"></i>Layout &amp; Spacing
+  </div>
+  <div style="font-size:12px;color:#64748b;margin-bottom:20px">Control table density, column widths, button size and spacing across the app</div>
+
+  <!-- TABLE DENSITY -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Table Density</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Row Height</span>
+        <span id="lay-rowh-val" style="font-size:12px;font-weight:700;color:#185FA5">7px</span>
+      </div>
+      <input type="range" id="lay-rowh" min="3" max="16" value="7" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Vertical padding inside table cells</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Cell Side Padding</span>
+        <span id="lay-cellpad-val" style="font-size:12px;font-weight:700;color:#185FA5">9px</span>
+      </div>
+      <input type="range" id="lay-cellpad" min="3" max="20" value="9" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Left/right space in table cells</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Table Font Size</span>
+        <span id="lay-tblfont-val" style="font-size:12px;font-weight:700;color:#185FA5">12px</span>
+      </div>
+      <input type="range" id="lay-tblfont" min="9" max="16" value="12" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Text size in all data tables</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Header Font Size</span>
+        <span id="lay-thfont-val" style="font-size:12px;font-weight:700;color:#185FA5">11px</span>
+      </div>
+      <input type="range" id="lay-thfont" min="8" max="15" value="11" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Column header text size</div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Buttons</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Button Height</span>
+        <span id="lay-btnh-val" style="font-size:12px;font-weight:700;color:#185FA5">7px</span>
+      </div>
+      <input type="range" id="lay-btnh" min="3" max="14" value="7" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Vertical padding on buttons</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Button Width</span>
+        <span id="lay-btnw-val" style="font-size:12px;font-weight:700;color:#185FA5">13px</span>
+      </div>
+      <input type="range" id="lay-btnw" min="6" max="26" value="13" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Horizontal padding on buttons</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Button Font Size</span>
+        <span id="lay-btnfont-val" style="font-size:12px;font-weight:700;color:#185FA5">12.5px</span>
+      </div>
+      <input type="range" id="lay-btnfont" min="9" max="16" step="0.5" value="12.5" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Text size on all buttons</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Corner Radius</span>
+        <span id="lay-radius-val" style="font-size:12px;font-weight:700;color:#185FA5">8px</span>
+      </div>
+      <input type="range" id="lay-radius" min="0" max="20" value="8" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Roundness of buttons and cards</div>
+    </div>
+  </div>
+
+  <!-- FORMS -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Form Inputs</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Input Height</span>
+        <span id="lay-inph-val" style="font-size:12px;font-weight:700;color:#185FA5">8px</span>
+      </div>
+      <input type="range" id="lay-inph" min="4" max="16" value="8" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Padding inside text fields</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Input Font Size</span>
+        <span id="lay-inpfont-val" style="font-size:12px;font-weight:700;color:#185FA5">13px</span>
+      </div>
+      <input type="range" id="lay-inpfont" min="10" max="17" value="13" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Text size in form fields</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Form Field Gap</span>
+        <span id="lay-formgap-val" style="font-size:12px;font-weight:700;color:#185FA5">12px</span>
+      </div>
+      <input type="range" id="lay-formgap" min="4" max="26" value="12" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Space between form fields</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Card Padding</span>
+        <span id="lay-cardpad-val" style="font-size:12px;font-weight:700;color:#185FA5">14px</span>
+      </div>
+      <input type="range" id="lay-cardpad" min="4" max="30" value="14" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Inner space of cards and panels</div>
+    </div>
+  </div>
+
+  <!-- PAGE -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Page</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Page Margin</span>
+        <span id="lay-pagepad-val" style="font-size:12px;font-weight:700;color:#185FA5">20px</span>
+      </div>
+      <input type="range" id="lay-pagepad" min="4" max="44" value="20" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Outer space around page content</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;font-weight:600;color:#374151">Card Gap</span>
+        <span id="lay-cardgap-val" style="font-size:12px;font-weight:700;color:#185FA5">14px</span>
+      </div>
+      <input type="range" id="lay-cardgap" min="4" max="30" value="14" style="width:100%;cursor:pointer" oninput="layApply()">
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px">Space between cards</div>
+    </div>
+  </div>
+
+  <!-- PRESETS -->
+  <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0">Quick Presets</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px">
+    <button class="tb" onclick="layPreset('compact')" style="font-size:12px"><i class="ti ti-arrows-minimize"></i> Compact</button>
+    <button class="tb" onclick="layPreset('normal')" style="font-size:12px"><i class="ti ti-layout-grid"></i> Normal</button>
+    <button class="tb" onclick="layPreset('comfort')" style="font-size:12px"><i class="ti ti-arrows-maximize"></i> Comfortable</button>
+    <button class="tb" onclick="layPreset('large')" style="font-size:12px"><i class="ti ti-eye"></i> Large Text</button>
+  </div>
+
+  <!-- SAVE -->
+  <div style="display:flex;gap:10px;align-items:center;padding-top:16px;border-top:1px solid #e2e8f0">
+    <button class="bp" onclick="laySave()"><i class="ti ti-device-floppy"></i> Save Layout</button>
+    <button class="bs" onclick="layReset()"><i class="ti ti-rotate"></i> Reset to Default</button>
+    <span id="lay-saved" style="font-size:12px;color:#059669;font-weight:600;display:none">Saved</span>
+  </div>
+</div>
+
+<div id="spc-rxtpl" style="display:none;flex:1;overflow-y:auto;padding:26px 30px">
   <div style="font-size:20px;font-weight:800;color:#0f172a;margin-bottom:3px">Rx Templates</div>
   <div style="font-size:12px;color:#64748b;margin-bottom:20px">Create and manage custom prescription templates. Pick medicines from your stock or type manually.</div>
 
@@ -2239,6 +2395,9 @@ html,body{height:100%;overflow:hidden}
 
 
 <script>
+
+
+
 
 
 
@@ -8717,13 +8876,14 @@ window.setFontSize=setFontSize;
 window.applyFontWeight=applyFontWeight;
 
 function spTab(name){
-  var tabs=['clinic','users','services','vendors','appearance','backup','rxtpl','billing','rxset','phset','access','datactl'];
+  var tabs=['clinic','users','services','vendors','appearance','layout','backup','rxtpl','billing','rxset','phset','access','datactl'];
   if(name==='users'&&typeof renderUserList==='function')renderUserList();
   if(name==='access'&&typeof renderAccessTable==='function')renderAccessTable();
   if(name==='billing'&&typeof loadBillingSettings==='function')loadBillingSettings();
   if(name==='rxset'&&typeof loadRxSettings==='function')loadRxSettings();
   if(name==='phset'&&typeof loadPharmacySettings==='function')loadPharmacySettings();
   if(name==='datactl'&&typeof loadDataSettings==='function')loadDataSettings();
+  if(name==='layout'&&typeof layLoad==='function')layLoad();
   var _ut=document.getElementById('spt-users');if(_ut)_ut.style.display=(window.CURRENT_USER&&window.CURRENT_USER.role==='Admin')?'':'none';
   tabs.forEach(function(t){
     var btn=document.getElementById('spt-'+t);
@@ -14680,6 +14840,113 @@ function toggleBatchView(){
   if(typeof renderInventory==='function')renderInventory();
 }
 window.toggleBatchView=toggleBatchView;
+
+
+
+// ══════════════════════════════════════════════
+// LAYOUT / SPACING SETTINGS
+// ══════════════════════════════════════════════
+window._layDefaults={
+  rowh:7, cellpad:9, tblfont:12, thfont:11,
+  btnh:7, btnw:13, btnfont:12.5, radius:8,
+  inph:8, inpfont:13, formgap:12, cardpad:14,
+  pagepad:20, cardgap:14
+};
+
+function layGet(){
+  var o={};
+  Object.keys(window._layDefaults).forEach(function(k){
+    var el=document.getElementById('lay-'+k);
+    o[k]=el?parseFloat(el.value):window._layDefaults[k];
+  });
+  return o;
+}
+
+function layApply(){
+  var v=layGet();
+  // Update value labels
+  Object.keys(v).forEach(function(k){
+    var lbl=document.getElementById('lay-'+k+'-val');
+    if(lbl)lbl.textContent=v[k]+'px';
+  });
+  // Build CSS
+  var css=
+    '.tbl td{padding:'+v.rowh+'px '+v.cellpad+'px!important;font-size:'+v.tblfont+'px!important}'+
+    '.tbl th{padding:'+Math.max(4,v.rowh-1)+'px '+v.cellpad+'px!important;font-size:'+v.thfont+'px!important}'+
+    '.bp,.bs,.tb{padding:'+v.btnh+'px '+v.btnw+'px!important;font-size:'+v.btnfont+'px!important;border-radius:'+v.radius+'px!important}'+
+    '.fin{padding:'+v.inph+'px 11px!important;font-size:'+v.inpfont+'px!important;border-radius:'+Math.max(4,v.radius-2)+'px!important}'+
+    '.edit-in{padding:'+Math.max(2,v.inph-4)+'px 6px!important;font-size:'+Math.max(10,v.inpfont-2)+'px!important}'+
+    '.card{margin-bottom:'+v.cardgap+'px!important;border-radius:'+(v.radius+2)+'px!important}'+
+    '.ch{padding:'+Math.max(6,v.cardpad-4)+'px '+v.cardpad+'px!important}'+
+    '.mbody{padding:'+v.cardpad+'px '+(v.cardpad+6)+'px!important}'+
+    '.page{padding:'+v.pagepad+'px!important}'+
+    '.mbody [style*="display:grid"]{gap:'+v.formgap+'px!important}';
+
+  var st=document.getElementById('lay-style');
+  if(!st){
+    st=document.createElement('style');
+    st.id='lay-style';
+    document.head.appendChild(st);
+  }
+  st.textContent=css;
+}
+window.layApply=layApply;
+
+function laySet(vals){
+  Object.keys(vals).forEach(function(k){
+    var el=document.getElementById('lay-'+k);
+    if(el)el.value=vals[k];
+  });
+  layApply();
+}
+window.laySet=laySet;
+
+function layPreset(name){
+  var p={
+    compact:{rowh:4,cellpad:6,tblfont:11,thfont:9,btnh:4,btnw:9,btnfont:11,radius:6,inph:5,inpfont:12,formgap:8,cardpad:9,pagepad:12,cardgap:9},
+    normal:window._layDefaults,
+    comfort:{rowh:10,cellpad:13,tblfont:13,thfont:12,btnh:9,btnw:17,btnfont:13,radius:10,inph:11,inpfont:14,formgap:16,cardpad:18,pagepad:26,cardgap:18},
+    large:{rowh:11,cellpad:14,tblfont:15,thfont:13,btnh:10,btnw:18,btnfont:15,radius:10,inph:12,inpfont:16,formgap:18,cardpad:20,pagepad:28,cardgap:20}
+  };
+  if(p[name])laySet(p[name]);
+}
+window.layPreset=layPreset;
+
+function laySave(){
+  try{
+    localStorage.setItem('cp_layout',JSON.stringify(layGet()));
+    var el=document.getElementById('lay-saved');
+    if(el){el.style.display='';setTimeout(function(){el.style.display='none';},1800);}
+  }catch(e){}
+  // Also save to server
+  fetch('data.php?action=store_set',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:'layout_settings',value:layGet()})
+  }).catch(function(){});
+}
+window.laySave=laySave;
+
+function layReset(){
+  laySet(window._layDefaults);
+  try{localStorage.removeItem('cp_layout');}catch(e){}
+}
+window.layReset=layReset;
+
+function layLoad(){
+  var saved=null;
+  try{saved=JSON.parse(localStorage.getItem('cp_layout')||'null');}catch(e){}
+  if(saved)laySet(saved);
+  else layApply();
+}
+window.layLoad=layLoad;
+
+// Load on startup
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(layLoad,200);});
+} else {
+  setTimeout(layLoad,200);
+}
+
 
 </script><datalist id="hist-list">
   <option value="Diabetes Mellitus">
