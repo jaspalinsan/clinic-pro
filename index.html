@@ -2391,6 +2391,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3862,8 +3863,11 @@ function doVendorImport(){
         };
 
         // Check existing
+        // Match on NAME + BATCH so different batches stay separate rows
         var ex=(typeof DB!=='undefined'?DB:[]).find(function(m){
-          return(m.name||'').toLowerCase().trim()===name.toLowerCase().trim();
+          var nm=(m.name||'').toLowerCase().trim()===name.toLowerCase().trim();
+          var bt=(m.batch||'').toLowerCase().trim()===batch.toLowerCase().trim();
+          return nm&&bt;
         });
         if(ex){
           ex.stock=(parseFloat(ex.stock||0))+qty;
@@ -9845,9 +9849,25 @@ function addBillRow(){
   var tbody=document.getElementById('bill-med-tbody');if(!tbody)return;
   var n=tbody.rows.length+1;
   var invDB=window.INV_DB||(typeof DB!=='undefined'?DB:[]);
+  // FEFO sort — same name grouped, nearest expiry first
+  var sorted=invDB.slice().filter(function(m){
+    return parseFloat(m.stock||m.qty||0)>0;
+  }).sort(function(a,b){
+    var na=(a.name||'').localeCompare(b.name||'');
+    if(na!==0)return na;
+    var da=typeof parseExpDate==='function'?parseExpDate(a.expiry||a.exp||''):null;
+    var db2=typeof parseExpDate==='function'?parseExpDate(b.expiry||b.exp||''):null;
+    if(da&&db2)return da-db2;
+    return 0;
+  });
   var opts='<option value="">— pick medicine —</option>'+
-    invDB.map(function(m){
-      return '<option value="'+m.id+'" data-sale="'+(m.sale||0)+'" data-mfr="'+encodeURIComponent(m.company||'')+'" data-batch="'+encodeURIComponent(m.batch||'')+'" data-exp="'+encodeURIComponent(m.expiry||'')+'">'+m.name+'</option>';
+    sorted.map(function(m){
+      var q=parseFloat(m.stock||m.qty||0);
+      var bt=(m.batch&&m.batch!=='—')?m.batch:'';
+      var ex=(m.expiry||m.exp||'');
+      if(ex==='—')ex='';
+      var label=m.name+(bt?'  ['+bt+']':'')+(ex?'  Exp '+ex:'')+'  \u00b7 Qty '+q;
+      return '<option value="'+m.id+'" data-sale="'+(m.sale||0)+'" data-mfr="'+encodeURIComponent(m.mfr||m.company||'')+'" data-batch="'+encodeURIComponent(bt)+'" data-exp="'+encodeURIComponent(ex)+'" data-stock="'+q+'">'+label+'</option>';
     }).join('');
   var tr=document.createElement('tr');
   tr.innerHTML=
@@ -14649,6 +14669,17 @@ window.phSort=phSort;
 
 
 
+
+
+// ── Batch View Toggle ──────────────────────────────
+window._batchView=true;
+function toggleBatchView(){
+  window._batchView=!window._batchView;
+  var btn=document.getElementById('batch-view-btn');
+  if(btn)btn.innerHTML='<i class="ti ti-layers-subtract"></i> Batch View: '+(window._batchView?'ON':'OFF');
+  if(typeof renderInventory==='function')renderInventory();
+}
+window.toggleBatchView=toggleBatchView;
 
 </script><datalist id="hist-list">
   <option value="Diabetes Mellitus">
