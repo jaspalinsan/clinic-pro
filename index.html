@@ -2578,6 +2578,8 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -4614,16 +4616,29 @@ function rxAddMedRow(data){
   var n=tbody.rows.length+1;
   var invDB=window.INV_DB||(typeof DB!=='undefined'?DB:[]);
 
+  // Sort FEFO — same name grouped, nearest expiry first
+  var _sorted=invDB.slice().sort(function(a,b){
+    var na=(a.name||'').localeCompare(b.name||'');
+    if(na!==0)return na;
+    var da=typeof parseExpDate==='function'?parseExpDate(a.expiry||a.exp||''):null;
+    var db=typeof parseExpDate==='function'?parseExpDate(b.expiry||b.exp||''):null;
+    if(da&&db)return da-db;
+    return 0;
+  });
   var opts='<option value="">— pick medicine —</option>'+
-    invDB.map(function(m){
+    _sorted.map(function(m){
+      var av=rxStockLeft(m);
+      var bt=(m.batch&&m.batch!=='—')?m.batch:'';
+      var tag=av<=0?'  [OUT OF STOCK]':av<=10?'  [LOW: '+av+']':'  ('+av+')';
       return '<option value="'+m.id+'"'+
         ' data-name="'+encodeURIComponent(m.name||'')+'"'+
         ' data-dose="'+encodeURIComponent(m.dose||'TAB')+'"'+
-        ' data-mfr="'+encodeURIComponent(m.company||'')+'"'+
-        ' data-batch="'+encodeURIComponent(m.batch||'')+'"'+
+        ' data-mfr="'+encodeURIComponent(m.mfr||m.company||'')+'"'+
+        ' data-batch="'+encodeURIComponent(bt)+'"'+
         ' data-exp="'+encodeURIComponent(m.expiry||'')+'"'+
         ' data-sale="'+(m.sale||0)+'"'+
-        ' data-schedule="'+(m.schedule||'OTC')+'">'+m.name+'</option>';
+        ' data-stock="'+av+'"'+
+        ' data-schedule="'+(m.schedule||'OTC')+'">'+m.name+(bt?' ['+bt+']':'')+tag+'</option>';
     }).join('');
 
   var tr=document.createElement('tr');
@@ -4757,6 +4772,23 @@ window.rxCalcTotals=rxCalcTotals;
 function rxSave(){
   var pname=(document.getElementById('rx-pat-name')||{}).value||'';
   if(!pname){toast('Enter patient name','error');return;}
+
+  // Warn about out-of-stock / over-qty items before saving
+  var _short=[];
+  document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
+    var av=parseFloat(tr.getAttribute('data-stock-avail'));
+    if(isNaN(av))return;
+    var sel=tr.querySelector('select');
+    var nm=sel&&sel.selectedIndex>0?sel.options[sel.selectedIndex].text.split('  [')[0].split('  (')[0]:'';
+    if(!nm)return;
+    var qi=tr.querySelector('[data-rx="qty"]');
+    var q=qi?parseInt(qi.value)||0:0;
+    if(av<=0)_short.push(nm+' \u2014 out of stock');
+    else if(q>av)_short.push(nm+' \u2014 need '+q+', only '+av+' left');
+  });
+  if(_short.length){
+    if(!confirm('Stock warning:\n\n'+_short.join('\n')+'\n\nSave prescription anyway?'))return;
+  }
 
   var meds=[],svcs=[];
   document.querySelectorAll('#rx-med-tbody tr').forEach(function(tr){
@@ -7088,6 +7120,17 @@ function rxCalcRow(el){
   var qtyInp=tr.querySelector('[data-rx="qty"]');
   if(qtyInp&&!qtyInp.dataset.manual)qtyInp.value=qty;
   var finalQty=qtyInp?parseInt(qtyInp.value)||qty:qty;
+  // Flag if prescribed qty exceeds available stock
+  var _av=parseFloat(tr.getAttribute('data-stock-avail'));
+  if(!isNaN(_av)){
+    if(finalQty>_av){
+      tr.style.background='#FFF1F2';
+      if(qtyInp){qtyInp.style.color='#DC2626';qtyInp.style.fontWeight='800';qtyInp.title='Only '+_av+' in stock';}
+    } else {
+      tr.style.background=_av<=10?'#FFFBEB':'';
+      if(qtyInp){qtyInp.style.color='';qtyInp.style.fontWeight='';qtyInp.title='';}
+    }
+  }
   var sale=parseFloat((tr.querySelector('[data-rx="sale"]')||{value:'0'}).value)||0;
   var disc=parseFloat((tr.querySelector('[data-rx="disc"]')||{value:'0'}).value)||0;
   var amt=finalQty*sale*(1-disc/100);
@@ -7245,6 +7288,18 @@ function rxMedPick(sel){
   fill('sale',  opt.dataset.sale);
   var sch=tr.querySelector('[data-rx="schedule"]');
   if(sch&&opt.dataset.schedule)sch.value=opt.dataset.schedule;
+
+  // Stock check — warn if nil or low
+  var av=parseFloat(opt.dataset.stock||0);
+  var mname=decodeURIComponent(opt.dataset.name||'')||opt.textContent;
+  tr.setAttribute('data-stock-avail',av);
+  if(av<=0){
+    rxStockWarn(mname,0,tr);
+  } else if(av<=10){
+    rxStockWarn(mname,av,tr);
+  } else {
+    tr.style.background='';
+  }
   rxCalcRow(tr.querySelector('[data-rx="sale"]'));
 }
 window.rxMedPick=rxMedPick;
@@ -15126,6 +15181,81 @@ window.layResetCols=layResetCols;
 
 
 
+
+
+
+// ══════════════════════════════════════════════
+// RX STOCK CHECK
+// ══════════════════════════════════════════════
+function rxStockLeft(m){
+  if(!m)return 0;
+  var kw=(m.name||'').toLowerCase().split(' ')[0];
+  var used=0;
+  (window.BILLING_DB||[]).forEach(function(bill){
+    if(!bill.meds)return;
+    bill.meds.forEach(function(med){
+      if((med.name||'').toLowerCase().indexOf(kw)!==-1){
+        if(!med.batch||!m.batch||med.batch===m.batch)used+=parseInt(med.qty||0);
+      }
+    });
+  });
+  var ps=m.pstock!==undefined?parseInt(m.pstock):(parseInt(m.stock)||0);
+  var nw=parseInt(m.newIn||0);
+  return Math.max(0,(ps+nw)-used);
+}
+window.rxStockLeft=rxStockLeft;
+
+function rxStockWarn(name,avail,tr){
+  var isNil=avail<=0;
+  if(tr)tr.style.background=isNil?'#FFF1F2':'#FFFBEB';
+  var box=document.getElementById('rx-stock-warn');
+  if(!box){
+    box=document.createElement('div');
+    box.id='rx-stock-warn';
+    box.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);'+
+      'z-index:9999;background:#fff;border-radius:14px;padding:0;min-width:340px;max-width:420px;'+
+      'box-shadow:0 20px 50px rgba(0,0,0,.28);overflow:hidden;font-family:Arial,sans-serif';
+    document.body.appendChild(box);
+  }
+  box.innerHTML=
+    '<div style="padding:16px 20px;background:'+(isNil?'#DC2626':'#D97706')+';color:#fff;'+
+      'display:flex;align-items:center;gap:10px">'+
+      '<i class="ti ti-'+(isNil?'alert-octagon':'alert-triangle')+'" style="font-size:22px"></i>'+
+      '<div style="font-size:15px;font-weight:800">'+(isNil?'Out of Stock':'Low Stock')+'</div>'+
+    '</div>'+
+    '<div style="padding:18px 20px">'+
+      '<div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:6px">'+name+'</div>'+
+      '<div style="font-size:13px;color:#475569;line-height:1.6">'+
+        (isNil
+          ? 'This medicine has <b style="color:#DC2626">no stock left</b>. You can still add it to the prescription, but it cannot be dispensed until restocked.'
+          : 'Only <b style="color:#D97706">'+avail+' unit'+(avail!==1?'s':'')+'</b> remaining. Check quantity before prescribing.')+
+      '</div>'+
+    '</div>'+
+    '<div style="padding:12px 20px;background:#F8FAFC;display:flex;gap:8px;justify-content:flex-end">'+
+      '<button onclick="rxStockWarnClose()" style="padding:8px 18px;border-radius:8px;border:none;'+
+        'background:'+(isNil?'#DC2626':'#D97706')+';color:#fff;font-size:13px;font-weight:700;cursor:pointer">OK, Got it</button>'+
+    '</div>';
+  box.style.display='';
+  // Backdrop
+  var bd=document.getElementById('rx-stock-backdrop');
+  if(!bd){
+    bd=document.createElement('div');
+    bd.id='rx-stock-backdrop';
+    bd.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:9998';
+    bd.onclick=rxStockWarnClose;
+    document.body.appendChild(bd);
+  }
+  bd.style.display='';
+}
+window.rxStockWarn=rxStockWarn;
+
+function rxStockWarnClose(){
+  var b=document.getElementById('rx-stock-warn');
+  var d=document.getElementById('rx-stock-backdrop');
+  if(b)b.style.display='none';
+  if(d)d.style.display='none';
+}
+window.rxStockWarnClose=rxStockWarnClose;
 
 
 </script><datalist id="hist-list">
