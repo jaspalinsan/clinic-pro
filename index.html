@@ -2574,6 +2574,7 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
 function sp(txt,css){var s=document.createElement('span');s.style.cssText=css;s.textContent=txt;return s;}
 window.sp=sp;
 function sepEl(){var s=document.createElement('span');s.style.cssText='width:0.5px;height:15px;background:rgba(0,0,0,.12);margin:0 6px;display:inline-block;vertical-align:middle';return s;}
@@ -3488,7 +3489,6 @@ function renderInventory(){
         '<td style="text-align:right;font-size:12px;font-weight:700">'+(bPstock+bNew)+'</td>'+
         '<td style="text-align:right;font-size:12px;color:#EF4444">−'+bConsumed+'</td>'+
         '<td style="text-align:right;font-size:13px;font-weight:800;color:'+bBalColor+'">'+bBal+'</td>'+
-        '<td><input class="edit-in" type="number" value="'+bPur.toFixed(2)+'" style="width:72px;text-align:right;font-weight:600"></td>'+
         '<td><input class="edit-in" type="number" value="'+bSal.toFixed(2)+'" style="width:65px;text-align:right;font-weight:600"></td>'+
         '<td><span class="pill '+bStPill+'" style="font-size:10px">'+bStLbl+'</span></td>'+
         '<td><button style="border:none;background:none;color:var(--rose);cursor:pointer;padding:3px" onclick="deleteItem('+b.id+')"><i class="ti ti-trash" style="font-size:12px"></i></button></td>';
@@ -15083,6 +15083,7 @@ function layResetCols(){
   layRenderCols();
 }
 window.layResetCols=layResetCols;
+
 
 </script><datalist id="hist-list">
   <option value="Diabetes Mellitus">
